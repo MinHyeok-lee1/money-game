@@ -1,102 +1,110 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>건물주 키우기 - 무한 방치형 클리커 게임</title>
-    <!-- Tailwind CSS (디자인용) -->
+    <title>Idle Landlord - Clicker Tycoon Game</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel (브라우저에서 JSX 변환) -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- 구글 애드센스 스크립트 (사용자님의 코드로 교체 예정) -->
-    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+    <!-- 사용자님의 실제 구글 애드센스 스크립트 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6423816528159440" crossorigin="anonymous"></script>
 
     <style>
-        body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #f3f4f6; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; }
         .click-effect { position: fixed; font-weight: bold; font-size: 1.5rem; color: #16a34a; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 50; }
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
         }
+        /* Hide scrollbar for clean UI */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
     </style>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6423816528159440"
-     crossorigin="anonymous"></script>
 </head>
 <body class="flex flex-col items-center min-h-screen">
 
-    <!-- 상단 네비게이션바 (애드센스 심사용 구조) -->
+    <!-- Header -->
     <header class="w-full bg-white shadow-sm p-4 text-center sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-green-600">💸 건물주 키우기</h1>
-        <p class="text-sm text-gray-500">최고의 자산가가 되어보세요!</p>
+        <h1 class="text-2xl font-black text-green-600">💸 Idle Landlord</h1>
+        <p class="text-sm text-gray-500">Become the ultimate real estate tycoon!</p>
     </header>
 
-    <!-- 애드센스 광고 (상단) -->
-    <div class="w-full max-w-4xl my-4 bg-gray-200 h-[90px] flex items-center justify-center text-gray-500 text-sm">
-        <!-- 이 자리에 구글이 주는 <ins> 태그를 넣으세요 -->
-        <span>[상단 반응형 광고 영역]</span>
+    <!-- AdSense Header Ad (Responsive) -->
+    <div class="w-full max-w-4xl my-4 bg-gray-200 h-[90px] flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded">
+        <span>[AdSense Responsive Ad Unit Here]</span>
     </div>
 
-    <!-- 리액트 게임이 렌더링 될 공간 -->
+    <!-- React App Root -->
     <div id="root" class="w-full max-w-md w-full"></div>
 
-    <!-- 애드센스 심사 통과를 위한 텍스트 콘텐츠 영역 (매우 중요) -->
+    <!-- Game Information for AdSense Approval & SEO -->
     <article class="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700">
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">게임 소개 및 플레이 방법</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">About the Game</h2>
         
-        <h3 class="text-lg font-semibold mt-4 mb-2">1. 건물주 키우기란?</h3>
+        <h3 class="text-lg font-semibold mt-4 mb-2">1. What is Idle Landlord?</h3>
         <p class="mb-4 leading-relaxed">
-            건물주 키우기는 누구나 쉽게 즐길 수 있는 방치형 클리커(Idle Clicker) 웹 게임입니다. 
-            초기 자본 없이 시작하여 클릭만으로 수익을 창출하고, 벌어들인 수익을 재투자하여 다양한 부동산과 사업체를 인수하는 경제 시뮬레이션 게임입니다. 
-            화면을 클릭하여 초기 자금을 마련하고, 자동 수익을 창출하는 건물을 구매해 보세요.
+            Idle Landlord is a highly addictive incremental clicker game where you start with empty pockets and build a real estate empire. 
+            Click the money bag to earn your first dollars, then invest your earnings into various businesses ranging from a simple Hotdog Stand to a massive Skyscraper.
         </p>
 
-        <h3 class="text-lg font-semibold mt-4 mb-2">2. 조작 방법 및 팁</h3>
+        <h3 class="text-lg font-semibold mt-4 mb-2">2. How to Play & Tips</h3>
         <ul class="list-disc pl-5 mb-4 space-y-2">
-            <li><strong>클릭으로 돈 벌기:</strong> 화면 중앙의 돈뭉치 아이콘을 클릭하면 즉시 돈이 지급됩니다.</li>
-            <li><strong>마우스 업그레이드:</strong> 클릭당 벌어들이는 수익을 증가시킵니다. 초반 빠른 성장을 위해 필수적입니다.</li>
-            <li><strong>부동산 투자:</strong> 붕어빵 노점상부터 시작하여 초고층 랜드마크까지 구매할 수 있습니다. 구매한 부동산은 매초 자동으로 수익을 통장에 입금해 줍니다.</li>
-            <li><strong>복리 효과:</strong> 비싼 건물을 살수록 초당 수익이 기하급수적으로 늘어납니다. 방치해 두어도 돈이 벌리는 경험을 해보세요.</li>
+            <li><strong>Click to Earn:</strong> Tap the giant money bag icon to instantly generate cash.</li>
+            <li><strong>Mouse Upgrade:</strong> Increase your clicking power. Essential for fast early-game growth.</li>
+            <li><strong>Invest in Real Estate:</strong> Buy properties to generate passive income every second. Your properties work for you even when you're not clicking!</li>
+            <li><strong>Auto-Save:</strong> Your progress is automatically saved to your browser. You can close the page and come back later without losing your empire.</li>
         </ul>
 
-        <h3 class="text-lg font-semibold mt-4 mb-2">3. 게임 이용 정책</h3>
-        <p class="mb-4 text-sm text-gray-500">
-            본 게임은 브라우저의 메모리상에서 동작하며, 새로고침 시 데이터가 초기화됩니다. (추후 데이터 저장 기능 업데이트 예정)
-            불법적인 매크로 프로그램 사용은 권장하지 않으며, 순수한 손가락의 한계를 시험해 보시길 바랍니다!
-        </p>
-
-        <!-- 애드센스 광고 (하단 콘텐츠 내) -->
-        <div class="w-full bg-gray-200 h-[250px] mt-6 flex items-center justify-center text-gray-500 text-sm">
-            <!-- 이 자리에 구글이 주는 <ins> 태그 (멀티플렉스 또는 디스플레이) 넣으세요 -->
-            <span>[콘텐츠 하단 광고 영역]</span>
+        <!-- AdSense Footer Ad (Multiplex/Display) -->
+        <div class="w-full bg-gray-200 h-[250px] mt-6 flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded">
+            <span>[AdSense Article Footer Ad Here]</span>
         </div>
     </article>
 
-
-    <!-- 리액트 컴포넌트 스크립트 -->
+    <!-- React Logic -->
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // 글로벌 타겟을 위한 영문 데이터
         const INITIAL_PROPERTIES = [
-            { id: 1, name: '붕어빵 노점상', baseCost: 100, baseIncome: 5, count: 0, icon: '🐟' },
-            { id: 2, name: '동네 편의점', baseCost: 1500, baseIncome: 60, count: 0, icon: '🏪' },
-            { id: 3, name: '프랜차이즈 카페', baseCost: 12000, baseIncome: 400, count: 0, icon: '☕' },
-            { id: 4, name: '강남 오피스텔', baseCost: 100000, baseIncome: 3000, count: 0, icon: '🏢' },
-            { id: 5, name: '초고층 랜드마크', baseCost: 1000000, baseIncome: 35000, count: 0, icon: '🏙️' },
+            { id: 1, name: 'Hotdog Stand', baseCost: 100, baseIncome: 5, count: 0, icon: 'HOTDOG' },
+            { id: 2, name: 'Store', baseCost: 1500, baseIncome: 60, count: 0, icon: 'STORE' },
+            { id: 3, name: 'Cafe', baseCost: 12000, baseIncome: 400, count: 0, icon: 'CAFE' },
+            { id: 4, name: 'Apartment', baseCost: 100000, baseIncome: 3000, count: 0, icon: 'APT' },
+            { id: 5, name: 'Skyscraper', baseCost: 1000000, baseIncome: 35000, count: 0, icon: 'TOWER' },
         ];
 
+        // 로컬 스토리지에서 저장된 데이터 불러오기 함수
+        const loadSavedData = () => {
+            const saved = localStorage.getItem('idleLandlordSave');
+            return saved ? JSON.parse(saved) : null;
+        };
+
         function GameApp() {
-            const [money, setMoney] = useState(0);
-            const [clickPower, setClickPower] = useState(10);
-            const [clickUpgradeCost, setClickUpgradeCost] = useState(50);
-            const [properties, setProperties] = useState(INITIAL_PROPERTIES);
+            // 초기값을 로컬 스토리지 데이터로 설정 (없으면 기본값)
+            const initialData = loadSavedData();
+            
+            const [money, setMoney] = useState(initialData ? initialData.money : 0);
+            const [clickPower, setClickPower] = useState(initialData ? initialData.clickPower : 10);
+            const [clickUpgradeCost, setClickUpgradeCost] = useState(initialData ? initialData.clickUpgradeCost : 50);
+            const [properties, setProperties] = useState(initialData ? initialData.properties : INITIAL_PROPERTIES);
             const [clicks, setClicks] = useState([]);
 
             const incomePerSec = properties.reduce((total, prop) => total + (prop.baseIncome * prop.count), 0);
 
+            // 상태가 변할 때마다 로컬 스토리지에 자동 저장 (Auto-Save)
+            useEffect(() => {
+                const saveData = { money, clickPower, clickUpgradeCost, properties };
+                localStorage.setItem('idleLandlordSave', JSON.stringify(saveData));
+            }, [money, clickPower, clickUpgradeCost, properties]);
+
+            // 초당 수익 추가 루프
             useEffect(() => {
                 if (incomePerSec === 0) return;
                 const timer = setInterval(() => {
@@ -107,11 +115,8 @@
 
             const handleMainClick = (e) => {
                 setMoney(prev => prev + clickPower);
-                
-                // 이벤트 객체가 없을 수 있는 키보드 접근성 대비
                 const x = e.clientX || window.innerWidth / 2;
                 const y = e.clientY || window.innerHeight / 2;
-
                 const newClick = { id: Date.now() + Math.random(), x, y, val: clickPower };
                 setClicks(prev => [...prev, newClick]);
                 setTimeout(() => {
@@ -140,31 +145,33 @@
                 }
             };
 
+            // 달러($) 포맷팅 함수
             const formatMoney = (amount) => {
-                return new Intl.NumberFormat('ko-KR').format(amount);
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
             };
 
             return (
                 <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[700px]">
                     
-                    {/* 게임 헤더 */}
-                    <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 text-center z-10 relative">
-                        <div className="text-4xl font-extrabold mb-1 drop-shadow-md">{formatMoney(money)} 원</div>
-                        <div className="text-green-100 text-sm font-medium bg-green-700/30 inline-block px-3 py-1 rounded-full">
-                            초당 수익: +{formatMoney(incomePerSec)}원/초
+                    {/* Game Header */}
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center z-10 relative">
+                        <div className="text-4xl font-extrabold mb-1 drop-shadow-md">{formatMoney(money)}</div>
+                        <div className="text-green-100 text-sm font-medium bg-green-800/30 inline-block px-3 py-1 rounded-full flex items-center justify-center gap-2 max-w-fit mx-auto">
+                            <span>+{formatMoney(incomePerSec)}/sec</span>
+                            <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse" title="Auto-saving..."></span>
                         </div>
                     </div>
 
-                    {/* 클릭 영역 */}
+                    {/* Click Area */}
                     <div 
                         className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50"
                         onClick={handleMainClick}
                     >
-                        <div className="text-[120px] drop-shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-100 user-select-none">
-                            💰
+                        <div className="text-[120px] drop-shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-100">
+                            CLICK!
                         </div>
                         <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
-                            터치해서 수익 창출! (+{formatMoney(clickPower)}원/클릭)
+                            Tap to Earn! (+{formatMoney(clickPower)}/click)
                         </div>
 
                         {clicks.map(click => (
@@ -174,26 +181,26 @@
                         ))}
                     </div>
 
-                    {/* 게임 내 중간 광고 (애드센스 인피드 추천) */}
+                    {/* In-Game Ad Placement */}
                     <div className="w-full bg-gray-100 h-16 flex items-center justify-center text-gray-400 text-xs border-y border-gray-200">
-                        <span>[게임 내 네이티브 광고 영역]</span>
+                        <span>[AdSense Native Ad Placeholder]</span>
                     </div>
 
-                    {/* 상점 */}
+                    {/* Shop */}
                     <div className="bg-gray-50 flex-grow overflow-y-auto p-4 custom-scrollbar">
-                        <h2 className="text-sm font-bold mb-3 text-gray-500 px-1">투자가이드 (상점)</h2>
+                        <h2 className="text-sm font-bold mb-3 text-gray-500 px-1 uppercase tracking-wider">Investments</h2>
                         
                         <button onClick={buyClickUpgrade} disabled={money < clickUpgradeCost} className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl shadow-sm border transition-all ${money >= clickUpgradeCost ? 'bg-white border-green-400 hover:shadow-md' : 'bg-gray-100 border-gray-200 opacity-50'}`}>
                             <div className="flex items-center gap-3">
-                                <span className="text-3xl bg-gray-100 p-2 rounded-lg">👆</span>
+                                <span className="text-xl font-black text-gray-600 bg-gray-100 p-2 rounded-lg">UP</span>
                                 <div className="text-left">
-                                    <div className="font-bold text-gray-800">마우스 강화</div>
-                                    <div className="text-xs text-gray-500">클릭당 +10원</div>
+                                    <div className="font-bold text-gray-800">Mouse Power</div>
+                                    <div className="text-xs text-gray-500">+{formatMoney(10)}/click</div>
                                 </div>
                             </div>
                             <div className="text-right">
                                 <div className={`font-black text-lg ${money >= clickUpgradeCost ? 'text-green-600' : 'text-red-400'}`}>
-                                    {formatMoney(clickUpgradeCost)}원
+                                    {formatMoney(clickUpgradeCost)}
                                 </div>
                             </div>
                         </button>
@@ -204,17 +211,17 @@
                             return (
                                 <button key={prop.id} onClick={() => buyProperty(prop.id)} disabled={!canAfford} className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl shadow-sm border transition-all ${canAfford ? 'bg-white border-blue-300 hover:shadow-md' : 'bg-gray-100 border-gray-200 opacity-50'}`}>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-3xl bg-blue-50 p-2 rounded-lg">{prop.icon}</span>
+                                        <span className="text-sm font-black text-blue-600 bg-blue-50 p-2 rounded-lg">{prop.icon}</span>
                                         <div className="text-left">
                                             <div className="font-bold text-gray-800">{prop.name} 
-                                                {prop.count > 0 && <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full ml-2">Lv.{prop.count}</span>}
+                                                {prop.count > 0 && <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full ml-2 align-middle">Lv.{prop.count}</span>}
                                             </div>
-                                            <div className="text-xs text-gray-500">초당 +{formatMoney(prop.baseIncome)}원</div>
+                                            <div className="text-xs text-gray-500">+{formatMoney(prop.baseIncome)}/sec</div>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <div className={`font-black text-lg ${canAfford ? 'text-blue-600' : 'text-red-400'}`}>
-                                            {formatMoney(currentCost)}원
+                                            {formatMoney(currentCost)}
                                         </div>
                                     </div>
                                 </button>
