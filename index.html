@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idle Landlord - Clicker Tycoon Game</title>
+    <title>건물주 키우기 / Idle Landlord</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -29,82 +29,147 @@
 </head>
 <body class="flex flex-col items-center min-h-screen">
 
-    <!-- Header -->
-    <header class="w-full bg-white shadow-sm p-4 text-center sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-green-600">💸 Idle Landlord</h1>
-        <p class="text-sm text-gray-500">Become the ultimate real estate tycoon!</p>
-    </header>
-
-    <!-- AdSense Header Ad (Responsive) -->
-    <div class="w-full max-w-4xl my-4 bg-gray-200 h-[90px] flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded">
-        <span>[AdSense Responsive Ad Unit Here]</span>
-    </div>
-
     <!-- React App Root -->
-    <div id="root" class="w-full max-w-md w-full"></div>
+    <div id="root" class="w-full max-w-md w-full my-4"></div>
 
     <!-- Game Information for AdSense Approval & SEO -->
-    <article class="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700">
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">About the Game</h2>
-        
-        <h3 class="text-lg font-semibold mt-4 mb-2">1. What is Idle Landlord?</h3>
-        <p class="mb-4 leading-relaxed">
-            Idle Landlord is a highly addictive incremental clicker game where you start with empty pockets and build a real estate empire. 
-            Click the money bag to earn your first dollars, then invest your earnings into various businesses ranging from a simple Hotdog Stand to a massive Skyscraper.
-        </p>
-
-        <h3 class="text-lg font-semibold mt-4 mb-2">2. How to Play & Tips</h3>
-        <ul class="list-disc pl-5 mb-4 space-y-2">
-            <li><strong>Click to Earn:</strong> Tap the giant money bag icon to instantly generate cash.</li>
-            <li><strong>Mouse Upgrade:</strong> Increase your clicking power. Essential for fast early-game growth.</li>
-            <li><strong>Invest in Real Estate:</strong> Buy properties to generate passive income every second. Your properties work for you even when you're not clicking!</li>
-            <li><strong>Auto-Save:</strong> Your progress is automatically saved to your browser. You can close the page and come back later without losing your empire.</li>
-        </ul>
-
-        <!-- AdSense Footer Ad (Multiplex/Display) -->
-        <div class="w-full bg-gray-200 h-[250px] mt-6 flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded">
-            <span>[AdSense Article Footer Ad Here]</span>
-        </div>
+    <article id="seo-article" class="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700">
+        <!-- 내용은 React에서 언어에 따라 동적으로 채웁니다 -->
     </article>
 
     <!-- React Logic -->
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // 글로벌 타겟을 위한 영문 데이터
-        const INITIAL_PROPERTIES = [
-            { id: 1, name: 'Hotdog Stand', baseCost: 100, baseIncome: 5, count: 0, icon: 'HOTDOG' },
-            { id: 2, name: 'Store', baseCost: 1500, baseIncome: 60, count: 0, icon: 'STORE' },
-            { id: 3, name: 'Cafe', baseCost: 12000, baseIncome: 400, count: 0, icon: 'CAFE' },
-            { id: 4, name: 'Apartment', baseCost: 100000, baseIncome: 3000, count: 0, icon: 'APT' },
-            { id: 5, name: 'Skyscraper', baseCost: 1000000, baseIncome: 35000, count: 0, icon: 'TOWER' },
-        ];
+        // 다국어 텍스트 데이터 (한국어, 영어)
+        const TRANSLATIONS = {
+            ko: {
+                title: "💸 건물주 키우기",
+                subtitle: "최고의 자산가가 되어보세요!",
+                sec: "초",
+                click: "클릭",
+                autoSaving: "자동 저장 중...",
+                tapToEarn: "터치해서 돈 벌기!",
+                investments: "투자 가이드 (상점)",
+                mousePower: "마우스 강화",
+                lv: "레벨",
+                adResponsive: "[상단 반응형 광고 영역]",
+                adNative: "[게임 내 네이티브 광고 영역]",
+                currency: "KRW",
+                format: "ko-KR",
+                seoTitle: "게임 소개 및 플레이 방법",
+                seoQ1: "1. 건물주 키우기란?",
+                seoA1: "건물주 키우기는 누구나 쉽게 즐길 수 있는 방치형 클리커(Idle Clicker) 웹 게임입니다. 초기 자본 없이 시작하여 클릭만으로 수익을 창출하고, 벌어들인 수익을 재투자하여 다양한 부동산과 사업체를 인수하는 경제 시뮬레이션 게임입니다.",
+                seoQ2: "2. 조작 방법 및 팁",
+                seoTips: [
+                    "클릭으로 돈 벌기: 화면 중앙의 돈뭉치 아이콘을 클릭하면 즉시 돈이 지급됩니다.",
+                    "마우스 업그레이드: 클릭당 벌어들이는 수익을 증가시킵니다. 초반 빠른 성장을 위해 필수적입니다.",
+                    "부동산 투자: 붕어빵 노점상부터 시작하여 초고층 랜드마크까지 구매할 수 있습니다. 구매한 부동산은 매초 자동으로 수익을 통장에 입금해 줍니다.",
+                    "자동 저장: 게임 진행 상황은 브라우저에 자동으로 저장됩니다. 나중에 다시 접속해도 이어서 플레이할 수 있습니다."
+                ]
+            },
+            en: {
+                title: "💸 Idle Landlord",
+                subtitle: "Become the ultimate real estate tycoon!",
+                sec: "sec",
+                click: "click",
+                autoSaving: "Auto-saving...",
+                tapToEarn: "Tap to Earn!",
+                investments: "Investments",
+                mousePower: "Mouse Power",
+                lv: "Lv",
+                adResponsive: "[AdSense Responsive Ad Unit Here]",
+                adNative: "[AdSense Native Ad Placeholder]",
+                currency: "USD",
+                format: "en-US",
+                seoTitle: "About the Game",
+                seoQ1: "1. What is Idle Landlord?",
+                seoA1: "Idle Landlord is a highly addictive incremental clicker game where you start with empty pockets and build a real estate empire. Click the money bag to earn your first dollars, then invest your earnings into various businesses.",
+                seoQ2: "2. How to Play & Tips",
+                seoTips: [
+                    "Click to Earn: Tap the giant money bag icon to instantly generate cash.",
+                    "Mouse Upgrade: Increase your clicking power. Essential for fast early-game growth.",
+                    "Invest in Real Estate: Buy properties to generate passive income every second.",
+                    "Auto-Save: Your progress is automatically saved to your browser."
+                ]
+            }
+        };
 
-        // 로컬 스토리지에서 저장된 데이터 불러오기 함수
+        // 속성 데이터 다국어 설정
+        const PROPERTIES_DATA = {
+            ko: [
+                { id: 1, name: '붕어빵 노점상', baseCost: 100, baseIncome: 5, count: 0, icon: 'HOTDOG' },
+                { id: 2, name: '동네 편의점', baseCost: 1500, baseIncome: 60, count: 0, icon: 'STORE' },
+                { id: 3, name: '프랜차이즈 카페', baseCost: 12000, baseIncome: 400, count: 0, icon: 'CAFE' },
+                { id: 4, name: '강남 오피스텔', baseCost: 100000, baseIncome: 3000, count: 0, icon: 'APT' },
+                { id: 5, name: '초고층 랜드마크', baseCost: 1000000, baseIncome: 35000, count: 0, icon: 'TOWER' },
+            ],
+            en: [
+                { id: 1, name: 'Hotdog Stand', baseCost: 100, baseIncome: 5, count: 0, icon: 'HOTDOG' },
+                { id: 2, name: 'Convenience Store', baseCost: 1500, baseIncome: 60, count: 0, icon: 'STORE' },
+                { id: 3, name: 'Coffee Franchise', baseCost: 12000, baseIncome: 400, count: 0, icon: 'CAFE' },
+                { id: 4, name: 'Luxury Apartment', baseCost: 100000, baseIncome: 3000, count: 0, icon: 'APT' },
+                { id: 5, name: 'Skyscraper', baseCost: 1000000, baseIncome: 35000, count: 0, icon: 'TOWER' },
+            ]
+        };
+
+        // 로컬 스토리지 데이터 로드
         const loadSavedData = () => {
-            const saved = localStorage.getItem('idleLandlordSave');
+            const saved = localStorage.getItem('idleLandlordSaveV2'); // V2로 변경하여 이전 버전과 충돌 방지
             return saved ? JSON.parse(saved) : null;
         };
 
         function GameApp() {
-            // 초기값을 로컬 스토리지 데이터로 설정 (없으면 기본값)
+            // 브라우저 언어 감지 ('ko' 또는 'en' 기본값)
+            const browserLang = navigator.language.startsWith('ko') ? 'ko' : 'en';
+            const t = TRANSLATIONS[browserLang];
+
             const initialData = loadSavedData();
             
             const [money, setMoney] = useState(initialData ? initialData.money : 0);
             const [clickPower, setClickPower] = useState(initialData ? initialData.clickPower : 10);
             const [clickUpgradeCost, setClickUpgradeCost] = useState(initialData ? initialData.clickUpgradeCost : 50);
-            const [properties, setProperties] = useState(initialData ? initialData.properties : INITIAL_PROPERTIES);
+            
+            // 프로퍼티는 언어 설정에 맞게 이름 갱신, 횟수는 저장된 값 유지
+            const [properties, setProperties] = useState(() => {
+                const baseProps = PROPERTIES_DATA[browserLang];
+                if (initialData && initialData.properties) {
+                    return baseProps.map(bp => {
+                        const savedProp = initialData.properties.find(sp => sp.id === bp.id);
+                        return savedProp ? { ...bp, count: savedProp.count } : bp;
+                    });
+                }
+                return baseProps;
+            });
+
             const [clicks, setClicks] = useState([]);
 
             const incomePerSec = properties.reduce((total, prop) => total + (prop.baseIncome * prop.count), 0);
 
-            // 상태가 변할 때마다 로컬 스토리지에 자동 저장 (Auto-Save)
+            // SEO Article 영역 동적 렌더링 (리액트 외부 영역 제어)
+            useEffect(() => {
+                const articleElement = document.getElementById('seo-article');
+                if(articleElement) {
+                    articleElement.innerHTML = `
+                        <h2 class="text-2xl font-bold mb-4 border-b pb-2">${t.seoTitle}</h2>
+                        <h3 class="text-lg font-semibold mt-4 mb-2">${t.seoQ1}</h3>
+                        <p class="mb-4 leading-relaxed">${t.seoA1}</p>
+                        <h3 class="text-lg font-semibold mt-4 mb-2">${t.seoQ2}</h3>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            ${t.seoTips.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                        <div class="w-full bg-gray-200 h-[250px] mt-6 flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded">
+                            <span>[AdSense Article Footer Ad Here]</span>
+                        </div>
+                    `;
+                }
+            }, [browserLang]);
+
             useEffect(() => {
                 const saveData = { money, clickPower, clickUpgradeCost, properties };
-                localStorage.setItem('idleLandlordSave', JSON.stringify(saveData));
+                localStorage.setItem('idleLandlordSaveV2', JSON.stringify(saveData));
             }, [money, clickPower, clickUpgradeCost, properties]);
 
-            // 초당 수익 추가 루프
             useEffect(() => {
                 if (incomePerSec === 0) return;
                 const timer = setInterval(() => {
@@ -115,8 +180,9 @@
 
             const handleMainClick = (e) => {
                 setMoney(prev => prev + clickPower);
-                const x = e.clientX || window.innerWidth / 2;
-                const y = e.clientY || window.innerHeight / 2;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX || rect.left + rect.width / 2;
+                const y = e.clientY || rect.top + rect.height / 2;
                 const newClick = { id: Date.now() + Math.random(), x, y, val: clickPower };
                 setClicks(prev => [...prev, newClick]);
                 setTimeout(() => {
@@ -145,88 +211,103 @@
                 }
             };
 
-            // 달러($) 포맷팅 함수
             const formatMoney = (amount) => {
-                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+                return new Intl.NumberFormat(t.format, { 
+                    style: 'currency', 
+                    currency: t.currency, 
+                    maximumFractionDigits: 0 
+                }).format(amount);
             };
 
             return (
-                <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[700px]">
-                    
-                    {/* Game Header */}
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center z-10 relative">
-                        <div className="text-4xl font-extrabold mb-1 drop-shadow-md">{formatMoney(money)}</div>
-                        <div className="text-green-100 text-sm font-medium bg-green-800/30 inline-block px-3 py-1 rounded-full flex items-center justify-center gap-2 max-w-fit mx-auto">
-                            <span>+{formatMoney(incomePerSec)}/sec</span>
-                            <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse" title="Auto-saving..."></span>
-                        </div>
+                <div className="w-full flex flex-col items-center">
+                    {/* Header */}
+                    <header className="w-full bg-white shadow-sm p-4 text-center z-50 mb-4 rounded-lg">
+                        <h1 className="text-2xl font-black text-green-600">{t.title}</h1>
+                        <p className="text-sm text-gray-500">{t.subtitle}</p>
+                    </header>
+
+                    {/* AdSense Header Ad */}
+                    <div className="w-full bg-gray-200 h-[90px] mb-4 flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded">
+                        <span>{t.adResponsive}</span>
                     </div>
 
-                    {/* Click Area */}
-                    <div 
-                        className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50"
-                        onClick={handleMainClick}
-                    >
-                        <div className="text-[120px] drop-shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-100">
-                            CLICK!
-                        </div>
-                        <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
-                            Tap to Earn! (+{formatMoney(clickPower)}/click)
-                        </div>
-
-                        {clicks.map(click => (
-                            <div key={click.id} className="click-effect" style={{ left: click.x - 20, top: click.y - 40 }}>
-                                +{formatMoney(click.val)}
+                    <div className="w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[700px]">
+                        {/* Game Header */}
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center z-10 relative">
+                            <div className="text-4xl font-extrabold mb-1 drop-shadow-md">{formatMoney(money)}</div>
+                            <div className="text-green-100 text-sm font-medium bg-green-800/30 inline-block px-3 py-1 rounded-full flex items-center justify-center gap-2 max-w-fit mx-auto">
+                                <span>+{formatMoney(incomePerSec)}/{t.sec}</span>
+                                <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse" title={t.autoSaving}></span>
                             </div>
-                        ))}
-                    </div>
+                        </div>
 
-                    {/* In-Game Ad Placement */}
-                    <div className="w-full bg-gray-100 h-16 flex items-center justify-center text-gray-400 text-xs border-y border-gray-200">
-                        <span>[AdSense Native Ad Placeholder]</span>
-                    </div>
+                        {/* Click Area */}
+                        <div 
+                            className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50 overflow-hidden"
+                            onClick={handleMainClick}
+                        >
+                            <div className="text-[120px] font-bold text-green-600 drop-shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-100">
+                                CLICK!
+                            </div>
+                            <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
+                                {t.tapToEarn} (+{formatMoney(clickPower)}/{t.click})
+                            </div>
 
-                    {/* Shop */}
-                    <div className="bg-gray-50 flex-grow overflow-y-auto p-4 custom-scrollbar">
-                        <h2 className="text-sm font-bold mb-3 text-gray-500 px-1 uppercase tracking-wider">Investments</h2>
-                        
-                        <button onClick={buyClickUpgrade} disabled={money < clickUpgradeCost} className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl shadow-sm border transition-all ${money >= clickUpgradeCost ? 'bg-white border-green-400 hover:shadow-md' : 'bg-gray-100 border-gray-200 opacity-50'}`}>
-                            <div className="flex items-center gap-3">
-                                <span className="text-xl font-black text-gray-600 bg-gray-100 p-2 rounded-lg">UP</span>
-                                <div className="text-left">
-                                    <div className="font-bold text-gray-800">Mouse Power</div>
-                                    <div className="text-xs text-gray-500">+{formatMoney(10)}/click</div>
+                            {clicks.map(click => (
+                                <div key={click.id} className="click-effect" style={{ left: click.x - 20, top: click.y - 40 }}>
+                                    +{formatMoney(click.val)}
                                 </div>
-                            </div>
-                            <div className="text-right">
-                                <div className={`font-black text-lg ${money >= clickUpgradeCost ? 'text-green-600' : 'text-red-400'}`}>
-                                    {formatMoney(clickUpgradeCost)}
-                                </div>
-                            </div>
-                        </button>
+                            ))}
+                        </div>
 
-                        {properties.map(prop => {
-                            const currentCost = Math.floor(prop.baseCost * Math.pow(1.15, prop.count));
-                            const canAfford = money >= currentCost;
-                            return (
-                                <button key={prop.id} onClick={() => buyProperty(prop.id)} disabled={!canAfford} className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl shadow-sm border transition-all ${canAfford ? 'bg-white border-blue-300 hover:shadow-md' : 'bg-gray-100 border-gray-200 opacity-50'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-sm font-black text-blue-600 bg-blue-50 p-2 rounded-lg">{prop.icon}</span>
-                                        <div className="text-left">
-                                            <div className="font-bold text-gray-800">{prop.name} 
-                                                {prop.count > 0 && <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full ml-2 align-middle">Lv.{prop.count}</span>}
+                        {/* In-Game Ad */}
+                        <div className="w-full bg-gray-100 h-16 flex items-center justify-center text-gray-400 text-xs border-y border-gray-200">
+                            <span>{t.adNative}</span>
+                        </div>
+
+                        {/* Shop */}
+                        <div className="bg-gray-50 flex-grow overflow-y-auto p-4 custom-scrollbar">
+                            <h2 className="text-sm font-bold mb-3 text-gray-500 px-1 uppercase tracking-wider">{t.investments}</h2>
+                            
+                            <button onClick={buyClickUpgrade} disabled={money < clickUpgradeCost} className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl shadow-sm border transition-all ${money >= clickUpgradeCost ? 'bg-white border-green-400 hover:shadow-md' : 'bg-gray-100 border-gray-200 opacity-50'}`}>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xl font-black text-gray-600 bg-gray-100 p-2 rounded-lg">UP</span>
+                                    <div className="text-left">
+                                        <div className="font-bold text-gray-800">{t.mousePower}</div>
+                                        <div className="text-xs text-gray-500">+{formatMoney(10)}/{t.click}</div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className={`font-black text-lg ${money >= clickUpgradeCost ? 'text-green-600' : 'text-red-400'}`}>
+                                        {formatMoney(clickUpgradeCost)}
+                                    </div>
+                                </div>
+                            </button>
+
+                            {properties.map(prop => {
+                                const currentCost = Math.floor(prop.baseCost * Math.pow(1.15, prop.count));
+                                const canAfford = money >= currentCost;
+                                return (
+                                    <button key={prop.id} onClick={() => buyProperty(prop.id)} disabled={!canAfford} className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl shadow-sm border transition-all ${canAfford ? 'bg-white border-blue-300 hover:shadow-md' : 'bg-gray-100 border-gray-200 opacity-50'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-black text-blue-600 bg-blue-50 p-2 rounded-lg">{prop.icon}</span>
+                                            <div className="text-left">
+                                                <div className="font-bold text-gray-800">{prop.name} 
+                                                    {prop.count > 0 && <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full ml-2 align-middle">{t.lv}.{prop.count}</span>}
+                                                </div>
+                                                <div className="text-xs text-gray-500">+{formatMoney(prop.baseIncome)}/{t.sec}</div>
                                             </div>
-                                            <div className="text-xs text-gray-500">+{formatMoney(prop.baseIncome)}/sec</div>
                                         </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className={`font-black text-lg ${canAfford ? 'text-blue-600' : 'text-red-400'}`}>
-                                            {formatMoney(currentCost)}
+                                        <div className="text-right">
+                                            <div className={`font-black text-lg ${canAfford ? 'text-blue-600' : 'text-red-400'}`}>
+                                                {formatMoney(currentCost)}
+                                            </div>
                                         </div>
-                                    </div>
-                                </button>
-                            );
-                        })}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             );
