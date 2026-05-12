@@ -1,37 +1,53 @@
-# 💸 Idle Landlord (Money Maker Game)
+# 💸 Idle Landlord (건물주 키우기)
 
-A highly addictive, web-based idle clicker game built with React and Tailwind CSS. Start with nothing, click to earn money, and invest in real estate to become a billionaire!
+> 웹 브라우저에서 가볍게 즐길 수 있는 중독성 높은 방치형 클리커(Tycoon) 게임입니다.
+> 초기 자본 없이 시작하여 시드 머니를 모으고, 다양한 부동산에 투자하여 거대한 부를 축적해 보세요!
 
-This project is optimized for Google AdSense monetization with strategically placed ad slots.
+🔗 **Live Demo:** [https://money-game-zeta.vercel.app](https://money-game-zeta.vercel.app)
 
-## 🎮 Features
+## ✨ 핵심 기능 (Key Features)
 
-* **Click to Earn:** Click the main money bag to generate immediate income.
-* **Upgrades:** Boost your click power by purchasing mouse upgrades.
-* **Passive Income:** Buy properties (from street food stalls to skyscrapers) that automatically generate money every second.
-* **Responsive Design:** Fully optimized for both mobile and desktop screens.
-* **Monetization Ready:** Pre-configured with Google AdSense banner and native ad placeholders.
+- **🌐 글로벌 다국어 자동 지원 (i18n)**
+  - 접속자의 브라우저 언어(IP 기반)를 자동 감지하여 **한국어(KRW)** 또는 **영어(USD)**로 맞춤형 UI 제공.
+- **🏢 10단계 부동산 투자 시스템**
+  - 붕어빵 노점상(🌭)부터 초고층 랜드마크(🏙️)까지 10종의 다채로운 건물 트리.
+  - 구매 시마다 가격이 1.15배씩 상승하는 경제 밸런스 적용.
+- **♻️ 환생 (Rebirth) 시스템**
+  - 자산 $2B (20억) 달성 시 환생 가능.
+  - 환생 시 모든 자산이 초기화되지만, **영구적인 수익 배수(Multiplier)**를 획득하여 성장 속도 극대화.
+- **💾 자동 저장 (Auto-Save)**
+  - 브라우저의 `localStorage`를 활용하여 실시간 진행 상황 저장. (현재 Save Data 버전: V4)
+- **💰 구글 애드센스 & SEO 최적화**
+  - 반응형 및 네이티브 광고 단위 탑재.
+  - 애드센스 심사 통과(가치 있는 콘텐츠)를 위한 하단 대규모 위키(공략집) 텍스트 하드코딩 적용.
 
-## 🛠️ Tech Stack
+## 🛠 기술 스택 (Tech Stack)
 
-* HTML5 / CSS3
-* React 18 (via CDN)
-* Babel (Standalone)
-* Tailwind CSS (via CDN)
+- **Frontend:** HTML5, Tailwind CSS
+- **Framework:** React.js 18 (CDN), Babel
+- **Deployment:** Vercel, GitHub Actions
 
-## 🚀 How to Play
+## 📈 변경 이력 (Changelog / 형상 관리)
 
-1. Click the center icon to earn initial cash.
-2. Upgrade your "Mouse Power" to earn more per click.
-3. Purchase real estate to build passive income.
-4. Leave the browser open and watch your wealth grow!
+- **v1.4.0 (Current)**
+  - 부동산 건물을 5단계에서 10단계로 대폭 확장.
+  - 직관적인 이모지(Emoji) 아이콘 전면 복구 및 적용.
+  - 스케일 확장에 따라 환생(Rebirth) 요구 금액을 $1M에서 $2B(20억)로 상향 조정.
+  - 브라우저 언어 자동 감지 로직 고도화 및 하단 공략집(SEO) 텍스트 누락 방지 고정.
+- **v1.3.0**
+  - 다국어(i18n) 수동/자동 전환 기능 도입.
+  - 코어 시스템: 환생(Rebirth) 로직 및 영구 Multiplier 배율 기능 추가.
+- **v1.2.0**
+  - 구글 애드센스 "가치가 낮은 콘텐츠" 반려 이슈 해결을 위한 하단 대규모 게임 공략본(SEO 텍스트) 추가.
+- **v1.1.0**
+  - 구글 애드센스 스크립트 및 광고 Placeholders 삽입.
+- **v1.0.0**
+  - 프로젝트 이니셜 릴리즈.
+  - 기본 클릭 시스템, 5단계 건물 시스템, 초당 수익(Income per sec) 루프 구현.
 
-## 🌐 Deployment
+## 🚀 향후 로드맵 (Future Roadmap)
 
-This project is easily deployable using [Vercel](https://vercel.com/).
-Simply run:
-
-`npx vercel --prod`
-
----
-*Created as a lightweight, single-file React application for easy deployment and ad revenue generation.*
+1. **오프라인 수익(Offline Earnings) 도입:** 브라우저를 닫고 있는 시간 동안의 수익을 계산하여 재접속 시 지급.
+2. **유니버스 세계관 확장 (데이터 연동):**
+   - 본 게임에서 획득한 재화 및 환생 횟수(Multiplier) 데이터를 암호화하여 추출(Export).
+   - 차기작인 **'강화하기 게임(가칭)'** 등에서 해당 데이터를 불러와 아이템 강화 재료 및 확률 부스트용으로 연동할 수 있는 시스템 구축 예정.
