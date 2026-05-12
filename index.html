@@ -81,10 +81,10 @@
     </style>
   </head>
   <body class="flex flex-col items-center min-h-screen">
-    <!-- React App Root (게임 UI가 그려지는 곳) -->
+    <!-- React App Root (게임 UI) -->
     <div id="root" class="w-full max-w-md w-full my-4"></div>
 
-    <!-- 구글 봇을 위한 애드센스 심사용 대규모 텍스트 (절대 생략 없음) -->
+    <!-- 구글 애드센스 심사용 대규모 공략집 텍스트 (절대 생략 금지) -->
     <article
       class="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500"
     >
@@ -239,6 +239,10 @@
           5. Version History & Patch Notes
         </h2>
         <p class="text-sm text-gray-600 mb-2">
+          <strong>v1.4.0:</strong> Expanded properties to 10 tiers. Restored
+          Emoji icons. Adjusted Rebirth threshold to $2B.
+        </p>
+        <p class="text-sm text-gray-600 mb-2">
           <strong>v1.3.0:</strong> Added automatic language detection (i18n),
           Rebirth system, and restored SEO content.
         </p>
@@ -246,10 +250,6 @@
           <strong>v1.2.0:</strong> Added comprehensive game guide,
           English/Korean bilingual support (i18n), and enhanced auto-save
           stability.
-        </p>
-        <p class="text-sm text-gray-600 mb-2">
-          <strong>v1.1.0:</strong> Integrated Google AdSense responsive ad units
-          and native ad placeholders. Adjusted click scaling.
         </p>
         <p class="text-sm text-gray-600">
           <strong>v1.0.0:</strong> Initial launch. Core clicker mechanics and
@@ -262,16 +262,16 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      const REBIRTH_REQUIREMENT = 1000000;
+      const REBIRTH_REQUIREMENT = 2000000000; // 환생 기준: 20억 (건물이 10개로 늘어났으므로 기준 상향)
 
       const TRANSLATIONS = {
         ko: {
           title: "💸 건물주 키우기",
           rebirth: "환생",
-          rebirthDesc: "100만 달러 달성 시 가능",
+          rebirthDesc: "20억 달성 시 가능",
           rebirthSuccess: "환생 성공! 수익 배율이 증가했습니다.",
           rebirthConfirm:
-            "환생하시겠습니까? 건물과 돈이 초기화되지만 영구 배율이 증가합니다.",
+            "환생하시겠습니까? 모든 건물과 돈이 초기화되지만 영구 배율이 1 증가합니다.",
           multiplier: "수익 배율",
           sec: "초",
           click: "클릭",
@@ -285,7 +285,7 @@
         en: {
           title: "💸 Idle Landlord",
           rebirth: "Rebirth",
-          rebirthDesc: "Need $1M to Rebirth",
+          rebirthDesc: "Need $2B to Rebirth",
           rebirthSuccess: "Rebirth Successful! Permanent Multiplier Increased.",
           rebirthConfirm:
             "Do you want to rebirth? All cash and properties will reset, but you gain a permanent multiplier.",
@@ -301,6 +301,7 @@
         },
       };
 
+      // 10단계의 확장된 건물 데이터 + 이모지 아이콘 복구
       const PROPERTIES_DATA = {
         ko: [
           {
@@ -308,35 +309,70 @@
             name: "붕어빵 노점상",
             baseCost: 100,
             baseIncome: 5,
-            icon: "HOTDOG",
+            icon: "🌭",
           },
           {
             id: 2,
             name: "동네 편의점",
             baseCost: 1500,
             baseIncome: 60,
-            icon: "STORE",
+            icon: "🏪",
           },
           {
             id: 3,
-            name: "프랜차이즈 카페",
-            baseCost: 12000,
-            baseIncome: 400,
-            icon: "CAFE",
+            name: "피자 프랜차이즈",
+            baseCost: 8000,
+            baseIncome: 300,
+            icon: "🍕",
           },
           {
             id: 4,
-            name: "강남 오피스텔",
-            baseCost: 100000,
-            baseIncome: 3000,
-            icon: "APT",
+            name: "프랜차이즈 카페",
+            baseCost: 35000,
+            baseIncome: 1200,
+            icon: "☕",
           },
           {
             id: 5,
+            name: "대형 PC방",
+            baseCost: 150000,
+            baseIncome: 5000,
+            icon: "🖥️",
+          },
+          {
+            id: 6,
+            name: "강남 오피스텔",
+            baseCost: 800000,
+            baseIncome: 25000,
+            icon: "🏢",
+          },
+          {
+            id: 7,
+            name: "대형 복합 마트",
+            baseCost: 4000000,
+            baseIncome: 120000,
+            icon: "🛒",
+          },
+          {
+            id: 8,
+            name: "5성급 럭셔리 호텔",
+            baseCost: 25000000,
+            baseIncome: 700000,
+            icon: "🏨",
+          },
+          {
+            id: 9,
+            name: "글로벌 테마파크",
+            baseCost: 150000000,
+            baseIncome: 4000000,
+            icon: "🎡",
+          },
+          {
+            id: 10,
             name: "초고층 랜드마크",
-            baseCost: 1000000,
-            baseIncome: 35000,
-            icon: "TOWER",
+            baseCost: 1000000000,
+            baseIncome: 25000000,
+            icon: "🏙️",
           },
         ],
         en: [
@@ -345,35 +381,70 @@
             name: "Hotdog Stand",
             baseCost: 100,
             baseIncome: 5,
-            icon: "HOTDOG",
+            icon: "🌭",
           },
           {
             id: 2,
             name: "Convenience Store",
             baseCost: 1500,
             baseIncome: 60,
-            icon: "STORE",
+            icon: "🏪",
           },
           {
             id: 3,
-            name: "Coffee Franchise",
-            baseCost: 12000,
-            baseIncome: 400,
-            icon: "CAFE",
+            name: "Pizza Franchise",
+            baseCost: 8000,
+            baseIncome: 300,
+            icon: "🍕",
           },
           {
             id: 4,
-            name: "Luxury Apartment",
-            baseCost: 100000,
-            baseIncome: 3000,
-            icon: "APT",
+            name: "Coffee Franchise",
+            baseCost: 35000,
+            baseIncome: 1200,
+            icon: "☕",
           },
           {
             id: 5,
+            name: "Cyber Cafe",
+            baseCost: 150000,
+            baseIncome: 5000,
+            icon: "🖥️",
+          },
+          {
+            id: 6,
+            name: "Luxury Apartment",
+            baseCost: 800000,
+            baseIncome: 25000,
+            icon: "🏢",
+          },
+          {
+            id: 7,
+            name: "Supermarket",
+            baseCost: 4000000,
+            baseIncome: 120000,
+            icon: "🛒",
+          },
+          {
+            id: 8,
+            name: "5-Star Hotel",
+            baseCost: 25000000,
+            baseIncome: 700000,
+            icon: "🏨",
+          },
+          {
+            id: 9,
+            name: "Theme Park",
+            baseCost: 150000000,
+            baseIncome: 4000000,
+            icon: "🎡",
+          },
+          {
+            id: 10,
             name: "Skyscraper",
-            baseCost: 1000000,
-            baseIncome: 35000,
-            icon: "TOWER",
+            baseCost: 1000000000,
+            baseIncome: 25000000,
+            icon: "🏙️",
           },
         ],
       };
@@ -387,8 +458,9 @@
           : "en";
         const t = TRANSLATIONS[userLang];
 
+        // 데이터 충돌 방지를 위해 Save Key를 V4로 변경
         const saved =
-          JSON.parse(localStorage.getItem("idleLandlordSaveV3")) || {};
+          JSON.parse(localStorage.getItem("idleLandlordSaveV4")) || {};
 
         const [money, setMoney] = useState(saved.money || 0);
         const [clickPower, setClickPower] = useState(saved.clickPower || 10);
@@ -431,7 +503,7 @@
             rebirthCount,
             multiplier,
           };
-          localStorage.setItem("idleLandlordSaveV3", JSON.stringify(saveData));
+          localStorage.setItem("idleLandlordSaveV4", JSON.stringify(saveData));
         }, [
           money,
           clickPower,
@@ -497,6 +569,7 @@
         };
 
         const formatMoney = (val) => {
+          // 단위가 너무 커질 때를 대비한 NumberFormat (ex: 1,000,000)
           return new Intl.NumberFormat(t.format, {
             style: "currency",
             currency: t.currency,
