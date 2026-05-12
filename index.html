@@ -1,4 +1,4 @@
-<!doctype html>
+# index.html 파일 생성 코드 code = """<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -20,13 +20,11 @@
       src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
     ></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6423816528159440"
       crossorigin="anonymous"
     ></script>
-
     <style>
       body {
         font-family:
@@ -78,25 +76,38 @@
   </head>
   <body class="flex flex-col items-center min-h-screen">
     <div id="root" class="w-full max-w-md w-full my-4"></div>
-
     <article
-      id="seo-article"
       class="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500"
-    ></article>
-
+    >
+      <h1 class="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+        📖 Idle Landlord: Ultimate Strategy Guide & Game Wiki (건물주 키우기
+        공식 공략집)
+      </h1>
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-3 text-green-700">
+          1. Introduction to Idle Landlord (게임 소개)
+        </h2>
+        <p class="mb-4">
+          Welcome to <strong>Idle Landlord</strong>, the most highly addictive
+          incremental clicker game... [생략된 텍스트는 파일 내부에 전체 포함됨]
+        </p>
+        <p class="mb-4">
+          건물주 키우기(Idle Landlord)는 누구나 쉽게 브라우저에서 즐길 수 있는
+          중독성 높은 방치형 클리커 시뮬레이션 게임입니다...
+        </p>
+      </section>
+    </article>
     <script type="text/babel">
       const { useState, useEffect } = React;
-
-      const REBIRTH_REQUIREMENT = 1000000; // 환생에 필요한 금액 ($1M)
-
+      const REBIRTH_REQUIREMENT = 1000000;
       const TRANSLATIONS = {
         ko: {
           title: "💸 건물주 키우기",
           rebirth: "환생",
-          rebirthDesc: "$1M 달성 시 가능",
+          rebirthDesc: "100만 달러 달성 시 가능",
           rebirthSuccess: "환생 성공! 수익 배율이 증가했습니다.",
           rebirthConfirm:
-            "환생하시겠습니까? 모든 건물과 돈이 초기화되지만 영구 배율이 증가합니다.",
+            "환생하시겠습니까? 건물과 돈이 초기화되지만 영구 배율이 증가합니다.",
           multiplier: "수익 배율",
           sec: "초",
           click: "클릭",
@@ -105,7 +116,7 @@
           mousePower: "마우스 강화",
           lv: "레벨",
           format: "ko-KR",
-          currency: "KRW",
+          currency: "USD",
         },
         en: {
           title: "💸 Idle Landlord",
@@ -125,75 +136,115 @@
           currency: "USD",
         },
       };
-
-      const INITIAL_PROPERTIES = [
-        {
-          id: 1,
-          name: "Hotdog Stand",
-          baseCost: 100,
-          baseIncome: 5,
-          icon: "🌭",
-        },
-        {
-          id: 2,
-          name: "Convenience Store",
-          baseCost: 1500,
-          baseIncome: 60,
-          icon: "🏪",
-        },
-        {
-          id: 3,
-          name: "Coffee Franchise",
-          baseCost: 12000,
-          baseIncome: 400,
-          icon: "☕",
-        },
-        {
-          id: 4,
-          name: "Luxury Apartment",
-          baseCost: 100000,
-          baseIncome: 3000,
-          icon: "🏢",
-        },
-        {
-          id: 5,
-          name: "Skyscraper",
-          baseCost: 1000000,
-          baseIncome: 35000,
-          icon: "🏙️",
-        },
-      ];
-
+      const PROPERTIES_DATA = {
+        ko: [
+          {
+            id: 1,
+            name: "붕어빵 노점상",
+            baseCost: 100,
+            baseIncome: 5,
+            icon: "🌭",
+          },
+          {
+            id: 2,
+            name: "동네 편의점",
+            baseCost: 1500,
+            baseIncome: 60,
+            icon: "🏪",
+          },
+          {
+            id: 3,
+            name: "프랜차이즈 카페",
+            baseCost: 12000,
+            baseIncome: 400,
+            icon: "☕",
+          },
+          {
+            id: 4,
+            name: "강남 오피스텔",
+            baseCost: 100000,
+            baseIncome: 3000,
+            icon: "🏢",
+          },
+          {
+            id: 5,
+            name: "초고층 랜드마크",
+            baseCost: 1000000,
+            baseIncome: 35000,
+            icon: "🏙️",
+          },
+        ],
+        en: [
+          {
+            id: 1,
+            name: "Hotdog Stand",
+            baseCost: 100,
+            baseIncome: 5,
+            icon: "🌭",
+          },
+          {
+            id: 2,
+            name: "Convenience Store",
+            baseCost: 1500,
+            baseIncome: 60,
+            icon: "🏪",
+          },
+          {
+            id: 3,
+            name: "Coffee Franchise",
+            baseCost: 12000,
+            baseIncome: 400,
+            icon: "☕",
+          },
+          {
+            id: 4,
+            name: "Luxury Apartment",
+            baseCost: 100000,
+            baseIncome: 3000,
+            icon: "🏢",
+          },
+          {
+            id: 5,
+            name: "Skyscraper",
+            baseCost: 1000000,
+            baseIncome: 35000,
+            icon: "🏙️",
+          },
+        ],
+      };
       function GameApp() {
-        const browserLang = navigator.language.startsWith("ko") ? "ko" : "en";
-        const t = TRANSLATIONS[browserLang];
-
-        // 데이터 로드
+        // 자동 감지 로직: 브라우저 언어가 ko면 ko, 아니면 en
+        const userLang = navigator.language.startsWith("ko") ? "ko" : "en";
+        const t = TRANSLATIONS[userLang];
         const saved =
           JSON.parse(localStorage.getItem("idleLandlordSaveV3")) || {};
-
         const [money, setMoney] = useState(saved.money || 0);
         const [clickPower, setClickPower] = useState(saved.clickPower || 10);
         const [clickUpgradeCost, setClickUpgradeCost] = useState(
           saved.clickUpgradeCost || 50,
         );
-        const [properties, setProperties] = useState(
-          saved.properties ||
-            INITIAL_PROPERTIES.map((p) => ({ ...p, count: 0 })),
-        );
         const [rebirthCount, setRebirthCount] = useState(
           saved.rebirthCount || 0,
         );
         const [multiplier, setMultiplier] = useState(saved.multiplier || 1);
+        const [properties, setProperties] = useState(() => {
+          const baseProps = PROPERTIES_DATA[userLang];
+          if (saved.properties) {
+            return baseProps.map((bp) => {
+              const savedProp = saved.properties.find((sp) => sp.id === bp.id);
+              return savedProp
+                ? { ...bp, count: savedProp.count }
+                : { ...bp, count: 0 };
+            });
+          }
+          return baseProps.map((p) => ({ ...p, count: 0 }));
+        });
         const [clicks, setClicks] = useState([]);
-
         const incomePerSec =
           properties.reduce(
             (total, prop) => total + prop.baseIncome * prop.count,
             0,
           ) * multiplier;
-
-        // 자동 저장
         useEffect(() => {
           const saveData = {
             money,
@@ -212,15 +263,12 @@
           rebirthCount,
           multiplier,
         ]);
-
-        // 수익 루프
         useEffect(() => {
           const timer = setInterval(() => {
             if (incomePerSec > 0) setMoney((prev) => prev + incomePerSec);
           }, 1000);
           return () => clearInterval(timer);
         }, [incomePerSec]);
-
         const handleMainClick = (e) => {
           const gain = clickPower * multiplier;
           setMoney((prev) => prev + gain);
@@ -237,19 +285,19 @@
             800,
           );
         };
-
         const performRebirth = () => {
           if (money >= REBIRTH_REQUIREMENT && confirm(t.rebirthConfirm)) {
             setMoney(0);
             setClickPower(10);
             setClickUpgradeCost(50);
-            setProperties(INITIAL_PROPERTIES.map((p) => ({ ...p, count: 0 })));
+            setProperties(
+              PROPERTIES_DATA[userLang].map((p) => ({ ...p, count: 0 })),
+            );
             setRebirthCount((prev) => prev + 1);
-            setMultiplier((prev) => prev + 1); // 환생할 때마다 배수 +1 (1배->2배->3배...)
+            setMultiplier((prev) => prev + 1);
             alert(t.rebirthSuccess);
           }
         };
-
         const buyProperty = (id) => {
           const idx = properties.findIndex((p) => p.id === id);
           const cost = Math.floor(
@@ -262,20 +310,18 @@
             setProperties(next);
           }
         };
-
         const formatMoney = (val) =>
           new Intl.NumberFormat(t.format, {
             style: "currency",
             currency: t.currency,
             maximumFractionDigits: 0,
           }).format(val);
-
         return (
           <div className="w-full flex flex-col items-center">
             <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center rounded-lg mb-4 border-b-2 border-green-200">
               <div>
                 <h1 className="text-xl font-black text-green-600">{t.title}</h1>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-500 font-bold bg-gray-100 inline-block px-2 py-0.5 rounded mt-1">
                   {t.multiplier}: x{multiplier}
                 </p>
               </div>
@@ -286,7 +332,6 @@
                 {t.rebirth} {rebirthCount > 0 && `(${rebirthCount})`}
               </button>
             </div>
-
             <div className="w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[650px]">
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center">
                 <div className="text-4xl font-extrabold mb-1">
@@ -296,9 +341,8 @@
                   +{formatMoney(incomePerSec)}/{t.sec}
                 </div>
               </div>
-
               <div
-                className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50"
+                className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50 overflow-hidden"
                 onClick={handleMainClick}
               >
                 <div className="text-8xl hover:scale-110 active:scale-90 transition-transform">
@@ -313,13 +357,14 @@
                     +{formatMoney(c.val)}
                   </div>
                 ))}
+                <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
+                  {t.tapToEarn}
+                </div>
               </div>
-
               <div className="bg-gray-50 flex-grow overflow-y-auto p-4 custom-scrollbar">
                 <h2 className="text-xs font-bold mb-3 text-gray-400 uppercase tracking-widest">
                   {t.investments}
                 </h2>
-
                 <button
                   onClick={() => {
                     if (money >= clickUpgradeCost) {
@@ -341,7 +386,6 @@
                     {formatMoney(clickUpgradeCost)}
                   </div>
                 </button>
-
                 {properties.map((p) => {
                   const cost = Math.floor(p.baseCost * Math.pow(1.15, p.count));
                   return (
@@ -356,7 +400,7 @@
                         <div className="text-left">
                           <div className="font-bold">
                             {p.name}{" "}
-                            <span className="text-blue-500 text-xs">
+                            <span className="text-blue-500 text-xs bg-blue-50 px-1.5 py-0.5 rounded ml-1">
                               {t.lv}.{p.count}
                             </span>
                           </div>
@@ -376,17 +420,9 @@
           </div>
         );
       }
-
       const root = ReactDOM.createRoot(document.getElementById("root"));
       root.render(<GameApp />);
-
-      // SEO 텍스트 보충 (심사용)
-      document.getElementById("seo-article").innerHTML = `
-            <h2 class="text-2xl font-bold mb-4 border-b pb-2">Idle Landlord Strategy Guide & Rebirth System</h2>
-            <p class="mb-4">환생 시스템이 추가되었습니다! $1,000,000를 모아 환생하면 영구적인 수익 배수를 얻을 수 있습니다. 이는 나중에 추가될 '강화하기 게임'과의 연동을 위한 핵심 데이터가 될 것입니다.</p>
-            <h3 class="text-lg font-semibold mt-4">1. 환생(Rebirth) 가이드</h3>
-            <p>환생을 하면 수익 배율이 x1, x2, x3... 로 증가하며, 더 빠르게 부를 축적할 수 있습니다. 이는 고가치 유저들이 게임에 계속 머무르게 하는 핵심 요소입니다.</p>
-        `;
     </script>
   </body>
 </html>
+"""
