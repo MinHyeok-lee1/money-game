@@ -1,4 +1,4 @@
-# index.html 파일 생성 코드 code = """<!doctype html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -10,7 +10,9 @@
     <title>
       Idle Landlord - Clicker Tycoon Game | 건물주 키우기 방치형 게임
     </title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
     <script
       crossorigin
       src="https://unpkg.com/react@18/umd/react.production.min.js"
@@ -19,12 +21,16 @@
       crossorigin
       src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
     ></script>
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 사용자님의 실제 구글 애드센스 스크립트 -->
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6423816528159440"
       crossorigin="anonymous"
     ></script>
+
     <style>
       body {
         font-family:
@@ -75,7 +81,10 @@
     </style>
   </head>
   <body class="flex flex-col items-center min-h-screen">
+    <!-- React App Root (게임 UI가 그려지는 곳) -->
     <div id="root" class="w-full max-w-md w-full my-4"></div>
+
+    <!-- 구글 봇을 위한 애드센스 심사용 대규모 텍스트 (절대 생략 없음) -->
     <article
       class="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500"
     >
@@ -83,23 +92,178 @@
         📖 Idle Landlord: Ultimate Strategy Guide & Game Wiki (건물주 키우기
         공식 공략집)
       </h1>
+
       <section class="mb-8">
         <h2 class="text-2xl font-bold mb-3 text-green-700">
           1. Introduction to Idle Landlord (게임 소개)
         </h2>
         <p class="mb-4">
           Welcome to <strong>Idle Landlord</strong>, the most highly addictive
-          incremental clicker game... [생략된 텍스트는 파일 내부에 전체 포함됨]
+          incremental clicker game designed to test your economic strategy and
+          patience. In this web-based simulation game, players start with
+          absolute zero capital and must click their way to building a massive
+          real estate empire. Whether you are actively clicking or letting the
+          game run in the background to generate passive income, Idle Landlord
+          provides endless hours of entertainment.
         </p>
         <p class="mb-4">
           건물주 키우기(Idle Landlord)는 누구나 쉽게 브라우저에서 즐길 수 있는
-          중독성 높은 방치형 클리커 시뮬레이션 게임입니다...
+          중독성 높은 방치형 클리커(Incremental Clicker) 시뮬레이션 게임입니다.
+          초기 자본 없이 시작하여, 마우스를 클릭해 시드 머니를 모으고, 이를
+          다양한 부동산과 사업체에 재투자하여 거대한 부를 축적하는 것이
+          목표입니다.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-3 text-green-700">
+          2. Core Gameplay Mechanics (핵심 게임 플레이 방법)
+        </h2>
+        <p class="mb-2">
+          Understanding the basic mechanics is crucial for maximizing your
+          revenue stream. Here is a detailed breakdown of how to play:
+        </p>
+        <ul class="list-disc pl-6 mb-4 space-y-2">
+          <li>
+            <strong>Manual Clicking (수동 클릭):</strong> The core mechanic of
+            the early game. Tap or click the giant money bag icon in the center
+            of the screen to instantly generate cash.
+          </li>
+          <li>
+            <strong>Mouse Upgrades (마우스 강화):</strong> As you accumulate
+            wealth, you can upgrade your clicking power. Every upgrade
+            significantly increases the amount of money earned per single click,
+            making active gameplay highly rewarding.
+          </li>
+          <li>
+            <strong>Real Estate Investment (부동산 투자):</strong> Transition
+            from active clicking to passive income by purchasing properties.
+            Start with humble Hotdog Stands (붕어빵 노점상) and eventually buy
+            Convenience Stores, Cafes, Luxury Apartments, and massive
+            Skyscrapers.
+          </li>
+          <li>
+            <strong>Auto-Save System (자동 저장 시스템):</strong> Your progress,
+            including total cash, click power, and property counts, is
+            automatically saved directly to your browser's local storage. You
+            can safely close the tab and return later to resume your empire
+            building.
+          </li>
+        </ul>
+      </section>
+
+      <div
+        class="w-full bg-gray-100 h-[250px] my-8 flex items-center justify-center text-gray-400 text-sm border border-gray-300 border-dashed rounded"
+      >
+        <span>[AdSense In-Article Ad Placement]</span>
+      </div>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-3 text-green-700">
+          3. Advanced Investment Strategy (고급 투자 공략 가이드)
+        </h2>
+        <p class="mb-4">
+          To become a billionaire faster, you need a solid investment strategy.
+          Here are the top tips from expert players:
+        </p>
+        <ol class="list-decimal pl-6 mb-4 space-y-2">
+          <li>
+            <strong>Early Game Focus:</strong> Spend your first few hundred
+            dollars purely on Mouse Upgrades. The base properties like the
+            Hotdog Stand generate income too slowly compared to an upgraded
+            click in the first 5 minutes. (초반에는 마우스 업그레이드에
+            집중하세요.)
+          </li>
+          <li>
+            <strong>The Rule of 1.15x:</strong> Every time you purchase a
+            property, the cost of the next property of the same type increases
+            by exactly 15% (1.15x multiplier). Therefore, it is mathematically
+            inefficient to only buy one type of building. Diversify your
+            portfolio! (건물 가격은 구매할 때마다 15%씩 상승하므로 분산 투자가
+            필수입니다.)
+          </li>
+          <li>
+            <strong>Saving for Skyscrapers:</strong> While lower-tier buildings
+            are cheap, the Skyscraper offers the best Return on Investment (ROI)
+            in the late game. Resist the urge to buy mid-tier apartments and
+            save your cash for the ultimate tower.
+          </li>
+        </ol>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-3 text-green-700">
+          4. Frequently Asked Questions (자주 묻는 질문 - FAQ)
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <strong class="block text-gray-800"
+              >Q: Does the game generate money while I am offline? (오프라인
+              상태에서도 돈을 버나요?)</strong
+            >
+            <span class="text-gray-600"
+              >A: Currently, income is generated only while the browser tab is
+              active or running in the background. Full offline progression
+              calculations will be added in a future update! (현재는 브라우저가
+              켜져 있을 때만 수익이 발생합니다.)</span
+            >
+          </div>
+          <div>
+            <strong class="block text-gray-800"
+              >Q: How do I reset my progress? (게임 데이터를 초기화하려면 어떻게
+              하나요?)</strong
+            >
+            <span class="text-gray-600"
+              >A: You can reset your progress by clearing your browser's Local
+              Storage data for this specific website. (브라우저의 인터넷 사용
+              기록에서 쿠키 및 사이트 데이터를 삭제하면 초기화됩니다.)</span
+            >
+          </div>
+          <div>
+            <strong class="block text-gray-800"
+              >Q: Is it safe to use auto-clickers? (오토마우스나 매크로를 써도
+              되나요?)</strong
+            >
+            <span class="text-gray-600"
+              >A: This is a single-player simulation game, so there is no
+              competitive penalty for using an auto-clicker. However, we
+              encourage pure manual clicking for the authentic tycoon
+              experience! (자유지만, 직접 클릭하는 재미를 느껴보세요.)</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold mb-2 text-gray-500">
+          5. Version History & Patch Notes
+        </h2>
+        <p class="text-sm text-gray-600 mb-2">
+          <strong>v1.3.0:</strong> Added automatic language detection (i18n),
+          Rebirth system, and restored SEO content.
+        </p>
+        <p class="text-sm text-gray-600 mb-2">
+          <strong>v1.2.0:</strong> Added comprehensive game guide,
+          English/Korean bilingual support (i18n), and enhanced auto-save
+          stability.
+        </p>
+        <p class="text-sm text-gray-600 mb-2">
+          <strong>v1.1.0:</strong> Integrated Google AdSense responsive ad units
+          and native ad placeholders. Adjusted click scaling.
+        </p>
+        <p class="text-sm text-gray-600">
+          <strong>v1.0.0:</strong> Initial launch. Core clicker mechanics and
+          property generation implemented.
         </p>
       </section>
     </article>
+
+    <!-- React Logic (게임 기능 및 번역) -->
     <script type="text/babel">
       const { useState, useEffect } = React;
+
       const REBIRTH_REQUIREMENT = 1000000;
+
       const TRANSLATIONS = {
         ko: {
           title: "💸 건물주 키우기",
@@ -116,7 +280,7 @@
           mousePower: "마우스 강화",
           lv: "레벨",
           format: "ko-KR",
-          currency: "USD",
+          currency: "KRW",
         },
         en: {
           title: "💸 Idle Landlord",
@@ -136,6 +300,7 @@
           currency: "USD",
         },
       };
+
       const PROPERTIES_DATA = {
         ko: [
           {
@@ -143,35 +308,35 @@
             name: "붕어빵 노점상",
             baseCost: 100,
             baseIncome: 5,
-            icon: "🌭",
+            icon: "HOTDOG",
           },
           {
             id: 2,
             name: "동네 편의점",
             baseCost: 1500,
             baseIncome: 60,
-            icon: "🏪",
+            icon: "STORE",
           },
           {
             id: 3,
             name: "프랜차이즈 카페",
             baseCost: 12000,
             baseIncome: 400,
-            icon: "☕",
+            icon: "CAFE",
           },
           {
             id: 4,
             name: "강남 오피스텔",
             baseCost: 100000,
             baseIncome: 3000,
-            icon: "🏢",
+            icon: "APT",
           },
           {
             id: 5,
             name: "초고층 랜드마크",
             baseCost: 1000000,
             baseIncome: 35000,
-            icon: "🏙️",
+            icon: "TOWER",
           },
         ],
         en: [
@@ -180,44 +345,51 @@
             name: "Hotdog Stand",
             baseCost: 100,
             baseIncome: 5,
-            icon: "🌭",
+            icon: "HOTDOG",
           },
           {
             id: 2,
             name: "Convenience Store",
             baseCost: 1500,
             baseIncome: 60,
-            icon: "🏪",
+            icon: "STORE",
           },
           {
             id: 3,
             name: "Coffee Franchise",
             baseCost: 12000,
             baseIncome: 400,
-            icon: "☕",
+            icon: "CAFE",
           },
           {
             id: 4,
             name: "Luxury Apartment",
             baseCost: 100000,
             baseIncome: 3000,
-            icon: "🏢",
+            icon: "APT",
           },
           {
             id: 5,
             name: "Skyscraper",
             baseCost: 1000000,
             baseIncome: 35000,
-            icon: "🏙️",
+            icon: "TOWER",
           },
         ],
       };
+
       function GameApp() {
-        // 자동 감지 로직: 브라우저 언어가 ko면 ko, 아니면 en
-        const userLang = navigator.language.startsWith("ko") ? "ko" : "en";
+        // 사용자 브라우저 언어 자동 감지
+        const userLang = (
+          navigator.language || navigator.userLanguage
+        ).includes("ko")
+          ? "ko"
+          : "en";
         const t = TRANSLATIONS[userLang];
+
         const saved =
           JSON.parse(localStorage.getItem("idleLandlordSaveV3")) || {};
+
         const [money, setMoney] = useState(saved.money || 0);
         const [clickPower, setClickPower] = useState(saved.clickPower || 10);
         const [clickUpgradeCost, setClickUpgradeCost] = useState(
@@ -227,6 +399,8 @@
           saved.rebirthCount || 0,
         );
         const [multiplier, setMultiplier] = useState(saved.multiplier || 1);
+
+        // 언어 설정에 맞는 건물 데이터 셋팅
         const [properties, setProperties] = useState(() => {
           const baseProps = PROPERTIES_DATA[userLang];
           if (saved.properties) {
@@ -239,12 +413,15 @@
           }
           return baseProps.map((p) => ({ ...p, count: 0 }));
         });
+
         const [clicks, setClicks] = useState([]);
         const incomePerSec =
           properties.reduce(
             (total, prop) => total + prop.baseIncome * prop.count,
             0,
           ) * multiplier;
+
+        // 자동 저장 로직
         useEffect(() => {
           const saveData = {
             money,
@@ -263,12 +440,15 @@
           rebirthCount,
           multiplier,
         ]);
+
+        // 초당 수익 추가 루프
         useEffect(() => {
           const timer = setInterval(() => {
             if (incomePerSec > 0) setMoney((prev) => prev + incomePerSec);
           }, 1000);
           return () => clearInterval(timer);
         }, [incomePerSec]);
+
         const handleMainClick = (e) => {
           const gain = clickPower * multiplier;
           setMoney((prev) => prev + gain);
@@ -285,8 +465,12 @@
             800,
           );
         };
+
         const performRebirth = () => {
-          if (money >= REBIRTH_REQUIREMENT && confirm(t.rebirthConfirm)) {
+          if (
+            money >= REBIRTH_REQUIREMENT &&
+            window.confirm(t.rebirthConfirm)
+          ) {
             setMoney(0);
             setClickPower(10);
             setClickUpgradeCost(50);
@@ -298,6 +482,7 @@
             alert(t.rebirthSuccess);
           }
         };
+
         const buyProperty = (id) => {
           const idx = properties.findIndex((p) => p.id === id);
           const cost = Math.floor(
@@ -310,14 +495,18 @@
             setProperties(next);
           }
         };
-        const formatMoney = (val) =>
-          new Intl.NumberFormat(t.format, {
+
+        const formatMoney = (val) => {
+          return new Intl.NumberFormat(t.format, {
             style: "currency",
             currency: t.currency,
             maximumFractionDigits: 0,
           }).format(val);
+        };
+
         return (
           <div className="w-full flex flex-col items-center">
+            {/* 상단 환생 버튼 및 상태 영역 */}
             <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center rounded-lg mb-4 border-b-2 border-green-200">
               <div>
                 <h1 className="text-xl font-black text-green-600">{t.title}</h1>
@@ -332,6 +521,8 @@
                 {t.rebirth} {rebirthCount > 0 && `(${rebirthCount})`}
               </button>
             </div>
+
+            {/* 게임 메인 UI 패널 */}
             <div className="w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[650px]">
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center">
                 <div className="text-4xl font-extrabold mb-1">
@@ -341,12 +532,17 @@
                   +{formatMoney(incomePerSec)}/{t.sec}
                 </div>
               </div>
+
               <div
                 className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50 overflow-hidden"
                 onClick={handleMainClick}
               >
-                <div className="text-8xl hover:scale-110 active:scale-90 transition-transform">
-                  💰
+                <div className="text-[100px] font-bold text-green-600 drop-shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-100">
+                  TAP!
+                </div>
+                <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
+                  {t.tapToEarn} (+{formatMoney(clickPower * multiplier)}/
+                  {t.click})
                 </div>
                 {clicks.map((c) => (
                   <div
@@ -357,14 +553,13 @@
                     +{formatMoney(c.val)}
                   </div>
                 ))}
-                <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
-                  {t.tapToEarn}
-                </div>
               </div>
+
               <div className="bg-gray-50 flex-grow overflow-y-auto p-4 custom-scrollbar">
                 <h2 className="text-xs font-bold mb-3 text-gray-400 uppercase tracking-widest">
                   {t.investments}
                 </h2>
+
                 <button
                   onClick={() => {
                     if (money >= clickUpgradeCost) {
@@ -386,6 +581,7 @@
                     {formatMoney(clickUpgradeCost)}
                   </div>
                 </button>
+
                 {properties.map((p) => {
                   const cost = Math.floor(p.baseCost * Math.pow(1.15, p.count));
                   return (
@@ -420,9 +616,9 @@
           </div>
         );
       }
+
       const root = ReactDOM.createRoot(document.getElementById("root"));
       root.render(<GameApp />);
     </script>
   </body>
 </html>
-"""
