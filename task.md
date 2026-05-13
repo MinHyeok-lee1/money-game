@@ -18,7 +18,7 @@
 - [x] 2-2. 우량주/잡코인 종목 데이터 구성 및 차트 UI 렌더링.
 - [x] 2-3. 매수/매도 로직 구현 및 Global Wallet의 `cash`와 연동.
 
-**Milestone 2C complete:** Investment tab has a basic static asset list, bounded active-tab price updates, Buy 1/Sell 1 actions, portfolio metrics, and lightweight mini charts connected to Global Wallet `cash`.
+**Milestone 2D complete:** Investment tab has a basic static asset list, bounded active-tab price updates, Buy 1/Sell 1 actions, portfolio metrics, lightweight mini charts, average buy price, and unrealized gain/loss connected to Global Wallet `cash`.
 
 ## 🏁 Milestone 3: 뽑기 및 무기 강화 시스템 (Gacha & Enhancement)
 

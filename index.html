@@ -313,6 +313,7 @@
           price: asset.price,
           volatility: asset.volatility,
           owned: 0,
+          avgBuyPrice: asset.price,
           history: [asset.price],
         }));
       }
@@ -366,6 +367,10 @@
 
       function toOwnedQuantity(value) {
         return Math.max(0, Math.floor(toFiniteNumber(value, 0)));
+      }
+
+      function toSafePrice(value, fallbackPrice) {
+        return Math.max(0, toFiniteNumber(value, fallbackPrice));
       }
 
       function normalizePriceHistory(history, fallbackPrice) {
@@ -439,6 +444,10 @@
                 ),
                 volatility: asset.volatility,
                 owned: toOwnedQuantity(savedHolding?.owned),
+                avgBuyPrice: toSafePrice(
+                  savedHolding?.avgBuyPrice,
+                  savedHolding?.price || asset.price,
+                ),
                 history: normalizePriceHistory(
                   savedHolding?.history,
                   savedHolding?.price || asset.price,
@@ -819,14 +828,23 @@
             asset.price,
           );
           const owned = toOwnedQuantity(holding?.owned);
+          const avgBuyPrice = toSafePrice(holding?.avgBuyPrice, price);
           const history = normalizePriceHistory(holding?.history, price);
+          const value = price * owned;
+          const costBasis = avgBuyPrice * owned;
+          const gainLoss = owned > 0 ? value - costBasis : 0;
+          const gainLossPercent =
+            owned > 0 && costBasis > 0 ? (gainLoss / costBasis) * 100 : 0;
           return {
             ...asset,
             ...(holding || {}),
             price,
             owned,
+            avgBuyPrice,
             history,
-            value: price * owned,
+            value,
+            gainLoss,
+            gainLossPercent,
           };
         });
         const totalPortfolioValue = investmentAssets.reduce(
@@ -1042,6 +1060,14 @@
               asset.price * 2,
               asset.price,
             );
+            const currentOwned = toOwnedQuantity(currentHolding?.owned);
+            const currentAvgBuyPrice = toSafePrice(
+              currentHolding?.avgBuyPrice,
+              currentPrice,
+            );
+            const nextOwned = currentOwned + 1;
+            const nextAvgBuyPrice =
+              ((currentAvgBuyPrice * currentOwned) + currentPrice) / nextOwned;
             if (prev.wallet.cash < currentPrice) return prev;
 
             return {
@@ -1057,7 +1083,11 @@
                     ? {
                         ...holding,
                         price: currentPrice,
-                        owned: toOwnedQuantity(holding.owned) + 1,
+                        owned: nextOwned,
+                        avgBuyPrice: toSafePrice(
+                          nextAvgBuyPrice,
+                          currentPrice,
+                        ),
                       }
                     : holding,
                 ),
@@ -1076,6 +1106,7 @@
             );
             const currentOwned = toOwnedQuantity(currentHolding?.owned);
             if (currentOwned <= 0) return prev;
+            const nextOwned = Math.max(0, currentOwned - 1);
 
             const currentPrice = clampNumber(
               currentHolding?.price,
@@ -1097,7 +1128,11 @@
                     ? {
                         ...holding,
                         price: currentPrice,
-                        owned: Math.max(0, currentOwned - 1),
+                        owned: nextOwned,
+                        avgBuyPrice:
+                          nextOwned > 0
+                            ? toSafePrice(holding.avgBuyPrice, currentPrice)
+                            : currentPrice,
                       }
                     : holding,
                 ),
@@ -1377,6 +1412,28 @@
                             </div>
                             <div className="font-black text-gray-800">
                               {formatMoney(asset.value)}
+                            </div>
+                          </div>
+                          <div className="bg-gray-50 rounded-md p-3">
+                            <div className="text-xs font-bold text-gray-400 uppercase">
+                              Avg Buy Price
+                            </div>
+                            <div className="font-black text-gray-800">
+                              {asset.owned > 0
+                                ? formatMoney(asset.avgBuyPrice)
+                                : "-"}
+                            </div>
+                          </div>
+                          <div className="bg-gray-50 rounded-md p-3">
+                            <div className="text-xs font-bold text-gray-400 uppercase">
+                              Gain / Loss
+                            </div>
+                            <div
+                              className={`font-black ${asset.owned <= 0 ? "text-gray-400" : asset.gainLoss >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                            >
+                              {asset.owned > 0
+                                ? `${formatMoney(asset.gainLoss)} (${asset.gainLossPercent.toFixed(1)}%)`
+                                : "-"}
                             </div>
                           </div>
                         </div>
