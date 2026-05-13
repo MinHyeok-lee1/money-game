@@ -324,9 +324,10 @@
       }
 
       const GACHA_RARITIES = [
-        { name: "Normal", weight: 60 },
+        { name: "Normal", weight: 50 },
         { name: "Rare", weight: 25 },
-        { name: "Epic", weight: 10 },
+        { name: "Epic", weight: 12 },
+        { name: "Unique", weight: 8 },
         { name: "Legendary", weight: 4 },
         { name: "Mythic", weight: 1 },
       ];
@@ -389,12 +390,36 @@
           power: 180,
         },
         {
+          id: "district-breaker",
+          characterId: "realty-unique-district-breaker",
+          name: "District Breaker",
+          type: "character",
+          rarity: "Unique",
+          power: 145,
+        },
+        {
+          id: "heavy-hammer",
+          name: "Heavy Hammer",
+          type: "weapon",
+          weaponType: "hammer",
+          rarity: "Unique",
+          power: 160,
+        },
+        {
           id: "mythic-ledger",
           name: "Mythic Ledger",
           type: "weapon",
           weaponType: "ledger",
           rarity: "Mythic",
           power: 420,
+        },
+        {
+          id: "deed-sovereign",
+          characterId: "realty-mythic-deed-sovereign",
+          name: "Deed Sovereign",
+          type: "character",
+          rarity: "Mythic",
+          power: 650,
         },
       ];
 
@@ -1870,6 +1895,31 @@
         return Math.min(1.5, toFiniteNumber(multiplier, 1.25));
       }
 
+      function getCharacterBaseDps(characterInstance) {
+        if (!characterInstance?.characterId) return 0;
+        const gachaItem = GACHA_ITEMS.find(
+          (item) => item.characterId === characterInstance.characterId,
+        );
+        return gachaItem ? toFiniteNumber(gachaItem.power, 0) : 0;
+      }
+
+      function getCharacterLevelDps(characterInstance) {
+        const baseDps = getCharacterBaseDps(characterInstance);
+        const definition = getCharacterDefinition(characterInstance.characterId);
+        if (!definition) return baseDps;
+
+        const rarityBalance = CHARACTER_RARITY_BALANCE[
+          definition.rarity.toLowerCase()
+        ] || {
+          growthRateRange: [1.05, 1.05],
+        };
+        const growthRate = rarityBalance.growthRateRange[0];
+        const level = toFiniteNumber(characterInstance.level, 1);
+
+        const levelMultiplier = Math.pow(growthRate, level - 1);
+        return toFiniteNumber(baseDps * levelMultiplier, baseDps);
+      }
+
       function getFactionSynergyMultiplier(count) {
         const c = Math.max(0, Math.floor(toFiniteNumber(count, 0)));
         if (c >= 4) return 1.25;
@@ -2443,6 +2493,27 @@
           acc[faction] = (acc[faction] || 0) + 1;
           return acc;
         }, {});
+
+        const characterDetailsWithDps = ownedCharacterDetails
+          .map((char) => {
+            const levelDps = getCharacterLevelDps(char);
+            const weaponDps = char.equippedWeapon
+              ? toFiniteNumber(char.equippedWeapon.power, 0)
+              : 0;
+            const factionMult = getFactionSynergyMultiplier(
+              ownedFactionCounts[char.definition.faction] || 0,
+            );
+            const totalDps =
+              (levelDps + weaponDps) * char.synergyMultiplier * factionMult;
+            return { ...char, totalDps };
+          })
+          .sort((a, b) => b.totalDps - a.totalDps);
+
+        const totalTeamDps = characterDetailsWithDps.reduce(
+          (sum, char) => sum + char.totalDps,
+          0,
+        );
+        const top5Characters = characterDetailsWithDps.slice(0, 5);
 
         const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
           (counts, rarity) => {
@@ -3104,6 +3175,7 @@
         const rarityTextClass = (rarity) => {
           if (rarity === "Mythic") return "text-fuchsia-600";
           if (rarity === "Legendary") return "text-amber-600";
+          if (rarity === "Unique") return "text-orange-600";
           if (rarity === "Epic") return "text-purple-600";
           if (rarity === "Rare") return "text-blue-600";
           return "text-gray-600";
@@ -3783,11 +3855,107 @@
                   </div>
                 </section>
               ) : (
-                <section className="w-full bg-white shadow-sm rounded-lg min-h-[420px] flex flex-col items-center justify-center border border-gray-100 text-center p-8">
-                  <h1 className="text-2xl font-black text-gray-800 mb-2">
-                    {comingSoonTitle}
-                  </h1>
-                  <p className="text-gray-500 font-medium">Coming Soon</p>
+                <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-700 to-orange-600 text-white p-5">
+                    <h1 className="text-xl font-black">Battle Preview</h1>
+                    <p className="mt-1 text-xs font-medium text-red-100">
+                      RPG combat foundation. Current team strength and squad
+                      rankings.
+                    </p>
+                    <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-red-100 text-[10px] font-black uppercase">
+                          Total Team DPS
+                        </div>
+                        <div className="text-lg font-black leading-tight">
+                          {totalTeamDps.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-red-100 text-[10px] font-black uppercase">
+                          Owned Chars
+                        </div>
+                        <div className="text-lg font-black leading-tight">
+                          {ownedCharacterDetails.length}
+                        </div>
+                      </div>
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-red-100 text-[10px] font-black uppercase">
+                          Top DPS
+                        </div>
+                        <div className="text-lg font-black leading-tight">
+                          {top5Characters.length > 0
+                            ? Math.floor(
+                                top5Characters[0].totalDps,
+                              ).toLocaleString()
+                            : "0"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 space-y-4">
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                        Top 5 Squad Members
+                      </h2>
+                      {top5Characters.length > 0 ? (
+                        <div className="space-y-2">
+                          {top5Characters.map((char, index) => (
+                            <div
+                              key={char.instanceId}
+                              className="flex items-center justify-between gap-3 bg-gray-50 rounded-md p-3 border-l-4 border-red-500"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="bg-red-100 text-red-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-black">
+                                  {index + 1}
+                                </div>
+                                <div>
+                                  <div className="font-black text-gray-800 text-sm">
+                                    {char.name}
+                                  </div>
+                                  <div
+                                    className={`text-[10px] font-bold uppercase ${rarityTextClass(char.rarityLabel)}`}
+                                  >
+                                    {char.rarityLabel} · Lv {char.level}
+                                  </div>
+                                  <div className="text-[10px] font-bold text-gray-400">
+                                    {char.definition.faction} ·{" "}
+                                    {char.equippedWeapon
+                                      ? char.equippedWeapon.name
+                                      : "No Weapon"}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-[10px] font-bold text-gray-400 uppercase">
+                                  DPS
+                                </div>
+                                <div className="font-black text-red-600">
+                                  {Math.floor(char.totalDps).toLocaleString()}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center font-bold text-gray-400">
+                          No characters in squad
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                        Battle System Notice
+                      </h2>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Active combat and stage progression are currently in
+                        development. DPS values shown here are derived from base
+                        stats, levels, weapon power, and active synergies.
+                      </p>
+                    </div>
+                  </div>
                 </section>
               )}
             </div>

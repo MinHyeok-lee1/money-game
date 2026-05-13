@@ -59,6 +59,8 @@
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.
 
+**Milestone 4A complete:** RPG DPS preview foundation is implemented with non-mutating derived DPS helper functions, Battle Preview UI, synergy multipliers (preferred weapon & faction), and top squad rankings.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.
