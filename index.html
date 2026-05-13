@@ -1985,7 +1985,7 @@
         return 0;
       }
 
-      function getTotalTeamDps(state) {
+      function getTeamBaseAtk(state) {
         if (!state || !state.rpg) return 0;
         const characters = Array.isArray(state.rpg.characters)
           ? state.rpg.characters
@@ -2021,7 +2021,7 @@
           return acc;
         }, {});
 
-        const baseTeamDps = ownedCharacterDetails.reduce((sum, char) => {
+        return ownedCharacterDetails.reduce((sum, char) => {
           const levelDps = getCharacterLevelDps(char);
           const weaponDps = char.equippedWeapon
             ? toFiniteNumber(char.equippedWeapon.power, 0)
@@ -2033,17 +2033,44 @@
             (levelDps + weaponDps) * char.synergyMultiplier * factionMult;
           return sum + totalDps;
         }, 0);
+      }
 
-        const atkMult = getRpgUpgradeEffect(
-          "atkLevel",
-          getRpgUpgradeLevel(state, "atkLevel"),
-        );
-        const spdMult = getRpgUpgradeEffect(
-          "spdLevel",
-          getRpgUpgradeLevel(state, "spdLevel"),
-        );
+      function getRpgCombatStats(state) {
+        const baseAtk = getTeamBaseAtk(state);
+        const atkLevel = getRpgUpgradeLevel(state, "atkLevel");
+        const spdLevel = getRpgUpgradeLevel(state, "spdLevel");
+        const penLevel = getRpgUpgradeLevel(state, "penLevel");
 
-        return baseTeamDps * atkMult * spdMult;
+        const atkMult = getRpgUpgradeEffect("atkLevel", atkLevel);
+        const spdMult = getRpgUpgradeEffect("spdLevel", spdLevel);
+        const penEffect = getRpgUpgradeEffect("penLevel", penLevel);
+
+        // Future-ready derived stats
+        const accBase = 0.95;
+        const crtBase = 0.05;
+
+        // Small bonus for Legendary/Mythic characters
+        const characters = state.rpg?.characters || [];
+        const highTierCount = characters.filter((c) => {
+          const def = getCharacterDefinition(c.characterId);
+          return (
+            def && (def.rarity === "legendary" || def.rarity === "mythic")
+          );
+        }).length;
+        const crtBonus = Math.min(0.1, highTierCount * 0.01);
+
+        return {
+          atk: baseAtk * atkMult,
+          spd: spdMult,
+          pen: penEffect,
+          acc: accBase,
+          crt: crtBase + crtBonus,
+          totalDps: baseAtk * atkMult * spdMult,
+        };
+      }
+
+      function getTotalTeamDps(state) {
+        return getRpgCombatStats(state).totalDps;
       }
 
       function applyCombatTick(state, deltaSeconds) {
@@ -2703,10 +2730,8 @@
           })
           .sort((a, b) => b.totalDps - a.totalDps);
 
-        const totalTeamDps = characterDetailsWithDps.reduce(
-          (sum, char) => sum + char.totalDps,
-          0,
-        );
+        const combatStats = getRpgCombatStats(gameState);
+        const totalTeamDps = combatStats.totalDps;
         const top5Characters = characterDetailsWithDps.slice(0, 5);
 
         const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
@@ -4174,6 +4199,38 @@
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-4">
+                    <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+                      <div className="bg-gray-100 px-3 py-2 border-b border-gray-200">
+                        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                          Battle Stat Preview
+                        </h2>
+                      </div>
+                      <div className="p-3 grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 p-2 rounded border border-gray-100">
+                          <div className="text-[9px] font-black text-gray-400 uppercase">Team ATK</div>
+                          <div className="text-sm font-black text-gray-800">{formatDps(combatStats.atk)}</div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded border border-gray-100">
+                          <div className="text-[9px] font-black text-gray-400 uppercase">Combat Freq (SPD)</div>
+                          <div className="text-sm font-black text-blue-600">x{combatStats.spd.toFixed(2)}</div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded border border-gray-100">
+                          <div className="text-[9px] font-black text-gray-400 uppercase">Penetration</div>
+                          <div className="text-sm font-black text-orange-600">{(combatStats.pen * 100).toFixed(1)}%</div>
+                          <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">Preview</div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded border border-gray-100">
+                          <div className="text-[9px] font-black text-gray-400 uppercase">Accuracy</div>
+                          <div className="text-sm font-black text-emerald-600">{(combatStats.acc * 100).toFixed(0)}%</div>
+                          <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">Preview</div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded border border-gray-100 col-span-2">
+                          <div className="text-[9px] font-black text-gray-400 uppercase">Critical Chance</div>
+                          <div className="text-sm font-black text-red-600">{(combatStats.crt * 100).toFixed(1)}%</div>
+                          <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">Preview (Includes Rarity Bonus)</div>
+                        </div>
+                      </div>
+                    </div>
                     <section className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                       <div className="bg-gray-800 text-white p-3 flex justify-between items-center">
                         <h2 className="text-xs font-black uppercase tracking-widest">
