@@ -1653,6 +1653,8 @@
             monsterMaxHp: 100,
             defeatedMonsters: 0,
             stageKills: 0,
+            dividends: 0,
+            lastRpgReward: 0,
           },
           settings: {
             language,
@@ -1955,6 +1957,11 @@
         return Math.floor(100 * Math.pow(1.3, s - 1));
       }
 
+      function getMonsterDefeatReward(stage) {
+        const s = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        return Math.floor(10 * Math.pow(s, 1.15));
+      }
+
       function getTotalTeamDps(state) {
         if (!state || !state.rpg) return 0;
         const characters = Array.isArray(state.rpg.characters)
@@ -2034,6 +2041,7 @@
           }
 
           const maxHp = getMonsterMaxHp(nextStage);
+          const reward = getMonsterDefeatReward(currentStage);
 
           return {
             ...state,
@@ -2045,6 +2053,8 @@
               monsterHp: maxHp,
               monsterMaxHp: maxHp,
               defeatedMonsters: nextDefeated,
+              dividends: toFiniteNumber(state.rpg.dividends, 0) + reward,
+              lastRpgReward: reward,
             },
           };
         }
@@ -2207,6 +2217,8 @@
               Math.floor(toFiniteNumber(rpg.defeatedMonsters, 0)),
             ),
             stageKills: Math.max(0, Math.floor(toFiniteNumber(rpg.stageKills, 0))),
+            dividends: Math.max(0, toFiniteNumber(rpg.dividends, 0)),
+            lastRpgReward: Math.max(0, toFiniteNumber(rpg.lastRpgReward, 0)),
           },
           settings: {
             ...defaults.settings,
@@ -4036,6 +4048,25 @@
                       </div>
                     </div>
 
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-red-100 text-[10px] font-black uppercase">
+                          RPG Dividends
+                        </div>
+                        <div className="text-lg font-black leading-tight text-yellow-400">
+                          {formatDps(gameState.rpg?.dividends || 0)}
+                        </div>
+                      </div>
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-red-100 text-[10px] font-black uppercase">
+                          Last Reward
+                        </div>
+                        <div className="text-lg font-black leading-tight">
+                          +{formatDps(gameState.rpg?.lastRpgReward || 0)}
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="mt-4 bg-black/40 rounded-lg p-4 border border-red-900/30">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-[10px] font-black text-red-200 uppercase tracking-widest">
@@ -4072,8 +4103,8 @@
                     </div>
 
                     <div className="mt-2 px-1 flex justify-between items-center text-[10px] font-bold text-red-300/40 uppercase">
+                      <span>Est. Reward: {formatDps(getMonsterDefeatReward(gameState.rpg?.currentStage || 1))}</span>
                       <span>Highest Stage: {gameState.rpg?.highestStage || 1}</span>
-                      <span>Team Ready for Combat</span>
                     </div>
                   </div>
 
