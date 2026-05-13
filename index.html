@@ -770,7 +770,7 @@
         );
         const [clicks, setClicks] = useState([]);
 
-        const cash = gameState.wallet.cash;
+        const cash = Math.max(0, toFiniteNumber(gameState.wallet.cash, 0));
         const landlord = gameState.landlord;
         const investmentHoldings = gameState.investment.holdings;
         const clickPower = landlord.clickPower;
@@ -810,10 +810,11 @@
             value: price * owned,
           };
         });
-        const investmentValue = investmentAssets.reduce(
-          (total, asset) => total + asset.value,
+        const totalPortfolioValue = investmentAssets.reduce(
+          (total, asset) => total + toFiniteNumber(asset.value, 0),
           0,
         );
+        const totalNetWorth = cash + totalPortfolioValue;
 
         const updateGameState = (updater) => {
           setGameState((prev) => {
@@ -1244,7 +1245,7 @@
                 <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
                   <div className="bg-gradient-to-r from-slate-800 to-teal-700 text-white p-5">
                     <h1 className="text-xl font-black">Investment Master</h1>
-                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                       <div>
                         <div className="text-teal-100 text-xs font-bold uppercase">
                           Wallet Cash
@@ -1255,10 +1256,18 @@
                       </div>
                       <div>
                         <div className="text-teal-100 text-xs font-bold uppercase">
-                          Holdings Value
+                          Portfolio Value
                         </div>
                         <div className="text-lg font-black">
-                          {formatMoney(investmentValue)}
+                          {formatMoney(totalPortfolioValue)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-teal-100 text-xs font-bold uppercase">
+                          Net Worth
+                        </div>
+                        <div className="text-lg font-black">
+                          {formatMoney(totalNetWorth)}
                         </div>
                       </div>
                     </div>
@@ -1281,7 +1290,7 @@
                           </div>
                           <div className="text-right">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Price
+                              Current Price
                             </div>
                             <div className="font-black text-teal-700">
                               {formatMoney(asset.price)}
@@ -1292,7 +1301,7 @@
                         <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
                           <div className="bg-gray-50 rounded-md p-3">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Owned
+                              Owned Quantity
                             </div>
                             <div className="font-black text-gray-800">
                               {asset.owned}
@@ -1300,7 +1309,7 @@
                           </div>
                           <div className="bg-gray-50 rounded-md p-3">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Value
+                              Holding Value
                             </div>
                             <div className="font-black text-gray-800">
                               {formatMoney(asset.value)}
