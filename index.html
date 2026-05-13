@@ -396,6 +396,33 @@
         return { asset, odds, payout, tier, stake, projectedWin };
       }
 
+      // Derived-only simulated outcome — deterministic preview, no random settlement
+      function getDefenseContractSimulatedOutcome(betSlip, assetList, highestStage, squadDps) {
+        const contractId = betSlip?.selectedContractId;
+        if (!contractId) return null;
+        const asset = (assetList || []).find((a) => a.id === contractId);
+        if (!asset) return null;
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        const odds = getDefenseContractOdds(asset, stage);
+        const payout = getDefenseContractProjectedPayout(asset, stage, dps);
+        const stake = Math.max(0, toFiniteNumber(betSlip?.stake, 0));
+        const vol = toFiniteNumber(asset.volatility, 0.05);
+        const outcomeLabel = odds >= 60 ? "Favorable" : odds >= 45 ? "Neutral" : "Unfavorable";
+        const successChance = odds;
+        const projectedGain = toFiniteNumber(stake * (payout - 1), 0);
+        const projectedLoss = stake;
+        let confidenceLevel;
+        if (vol <= 0.03 && stage >= 30) confidenceLevel = "High";
+        else if (vol <= 0.07 || stage >= 15) confidenceLevel = "Medium";
+        else confidenceLevel = "Low";
+        const stageSupportLabel = stage >= 50 ? "strongly supports" : stage >= 20 ? "partially supports" : "weakly supports";
+        const dpsSignal = dps > 0 ? "signal active" : "signal inactive";
+        const contractDisplayName = DEFENSE_CONTRACT_FLAVOR[asset.id]?.displayName || asset.name;
+        const explanation = `${contractDisplayName} shows a ${successChance}% defense success rate. Stage ${stage} progress ${stageSupportLabel} this contract. Squad DPS ${dpsSignal}.`;
+        return { selectedContractId: contractId, outcomeLabel, successChance, projectedGain, projectedLoss, confidenceLevel, explanation };
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -2856,6 +2883,12 @@
           gameState.rpg?.highestStage || 0,
           totalTeamDps,
         );
+        const simulatedOutcome = getDefenseContractSimulatedOutcome(
+          gameState.investment.betSlip,
+          investmentAssets,
+          gameState.rpg?.highestStage || 0,
+          totalTeamDps,
+        );
 
         const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
           (counts, rarity) => {
@@ -3966,12 +3999,49 @@
                           </div>
                         </div>
 
-                        {/* Settlement locked button */}
+                        {/* Settlement Preview panel */}
+                        {simulatedOutcome && (
+                          <div className="border border-emerald-100 rounded-md bg-emerald-50 p-3 space-y-2">
+                            <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">Settlement Preview</div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-white border border-gray-100 rounded p-2">
+                                <div className="text-[9px] font-black text-gray-400 uppercase">Success Chance</div>
+                                <div className="text-sm font-black text-emerald-700">{simulatedOutcome.successChance}%</div>
+                              </div>
+                              <div className="bg-white border border-gray-100 rounded p-2">
+                                <div className="text-[9px] font-black text-gray-400 uppercase">Outcome</div>
+                                <div className={`text-sm font-black ${simulatedOutcome.outcomeLabel === "Favorable" ? "text-emerald-700" : simulatedOutcome.outcomeLabel === "Neutral" ? "text-yellow-600" : "text-red-500"}`}>
+                                  {simulatedOutcome.outcomeLabel}
+                                </div>
+                              </div>
+                              <div className="bg-white border border-gray-100 rounded p-2">
+                                <div className="text-[9px] font-black text-gray-400 uppercase">Projected Gain</div>
+                                <div className="text-sm font-black text-emerald-700">+{formatMoney(simulatedOutcome.projectedGain)}</div>
+                              </div>
+                              <div className="bg-white border border-gray-100 rounded p-2">
+                                <div className="text-[9px] font-black text-gray-400 uppercase">Projected Loss</div>
+                                <div className="text-sm font-black text-red-500">-{formatMoney(simulatedOutcome.projectedLoss)}</div>
+                              </div>
+                            </div>
+                            <div className="bg-white border border-gray-100 rounded p-2">
+                              <div className="text-[9px] font-black text-gray-400 uppercase mb-1">Confidence</div>
+                              <div className={`text-xs font-black ${simulatedOutcome.confidenceLevel === "High" ? "text-emerald-700" : simulatedOutcome.confidenceLevel === "Medium" ? "text-yellow-600" : "text-gray-500"}`}>
+                                {simulatedOutcome.confidenceLevel}
+                              </div>
+                            </div>
+                            <div className="bg-white border border-gray-100 rounded p-2">
+                              <div className="text-[9px] font-black text-gray-400 uppercase mb-1">Signal Analysis</div>
+                              <div className="text-[10px] text-gray-600 leading-relaxed">{simulatedOutcome.explanation}</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Real settlement locked */}
                         <button
                           disabled
                           className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
                         >
-                          Settlement Coming Soon — Hero's Fate Not Active
+                          Real Settlement Locked — Hero's Fate Not Active
                         </button>
                       </div>
                     ) : (
@@ -3982,6 +4052,12 @@
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  {/* Settlement History placeholder */}
+                  <div className="mx-4 mb-3 border border-dashed border-gray-200 rounded-md p-3 text-center">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Settlement History</div>
+                    <div className="text-[10px] text-gray-400 mt-1">Coming Soon — past bet results will appear here</div>
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-3">
