@@ -284,6 +284,8 @@
       const GACHA_DRAW_COST = 1000;
       const GACHA_RECENT_PULL_LIMIT = 10;
       const MAX_ENHANCE_LEVEL = 10;
+      const MAX_CHARACTER_LEVEL = 999;
+      const MAX_CHARACTER_STARS = 10;
       const INVESTMENT_ASSETS = [
         {
           id: "blue-chip-stock",
@@ -1689,6 +1691,81 @@
         });
       }
 
+      function getCharacterDefinition(characterId) {
+        return CHARACTER_DEFINITIONS.find(
+          (character) => character.id === characterId,
+        );
+      }
+
+      function createCharacterInstance(characterId) {
+        const definition = getCharacterDefinition(characterId);
+        if (!definition) return null;
+
+        return {
+          instanceId: `${definition.id}-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 8)}`,
+          characterId: definition.id,
+          level: 1,
+          stars: 0,
+          equippedWeaponInstanceId: null,
+        };
+      }
+
+      function normalizeOwnedCharacter(character, fallbackIndex = 0) {
+        const definition = getCharacterDefinition(character?.characterId);
+        if (!definition) return null;
+
+        const equippedWeaponInstanceId =
+          typeof character.equippedWeaponInstanceId === "string" &&
+          character.equippedWeaponInstanceId.length > 0
+            ? character.equippedWeaponInstanceId
+            : null;
+
+        return {
+          instanceId:
+            typeof character.instanceId === "string" &&
+            character.instanceId.length > 0
+              ? character.instanceId
+              : `${definition.id}-owned-${fallbackIndex}`,
+          characterId: definition.id,
+          level: clampNumber(
+            Math.floor(toFiniteNumber(character.level, 1)),
+            1,
+            MAX_CHARACTER_LEVEL,
+            1,
+          ),
+          stars: clampNumber(
+            Math.floor(toFiniteNumber(character.stars, 0)),
+            0,
+            MAX_CHARACTER_STARS,
+            0,
+          ),
+          equippedWeaponInstanceId,
+        };
+      }
+
+      function ensureUniqueCharacterInstanceIds(characters) {
+        const seen = new Set();
+
+        return characters.map((character, index) => {
+          const baseInstanceId =
+            typeof character.instanceId === "string" &&
+            character.instanceId.length > 0
+              ? character.instanceId
+              : `${character.characterId}-owned-${index}`;
+          const instanceId = seen.has(baseInstanceId)
+            ? `${baseInstanceId}-${index}`
+            : baseInstanceId;
+          seen.add(instanceId);
+
+          return {
+            ...character,
+            instanceId,
+          };
+        });
+      }
+
       function normalizeGameState(state, language = "en") {
         const defaults = createDefaultGameState(language);
         const landlord = state?.landlord || {};
@@ -1710,6 +1787,17 @@
         );
         const normalizedRecentPulls = ensureUniqueGachaInstanceIds(
           normalizeRecentPulls(enhancement.recentPulls),
+        );
+        const rpg = state?.rpg || {};
+        const savedCharacters = Array.isArray(rpg.characters)
+          ? rpg.characters
+          : [];
+        const normalizedCharacters = ensureUniqueCharacterInstanceIds(
+          savedCharacters
+            .map((character, index) =>
+              normalizeOwnedCharacter(character, index),
+            )
+            .filter(Boolean),
         );
 
         return {
@@ -1807,11 +1895,9 @@
           },
           rpg: {
             ...defaults.rpg,
-            ...(state?.rpg || {}),
-            characters: Array.isArray(state?.rpg?.characters)
-              ? state.rpg.characters
-              : [],
-            highestStage: toFiniteNumber(state?.rpg?.highestStage, 0),
+            ...rpg,
+            characters: normalizedCharacters,
+            highestStage: Math.max(0, toFiniteNumber(rpg.highestStage, 0)),
           },
           settings: {
             ...defaults.settings,
