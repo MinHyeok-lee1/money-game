@@ -455,6 +455,54 @@
         return gameState?.investment?.contractSettlementUnlocked === true;
       }
 
+      // Pure validation helper — no mutation, returns structured canSettle result
+      function validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps) {
+        const investment = gameState?.investment;
+        const cash = toFiniteNumber(gameState?.wallet?.cash, 0);
+        const contractId = investment?.betSlip?.selectedContractId || null;
+        const stake = Math.max(0, toFiniteNumber(investment?.betSlip?.stake, 0));
+
+        const base = { selectedContractId: contractId, stake, odds: null, projectedPayout: null };
+
+        if (!isDefenseContractSettlementUnlocked(gameState)) {
+          return { ...base, canSettle: false, reason: "Settlement is locked. Hero's Fate mechanics are not yet enabled.",
+            checks: { settlementUnlocked: false, contractSelected: false, stakePositive: false, stakeWithinCash: false, oddsValid: false, payoutValid: false } };
+        }
+
+        const asset = (assetList || []).find((a) => a.id === contractId);
+        if (!contractId || !asset) {
+          return { ...base, canSettle: false, reason: "No valid contract is selected.",
+            checks: { settlementUnlocked: true, contractSelected: false, stakePositive: false, stakeWithinCash: false, oddsValid: false, payoutValid: false } };
+        }
+
+        if (stake <= 0) {
+          return { ...base, canSettle: false, reason: "Stake must be greater than 0.",
+            checks: { settlementUnlocked: true, contractSelected: true, stakePositive: false, stakeWithinCash: false, oddsValid: false, payoutValid: false } };
+        }
+
+        if (stake > cash) {
+          return { ...base, canSettle: false, reason: "Stake exceeds available War Chest balance.",
+            checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: false, oddsValid: false, payoutValid: false } };
+        }
+
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        const odds = getDefenseContractOdds(asset, stage);
+        if (!isFinite(odds) || odds <= 0) {
+          return { ...base, odds, canSettle: false, reason: "Contract odds are invalid.",
+            checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: true, oddsValid: false, payoutValid: false } };
+        }
+
+        const projectedPayout = getDefenseContractProjectedPayout(asset, stage, dps);
+        if (!isFinite(projectedPayout) || projectedPayout <= 0) {
+          return { ...base, odds, projectedPayout, canSettle: false, reason: "Projected payout is invalid.",
+            checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: true, oddsValid: true, payoutValid: false } };
+        }
+
+        return { canSettle: true, reason: "All conditions met. Ready to settle.", selectedContractId: contractId, stake, odds, projectedPayout,
+          checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: true, oddsValid: true, payoutValid: true } };
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -2942,6 +2990,12 @@
           gameState.rpg?.highestStage || 0,
           totalTeamDps,
         );
+        const settlementValidation = validateDefenseContractSettlement(
+          gameState,
+          investmentAssets,
+          gameState.rpg?.highestStage || 0,
+          totalTeamDps,
+        );
 
         const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
           (counts, rarity) => {
@@ -4125,30 +4179,45 @@
                           Save Preview to History
                         </button>
 
-                        {/* Settlement gate status */}
+                        {/* Settlement gate status + validation breakdown */}
                         {(() => {
-                          const unlocked = isDefenseContractSettlementUnlocked(gameState);
+                          const v = settlementValidation;
+                          const checks = v.checks;
+                          const checkRows = [
+                            { label: "Settlement Unlocked", pass: checks.settlementUnlocked },
+                            { label: "Contract Selected",   pass: checks.contractSelected },
+                            { label: "Stake > 0",           pass: checks.stakePositive },
+                            { label: "Stake ≤ Balance",     pass: checks.stakeWithinCash },
+                            { label: "Odds Valid",          pass: checks.oddsValid },
+                            { label: "Payout Valid",        pass: checks.payoutValid },
+                          ];
                           return (
                             <div className="border border-gray-200 rounded-md overflow-hidden">
                               <div className="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
                                 <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Settlement Status</div>
-                                <div className={`text-[9px] font-black uppercase ${unlocked ? "text-emerald-600" : "text-gray-400"}`}>
-                                  {unlocked ? "Unlocked" : "Locked"}
+                                <div className={`text-[9px] font-black uppercase ${v.canSettle ? "text-emerald-600" : "text-gray-400"}`}>
+                                  {v.canSettle ? "Ready" : "Locked"}
                                 </div>
                               </div>
-                              <div className="px-3 py-2">
-                                <div className="text-[10px] text-gray-500 leading-relaxed">
-                                  {unlocked
-                                    ? "Hero's Fate mechanics are active. Real settlement is available."
-                                    : "Real settlement is locked until Hero's Fate mechanics are enabled."}
+                              <div className="px-3 pt-2 pb-1">
+                                <div className="text-[10px] text-gray-500 leading-relaxed mb-2">{v.reason}</div>
+                                <div className="space-y-1">
+                                  {checkRows.map((row) => (
+                                    <div key={row.label} className="flex items-center justify-between">
+                                      <span className="text-[9px] text-gray-500">{row.label}</span>
+                                      <span className={`text-[9px] font-black ${row.pass ? "text-emerald-600" : "text-gray-300"}`}>
+                                        {row.pass ? "✓" : "✗"}
+                                      </span>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
-                              <div className="px-3 pb-3">
+                              <div className="px-3 pb-3 pt-2">
                                 <button
                                   disabled
                                   className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
                                 >
-                                  {unlocked ? "Settle Contract" : "Real Settlement Locked"}
+                                  {v.canSettle ? "Settle Contract" : "Real Settlement Locked"}
                                 </button>
                               </div>
                             </div>
