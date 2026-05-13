@@ -503,6 +503,41 @@
           checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: true, oddsValid: true, payoutValid: true } };
       }
 
+      // Pure helper — deterministic dry-run, no Math.random for outcome, no cash mutation
+      function createDefenseContractDryRunResult(gameState, assetList, highestStage, squadDps) {
+        const validation = validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps);
+        if (!validation.canSettle) return null;
+        const { selectedContractId: contractId, stake, odds, projectedPayout } = validation;
+        const asset = (assetList || []).find((a) => a.id === contractId);
+        if (!asset) return null;
+        const successChance = toFiniteNumber(odds, 0);
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        // Deterministic win signal using contract odds + stage progress + DPS signal
+        const stageSignal = Math.min(10, Math.round((stage / NORMAL_ENDING_STAGE) * 10));
+        const dpsSignal = dps > 0 ? 3 : 0;
+        const winScore = successChance + stageSignal + dpsSignal;
+        const wouldWin = winScore >= 60;
+        const safePayout = Math.max(1, toFiniteNumber(projectedPayout, 1));
+        const safeStake = Math.max(0, toFiniteNumber(stake, 0));
+        const netPreview = wouldWin
+          ? toFiniteNumber(safeStake * (safePayout - 1), 0)
+          : -safeStake;
+        return {
+          id: `dryrun-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+          contractId,
+          contractName: DEFENSE_CONTRACT_FLAVOR[contractId]?.displayName || asset.name,
+          stake: safeStake,
+          odds,
+          projectedPayout: safePayout,
+          successChance,
+          wouldWin,
+          netPreview,
+          createdAt: Date.now(),
+          status: "dry-run",
+        };
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -1833,6 +1868,7 @@
             betSlip: { selectedContractId: null, stake: 0 },
             contractHistory: [],
             contractSettlementUnlocked: false,
+            lastContractDryRun: null,
           },
           enhancement: {
             inventory: [],
@@ -2469,6 +2505,24 @@
               : [],
             contractSettlementUnlocked:
               investment.contractSettlementUnlocked === true ? true : false,
+            lastContractDryRun: (() => {
+              const d = investment.lastContractDryRun;
+              if (!d || typeof d !== "object") return null;
+              if (
+                typeof d.id !== "string" ||
+                typeof d.contractId !== "string" ||
+                typeof d.contractName !== "string" ||
+                typeof d.stake !== "number" ||
+                typeof d.odds !== "number" ||
+                typeof d.projectedPayout !== "number" ||
+                typeof d.successChance !== "number" ||
+                typeof d.wouldWin !== "boolean" ||
+                typeof d.netPreview !== "number" ||
+                typeof d.createdAt !== "number" ||
+                d.status !== "dry-run"
+              ) return null;
+              return d;
+            })(),
           },
           enhancement: {
             ...defaults.enhancement,
@@ -3500,6 +3554,25 @@
           }));
         };
 
+        const runDefenseContractDryRun = () => {
+          setGameState((prev) => {
+            const result = createDefenseContractDryRunResult(
+              prev,
+              investmentAssets,
+              prev.rpg?.highestStage || 0,
+              totalTeamDps,
+            );
+            if (!result) return prev;
+            return {
+              ...prev,
+              investment: {
+                ...prev.investment,
+                lastContractDryRun: result,
+              },
+            };
+          });
+        };
+
         const pickGachaRarity = () => {
           const totalWeight = GACHA_RARITIES.reduce(
             (total, rarity) => total + rarity.weight,
@@ -4242,13 +4315,69 @@
                                   ))}
                                 </div>
                               </div>
-                              <div className="px-3 pb-3 pt-2">
+                              <div className="px-3 pt-2 pb-1">
+                                <button
+                                  onClick={runDefenseContractDryRun}
+                                  disabled={!v.canSettle}
+                                  className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
+                                    v.canSettle
+                                      ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                                      : "bg-gray-100 text-gray-300 cursor-not-allowed"
+                                  }`}
+                                >
+                                  Run Dry-Run Simulation
+                                </button>
+                              </div>
+                              <div className="px-3 pb-3">
                                 <button
                                   disabled
                                   className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
                                 >
                                   {v.canSettle ? "Settle Contract" : "Real Settlement Locked"}
                                 </button>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Dry-run result panel */}
+                        {gameState.investment.lastContractDryRun && (() => {
+                          const dr = gameState.investment.lastContractDryRun;
+                          const ts = new Date(toFiniteNumber(dr.createdAt, Date.now())).toLocaleTimeString();
+                          return (
+                            <div className="border border-blue-200 rounded-md overflow-hidden">
+                              <div className="bg-blue-50 px-3 py-2 flex items-center justify-between border-b border-blue-200">
+                                <div className="text-[9px] font-black text-blue-700 uppercase tracking-wider">Dry-Run Result</div>
+                                <div className="text-[9px] text-blue-500">{ts}</div>
+                              </div>
+                              <div className="px-3 py-2 space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] text-gray-500">Contract</span>
+                                  <span className="text-[9px] font-black text-gray-700 truncate max-w-[55%] text-right">{dr.contractName}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] text-gray-500">Outcome</span>
+                                  <span className={`text-[9px] font-black uppercase ${dr.wouldWin ? "text-emerald-600" : "text-red-500"}`}>
+                                    {dr.wouldWin ? "Would Win" : "Would Lose"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] text-gray-500">Success Chance</span>
+                                  <span className="text-[9px] font-black text-gray-700">{toFiniteNumber(dr.successChance, 0)}%</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] text-gray-500">Projected Payout</span>
+                                  <span className="text-[9px] font-black text-gray-700">×{toFiniteNumber(dr.projectedPayout, 1).toFixed(2)}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] text-gray-500">Net Preview</span>
+                                  <span className={`text-[9px] font-black ${toFiniteNumber(dr.netPreview, 0) >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                                    {toFiniteNumber(dr.netPreview, 0) >= 0 ? "+" : ""}{formatMoney(toFiniteNumber(dr.netPreview, 0))}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="px-3 pb-2">
+                                <div className="text-[9px] text-blue-500 italic">Dry-run only — no cash moved.</div>
                               </div>
                             </div>
                           );
