@@ -54,3 +54,8 @@
 - Preferred weapon synergy foundation: x1.25 multiplier (capped) for matching character preference.
 - Faction synergy foundation: multiplier previews for owning multiple characters of the same faction.
 - Enhancement and Draw logic use shared wallet `cash`.
+
+### Milestone 4 (In Progress)
+
+- RPG Master Blueprint adopted (`RPG_MASTER_BLUEPRINT.md`) covering "Sponsor to God" progression.
+- Basic idle combat engine with monster HP scaling and stage progression is implemented.

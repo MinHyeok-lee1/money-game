@@ -31,8 +31,15 @@
 - [x] Inventory and equipment data model.
 - [x] Faction and weapon synergy data foundation.
 
-## Phase 4: Idle RPG
+## Phase 4: Idle RPG (RPG Master Blueprint adopted)
 
+- [ ] **Dividends Economy**: Implement the first RPG-specific currency for early-game stat upgrades.
+- [ ] **Combat Stat Model**: Add logic for ATK, ACC, CRT, SPD, and PEN stats.
+- [ ] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power.
+- [ ] **Dorothy UI & Event**: Create the "Dorothy Proposal" script and interaction flow.
+- [ ] **52-Character Detailed Data Sheet**: Define granular stats for the complete character roster.
+- [ ] **Mythic Authority Triggers**: Implement endgame characters with reality-warping authority skills.
+- [ ] **Character Storylines**: Add lore integration for characters and factions.
 - [ ] Character collection and party setup.
 - [ ] Auto-battle and endless stage progression.
 - [ ] Boss rewards that connect back into the shared economy.

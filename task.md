@@ -67,6 +67,10 @@
 
 **Milestone 4C complete:** Basic stage progression foundation implemented. Stage advances every 5 kills, with monster HP scaling and highest stage tracking integrated into the live combat UI.
 
+**RPG Master Blueprint adopted:** Integrated long-term vision document (`RPG_MASTER_BLUEPRINT.md`) covering the "Sponsor to God" progression, external capital leverage, and Dorothy proposal system.
+
+**Next - Milestone 4D (Planned):** Introduce `Dividends` as the first RPG-specific defeat reward foundation to enable early-game stat upgrades.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.
