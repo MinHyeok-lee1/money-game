@@ -18,9 +18,11 @@
 
 ## Phase 2: Investment Master
 
-- [ ] Market price simulation with volatility.
-- [ ] Stock/coin asset data and chart UI.
-- [ ] Buy/sell logic connected to Global Wallet `cash`.
+- [x] Market price simulation with bounded active-tab-only volatility.
+- [x] Stock/coin asset data with lightweight SVG sparkline charts.
+- [x] Buy/sell logic connected to Global Wallet `cash`.
+- [x] Portfolio value, net worth, average buy price, and unrealized gain/loss.
+- [x] Buy Max and Sell All trading controls.
 
 ## Phase 3: Gacha & Enhancement
 

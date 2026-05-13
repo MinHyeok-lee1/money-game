@@ -10,8 +10,8 @@
 1. **🏢 Idle Landlord (건물주 키우기 - Current)**
    - 클릭 및 10단계 부동산 투자를 통한 안정적인 기초 자본(Cash) 생산.
    - 환생(Rebirth)을 통한 영구적인 수익 배수(Multiplier) 획득.
-2. **📈 Investment Master (투자 고수되기 - Planned)**
-   - 실시간 변동성 엔진 기반의 주식/코인 매매 시스템.
+2. **📈 Investment Master (투자 고수되기 - Current)**
+   - Static assets, bounded active-tab price updates, Buy/Sell controls, portfolio metrics, and lightweight sparklines.
 3. **🗡️ Gacha & Enhancement (캐릭터 뽑기 및 강화 - Planned)**
    - 등급별 캐릭터 뽑기와 무기 강화 시스템, 전용 무기 시너지 로직.
 4. **🌲 Idle RPG (방치형 RPG - Planned)**
@@ -31,8 +31,14 @@
 
 ### Milestone 1 Completion
 
-- Current playable module: Idle Landlord.
-- Planned modules: Investment, Enhancement, and RPG are visible as Coming Soon tabs.
+- Current playable modules: Idle Landlord and Investment Master.
+- Planned modules: Enhancement and RPG are visible as Coming Soon tabs.
 - Global Wallet is now the shared state foundation.
 - Canonical localStorage key: `moneyGameUniverseStateV1`.
 - Legacy `idleLandlordSaveV4` saves are migrated into the canonical state and removed.
+
+### Milestone 2 Completion
+
+- Investment data is stored under the shared Global Game State.
+- Investment trading uses shared wallet `cash`.
+- Investment Master includes static assets, bounded price history, SVG sparklines, Buy 1/Sell 1, Buy Max/Sell All, portfolio value, net worth, average buy price, and unrealized gain/loss.
