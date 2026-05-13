@@ -380,6 +380,22 @@
         return Math.max(1.05, Math.min(2.5, raw));
       }
 
+      // Derived-only bet slip preview — no state mutation, no settlement
+      function getDefenseContractBetPreview(betSlip, assetList, highestStage, squadDps) {
+        const contractId = betSlip?.selectedContractId;
+        if (!contractId) return null;
+        const asset = (assetList || []).find((a) => a.id === contractId);
+        if (!asset) return null;
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        const odds = getDefenseContractOdds(asset, stage);
+        const payout = getDefenseContractProjectedPayout(asset, stage, dps);
+        const tier = getDefenseContractRiskTier(asset);
+        const stake = Math.max(0, toFiniteNumber(betSlip?.stake, 0));
+        const projectedWin = toFiniteNumber(stake * payout, 0);
+        return { asset, odds, payout, tier, stake, projectedWin };
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -1707,6 +1723,7 @@
           },
           investment: {
             holdings: createDefaultInvestmentHoldings(),
+            betSlip: { selectedContractId: null, stake: 0 },
           },
           enhancement: {
             inventory: [],
@@ -2317,6 +2334,13 @@
                 ),
               };
             }),
+            betSlip: {
+              selectedContractId:
+                typeof investment.betSlip?.selectedContractId === "string"
+                  ? investment.betSlip.selectedContractId
+                  : null,
+              stake: Math.max(0, toFiniteNumber(investment.betSlip?.stake, 0)),
+            },
           },
           enhancement: {
             ...defaults.enhancement,
@@ -2826,6 +2850,12 @@
         const combatStats = getRpgCombatStats(gameState);
         const totalTeamDps = combatStats.totalDps;
         const top5Characters = characterDetailsWithDps.slice(0, 5);
+        const betPreview = getDefenseContractBetPreview(
+          gameState.investment.betSlip,
+          investmentAssets,
+          gameState.rpg?.highestStage || 0,
+          totalTeamDps,
+        );
 
         const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
           (counts, rarity) => {
@@ -3251,6 +3281,50 @@
               },
             };
           });
+        };
+
+        const selectDefenseContract = (contractId) => {
+          setGameState((prev) => ({
+            ...prev,
+            investment: {
+              ...prev.investment,
+              betSlip: {
+                ...prev.investment.betSlip,
+                selectedContractId:
+                  contractId === prev.investment.betSlip?.selectedContractId
+                    ? null
+                    : contractId,
+              },
+            },
+          }));
+        };
+
+        const updateDefenseContractStake = (rawValue) => {
+          setGameState((prev) => {
+            const maxStake = Math.max(0, toFiniteNumber(prev.wallet.cash, 0));
+            const parsed = toFiniteNumber(Number(rawValue), 0);
+            const clamped = Math.min(maxStake, Math.max(0, parsed));
+            return {
+              ...prev,
+              investment: {
+                ...prev.investment,
+                betSlip: {
+                  ...prev.investment.betSlip,
+                  stake: clamped,
+                },
+              },
+            };
+          });
+        };
+
+        const clearDefenseContractBetSlip = () => {
+          setGameState((prev) => ({
+            ...prev,
+            investment: {
+              ...prev.investment,
+              betSlip: { selectedContractId: null, stake: 0 },
+            },
+          }));
         };
 
         const pickGachaRarity = () => {
@@ -3810,6 +3884,106 @@
                     </div>
                   </div>
 
+                  {/* Bet Slip panel */}
+                  <div className="bg-white border-b border-gray-100 px-4 py-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Bet Slip
+                      </div>
+                      {betPreview && (
+                        <button
+                          onClick={clearDefenseContractBetSlip}
+                          className="text-[9px] font-black text-gray-400 uppercase hover:text-red-500 transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    {betPreview ? (
+                      <div className="space-y-3">
+                        {/* Selected contract summary */}
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-md p-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-black text-gray-800 text-sm">
+                                {DEFENSE_CONTRACT_FLAVOR[betPreview.asset.id]?.displayName || betPreview.asset.name}
+                              </div>
+                              <div className={`text-[10px] font-black uppercase mt-0.5 ${betPreview.tier.color}`}>
+                                {betPreview.tier.label} · {betPreview.odds}% Defense Odds
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-[9px] font-bold text-gray-400 uppercase">Payout Rate</div>
+                              <div className="text-sm font-black text-emerald-700">x{betPreview.payout.toFixed(2)}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Stake input */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="text-[9px] font-black text-gray-400 uppercase">Stake Amount</div>
+                            <div className="text-[9px] font-bold text-gray-400 uppercase">
+                              War Chest: {formatMoney(cash)}
+                            </div>
+                          </div>
+                          <input
+                            type="number"
+                            min="0"
+                            max={cash}
+                            value={gameState.investment.betSlip?.stake ?? 0}
+                            onChange={(e) => updateDefenseContractStake(e.target.value)}
+                            className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-sm font-black text-gray-800 focus:outline-none focus:border-emerald-400"
+                            placeholder="0"
+                          />
+                          <div className="grid grid-cols-3 gap-1 mt-1.5">
+                            {[0.25, 0.5, 1.0].map((frac) => (
+                              <button
+                                key={frac}
+                                onClick={() => updateDefenseContractStake(Math.floor(cash * frac))}
+                                className="rounded py-1 text-[9px] font-black bg-gray-200 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors uppercase"
+                              >
+                                {frac === 1.0 ? "Max" : `${frac * 100}%`}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Projected payout preview */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-gray-50 border border-gray-100 rounded-md p-2">
+                            <div className="text-[9px] font-black text-gray-400 uppercase">Stake</div>
+                            <div className="text-sm font-black text-gray-800">
+                              {formatMoney(toFiniteNumber(gameState.investment.betSlip?.stake, 0))}
+                            </div>
+                          </div>
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-md p-2">
+                            <div className="text-[9px] font-black text-gray-400 uppercase">Projected Win</div>
+                            <div className="text-sm font-black text-emerald-700">
+                              {formatMoney(betPreview.projectedWin)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Settlement locked button */}
+                        <button
+                          disabled
+                          className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
+                        >
+                          Settlement Coming Soon — Hero's Fate Not Active
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="py-4 text-center">
+                        <div className="text-sm font-black text-gray-400">No contract selected</div>
+                        <div className="text-[10px] font-bold text-gray-400 mt-1">
+                          Select a contract below to build your bet slip
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="bg-gray-50 p-4 space-y-3">
                     {investmentAssets.map((asset) => (
                       <div
@@ -3952,6 +4126,20 @@
                             Exit All
                           </button>
                         </div>
+
+                        {/* Select Contract for Bet Slip */}
+                        <button
+                          onClick={() => selectDefenseContract(asset.id)}
+                          className={`w-full mt-2 rounded-md py-1.5 text-xs font-black uppercase tracking-wide transition-colors ${
+                            gameState.investment.betSlip?.selectedContractId === asset.id
+                              ? "bg-emerald-600 text-white"
+                              : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                          }`}
+                        >
+                          {gameState.investment.betSlip?.selectedContractId === asset.id
+                            ? "✓ Selected for Bet Slip"
+                            : "Select Contract"}
+                        </button>
                       </div>
                     ))}
                   </div>
