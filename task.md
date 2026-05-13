@@ -44,6 +44,17 @@
 
 **Milestone 3-3F complete:** Faction synergy foundation is implemented with owned character faction counting and multiplier previews (x1.05 for 2, x1.12 for 3, x1.25 for 4+ same faction) visible in UI.
 
+**Milestone 3-3G complete:** Final QA and documentation alignment for equipment and synergy data structure are complete.
+
+**Milestone 3-3 complete:** The RPG character and weapon equipment foundation is fully integrated.
+- 52-character definitions with faction/rarity balance.
+- Canonical owned character instance management.
+- Gacha integration for both characters and weapons.
+- Weapon equip/unequip foundation.
+- Preferred weapon synergy preview and safe normalization.
+- Faction synergy preview and derived multiplier logic.
+- All systems use shared Global Wallet `cash` and preserve tab-scoped passive behaviors.
+
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.

@@ -42,3 +42,15 @@
 - Investment data is stored under the shared Global Game State.
 - Investment trading uses shared wallet `cash`.
 - Investment Master includes static assets, bounded price history, SVG sparklines, Buy 1/Sell 1, Buy Max/Sell All, portfolio value, net worth, average buy price, and unrealized gain/loss.
+- Trading is bounded to the active Investment tab only.
+
+### Milestone 3-3 Completion
+
+- Gacha and inventory system foundations are complete.
+- Static data for 52 unique characters with factions (Realty, Ticker, Luxury, Shadow) and rarities is implemented.
+- Owned characters are stored as canonical instances with unique IDs.
+- Character/Weapon gacha integration: characters go to RPG state, weapons go to Enhancement inventory.
+- Basic equipment foundation: characters can equip/unequip weapons via instance IDs.
+- Preferred weapon synergy foundation: x1.25 multiplier (capped) for matching character preference.
+- Faction synergy foundation: multiplier previews for owning multiple characters of the same faction.
+- Enhancement and Draw logic use shared wallet `cash`.

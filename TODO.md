@@ -26,9 +26,10 @@
 
 ## Phase 3: Gacha & Enhancement
 
-- [ ] Character or item gacha UI and reward logic.
-- [ ] Weapon enhancement system with success/failure outcomes.
-- [ ] Inventory and equipment data model.
+- [x] Character and item gacha UI and reward logic.
+- [x] Weapon enhancement system with success/failure outcomes (Foundation).
+- [x] Inventory and equipment data model.
+- [x] Faction and weapon synergy data foundation.
 
 ## Phase 4: Idle RPG
 
