@@ -334,6 +334,7 @@
       const GACHA_ITEMS = [
         {
           id: "rookie-merchant",
+          characterId: "realty-normal-yard-broker",
           name: "Rookie Merchant",
           type: "character",
           rarity: "Normal",
@@ -348,6 +349,7 @@
         },
         {
           id: "market-scout",
+          characterId: "realty-rare-lease-knight",
           name: "Market Scout",
           type: "character",
           rarity: "Rare",
@@ -362,6 +364,7 @@
         },
         {
           id: "coin-oracle",
+          characterId: "realty-epic-hotel-duelist",
           name: "Coin Oracle",
           type: "character",
           rarity: "Epic",
@@ -376,6 +379,7 @@
         },
         {
           id: "tycoon-hero",
+          characterId: "realty-legendary-empire-auctioneer",
           name: "Tycoon Hero",
           type: "character",
           rarity: "Legendary",
@@ -1475,6 +1479,11 @@
           "characters.realtyEpicHotelDuelist.title": "Suite Floor Finisher",
           "characters.realtyEpicHotelDuelist.description":
             "Deals precise finishing damage from the upper floors.",
+          "characters.realtyLegendaryEmpireAuctioneer.name": "Empire Auctioneer",
+          "characters.realtyLegendaryEmpireAuctioneer.title":
+            "Capital Hammer Caller",
+          "characters.realtyLegendaryEmpireAuctioneer.description":
+            "Calls the final bid with heavy burst damage.",
           "characters.realtyMythicDeedSovereign.name": "Deed Sovereign",
           "characters.realtyMythicDeedSovereign.title": "Authority of Property Income",
           "characters.realtyMythicDeedSovereign.description":
@@ -1512,6 +1521,10 @@
           "characters.realtyEpicHotelDuelist.title": "스위트층 결정타",
           "characters.realtyEpicHotelDuelist.description":
             "상층에서 정밀한 마무리 피해를 줍니다.",
+          "characters.realtyLegendaryEmpireAuctioneer.name": "제국 경매인",
+          "characters.realtyLegendaryEmpireAuctioneer.title": "자본 망치 호출자",
+          "characters.realtyLegendaryEmpireAuctioneer.description":
+            "묵직한 폭발 피해로 최종 낙찰을 선언합니다.",
           "characters.realtyMythicDeedSovereign.name": "권리증 군주",
           "characters.realtyMythicDeedSovereign.title": "부동산 수입의 권위",
           "characters.realtyMythicDeedSovereign.description":
@@ -1546,6 +1559,10 @@
           "characters.realtyEpicHotelDuelist.title": "スイート階の決定打",
           "characters.realtyEpicHotelDuelist.description":
             "上層階から精密なフィニッシュダメージを与えます。",
+          "characters.realtyLegendaryEmpireAuctioneer.name": "エンパイア競売人",
+          "characters.realtyLegendaryEmpireAuctioneer.title": "資本ハンマーの号令役",
+          "characters.realtyLegendaryEmpireAuctioneer.description":
+            "重いバーストダメージで最後の落札を告げます。",
           "characters.realtyMythicDeedSovereign.name": "ディードソブリン",
           "characters.realtyMythicDeedSovereign.title": "不動産収入の権威",
           "characters.realtyMythicDeedSovereign.description":
@@ -1642,6 +1659,11 @@
       function normalizeGachaItem(item, fallbackIndex = 0) {
         const definition = GACHA_ITEMS.find((candidate) => candidate.id === item?.id);
         if (!definition) return null;
+        const characterDefinition =
+          definition.type === "character"
+            ? getCharacterDefinition(definition.characterId)
+            : null;
+        if (definition.type === "character" && !characterDefinition) return null;
         const enhanceLevel = clampNumber(
           Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
           0,
@@ -1655,12 +1677,19 @@
               ? item.instanceId
               : `${definition.id}-${fallbackIndex}`,
           id: definition.id,
+          characterId: characterDefinition?.id,
           name: definition.name,
           type: definition.type,
           rarity: definition.rarity,
           power: Math.max(0, toFiniteNumber(item.power, definition.power)),
           enhanceLevel,
         };
+      }
+
+      function normalizeInventoryItem(item, fallbackIndex = 0) {
+        const normalizedItem = normalizeGachaItem(item, fallbackIndex);
+        if (!normalizedItem || normalizedItem.type === "character") return null;
+        return normalizedItem;
       }
 
       function normalizeRecentPulls(pulls) {
@@ -1782,7 +1811,7 @@
           : [];
         const normalizedInventory = ensureUniqueGachaInstanceIds(
           savedInventory
-            .map((item, index) => normalizeGachaItem(item, index))
+            .map((item, index) => normalizeInventoryItem(item, index))
             .filter(Boolean),
         );
         const normalizedRecentPulls = ensureUniqueGachaInstanceIds(
@@ -2232,6 +2261,7 @@
         const recentPulls = gameState.enhancement.recentPulls;
         const lastEnhancementResult =
           gameState.enhancement.lastEnhancementResult;
+        const ownedCharacters = gameState.rpg.characters;
         const clickPower = landlord.clickPower;
         const clickUpgradeCost = landlord.clickUpgradeCost;
         const rebirthCount = landlord.rebirthCount;
@@ -2285,6 +2315,36 @@
           0,
         );
         const totalNetWorth = cash + totalPortfolioValue;
+        const characterText = (key) =>
+          CHARACTER_LOCALIZATION[userLang]?.[key] ||
+          CHARACTER_LOCALIZATION.en?.[key] ||
+          key;
+        const characterRarityLabel = (rarity) =>
+          typeof rarity === "string" && rarity.length > 0
+            ? rarity.charAt(0).toUpperCase() + rarity.slice(1)
+            : "Normal";
+        const ownedCharacterDetails = ownedCharacters
+          .map((character) => {
+            const definition = getCharacterDefinition(character.characterId);
+            if (!definition) return null;
+            return {
+              ...character,
+              definition,
+              name: characterText(definition.nameKey),
+              rarityLabel: characterRarityLabel(definition.rarity),
+            };
+          })
+          .filter(Boolean);
+        const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
+          (counts, rarity) => {
+            counts[rarity] = ownedCharacterDetails.filter(
+              (character) => character.definition.rarity === rarity,
+            ).length;
+            return counts;
+          },
+          {},
+        );
+        const recentOwnedCharacters = ownedCharacterDetails.slice(-3).reverse();
         const inventoryByRarity = GACHA_RARITIES.reduce((counts, rarity) => {
           counts[rarity.name] = enhancementInventory.filter(
             (item) => item.rarity === rarity.name,
@@ -2729,6 +2789,13 @@
               createPulledGachaItem(),
             );
             const lastPulled = pulledItems[pulledItems.length - 1];
+            const pulledInventoryItems = pulledItems.filter(
+              (item) => item.type !== "character",
+            );
+            const pulledCharacters = pulledItems
+              .filter((item) => item.type === "character")
+              .map((item) => createCharacterInstance(item.characterId))
+              .filter(Boolean);
             const recentPulls = [
               ...normalizeRecentPulls(prev.enhancement.recentPulls),
               ...pulledItems,
@@ -2742,9 +2809,16 @@
               },
               enhancement: {
                 ...prev.enhancement,
-                inventory: [...prev.enhancement.inventory, ...pulledItems],
+                inventory: [
+                  ...prev.enhancement.inventory,
+                  ...pulledInventoryItems,
+                ],
                 lastPulledItem: lastPulled,
                 recentPulls,
+              },
+              rpg: {
+                ...prev.rpg,
+                characters: [...prev.rpg.characters, ...pulledCharacters],
               },
             };
           });
@@ -3280,6 +3354,65 @@
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          Owned Characters
+                        </h2>
+                        <div className="text-xs font-black text-gray-500">
+                          {ownedCharacterDetails.length}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        {Object.keys(CHARACTER_GACHA_POOLS).map((rarity) => {
+                          const label = characterRarityLabel(rarity);
+                          return (
+                            <div
+                              key={rarity}
+                              className="bg-gray-50 border border-gray-200 rounded-md p-2 text-center"
+                            >
+                              <div
+                                className={`text-[10px] font-black uppercase ${rarityTextClass(label)}`}
+                              >
+                                {label}
+                              </div>
+                              <div className="font-black text-gray-800">
+                                {ownedCharactersByRarity[rarity] || 0}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {recentOwnedCharacters.length > 0 ? (
+                        <div className="space-y-2">
+                          {recentOwnedCharacters.map((character) => (
+                            <div
+                              key={character.instanceId}
+                              className="flex items-center justify-between gap-3 bg-gray-50 rounded-md p-3"
+                            >
+                              <div>
+                                <div className="font-bold text-gray-800">
+                                  {character.name}
+                                </div>
+                                <div
+                                  className={`text-xs font-bold uppercase ${rarityTextClass(character.rarityLabel)}`}
+                                >
+                                  {character.rarityLabel} character
+                                </div>
+                              </div>
+                              <div className="font-black text-gray-700">
+                                Lv {character.level}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-6 text-center font-bold text-gray-400">
+                          Empty
+                        </div>
+                      )}
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
