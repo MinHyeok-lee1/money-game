@@ -4,9 +4,9 @@
 
 **목표:** 기존 독립된 게임을 생태계의 일부로 편입하고, 여러 탭을 오갈 수 있는 뼈대 구축.
 
-- [ ] 1-1. `localStorage` 마스터 지갑(Global Wallet) 스키마 정의 및 초기화 로직 구현.
-- [ ] 1-2. 게임 간 화면 전환을 위한 최상단 네비게이션 탭(GNB) UI 추가 (건물주 / 투자 / 강화 / RPG).
-- [ ] 1-3. 기존 `Idle Landlord`의 재화를 `Global Wallet`의 `cash`로 마이그레이션 연동.
+- [x] 1-1. `localStorage` 마스터 지갑(Global Wallet) 스키마 정의 및 초기화 로직 구현.
+- [x] 1-2. 게임 간 화면 전환을 위한 최상단 네비게이션 탭(GNB) UI 추가 (건물주 / 투자 / 강화 / RPG).
+- [x] 1-3. 기존 `Idle Landlord`의 재화를 `Global Wallet`의 `cash`로 마이그레이션 연동.
 
 ## 🏁 Milestone 2: 투자 게임 (Investment Master) 구현
 

@@ -277,6 +277,183 @@
         ],
       };
 
+      const GAME_STATE_VERSION = 1;
+      const GAME_STATE_STORAGE_KEY = "moneyGameUniverseStateV1";
+      const LEGACY_LANDLORD_STORAGE_KEY = "idleLandlordSaveV4";
+
+      function createDefaultGameState(language = "en") {
+        return {
+          version: GAME_STATE_VERSION,
+          wallet: {
+            cash: 0,
+            diamonds: 0,
+            honorPoints: 0,
+          },
+          landlord: {
+            properties: PROPERTIES_DATA[language].map((property) => ({
+              id: property.id,
+              count: 0,
+            })),
+            rebirthCount: 0,
+            multiplier: 1,
+            totalEarned: 0,
+            clickPower: 10,
+            clickUpgradeCost: 50,
+          },
+          investment: {
+            holdings: [],
+          },
+          enhancement: {
+            inventory: [],
+            failStacks: 0,
+          },
+          rpg: {
+            characters: [],
+            highestStage: 0,
+          },
+          settings: {
+            language,
+            lastSavedAt: null,
+          },
+        };
+      }
+
+      function normalizeGameState(state, language = "en") {
+        const defaults = createDefaultGameState(language);
+        const landlord = state?.landlord || {};
+        const savedProperties = Array.isArray(landlord.properties)
+          ? landlord.properties
+          : [];
+
+        return {
+          ...defaults,
+          ...state,
+          version: GAME_STATE_VERSION,
+          wallet: {
+            ...defaults.wallet,
+            ...(state?.wallet || {}),
+            cash: Number(state?.wallet?.cash || 0),
+          },
+          landlord: {
+            ...defaults.landlord,
+            ...landlord,
+            properties: defaults.landlord.properties.map((property) => {
+              const savedProperty = savedProperties.find(
+                (item) => item.id === property.id,
+              );
+              return {
+                id: property.id,
+                count: Number(savedProperty?.count || 0),
+              };
+            }),
+            rebirthCount: Number(landlord.rebirthCount || 0),
+            multiplier: Number(landlord.multiplier || 1),
+            totalEarned: Number(landlord.totalEarned || 0),
+            clickPower: Number(landlord.clickPower || 10),
+            clickUpgradeCost: Number(landlord.clickUpgradeCost || 50),
+          },
+          investment: {
+            ...defaults.investment,
+            ...(state?.investment || {}),
+            holdings: Array.isArray(state?.investment?.holdings)
+              ? state.investment.holdings
+              : [],
+          },
+          enhancement: {
+            ...defaults.enhancement,
+            ...(state?.enhancement || {}),
+            inventory: Array.isArray(state?.enhancement?.inventory)
+              ? state.enhancement.inventory
+              : [],
+            failStacks: Number(state?.enhancement?.failStacks || 0),
+          },
+          rpg: {
+            ...defaults.rpg,
+            ...(state?.rpg || {}),
+            characters: Array.isArray(state?.rpg?.characters)
+              ? state.rpg.characters
+              : [],
+            highestStage: Number(state?.rpg?.highestStage || 0),
+          },
+          settings: {
+            ...defaults.settings,
+            ...(state?.settings || {}),
+            language,
+          },
+        };
+      }
+
+      function migrateLegacyStateIfNeeded(language = "en") {
+        const legacyRaw = localStorage.getItem(LEGACY_LANDLORD_STORAGE_KEY);
+        if (!legacyRaw) return null;
+
+        try {
+          const legacy = JSON.parse(legacyRaw);
+          const migrated = createDefaultGameState(language);
+          const legacyProperties = Array.isArray(legacy.properties)
+            ? legacy.properties
+            : [];
+
+          migrated.wallet.cash = Number(legacy.money || 0);
+          migrated.landlord.properties = migrated.landlord.properties.map(
+            (property) => {
+              const savedProperty = legacyProperties.find(
+                (item) => item.id === property.id,
+              );
+              return {
+                id: property.id,
+                count: Number(savedProperty?.count || 0),
+              };
+            },
+          );
+          migrated.landlord.rebirthCount = Number(legacy.rebirthCount || 0);
+          migrated.landlord.multiplier = Number(legacy.multiplier || 1);
+          migrated.landlord.totalEarned = Number(legacy.totalEarned || 0);
+          migrated.landlord.clickPower = Number(legacy.clickPower || 10);
+          migrated.landlord.clickUpgradeCost = Number(
+            legacy.clickUpgradeCost || 50,
+          );
+
+          saveGameState(migrated);
+          localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
+          return migrated;
+        } catch (error) {
+          console.warn("Unable to migrate legacy Idle Landlord state.", error);
+          return null;
+        }
+      }
+
+      function loadGameState(language = "en") {
+        const savedRaw = localStorage.getItem(GAME_STATE_STORAGE_KEY);
+
+        if (savedRaw) {
+          try {
+            return normalizeGameState(JSON.parse(savedRaw), language);
+          } catch (error) {
+            console.warn("Unable to load saved Money Game state.", error);
+          }
+        }
+
+        return (
+          migrateLegacyStateIfNeeded(language) || createDefaultGameState(language)
+        );
+      }
+
+      function saveGameState(state) {
+        const stateToSave = {
+          ...state,
+          version: GAME_STATE_VERSION,
+          settings: {
+            ...state.settings,
+            lastSavedAt: new Date().toISOString(),
+          },
+        };
+        localStorage.setItem(
+          GAME_STATE_STORAGE_KEY,
+          JSON.stringify(stateToSave),
+        );
+      }
+
       // 국가별 공략집 데이터 분리
       const SEO_CONTENT = {
         ko: (
@@ -505,69 +682,77 @@
           : "en";
         const t = TRANSLATIONS[userLang];
 
-        const saved =
-          JSON.parse(localStorage.getItem("idleLandlordSaveV4")) || {};
-
-        const [money, setMoney] = useState(saved.money || 0);
-        const [clickPower, setClickPower] = useState(saved.clickPower || 10);
-        const [clickUpgradeCost, setClickUpgradeCost] = useState(
-          saved.clickUpgradeCost || 50,
+        const [activeTab, setActiveTab] = useState("landlord");
+        const [gameState, setGameState] = useState(() =>
+          loadGameState(userLang),
         );
-        const [rebirthCount, setRebirthCount] = useState(
-          saved.rebirthCount || 0,
-        );
-        const [multiplier, setMultiplier] = useState(saved.multiplier || 1);
-
-        const [properties, setProperties] = useState(() => {
-          const baseProps = PROPERTIES_DATA[userLang];
-          if (saved.properties) {
-            return baseProps.map((bp) => {
-              const savedProp = saved.properties.find((sp) => sp.id === bp.id);
-              return savedProp
-                ? { ...bp, count: savedProp.count }
-                : { ...bp, count: 0 };
-            });
-          }
-          return baseProps.map((p) => ({ ...p, count: 0 }));
-        });
-
         const [clicks, setClicks] = useState([]);
+
+        const cash = gameState.wallet.cash;
+        const landlord = gameState.landlord;
+        const clickPower = landlord.clickPower;
+        const clickUpgradeCost = landlord.clickUpgradeCost;
+        const rebirthCount = landlord.rebirthCount;
+        const multiplier = landlord.multiplier;
+        const properties = PROPERTIES_DATA[userLang].map((property) => {
+          const savedProperty = landlord.properties.find(
+            (item) => item.id === property.id,
+          );
+          return {
+            ...property,
+            count: Number(savedProperty?.count || 0),
+          };
+        });
         const incomePerSec =
           properties.reduce(
             (total, prop) => total + prop.baseIncome * prop.count,
             0,
           ) * multiplier;
 
+        const updateGameState = (updater) => {
+          setGameState((prev) => {
+            const next = typeof updater === "function" ? updater(prev) : updater;
+            return normalizeGameState(next, userLang);
+          });
+        };
+
         // 자동 저장 로직
         useEffect(() => {
-          const saveData = {
-            money,
-            clickPower,
-            clickUpgradeCost,
-            properties,
-            rebirthCount,
-            multiplier,
-          };
-          localStorage.setItem("idleLandlordSaveV4", JSON.stringify(saveData));
-        }, [
-          money,
-          clickPower,
-          clickUpgradeCost,
-          properties,
-          rebirthCount,
-          multiplier,
-        ]);
+          saveGameState(gameState);
+        }, [gameState]);
 
         useEffect(() => {
           const timer = setInterval(() => {
-            if (incomePerSec > 0) setMoney((prev) => prev + incomePerSec);
+            if (incomePerSec > 0) {
+              updateGameState((prev) => ({
+                ...prev,
+                wallet: {
+                  ...prev.wallet,
+                  cash: prev.wallet.cash + incomePerSec,
+                },
+                landlord: {
+                  ...prev.landlord,
+                  totalEarned: prev.landlord.totalEarned + incomePerSec,
+                },
+              }));
+            }
           }, 1000);
           return () => clearInterval(timer);
         }, [incomePerSec]);
 
         const handleMainClick = (e) => {
           const gain = clickPower * multiplier;
-          setMoney((prev) => prev + gain);
+          updateGameState((prev) => ({
+            ...prev,
+            wallet: {
+              ...prev.wallet,
+              cash: prev.wallet.cash + gain,
+            },
+            landlord: {
+              ...prev.landlord,
+              totalEarned: prev.landlord.totalEarned + gain,
+            },
+          }));
           const rect = e.currentTarget.getBoundingClientRect();
           const newClick = {
             id: Date.now(),
@@ -584,32 +769,67 @@
 
         const performRebirth = () => {
           if (
-            money >= REBIRTH_REQUIREMENT &&
+            cash >= REBIRTH_REQUIREMENT &&
             window.confirm(t.rebirthConfirm)
           ) {
-            setMoney(0);
-            setClickPower(10);
-            setClickUpgradeCost(50);
-            setProperties(
-              PROPERTIES_DATA[userLang].map((p) => ({ ...p, count: 0 })),
-            );
-            setRebirthCount((prev) => prev + 1);
-            setMultiplier((prev) => prev + 1);
+            updateGameState((prev) => ({
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: 0,
+              },
+              landlord: {
+                ...prev.landlord,
+                properties: createDefaultGameState(userLang).landlord
+                  .properties,
+                rebirthCount: prev.landlord.rebirthCount + 1,
+                multiplier: prev.landlord.multiplier + 1,
+                clickPower: 10,
+                clickUpgradeCost: 50,
+              },
+            }));
             alert(t.rebirthSuccess);
           }
         };
 
         const buyProperty = (id) => {
           const idx = properties.findIndex((p) => p.id === id);
+          if (idx < 0) return;
           const cost = Math.floor(
             properties[idx].baseCost * Math.pow(1.15, properties[idx].count),
           );
-          if (money >= cost) {
-            setMoney((prev) => prev - cost);
-            const next = [...properties];
-            next[idx].count += 1;
-            setProperties(next);
+          if (cash >= cost) {
+            updateGameState((prev) => ({
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash - cost,
+              },
+              landlord: {
+                ...prev.landlord,
+                properties: prev.landlord.properties.map((item) =>
+                  item.id === id ? { ...item, count: item.count + 1 } : item,
+                ),
+              },
+            }));
           }
+        };
+
+        const buyClickUpgrade = () => {
+          if (cash < clickUpgradeCost) return;
+
+          updateGameState((prev) => ({
+            ...prev,
+            wallet: {
+              ...prev.wallet,
+              cash: prev.wallet.cash - prev.landlord.clickUpgradeCost,
+            },
+            landlord: {
+              ...prev.landlord,
+              clickPower: prev.landlord.clickPower + 10,
+              clickUpgradeCost: Math.floor(prev.landlord.clickUpgradeCost * 1.5),
+            },
+          }));
         };
 
         const formatMoney = (val) => {
@@ -620,10 +840,33 @@
           }).format(val);
         };
 
+        const tabs = [
+          { id: "landlord", label: "Landlord" },
+          { id: "investment", label: "Investment" },
+          { id: "enhancement", label: "Enhancement" },
+          { id: "rpg", label: "RPG" },
+        ];
+        const comingSoonTitle =
+          tabs.find((tab) => tab.id === activeTab)?.label || "Coming Soon";
+
         return (
           <div className="w-full max-w-4xl flex flex-col items-center">
             {/* 게임 메인 컨테이너 */}
             <div className="w-full max-w-md">
+              <nav className="w-full bg-white shadow-sm rounded-lg mb-4 p-1 grid grid-cols-4 gap-1 border border-gray-100">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-2 py-2 rounded-md text-xs font-bold transition-colors ${activeTab === tab.id ? "bg-green-600 text-white" : "text-gray-500 hover:bg-gray-100"}`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
+
+              {activeTab === "landlord" ? (
+                <>
               {/* 상단 환생 버튼 및 상태 영역 */}
               <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center rounded-lg mb-4 border-b-2 border-green-200">
                 <div>
@@ -636,7 +879,7 @@
                 </div>
                 <button
                   onClick={performRebirth}
-                  className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${money >= REBIRTH_REQUIREMENT ? "bg-yellow-400 text-yellow-900 rebirth-animate shadow-lg" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                  className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${cash >= REBIRTH_REQUIREMENT ? "bg-yellow-400 text-yellow-900 rebirth-animate shadow-lg" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                 >
                   {t.rebirth} {rebirthCount > 0 && `(${rebirthCount})`}
                 </button>
@@ -646,7 +889,7 @@
               <div className="w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[650px]">
                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center">
                   <div className="text-4xl font-extrabold mb-1">
-                    {formatMoney(money)}
+                    {formatMoney(cash)}
                   </div>
                   <div className="text-green-100 text-sm font-medium">
                     +{formatMoney(incomePerSec)}/{t.sec}
@@ -681,15 +924,9 @@
                   </h2>
 
                   <button
-                    onClick={() => {
-                      if (money >= clickUpgradeCost) {
-                        setMoney((m) => m - clickUpgradeCost);
-                        setClickPower((p) => p + 10);
-                        setClickUpgradeCost((c) => Math.floor(c * 1.5));
-                      }
-                    }}
-                    disabled={money < clickUpgradeCost}
-                    className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl border transition-all ${money >= clickUpgradeCost ? "bg-white border-green-300 shadow-sm" : "bg-gray-100 opacity-50"}`}
+                    onClick={buyClickUpgrade}
+                    disabled={cash < clickUpgradeCost}
+                    className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl border transition-all ${cash >= clickUpgradeCost ? "bg-white border-green-300 shadow-sm" : "bg-gray-100 opacity-50"}`}
                   >
                     <div className="text-left">
                       <div className="font-bold">{t.mousePower}</div>
@@ -710,8 +947,8 @@
                       <button
                         key={p.id}
                         onClick={() => buyProperty(p.id)}
-                        disabled={money < cost}
-                        className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl border transition-all ${money >= cost ? "bg-white border-blue-200 shadow-sm" : "bg-gray-100 opacity-50"}`}
+                        disabled={cash < cost}
+                        className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl border transition-all ${cash >= cost ? "bg-white border-blue-200 shadow-sm" : "bg-gray-100 opacity-50"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{p.icon}</span>
@@ -735,10 +972,36 @@
                   })}
                 </div>
               </div>
+
+                  <section className="w-full bg-white shadow-sm rounded-lg mt-4 p-4 border border-gray-100">
+                    <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                      Save Data
+                    </h2>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
+                        Save
+                      </button>
+                      <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
+                        Export
+                      </button>
+                      <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
+                        Import
+                      </button>
+                    </div>
+                  </section>
+                </>
+              ) : (
+                <section className="w-full bg-white shadow-sm rounded-lg min-h-[420px] flex flex-col items-center justify-center border border-gray-100 text-center p-8">
+                  <h1 className="text-2xl font-black text-gray-800 mb-2">
+                    {comingSoonTitle}
+                  </h1>
+                  <p className="text-gray-500 font-medium">Coming Soon</p>
+                </section>
+              )}
             </div>
 
             {/* 국가별로 렌더링되는 SEO 공략집 텍스트 영역 */}
-            {SEO_CONTENT[userLang]}
+            {activeTab === "landlord" && SEO_CONTENT[userLang]}
           </div>
         );
       }
