@@ -10,8 +10,10 @@
 1. **🏢 Idle Landlord (건물주 키우기 - Current)**
    - 클릭 및 10단계 부동산 투자를 통한 안정적인 기초 자본(Cash) 생산.
    - 환생(Rebirth)을 통한 영구적인 수익 배수(Multiplier) 획득.
-2. **📈 Investment Master (투자 고수되기 - Current)**
-   - Static assets, bounded active-tab price updates, Buy/Sell controls, portfolio metrics, and lightweight sparklines.
+2. **📈 Defense Contracts / Hero's Fate Betting (투자 → 방어 계약 - Current)**
+   - Investment tab reframed as a Defense Contracts / Hero's Fate Betting system. Backed by the existing Buy/Sell engine (Back/Exit controls, sparklines, portfolio metrics).
+   - Defense Contracts odds preview, bet slip, deterministic settlement preview, and preview history are live.
+   - Settlement gate is in place (`contractSettlementUnlocked: false`). Real settlement, stake deduction, and payout are **not yet active**.
 3. **🗡️ Gacha & Enhancement (캐릭터 뽑기 및 강화 - Planned)**
    - 등급별 캐릭터 뽑기와 무기 강화 시스템, 전용 무기 시너지 로직.
 4. **🌲 Idle RPG (방치형 RPG - Planned)**
@@ -59,3 +61,11 @@
 
 - RPG Master Blueprint adopted (`RPG_MASTER_BLUEPRINT.md`) covering "Sponsor to God" progression.
 - Basic idle combat engine with monster HP scaling and stage progression is implemented.
+- Dividends reward and upgrade economy are implemented (ATK, SPD, PEN stat boosts).
+- Normal Ending boundary (Stage 100) and Dorothy Proposal script are implemented.
+- Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete (six layers). Real settlement is not active.
+
+**Next recommended steps:**
+1. Real settlement unlock — trigger `contractSettlementUnlocked: true` from a game condition.
+2. Hero's Fate resolution formula — probabilistic win/loss with wallet stake deduction and payout.
+3. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.

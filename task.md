@@ -97,6 +97,23 @@
 
 **Investment presentation layer shifted toward Hero's Fate Betting foundation:** `DEFENSE_CONTRACT_FLAVOR` static map added for asset display names, contract types, and lore. Investment tab header renamed to "Defense Contracts"; stat labels renamed (War Chest, Contract Value, Total Capital). Lore panel with Dorothy voice added. Derived-only Market Status panel (Defense Stability, Hero Survival Index, Raid Confidence, Capital Pressure, dominant faction, squad DPS) added. Per-asset labels renamed (Contract Rate, Positions Held, Stake Value, Entry Rate, Return) and action buttons renamed (Back 1, Back Max, Exit 1, Exit All). All buy/sell/portfolio logic and internal state keys are unchanged.
 
+**Defense Contracts progress summary (Documentation & Task Alignment Pass):**
+Six foundation layers are complete under `gameState.investment`. Real settlement, payout, and Hero's Fate resolution are **not yet active**.
+- ✅ Presentation: Investment tab reframed as Defense Contracts with flavor names, Dorothy lore, renamed labels/buttons, Market Status panel.
+- ✅ Odds preview: `getDefenseContractRiskTier`, `getDefenseContractOdds`, `getDefenseContractProjectedPayout` pure helpers; per-card Contract Preview panel.
+- ✅ Bet slip: `betSlip` sub-state, `selectDefenseContract` / `updateDefenseContractStake` / `clearDefenseContractBetSlip` handlers, stake UI with 25%/50%/Max shortcuts.
+- ✅ Settlement preview: `getDefenseContractSimulatedOutcome` deterministic helper; Success Chance, Outcome, Projected Gain/Loss, Confidence, Signal Analysis panel — no mutation.
+- ✅ Preview history: `contractHistory` (max 10, status `"preview"`), `createDefenseContractPreviewHistoryEntry` helper, `saveDefenseContractPreviewToHistory` handler, live history list UI.
+- ✅ Settlement gate: `contractSettlementUnlocked: false` flag, `isDefenseContractSettlementUnlocked` helper, Settlement Status panel with Locked/Unlocked indicator.
+- 🔒 Real settlement: not implemented — no stake deducted, no payout granted, no random outcome.
+- 🔒 Hero's Fate resolution formula: not implemented.
+- 🔒 Infinite Mode unlock via Dorothy: not implemented.
+
+**Next recommended implementation:**
+1. Manual settlement QA — test bet slip → save preview → history flow end-to-end in browser.
+2. Real settlement unlock design — define trigger for `contractSettlementUnlocked: true` (e.g., `highestStage >= NORMAL_ENDING_STAGE`).
+3. Hero's Fate resolution formula — probabilistic win/loss using `getDefenseContractOdds` as success probability, payout via `getDefenseContractProjectedPayout`, with stake deduction from wallet.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.
