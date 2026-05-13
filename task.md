@@ -38,6 +38,8 @@
 
 **Milestone 3-3C complete:** Character gacha pulls now create owned RPG character instances while weapon pulls remain in Enhancement inventory; full 3-3 gameplay integration remains pending.
 
+**Milestone 3-3D complete:** Added basic weapon equip/unequip foundation using character `equippedWeaponInstanceId`; full 3-3 gameplay integration remains pending.
+
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.
