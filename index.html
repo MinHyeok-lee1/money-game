@@ -92,6 +92,7 @@
       const { useState, useEffect } = React;
 
       const REBIRTH_REQUIREMENT = 2000000000; // 환생 기준: 20억
+      const NORMAL_ENDING_STAGE = 100;
 
       const TRANSLATIONS = {
         ko: {
@@ -1655,6 +1656,8 @@
             stageKills: 0,
             dividends: 0,
             lastRpgReward: 0,
+            normalEndingReached: false,
+            normalEndingSeen: false,
             upgrades: {
               atkLevel: 0,
               spdLevel: 0,
@@ -1985,6 +1988,21 @@
         return 0;
       }
 
+      function isNormalEndingReached(rpgState) {
+        if (!rpgState) return false;
+        return (
+          rpgState.normalEndingReached === true ||
+          Math.max(0, toFiniteNumber(rpgState.highestStage, 0)) >= NORMAL_ENDING_STAGE
+        );
+      }
+
+      function getRpgModeLabel(rpgState) {
+        const stage = Math.max(1, toFiniteNumber(rpgState?.currentStage, 1));
+        if (stage > NORMAL_ENDING_STAGE) return "Infinite Mode Preview / Locked Mechanics";
+        if (isNormalEndingReached(rpgState)) return "Normal Ending Reached";
+        return "Normal Arc";
+      }
+
       function getTeamBaseAtk(state) {
         if (!state || !state.rpg) return 0;
         const characters = Array.isArray(state.rpg.characters)
@@ -2103,6 +2121,9 @@
 
           const maxHp = getMonsterMaxHp(nextStage);
           const reward = getMonsterDefeatReward(currentStage);
+          const reachedNormalEnding =
+            state.rpg.normalEndingReached === true ||
+            nextHighestStage >= NORMAL_ENDING_STAGE;
 
           return {
             ...state,
@@ -2116,6 +2137,7 @@
               defeatedMonsters: nextDefeated,
               dividends: toFiniteNumber(state.rpg.dividends, 0) + reward,
               lastRpgReward: reward,
+              normalEndingReached: reachedNormalEnding,
             },
           };
         }
@@ -2280,6 +2302,8 @@
             stageKills: Math.max(0, Math.floor(toFiniteNumber(rpg.stageKills, 0))),
             dividends: Math.max(0, toFiniteNumber(rpg.dividends, 0)),
             lastRpgReward: Math.max(0, toFiniteNumber(rpg.lastRpgReward, 0)),
+            normalEndingReached: rpg.normalEndingReached === true,
+            normalEndingSeen: rpg.normalEndingSeen === true,
             upgrades: {
               atkLevel: clampNumber(rpg.upgrades?.atkLevel, 0, 1000, 0),
               spdLevel: clampNumber(rpg.upgrades?.spdLevel, 0, 1000, 0),
@@ -4196,6 +4220,39 @@
                       <span>Est. Reward: {formatDps(getMonsterDefeatReward(gameState.rpg?.currentStage || 1))}</span>
                       <span>Highest Stage: {gameState.rpg?.highestStage || 1}</span>
                     </div>
+
+                    <div className="mt-3 bg-black/30 rounded-lg p-3 border border-red-900/20">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-black text-red-200 uppercase tracking-widest">
+                          Mode
+                        </span>
+                        <span className={`text-[10px] font-black uppercase ${isNormalEndingReached(gameState.rpg) ? "text-yellow-300" : "text-red-100"}`}>
+                          {getRpgModeLabel(gameState.rpg)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-bold text-red-300/60 uppercase">Normal Ending Target</span>
+                        <span className="text-[10px] font-black text-white">Stage {NORMAL_ENDING_STAGE}</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-900 rounded-full overflow-hidden mt-1">
+                        <div
+                          className="h-full bg-gradient-to-r from-yellow-500 to-yellow-300 transition-all duration-500"
+                          style={{ width: `${Math.min(100, ((gameState.rpg?.highestStage || 0) / NORMAL_ENDING_STAGE) * 100)}%` }}
+                        ></div>
+                      </div>
+                      <div className="mt-1 text-right text-[9px] font-bold text-red-300/40 uppercase">
+                        {Math.min(gameState.rpg?.highestStage || 0, NORMAL_ENDING_STAGE)} / {NORMAL_ENDING_STAGE}
+                      </div>
+                    </div>
+
+                    {isNormalEndingReached(gameState.rpg) && (
+                      <div className="mt-3 bg-yellow-900/40 border border-yellow-500/30 rounded-lg p-3 text-center">
+                        <div className="text-yellow-300 font-black text-xs uppercase tracking-widest">Normal Ending Reached</div>
+                        <div className="text-yellow-200/70 text-[10px] font-bold mt-1">
+                          You have conquered Stage 100. The world beyond awaits — Infinite Mode coming soon.
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-4">
