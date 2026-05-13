@@ -318,6 +318,11 @@
         };
       }
 
+      function toFiniteNumber(value, fallback = 0) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : fallback;
+      }
+
       function normalizeGameState(state, language = "en") {
         const defaults = createDefaultGameState(language);
         const landlord = state?.landlord || {};
@@ -332,7 +337,7 @@
           wallet: {
             ...defaults.wallet,
             ...(state?.wallet || {}),
-            cash: Number(state?.wallet?.cash || 0),
+            cash: toFiniteNumber(state?.wallet?.cash, 0),
           },
           landlord: {
             ...defaults.landlord,
@@ -343,14 +348,14 @@
               );
               return {
                 id: property.id,
-                count: Number(savedProperty?.count || 0),
+                count: toFiniteNumber(savedProperty?.count, 0),
               };
             }),
-            rebirthCount: Number(landlord.rebirthCount || 0),
-            multiplier: Number(landlord.multiplier || 1),
-            totalEarned: Number(landlord.totalEarned || 0),
-            clickPower: Number(landlord.clickPower || 10),
-            clickUpgradeCost: Number(landlord.clickUpgradeCost || 50),
+            rebirthCount: toFiniteNumber(landlord.rebirthCount, 0),
+            multiplier: toFiniteNumber(landlord.multiplier, 1),
+            totalEarned: toFiniteNumber(landlord.totalEarned, 0),
+            clickPower: toFiniteNumber(landlord.clickPower, 10),
+            clickUpgradeCost: toFiniteNumber(landlord.clickUpgradeCost, 50),
           },
           investment: {
             ...defaults.investment,
@@ -365,7 +370,7 @@
             inventory: Array.isArray(state?.enhancement?.inventory)
               ? state.enhancement.inventory
               : [],
-            failStacks: Number(state?.enhancement?.failStacks || 0),
+            failStacks: toFiniteNumber(state?.enhancement?.failStacks, 0),
           },
           rpg: {
             ...defaults.rpg,
@@ -373,7 +378,7 @@
             characters: Array.isArray(state?.rpg?.characters)
               ? state.rpg.characters
               : [],
-            highestStage: Number(state?.rpg?.highestStage || 0),
+            highestStage: toFiniteNumber(state?.rpg?.highestStage, 0),
           },
           settings: {
             ...defaults.settings,
@@ -394,7 +399,7 @@
             ? legacy.properties
             : [];
 
-          migrated.wallet.cash = Number(legacy.money || 0);
+          migrated.wallet.cash = toFiniteNumber(legacy.money, 0);
           migrated.landlord.properties = migrated.landlord.properties.map(
             (property) => {
               const savedProperty = legacyProperties.find(
@@ -402,16 +407,23 @@
               );
               return {
                 id: property.id,
-                count: Number(savedProperty?.count || 0),
+                count: toFiniteNumber(savedProperty?.count, 0),
               };
             },
           );
-          migrated.landlord.rebirthCount = Number(legacy.rebirthCount || 0);
-          migrated.landlord.multiplier = Number(legacy.multiplier || 1);
-          migrated.landlord.totalEarned = Number(legacy.totalEarned || 0);
-          migrated.landlord.clickPower = Number(legacy.clickPower || 10);
-          migrated.landlord.clickUpgradeCost = Number(
-            legacy.clickUpgradeCost || 50,
+          migrated.landlord.rebirthCount = toFiniteNumber(
+            legacy.rebirthCount,
+            0,
+          );
+          migrated.landlord.multiplier = toFiniteNumber(legacy.multiplier, 1);
+          migrated.landlord.totalEarned = toFiniteNumber(
+            legacy.totalEarned,
+            0,
+          );
+          migrated.landlord.clickPower = toFiniteNumber(legacy.clickPower, 10);
+          migrated.landlord.clickUpgradeCost = toFiniteNumber(
+            legacy.clickUpgradeCost,
+            50,
           );
 
           saveGameState(migrated);
@@ -428,7 +440,12 @@
 
         if (savedRaw) {
           try {
-            return normalizeGameState(JSON.parse(savedRaw), language);
+            const normalizedState = normalizeGameState(
+              JSON.parse(savedRaw),
+              language,
+            );
+            localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
+            return normalizedState;
           } catch (error) {
             console.warn("Unable to load saved Money Game state.", error);
           }
@@ -700,7 +717,7 @@
           );
           return {
             ...property,
-            count: Number(savedProperty?.count || 0),
+            count: toFiniteNumber(savedProperty?.count, 0),
           };
         });
         const incomePerSec =
@@ -722,6 +739,8 @@
         }, [gameState]);
 
         useEffect(() => {
+          if (activeTab !== "landlord") return;
+
           const timer = setInterval(() => {
             if (incomePerSec > 0) {
               updateGameState((prev) => ({
@@ -738,7 +757,7 @@
             }
           }, 1000);
           return () => clearInterval(timer);
-        }, [incomePerSec]);
+        }, [activeTab, incomePerSec]);
 
         const handleMainClick = (e) => {
           const gain = clickPower * multiplier;
