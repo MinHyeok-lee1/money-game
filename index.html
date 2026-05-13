@@ -357,6 +357,15 @@
         return Number.isFinite(number) ? number : fallback;
       }
 
+      function clampNumber(value, min, max, fallback = min) {
+        const number = toFiniteNumber(value, fallback);
+        return Math.min(max, Math.max(min, number));
+      }
+
+      function toOwnedQuantity(value) {
+        return Math.max(0, Math.floor(toFiniteNumber(value, 0)));
+      }
+
       function normalizeGameState(state, language = "en") {
         const defaults = createDefaultGameState(language);
         const landlord = state?.landlord || {};
@@ -375,7 +384,7 @@
           wallet: {
             ...defaults.wallet,
             ...(state?.wallet || {}),
-            cash: toFiniteNumber(state?.wallet?.cash, 0),
+            cash: Math.max(0, toFiniteNumber(state?.wallet?.cash, 0)),
           },
           landlord: {
             ...defaults.landlord,
@@ -409,9 +418,14 @@
                 id: holding.id,
                 name: asset.name,
                 type: asset.type,
-                price: toFiniteNumber(savedHolding?.price, asset.price),
+                price: clampNumber(
+                  savedHolding?.price,
+                  Math.max(1, asset.price * 0.5),
+                  asset.price * 2,
+                  asset.price,
+                ),
                 volatility: asset.volatility,
-                owned: toFiniteNumber(savedHolding?.owned, 0),
+                owned: toOwnedQuantity(savedHolding?.owned),
               };
             }),
           },
@@ -781,8 +795,13 @@
           const holding = investmentHoldings.find(
             (item) => item.id === asset.id,
           );
-          const price = toFiniteNumber(holding?.price, asset.price);
-          const owned = toFiniteNumber(holding?.owned, 0);
+          const price = clampNumber(
+            holding?.price,
+            Math.max(1, asset.price * 0.5),
+            asset.price * 2,
+            asset.price,
+          );
+          const owned = toOwnedQuantity(holding?.owned);
           return {
             ...asset,
             ...(holding || {}),
@@ -926,79 +945,141 @@
             properties[idx].baseCost * Math.pow(1.15, properties[idx].count),
           );
           if (cash >= cost) {
-            updateGameState((prev) => ({
-              ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash - cost,
-              },
-              landlord: {
-                ...prev.landlord,
-                properties: prev.landlord.properties.map((item) =>
-                  item.id === id ? { ...item, count: item.count + 1 } : item,
-                ),
-              },
-            }));
+            updateGameState((prev) => {
+              const baseProperty = PROPERTIES_DATA[userLang].find(
+                (property) => property.id === id,
+              );
+              const currentProperty = prev.landlord.properties.find(
+                (property) => property.id === id,
+              );
+              if (!baseProperty || !currentProperty) return prev;
+
+              const currentCount = toOwnedQuantity(currentProperty.count);
+              const currentCost = Math.floor(
+                baseProperty.baseCost * Math.pow(1.15, currentCount),
+              );
+              if (prev.wallet.cash < currentCost) return prev;
+
+              return {
+                ...prev,
+                wallet: {
+                  ...prev.wallet,
+                  cash: prev.wallet.cash - currentCost,
+                },
+                landlord: {
+                  ...prev.landlord,
+                  properties: prev.landlord.properties.map((item) =>
+                    item.id === id
+                      ? { ...item, count: currentCount + 1 }
+                      : item,
+                  ),
+                },
+              };
+            });
           }
         };
 
         const buyClickUpgrade = () => {
           if (cash < clickUpgradeCost) return;
 
-          updateGameState((prev) => ({
-            ...prev,
-            wallet: {
-              ...prev.wallet,
-              cash: prev.wallet.cash - prev.landlord.clickUpgradeCost,
-            },
-            landlord: {
-              ...prev.landlord,
-              clickPower: prev.landlord.clickPower + 10,
-              clickUpgradeCost: Math.floor(prev.landlord.clickUpgradeCost * 1.5),
-            },
-          }));
+          updateGameState((prev) => {
+            const currentCost = toFiniteNumber(
+              prev.landlord.clickUpgradeCost,
+              50,
+            );
+            if (prev.wallet.cash < currentCost) return prev;
+
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash - currentCost,
+              },
+              landlord: {
+                ...prev.landlord,
+                clickPower: prev.landlord.clickPower + 10,
+                clickUpgradeCost: Math.floor(currentCost * 1.5),
+              },
+            };
+          });
         };
 
         const buyInvestmentAsset = (id) => {
           const asset = investmentAssets.find((item) => item.id === id);
           if (!asset || cash < asset.price) return;
 
-          updateGameState((prev) => ({
-            ...prev,
-            wallet: {
-              ...prev.wallet,
-              cash: prev.wallet.cash - asset.price,
-            },
-            investment: {
-              ...prev.investment,
-              holdings: prev.investment.holdings.map((holding) =>
-                holding.id === id
-                  ? { ...holding, owned: holding.owned + 1 }
-                  : holding,
-              ),
-            },
-          }));
+          updateGameState((prev) => {
+            const currentHolding = prev.investment.holdings.find(
+              (holding) => holding.id === id,
+            );
+            const currentPrice = clampNumber(
+              currentHolding?.price,
+              Math.max(1, asset.price * 0.5),
+              asset.price * 2,
+              asset.price,
+            );
+            if (prev.wallet.cash < currentPrice) return prev;
+
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash - currentPrice,
+              },
+              investment: {
+                ...prev.investment,
+                holdings: prev.investment.holdings.map((holding) =>
+                  holding.id === id
+                    ? {
+                        ...holding,
+                        price: currentPrice,
+                        owned: toOwnedQuantity(holding.owned) + 1,
+                      }
+                    : holding,
+                ),
+              },
+            };
+          });
         };
 
         const sellInvestmentAsset = (id) => {
           const asset = investmentAssets.find((item) => item.id === id);
           if (!asset || asset.owned <= 0) return;
 
-          updateGameState((prev) => ({
-            ...prev,
-            wallet: {
-              ...prev.wallet,
-              cash: prev.wallet.cash + asset.price,
-            },
-            investment: {
-              ...prev.investment,
-              holdings: prev.investment.holdings.map((holding) =>
-                holding.id === id
-                  ? { ...holding, owned: Math.max(0, holding.owned - 1) }
-                  : holding,
-              ),
-            },
-          }));
+          updateGameState((prev) => {
+            const currentHolding = prev.investment.holdings.find(
+              (holding) => holding.id === id,
+            );
+            const currentOwned = toOwnedQuantity(currentHolding?.owned);
+            if (currentOwned <= 0) return prev;
+
+            const currentPrice = clampNumber(
+              currentHolding?.price,
+              Math.max(1, asset.price * 0.5),
+              asset.price * 2,
+              asset.price,
+            );
+
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash + currentPrice,
+              },
+              investment: {
+                ...prev.investment,
+                holdings: prev.investment.holdings.map((holding) =>
+                  holding.id === id
+                    ? {
+                        ...holding,
+                        price: currentPrice,
+                        owned: Math.max(0, currentOwned - 1),
+                      }
+                    : holding,
+                ),
+              },
+            };
+          });
         };
 
         const formatMoney = (val) => {
