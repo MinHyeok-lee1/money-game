@@ -1661,6 +1661,19 @@
         return Number.isFinite(number) ? number : fallback;
       }
 
+      function formatDps(val) {
+        const n = toFiniteNumber(val, 0);
+        if (n <= 0) return "0";
+        if (n < 1000000) return Math.floor(n).toLocaleString();
+        if (n < 1e12) {
+          return new Intl.NumberFormat("en-US", {
+            notation: "compact",
+            maximumFractionDigits: 2,
+          }).format(n);
+        }
+        return n.toExponential(2);
+      }
+
       function clampNumber(value, min, max, fallback = min) {
         const number = toFiniteNumber(value, fallback);
         return Math.min(max, Math.max(min, number));
@@ -3538,7 +3551,7 @@
                             </div>
                           </div>
                           <div className="font-black text-gray-700">
-                            {lastPulledItem.power}
+                            {formatDps(lastPulledItem.power)}
                           </div>
                         </div>
                       ) : (
@@ -3778,8 +3791,8 @@
                                   {item.rarity} {item.type}
                                 </div>
                               </div>
-                              <div className="font-black text-gray-700">
-                                {item.power}
+                               <div className="font-black text-gray-700">
+                                {formatDps(item.power)}
                               </div>
                             </div>
                           ))}
@@ -3821,7 +3834,7 @@
                               </div>
                               <div className="text-right">
                                 <div className="font-black text-gray-700">
-                                  {item.power}
+                                  {formatDps(item.power)}
                                 </div>
                                 {item.type === "weapon" ? (
                                   <button
@@ -3868,7 +3881,7 @@
                           Total Team DPS
                         </div>
                         <div className="text-lg font-black leading-tight">
-                          {totalTeamDps.toLocaleString()}
+                          {formatDps(totalTeamDps)}
                         </div>
                       </div>
                       <div className="bg-black/20 rounded-md p-2">
@@ -3885,9 +3898,7 @@
                         </div>
                         <div className="text-lg font-black leading-tight">
                           {top5Characters.length > 0
-                            ? Math.floor(
-                                top5Characters[0].totalDps,
-                              ).toLocaleString()
+                            ? formatDps(top5Characters[0].totalDps)
                             : "0"}
                         </div>
                       </div>
@@ -3932,7 +3943,7 @@
                                   DPS
                                 </div>
                                 <div className="font-black text-red-600">
-                                  {Math.floor(char.totalDps).toLocaleString()}
+                                  {formatDps(char.totalDps)}
                                 </div>
                               </div>
                             </div>
