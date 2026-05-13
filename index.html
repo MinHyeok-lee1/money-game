@@ -332,6 +332,24 @@
         },
       ];
 
+      const DEFENSE_CONTRACT_FLAVOR = {
+        "blue-chip-stock": {
+          displayName: "Vanguard Defense Fund",
+          contractType: "Elite Contract",
+          lore: "Funds top-tier hero squads with proven stage-defense records.",
+        },
+        "growth-stock": {
+          displayName: "Rising Squad Futures",
+          contractType: "Hero Futures",
+          lore: "Early backing for squads climbing the stage ladder quickly.",
+        },
+        "meme-coin": {
+          displayName: "Underground Raid Bond",
+          contractType: "Raid Contract",
+          lore: "Unrated, volatile contracts on fringe squads. Max risk, max return.",
+        },
+      };
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -3498,6 +3516,28 @@
           }).format(val);
         };
 
+        const defenseStabilityIndex = Math.round(
+          Math.min(100, Math.max(0,
+            50 + investmentAssets.reduce((s, a) => s + a.gainLossPercent, 0) / Math.max(1, investmentAssets.length)
+          ))
+        );
+        const heroSurvivalIndex = Math.min(100, Math.round(
+          ((gameState.rpg?.highestStage || 0) / NORMAL_ENDING_STAGE) * 100
+        ));
+        const raidConfidence = Math.round(
+          Math.min(100, Math.max(10,
+            totalNetWorth > 0 ? Math.min(100, (totalPortfolioValue / Math.max(1, totalNetWorth)) * 100) : 20
+          ))
+        );
+        const dominantFaction = (() => {
+          const entries = Object.entries(ownedFactionCounts);
+          if (entries.length === 0) return "—";
+          return entries.sort((a, b) => b[1] - a[1])[0][0];
+        })();
+        const capitalPressure = totalNetWorth > 0
+          ? Math.round(Math.min(100, Math.max(0, (1 - cash / Math.max(1, totalNetWorth)) * 100)))
+          : 0;
+
         const tabs = [
           { id: "landlord", label: "Landlord" },
           { id: "investment", label: "Investment" },
@@ -3650,37 +3690,93 @@
                 </>
               ) : activeTab === "investment" ? (
                 <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-slate-800 to-teal-700 text-white p-5">
-                    <h1 className="text-xl font-black">Investment Master</h1>
-                    <p className="mt-1 text-xs font-medium text-teal-100">
-                      Prices update only while this tab is open. Wallet cash is
-                      shared with Landlord.
+                  <div className="bg-gradient-to-r from-green-700 to-emerald-600 text-white p-5">
+                    <h1 className="text-xl font-black">Defense Contracts</h1>
+                    <p className="mt-1 text-xs font-medium text-green-100">
+                      Fund hero squads. Rates shift with each defense outcome.
+                      War chest shared with Landlord.
                     </p>
                     <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                       <div>
-                        <div className="text-teal-100 text-xs font-bold uppercase">
-                          Wallet Cash
+                        <div className="text-green-100 text-xs font-bold uppercase">
+                          War Chest
                         </div>
                         <div className="text-lg font-black">
                           {formatMoney(cash)}
                         </div>
                       </div>
                       <div>
-                        <div className="text-teal-100 text-xs font-bold uppercase">
-                          Portfolio Value
+                        <div className="text-green-100 text-xs font-bold uppercase">
+                          Contract Value
                         </div>
                         <div className="text-lg font-black">
                           {formatMoney(totalPortfolioValue)}
                         </div>
                       </div>
                       <div>
-                        <div className="text-teal-100 text-xs font-bold uppercase">
-                          Net Worth
+                        <div className="text-green-100 text-xs font-bold uppercase">
+                          Total Capital
                         </div>
                         <div className="text-lg font-black">
                           {formatMoney(totalNetWorth)}
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Lore panel */}
+                  <div className="bg-emerald-50 border-b border-emerald-100 px-4 py-3">
+                    <div className="flex items-start gap-2">
+                      <div className="text-emerald-600 font-black text-xs uppercase tracking-widest mt-0.5">Dorothy</div>
+                      <p className="text-xs text-emerald-800 leading-relaxed">
+                        Investors who back winning squads see their contracts appreciate
+                        as squads clear higher stages. The upcoming{" "}
+                        <span className="font-black">Hero's Fate Betting</span> system
+                        will let you wager directly on defense outcomes.
+                        For now — fund wisely. I am watching the market.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Market Status panel */}
+                  <div className="bg-white border-b border-gray-100 px-4 py-3">
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                      Raid Market Status
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-gray-50 rounded-md p-2 border border-gray-100">
+                        <div className="text-[9px] font-black text-gray-400 uppercase">Defense Stability</div>
+                        <div className={`text-sm font-black ${defenseStabilityIndex >= 55 ? "text-emerald-600" : defenseStabilityIndex >= 45 ? "text-yellow-600" : "text-red-500"}`}>
+                          {defenseStabilityIndex}
+                          <span className="text-[9px] font-bold text-gray-400 ml-0.5">/ 100</span>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 rounded-md p-2 border border-gray-100">
+                        <div className="text-[9px] font-black text-gray-400 uppercase">Hero Survival Index</div>
+                        <div className={`text-sm font-black ${heroSurvivalIndex >= 60 ? "text-emerald-600" : heroSurvivalIndex >= 30 ? "text-yellow-600" : "text-gray-500"}`}>
+                          {heroSurvivalIndex}
+                          <span className="text-[9px] font-bold text-gray-400 ml-0.5">/ 100</span>
+                        </div>
+                        <div className="text-[8px] font-bold text-gray-400 mt-0.5">Stage {gameState.rpg?.highestStage || 0} / {NORMAL_ENDING_STAGE}</div>
+                      </div>
+                      <div className="bg-gray-50 rounded-md p-2 border border-gray-100">
+                        <div className="text-[9px] font-black text-gray-400 uppercase">Raid Confidence</div>
+                        <div className={`text-sm font-black ${raidConfidence >= 50 ? "text-emerald-600" : "text-yellow-600"}`}>
+                          {raidConfidence}
+                          <span className="text-[9px] font-bold text-gray-400 ml-0.5">/ 100</span>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 rounded-md p-2 border border-gray-100">
+                        <div className="text-[9px] font-black text-gray-400 uppercase">Capital Pressure</div>
+                        <div className={`text-sm font-black ${capitalPressure >= 70 ? "text-yellow-600" : "text-emerald-600"}`}>
+                          {capitalPressure}
+                          <span className="text-[9px] font-bold text-gray-400 ml-0.5">/ 100</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[9px] font-bold text-gray-400 uppercase">
+                      <span>Top Faction: <span className="text-emerald-700 font-black">{dominantFaction}</span></span>
+                      <span>Squad DPS: <span className="text-emerald-700 font-black">{formatDps(totalTeamDps)}</span></span>
                     </div>
                   </div>
 
@@ -3693,17 +3789,22 @@
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <h2 className="font-black text-gray-800">
-                              {asset.name}
+                              {DEFENSE_CONTRACT_FLAVOR[asset.id]?.displayName || asset.name}
                             </h2>
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              {asset.type}
+                              {DEFENSE_CONTRACT_FLAVOR[asset.id]?.contractType || asset.type}
                             </div>
+                            {DEFENSE_CONTRACT_FLAVOR[asset.id]?.lore && (
+                              <div className="text-[10px] text-gray-400 mt-1 leading-snug max-w-[160px]">
+                                {DEFENSE_CONTRACT_FLAVOR[asset.id].lore}
+                              </div>
+                            )}
                           </div>
                           <div className="text-right">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Current Price
+                              Contract Rate
                             </div>
-                            <div className="font-black text-teal-700">
+                            <div className="font-black text-emerald-700">
                               {formatMoney(asset.price)}
                             </div>
                           </div>
@@ -3712,7 +3813,7 @@
                         <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
                           <div className="bg-gray-50 rounded-md p-3">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Owned Quantity
+                              Positions Held
                             </div>
                             <div className="font-black text-gray-800">
                               {asset.owned}
@@ -3720,7 +3821,7 @@
                           </div>
                           <div className="bg-gray-50 rounded-md p-3">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Holding Value
+                              Stake Value
                             </div>
                             <div className="font-black text-gray-800">
                               {formatMoney(asset.value)}
@@ -3728,7 +3829,7 @@
                           </div>
                           <div className="bg-gray-50 rounded-md p-3">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Avg Buy Price
+                              Entry Rate
                             </div>
                             <div className="font-black text-gray-800">
                               {asset.owned > 0
@@ -3738,7 +3839,7 @@
                           </div>
                           <div className="bg-gray-50 rounded-md p-3">
                             <div className="text-xs font-bold text-gray-400 uppercase">
-                              Gain / Loss
+                              Return
                             </div>
                             <div
                               className={`font-black ${asset.owned <= 0 ? "text-gray-400" : asset.gainLoss >= 0 ? "text-emerald-600" : "text-red-600"}`}
@@ -3756,30 +3857,30 @@
                           <button
                             onClick={() => buyInvestmentAsset(asset.id)}
                             disabled={cash < asset.price}
-                            className={`rounded-md py-2 text-sm font-bold transition-colors ${cash >= asset.price ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                            className={`rounded-md py-2 text-sm font-bold transition-colors ${cash >= asset.price ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                           >
-                            Buy 1
+                            Back 1
                           </button>
                           <button
                             onClick={() => buyMaxInvestmentAsset(asset.id)}
                             disabled={cash < asset.price}
-                            className={`rounded-md py-2 text-sm font-bold transition-colors ${cash >= asset.price ? "bg-teal-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                            className={`rounded-md py-2 text-sm font-bold transition-colors ${cash >= asset.price ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                           >
-                            Buy Max
+                            Back Max
                           </button>
                           <button
                             onClick={() => sellInvestmentAsset(asset.id)}
                             disabled={asset.owned <= 0}
-                            className={`rounded-md py-2 text-sm font-bold transition-colors ${asset.owned > 0 ? "bg-slate-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                            className={`rounded-md py-2 text-sm font-bold transition-colors ${asset.owned > 0 ? "bg-green-800 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                           >
-                            Sell 1
+                            Exit 1
                           </button>
                           <button
                             onClick={() => sellAllInvestmentAsset(asset.id)}
                             disabled={asset.owned <= 0}
-                            className={`rounded-md py-2 text-sm font-bold transition-colors ${asset.owned > 0 ? "bg-slate-800 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                            className={`rounded-md py-2 text-sm font-bold transition-colors ${asset.owned > 0 ? "bg-green-900 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                           >
-                            Sell All
+                            Exit All
                           </button>
                         </div>
                       </div>
@@ -3788,13 +3889,13 @@
                 </section>
               ) : activeTab === "enhancement" ? (
                 <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-700 to-rose-600 text-white p-5">
+                  <div className="bg-gradient-to-r from-green-700 to-emerald-600 text-white p-5">
                     <h1 className="text-xl font-black">
                       Gacha & Enhancement
                     </h1>
                     <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <div className="text-purple-100 text-xs font-bold uppercase">
+                        <div className="text-green-100 text-xs font-bold uppercase">
                           Wallet Cash
                         </div>
                         <div className="text-lg font-black">
@@ -3802,7 +3903,7 @@
                         </div>
                       </div>
                       <div>
-                        <div className="text-purple-100 text-xs font-bold uppercase">
+                        <div className="text-green-100 text-xs font-bold uppercase">
                           Draw Cost
                         </div>
                         <div className="text-lg font-black">
@@ -3817,14 +3918,14 @@
                       <button
                         onClick={drawGachaItem}
                         disabled={cash < GACHA_DRAW_COST}
-                        className={`rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST ? "bg-purple-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                        className={`rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                       >
                         Draw 1
                       </button>
                       <button
                         onClick={drawTenGachaItems}
                         disabled={cash < GACHA_DRAW_COST * 10}
-                        className={`rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST * 10 ? "bg-rose-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                        className={`rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST * 10 ? "bg-green-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                       >
                         Draw 10
                       </button>
@@ -4033,7 +4134,7 @@
                                         )
                                       }
                                       disabled={!fallbackWeapon}
-                                      className={`rounded-md px-3 py-1 text-xs font-black transition-colors ${fallbackWeapon ? "bg-purple-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                      className={`rounded-md px-3 py-1 text-xs font-black transition-colors ${fallbackWeapon ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                                     >
                                       Equip First
                                     </button>
@@ -4141,7 +4242,7 @@
                                       item.enhanceLevel >= MAX_ENHANCE_LEVEL ||
                                       cash < getEnhanceCost(item.enhanceLevel)
                                     }
-                                    className={`mt-2 rounded-md px-3 py-1 text-xs font-black transition-colors ${item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel) ? "bg-purple-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                    className={`mt-2 rounded-md px-3 py-1 text-xs font-black transition-colors ${item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel) ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                                   >
                                     Enhance
                                   </button>
@@ -4165,15 +4266,15 @@
                 </section>
               ) : (
                 <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-red-700 to-orange-600 text-white p-5">
+                  <div className="bg-gradient-to-r from-green-800 to-emerald-700 text-white p-5">
                     <h1 className="text-xl font-black">Battle Preview</h1>
-                    <p className="mt-1 text-xs font-medium text-red-100">
+                    <p className="mt-1 text-xs font-medium text-green-100">
                       RPG combat foundation. Current team strength and squad
                       rankings.
                     </p>
                     <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                       <div className="bg-black/20 rounded-md p-2">
-                        <div className="text-red-100 text-[10px] font-black uppercase">
+                        <div className="text-green-100 text-[10px] font-black uppercase">
                           Total Team DPS
                         </div>
                         <div className="text-lg font-black leading-tight">
@@ -4181,7 +4282,7 @@
                         </div>
                       </div>
                       <div className="bg-black/20 rounded-md p-2">
-                        <div className="text-red-100 text-[10px] font-black uppercase">
+                        <div className="text-green-100 text-[10px] font-black uppercase">
                           Stage {gameState.rpg?.currentStage || 1} Progress
                         </div>
                         <div className="text-lg font-black leading-tight">
@@ -4195,7 +4296,7 @@
 
                     <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                       <div className="bg-black/20 rounded-md p-2">
-                        <div className="text-red-100 text-[10px] font-black uppercase">
+                        <div className="text-green-100 text-[10px] font-black uppercase">
                           RPG Dividends
                         </div>
                         <div className="text-lg font-black leading-tight text-yellow-400">
@@ -4203,7 +4304,7 @@
                         </div>
                       </div>
                       <div className="bg-black/20 rounded-md p-2">
-                        <div className="text-red-100 text-[10px] font-black uppercase">
+                        <div className="text-green-100 text-[10px] font-black uppercase">
                           Last Reward
                         </div>
                         <div className="text-lg font-black leading-tight">
@@ -4214,7 +4315,7 @@
 
                     <div className="mt-4 bg-black/40 rounded-lg p-4 border border-red-900/30">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] font-black text-red-200 uppercase tracking-widest">
+                        <span className="text-[10px] font-black text-green-200 uppercase tracking-widest">
                           Monster HP
                         </span>
                         <span className="text-xs font-black text-white">
@@ -4224,13 +4325,13 @@
                       </div>
                       <div className="w-full h-4 bg-gray-900 rounded-full overflow-hidden border border-red-900/20">
                         <div
-                          className="h-full bg-gradient-to-r from-red-600 to-orange-500 transition-all duration-500"
+                          className="h-full bg-gradient-to-r from-emerald-600 to-green-500 transition-all duration-500"
                           style={{
                             width: `${Math.min(100, Math.max(0, ((gameState.rpg?.monsterHp || 0) / (gameState.rpg?.monsterMaxHp || 100)) * 100))}%`,
                           }}
                         ></div>
                       </div>
-                      <div className="mt-2 text-center text-[10px] font-bold text-red-300/60 uppercase">
+                      <div className="mt-2 text-center text-[10px] font-bold text-green-300/60 uppercase">
                         {Math.floor(
                           Math.min(
                             100,
@@ -4247,22 +4348,22 @@
                       </div>
                     </div>
 
-                    <div className="mt-2 px-1 flex justify-between items-center text-[10px] font-bold text-red-300/40 uppercase">
+                    <div className="mt-2 px-1 flex justify-between items-center text-[10px] font-bold text-green-300/40 uppercase">
                       <span>Est. Reward: {formatDps(getMonsterDefeatReward(gameState.rpg?.currentStage || 1))}</span>
                       <span>Highest Stage: {gameState.rpg?.highestStage || 1}</span>
                     </div>
 
                     <div className="mt-3 bg-black/30 rounded-lg p-3 border border-red-900/20">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] font-black text-red-200 uppercase tracking-widest">
+                        <span className="text-[10px] font-black text-green-200 uppercase tracking-widest">
                           Mode
                         </span>
-                        <span className={`text-[10px] font-black uppercase ${isNormalEndingReached(gameState.rpg) ? "text-yellow-300" : "text-red-100"}`}>
+                        <span className={`text-[10px] font-black uppercase ${isNormalEndingReached(gameState.rpg) ? "text-yellow-300" : "text-green-100"}`}>
                           {getRpgModeLabel(gameState.rpg)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] font-bold text-red-300/60 uppercase">Normal Ending Target</span>
+                        <span className="text-[10px] font-bold text-green-300/60 uppercase">Normal Ending Target</span>
                         <span className="text-[10px] font-black text-white">Stage {NORMAL_ENDING_STAGE}</span>
                       </div>
                       <div className="w-full h-1.5 bg-gray-900 rounded-full overflow-hidden mt-1">
@@ -4271,7 +4372,7 @@
                           style={{ width: `${Math.min(100, ((gameState.rpg?.highestStage || 0) / NORMAL_ENDING_STAGE) * 100)}%` }}
                         ></div>
                       </div>
-                      <div className="mt-1 text-right text-[9px] font-bold text-red-300/40 uppercase">
+                      <div className="mt-1 text-right text-[9px] font-bold text-green-300/40 uppercase">
                         {Math.min(gameState.rpg?.highestStage || 0, NORMAL_ENDING_STAGE)} / {NORMAL_ENDING_STAGE}
                       </div>
                     </div>
@@ -4342,7 +4443,7 @@
                       </div>
                     </div>
                     <section className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
-                      <div className="bg-gray-800 text-white p-3 flex justify-between items-center">
+                      <div className="bg-emerald-800 text-white p-3 flex justify-between items-center">
                         <h2 className="text-xs font-black uppercase tracking-widest">
                           RPG Dividends Upgrades
                         </h2>
@@ -4364,7 +4465,7 @@
                           <button
                             onClick={() => buyRpgUpgrade("atkLevel")}
                             disabled={(gameState.rpg?.dividends || 0) < getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel"))}
-                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel")) ? "bg-red-600 text-white shadow-sm hover:bg-red-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel")) ? "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                           >
                             {formatDps(getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel")))}
                           </button>
@@ -4422,10 +4523,10 @@
                           {top5Characters.map((char, index) => (
                             <div
                               key={char.instanceId}
-                              className="flex items-center justify-between gap-3 bg-gray-50 rounded-md p-3 border-l-4 border-red-500"
+                              className="flex items-center justify-between gap-3 bg-gray-50 rounded-md p-3 border-l-4 border-emerald-500"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="bg-red-100 text-red-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-black">
+                                <div className="bg-emerald-100 text-emerald-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-black">
                                   {index + 1}
                                 </div>
                                 <div>
@@ -4449,7 +4550,7 @@
                                 <div className="text-[10px] font-bold text-gray-400 uppercase">
                                   DPS
                                 </div>
-                                <div className="font-black text-red-600">
+                                <div className="font-black text-emerald-600">
                                   {formatDps(char.totalDps)}
                                 </div>
                               </div>

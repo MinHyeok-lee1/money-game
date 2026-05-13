@@ -83,6 +83,10 @@
 
 **Milestone 4H complete:** Dorothy Proposal Script Foundation implemented. `DOROTHY_SCRIPTS.normalEndingProposal` added with four speaker/textKey lines; KO and EN localization entries added to `TRANSLATIONS`; `acknowledgeDorothyProposal` handler sets `normalEndingSeen: true`; RPG tab shows Dorothy proposal panel when `normalEndingReached && !normalEndingSeen` and a compact acknowledged note when `normalEndingSeen`; external capital leverage, Infinite Mode mechanics, and Dorothy UI beyond the script remain locked. Milestone 4-2 not yet complete.
 
+**UI Alignment pass complete:** Investment, Enhancement, and RPG tabs now follow the Landlord emerald/card layout. All tab headers use `from-green-700 to-emerald-600` gradient; buttons use emerald/green accents; red/teal/purple/slate/rose UI colors removed. No gameplay logic, data, or save state was modified.
+
+**Investment presentation layer shifted toward Hero's Fate Betting foundation:** `DEFENSE_CONTRACT_FLAVOR` static map added for asset display names, contract types, and lore. Investment tab header renamed to "Defense Contracts"; stat labels renamed (War Chest, Contract Value, Total Capital). Lore panel with Dorothy voice added. Derived-only Market Status panel (Defense Stability, Hero Survival Index, Raid Confidence, Capital Pressure, dominant faction, squad DPS) added. Per-asset labels renamed (Contract Rate, Positions Held, Stake Value, Entry Rate, Return) and action buttons renamed (Back 1, Back Max, Exit 1, Exit All). All buy/sell/portfolio logic and internal state keys are unchanged.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.
