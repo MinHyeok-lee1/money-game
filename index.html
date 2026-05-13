@@ -283,6 +283,7 @@
       const INVESTMENT_HISTORY_LIMIT = 30;
       const GACHA_DRAW_COST = 1000;
       const GACHA_RECENT_PULL_LIMIT = 10;
+      const MAX_ENHANCE_LEVEL = 10;
       const INVESTMENT_ASSETS = [
         {
           id: "blue-chip-stock",
@@ -414,6 +415,7 @@
             failStacks: 0,
             lastPulledItem: null,
             recentPulls: [],
+            lastEnhancementResult: null,
           },
           rpg: {
             characters: [],
@@ -458,6 +460,12 @@
       function normalizeGachaItem(item, fallbackIndex = 0) {
         const definition = GACHA_ITEMS.find((candidate) => candidate.id === item?.id);
         if (!definition) return null;
+        const enhanceLevel = clampNumber(
+          Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
+          0,
+          MAX_ENHANCE_LEVEL,
+          0,
+        );
 
         return {
           instanceId:
@@ -469,6 +477,7 @@
           type: definition.type,
           rarity: definition.rarity,
           power: Math.max(0, toFiniteNumber(item.power, definition.power)),
+          enhanceLevel,
         };
       }
 
@@ -572,6 +581,27 @@
               normalizedInventory[normalizedInventory.length - 1] ||
               null,
             recentPulls: normalizedRecentPulls,
+            lastEnhancementResult:
+              enhancement.lastEnhancementResult &&
+              typeof enhancement.lastEnhancementResult === "object"
+                ? {
+                    itemName: String(
+                      enhancement.lastEnhancementResult.itemName || "",
+                    ),
+                    success: Boolean(enhancement.lastEnhancementResult.success),
+                    level: clampNumber(
+                      Math.floor(
+                        toFiniteNumber(
+                          enhancement.lastEnhancementResult.level,
+                          0,
+                        ),
+                      ),
+                      0,
+                      MAX_ENHANCE_LEVEL,
+                      0,
+                    ),
+                  }
+                : null,
           },
           rpg: {
             ...defaults.rpg,
@@ -912,6 +942,8 @@
         const enhancementInventory = gameState.enhancement.inventory;
         const lastPulledItem = gameState.enhancement.lastPulledItem;
         const recentPulls = gameState.enhancement.recentPulls;
+        const lastEnhancementResult =
+          gameState.enhancement.lastEnhancementResult;
         const clickPower = landlord.clickPower;
         const clickUpgradeCost = landlord.clickUpgradeCost;
         const rebirthCount = landlord.rebirthCount;
@@ -1438,6 +1470,71 @@
           drawGachaItems(10);
         };
 
+        const getEnhanceCost = (level) => {
+          const safeLevel = clampNumber(
+            Math.floor(toFiniteNumber(level, 0)),
+            0,
+            MAX_ENHANCE_LEVEL,
+            0,
+          );
+          return 500 * (safeLevel + 1);
+        };
+
+        const getEnhanceChance = (level) => {
+          const safeLevel = clampNumber(
+            Math.floor(toFiniteNumber(level, 0)),
+            0,
+            MAX_ENHANCE_LEVEL,
+            0,
+          );
+          return clampNumber(0.9 - safeLevel * 0.06, 0.3, 0.9, 0.9);
+        };
+
+        const enhanceWeaponItem = (instanceId) => {
+          updateGameState((prev) => {
+            const item = prev.enhancement.inventory.find(
+              (candidate) => candidate.instanceId === instanceId,
+            );
+            if (!item || item.type !== "weapon") return prev;
+
+            const currentLevel = clampNumber(
+              Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
+              0,
+              MAX_ENHANCE_LEVEL,
+              0,
+            );
+            if (currentLevel >= MAX_ENHANCE_LEVEL) return prev;
+
+            const cost = getEnhanceCost(currentLevel);
+            if (prev.wallet.cash < cost) return prev;
+
+            const success = Math.random() < getEnhanceChance(currentLevel);
+            const nextLevel = success ? currentLevel + 1 : currentLevel;
+            const result = {
+              itemName: item.name,
+              success,
+              level: nextLevel,
+            };
+
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash - cost,
+              },
+              enhancement: {
+                ...prev.enhancement,
+                inventory: prev.enhancement.inventory.map((candidate) =>
+                  candidate.instanceId === instanceId
+                    ? { ...candidate, enhanceLevel: nextLevel }
+                    : candidate,
+                ),
+                lastEnhancementResult: result,
+              },
+            };
+          });
+        };
+
         const renderSparkline = (history) => {
           const points = normalizePriceHistory(history, 1);
           const min = Math.min(...points);
@@ -1852,6 +1949,33 @@
                       )}
                     </div>
 
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="text-xs font-bold text-gray-400 uppercase">
+                        Last Enhancement
+                      </div>
+                      {lastEnhancementResult ? (
+                        <div className="mt-2 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="font-black text-gray-800">
+                              {lastEnhancementResult.itemName}
+                            </div>
+                            <div
+                              className={`text-xs font-bold uppercase ${lastEnhancementResult.success ? "text-emerald-600" : "text-red-600"}`}
+                            >
+                              {lastEnhancementResult.success
+                                ? "Success"
+                                : "Failed"}
+                            </div>
+                          </div>
+                          <div className="font-black text-gray-700">
+                            +{lastEnhancementResult.level}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-2 font-bold text-gray-400">-</div>
+                      )}
+                    </div>
+
                     <div className="grid grid-cols-5 gap-2">
                       {GACHA_RARITIES.map((rarity) => (
                         <div
@@ -1928,6 +2052,8 @@
                               <div>
                                 <div className="font-bold text-gray-800">
                                   {item.name}
+                                  {item.type === "weapon" &&
+                                    ` +${item.enhanceLevel}`}
                                 </div>
                                 <div
                                   className={`text-xs font-bold uppercase ${rarityTextClass(item.rarity)}`}
@@ -1935,9 +2061,30 @@
                                   {item.rarity} {item.type}
                                 </div>
                               </div>
-                              <div className="font-black text-gray-700">
-                                {item.power}
+                              <div className="text-right">
+                                <div className="font-black text-gray-700">
+                                  {item.power}
+                                </div>
+                                {item.type === "weapon" ? (
+                                  <button
+                                    onClick={() =>
+                                      enhanceWeaponItem(item.instanceId)
+                                    }
+                                    disabled={
+                                      item.enhanceLevel >= MAX_ENHANCE_LEVEL ||
+                                      cash < getEnhanceCost(item.enhanceLevel)
+                                    }
+                                    className={`mt-2 rounded-md px-3 py-1 text-xs font-black transition-colors ${item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel) ? "bg-purple-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                  >
+                                    Enhance
+                                  </button>
+                                ) : null}
                               </div>
+                              {item.type === "weapon" ? (
+                                <div className="col-span-2 text-xs font-bold text-gray-500">
+                                  Cost: {formatMoney(getEnhanceCost(item.enhanceLevel))} · Chance: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%
+                                </div>
+                              ) : null}
                             </div>
                           ))
                         ) : (

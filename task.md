@@ -30,6 +30,8 @@
 
 **Milestone 3B complete:** Enhancement tab has Draw 1/Draw 10, shared wallet spending, rarity counts, recent pull history, and inventory controls.
 
+**Milestone 3C complete:** Basic weapon enhancement is available for weapon items with shared wallet spending, level cap, success/failure result, and safe item-level persistence.
+
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.
