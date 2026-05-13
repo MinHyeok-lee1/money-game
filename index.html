@@ -450,6 +450,11 @@
         };
       }
 
+      // Pure derived helper — no mutation, reads only contractSettlementUnlocked flag
+      function isDefenseContractSettlementUnlocked(gameState) {
+        return gameState?.investment?.contractSettlementUnlocked === true;
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -1779,6 +1784,7 @@
             holdings: createDefaultInvestmentHoldings(),
             betSlip: { selectedContractId: null, stake: 0 },
             contractHistory: [],
+            contractSettlementUnlocked: false,
           },
           enhancement: {
             inventory: [],
@@ -2413,6 +2419,8 @@
                   )
                   .slice(-10)
               : [],
+            contractSettlementUnlocked:
+              investment.contractSettlementUnlocked === true ? true : false,
           },
           enhancement: {
             ...defaults.enhancement,
@@ -4117,13 +4125,35 @@
                           Save Preview to History
                         </button>
 
-                        {/* Real settlement locked */}
-                        <button
-                          disabled
-                          className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
-                        >
-                          Real Settlement Locked — Hero's Fate Not Active
-                        </button>
+                        {/* Settlement gate status */}
+                        {(() => {
+                          const unlocked = isDefenseContractSettlementUnlocked(gameState);
+                          return (
+                            <div className="border border-gray-200 rounded-md overflow-hidden">
+                              <div className="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
+                                <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Settlement Status</div>
+                                <div className={`text-[9px] font-black uppercase ${unlocked ? "text-emerald-600" : "text-gray-400"}`}>
+                                  {unlocked ? "Unlocked" : "Locked"}
+                                </div>
+                              </div>
+                              <div className="px-3 py-2">
+                                <div className="text-[10px] text-gray-500 leading-relaxed">
+                                  {unlocked
+                                    ? "Hero's Fate mechanics are active. Real settlement is available."
+                                    : "Real settlement is locked until Hero's Fate mechanics are enabled."}
+                                </div>
+                              </div>
+                              <div className="px-3 pb-3">
+                                <button
+                                  disabled
+                                  className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
+                                >
+                                  {unlocked ? "Settle Contract" : "Real Settlement Locked"}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="py-4 text-center">
