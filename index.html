@@ -1870,6 +1870,14 @@
         return Math.min(1.5, toFiniteNumber(multiplier, 1.25));
       }
 
+      function getFactionSynergyMultiplier(count) {
+        const c = Math.max(0, Math.floor(toFiniteNumber(count, 0)));
+        if (c >= 4) return 1.25;
+        if (c === 3) return 1.12;
+        if (c === 2) return 1.05;
+        return 1.0;
+      }
+
       function normalizeGameState(state, language = "en") {
         const defaults = createDefaultGameState(language);
         const landlord = state?.landlord || {};
@@ -2429,6 +2437,13 @@
             };
           })
           .filter(Boolean);
+
+        const ownedFactionCounts = ownedCharacterDetails.reduce((acc, char) => {
+          const faction = char.definition.faction;
+          acc[faction] = (acc[faction] || 0) + 1;
+          return acc;
+        }, {});
+
         const ownedCharactersByRarity = Object.keys(CHARACTER_GACHA_POOLS).reduce(
           (counts, rarity) => {
             counts[rarity] = ownedCharacterDetails.filter(
@@ -3533,6 +3548,44 @@
                           );
                         })}
                       </div>
+
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-3">
+                        <div className="flex items-center justify-between mb-3">
+                          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            Faction Synergies
+                          </h2>
+                          <div className="text-[10px] font-black text-gray-500 uppercase">
+                            Preview
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {Object.entries(ownedFactionCounts).map(
+                            ([faction, count]) => {
+                              const multiplier =
+                                getFactionSynergyMultiplier(count);
+                              return (
+                                <div
+                                  key={faction}
+                                  className="bg-white border border-gray-200 rounded-md p-2 flex flex-col items-center shadow-sm"
+                                >
+                                  <div className="text-[10px] font-black uppercase text-gray-400">
+                                    {faction}
+                                  </div>
+                                  <div className="font-black text-gray-800 text-sm">
+                                    {count} Chars
+                                  </div>
+                                  <div
+                                    className={`text-[10px] font-black mt-1 px-1.5 py-0.5 rounded-sm ${multiplier > 1.0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}
+                                  >
+                                    x{multiplier.toFixed(2)}
+                                  </div>
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      </div>
+
                       {ownedCharacterDetails.length > 0 ? (
                         <div className="space-y-2">
                           {ownedCharacterDetails.map((character) => {
@@ -3550,7 +3603,8 @@
                                   <div
                                     className={`text-xs font-bold uppercase ${rarityTextClass(character.rarityLabel)}`}
                                   >
-                                    {character.rarityLabel} character
+                                    {character.rarityLabel} ·{" "}
+                                    {character.definition.faction}
                                   </div>
                                   <div className="text-xs font-bold text-gray-500">
                                     Weapon:{" "}

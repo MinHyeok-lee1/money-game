@@ -42,6 +42,8 @@
 
 **Milestone 3-3E complete:** Preferred weapon synergy foundation is implemented with character `preferredWeaponType` comparison, safe normalization, and bounded synergy multipliers visible in UI.
 
+**Milestone 3-3F complete:** Faction synergy foundation is implemented with owned character faction counting and multiplier previews (x1.05 for 2, x1.12 for 3, x1.25 for 4+ same faction) visible in UI.
+
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.
