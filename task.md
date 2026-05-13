@@ -85,6 +85,8 @@
 
 **UI Alignment pass complete:** Investment, Enhancement, and RPG tabs now follow the Landlord emerald/card layout. All tab headers use `from-green-700 to-emerald-600` gradient; buttons use emerald/green accents; red/teal/purple/slate/rose UI colors removed. No gameplay logic, data, or save state was modified.
 
+**Defense Contracts derived odds preview foundation added:** Three pure derived helpers (`getDefenseContractRiskTier`, `getDefenseContractOdds`, `getDefenseContractProjectedPayout`) added outside the component — no state mutation, no settlement logic. Each Defense Contract card now shows a "Contract Preview" panel with Defense Odds (%), Projected Payout (multiplier), Risk Tier (Stable/Volatile/High Risk), and Linked RPG Signal (highest stage + squad DPS). All existing buy/sell mechanics, portfolio calculations, sparklines, and localStorage schema are unchanged.
+
 **Investment presentation layer shifted toward Hero's Fate Betting foundation:** `DEFENSE_CONTRACT_FLAVOR` static map added for asset display names, contract types, and lore. Investment tab header renamed to "Defense Contracts"; stat labels renamed (War Chest, Contract Value, Total Capital). Lore panel with Dorothy voice added. Derived-only Market Status panel (Defense Stability, Hero Survival Index, Raid Confidence, Capital Pressure, dominant faction, squad DPS) added. Per-asset labels renamed (Contract Rate, Positions Held, Stake Value, Entry Rate, Return) and action buttons renamed (Back 1, Back Max, Exit 1, Exit All). All buy/sell/portfolio logic and internal state keys are unchanged.
 
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
