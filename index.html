@@ -111,6 +111,12 @@
           lv: "레벨",
           format: "ko-KR",
           currency: "KRW",
+          dorothyLine1: "...드디어 왔군요. 100층을 돌파한 용사에게 인사를 전합니다.",
+          dorothyLine2: "이 세계는 원래 100층에서 끝나도록 설계된 '닫힌 세계'였어요.",
+          dorothyLine3: "하지만 당신처럼 그 경계를 넘는 자가 나타나면... 세계는 다시 열립니다.",
+          dorothyLine4: "101층부터는 '무한 모드'입니다. 아직 그 문은 잠겨 있지만, 곧 외부 자본 레버리지가 해금될 거예요.",
+          dorothyAcknowledge: "알겠습니다, 도로시",
+          dorothyAcknowledged: "도로시의 제안을 확인했습니다 — 무한 모드 해금 대기 중",
         },
         en: {
           title: "💸 Idle Landlord",
@@ -128,7 +134,22 @@
           lv: "Lv",
           format: "en-US",
           currency: "USD",
+          dorothyLine1: "...So you finally made it. I offer my greetings to the hero who broke through Stage 100.",
+          dorothyLine2: "This world was designed to end at Stage 100 — a closed world, by intention.",
+          dorothyLine3: "But when someone like you crosses that boundary... the world opens again.",
+          dorothyLine4: "Stage 101 and beyond is Infinite Mode. That door is still locked — but external capital leverage will unlock soon.",
+          dorothyAcknowledge: "Understood, Dorothy",
+          dorothyAcknowledged: "Dorothy's proposal acknowledged — awaiting Infinite Mode unlock",
         },
+      };
+
+      const DOROTHY_SCRIPTS = {
+        normalEndingProposal: [
+          { speaker: "Dorothy", textKey: "dorothyLine1" },
+          { speaker: "Dorothy", textKey: "dorothyLine2" },
+          { speaker: "Dorothy", textKey: "dorothyLine3" },
+          { speaker: "Dorothy", textKey: "dorothyLine4" },
+        ],
       };
 
       const PROPERTIES_DATA = {
@@ -3383,6 +3404,16 @@
           }));
         };
 
+        const acknowledgeDorothyProposal = () => {
+          updateGameState((prev) => ({
+            ...prev,
+            rpg: {
+              ...prev.rpg,
+              normalEndingSeen: true,
+            },
+          }));
+        };
+
         const buyRpgUpgrade = (key) => {
           const validKeys = ["atkLevel", "spdLevel", "penLevel"];
           if (!validKeys.includes(key)) return;
@@ -4245,12 +4276,34 @@
                       </div>
                     </div>
 
-                    {isNormalEndingReached(gameState.rpg) && (
-                      <div className="mt-3 bg-yellow-900/40 border border-yellow-500/30 rounded-lg p-3 text-center">
-                        <div className="text-yellow-300 font-black text-xs uppercase tracking-widest">Normal Ending Reached</div>
-                        <div className="text-yellow-200/70 text-[10px] font-bold mt-1">
-                          You have conquered Stage 100. The world beyond awaits — Infinite Mode coming soon.
+                    {isNormalEndingReached(gameState.rpg) && !gameState.rpg?.normalEndingSeen && (
+                      <div className="mt-3 bg-gray-950 border border-yellow-600/40 rounded-lg overflow-hidden">
+                        <div className="bg-yellow-900/60 px-3 py-2 flex items-center gap-2">
+                          <span className="text-yellow-300 font-black text-[10px] uppercase tracking-widest">Dorothy</span>
+                          <span className="text-yellow-600/60 text-[9px] font-bold uppercase">— Proposal</span>
                         </div>
+                        <div className="p-3 space-y-2">
+                          {DOROTHY_SCRIPTS.normalEndingProposal.map((line, i) => (
+                            <div key={i} className="text-[11px] font-bold text-yellow-100/80 leading-snug">
+                              {t[line.textKey]}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="px-3 pb-3">
+                          <button
+                            onClick={acknowledgeDorothyProposal}
+                            className="w-full py-2 bg-yellow-600 hover:bg-yellow-500 text-gray-950 font-black text-xs rounded-md transition-all uppercase tracking-wider"
+                          >
+                            {t.dorothyAcknowledge}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {isNormalEndingReached(gameState.rpg) && gameState.rpg?.normalEndingSeen && (
+                      <div className="mt-3 px-3 py-2 bg-gray-900/40 border border-gray-700/30 rounded-md text-center">
+                        <span className="text-gray-400 text-[9px] font-black uppercase tracking-widest">
+                          {t.dorothyAcknowledged}
+                        </span>
                       </div>
                     )}
                   </div>

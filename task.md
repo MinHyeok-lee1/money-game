@@ -81,6 +81,8 @@
 
 **Milestone 4G complete:** Normal Ending Boundary Foundation implemented. `NORMAL_ENDING_STAGE = 100` constant added; `normalEndingReached` and `normalEndingSeen` fields added to `gameState.rpg` with safe defaults and normalization; stage progression sets `normalEndingReached: true` when `highestStage >= 100` without blocking further progression; `isNormalEndingReached` and `getRpgModeLabel` helpers added; RPG tab now shows Stage 100 target progress bar, current mode label (Normal Arc / Infinite Mode Preview / Locked Mechanics), and a small narrative placeholder when Normal Ending is reached. `normalEndingSeen` remains reserved for a future modal. Milestone 4-2 not yet complete.
 
+**Milestone 4H complete:** Dorothy Proposal Script Foundation implemented. `DOROTHY_SCRIPTS.normalEndingProposal` added with four speaker/textKey lines; KO and EN localization entries added to `TRANSLATIONS`; `acknowledgeDorothyProposal` handler sets `normalEndingSeen: true`; RPG tab shows Dorothy proposal panel when `normalEndingReached && !normalEndingSeen` and a compact acknowledged note when `normalEndingSeen`; external capital leverage, Infinite Mode mechanics, and Dorothy UI beyond the script remain locked. Milestone 4-2 not yet complete.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.
