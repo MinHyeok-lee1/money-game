@@ -40,6 +40,8 @@
 
 **Milestone 3-3D complete:** Added basic weapon equip/unequip foundation using character `equippedWeaponInstanceId`; full 3-3 gameplay integration remains pending.
 
+**Milestone 3-3E complete:** Preferred weapon synergy foundation is implemented with character `preferredWeaponType` comparison, safe normalization, and bounded synergy multipliers visible in UI.
+
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.

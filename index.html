@@ -344,6 +344,7 @@
           id: "iron-dagger",
           name: "Iron Dagger",
           type: "weapon",
+          weaponType: "dagger",
           rarity: "Normal",
           power: 12,
         },
@@ -359,6 +360,7 @@
           id: "silver-blade",
           name: "Silver Blade",
           type: "weapon",
+          weaponType: "blade",
           rarity: "Rare",
           power: 34,
         },
@@ -374,6 +376,7 @@
           id: "golden-axe",
           name: "Golden Axe",
           type: "weapon",
+          weaponType: "axe",
           rarity: "Epic",
           power: 86,
         },
@@ -389,6 +392,7 @@
           id: "mythic-ledger",
           name: "Mythic Ledger",
           type: "weapon",
+          weaponType: "ledger",
           rarity: "Mythic",
           power: 420,
         },
@@ -1680,6 +1684,7 @@
           characterId: characterDefinition?.id,
           name: definition.name,
           type: definition.type,
+          weaponType: definition.weaponType || null,
           rarity: definition.rarity,
           power: Math.max(0, toFiniteNumber(item.power, definition.power)),
           enhanceLevel,
@@ -1833,6 +1838,36 @@
           equippedWeaponIds.add(equippedWeapon.instanceId);
           return character;
         });
+      }
+
+      function getWeaponType(weapon) {
+        return weapon?.weaponType || null;
+      }
+
+      function getCharacterPreferredWeaponType(characterDefinition) {
+        return characterDefinition?.preferredWeaponType || null;
+      }
+
+      function hasPreferredWeaponEquipped(character, inventory) {
+        const definition = getCharacterDefinition(character?.characterId);
+        if (!definition) return false;
+        const weapon = getEquippedWeaponForCharacter(character, inventory);
+        if (!weapon) return false;
+        return (
+          getWeaponType(weapon) === getCharacterPreferredWeaponType(definition)
+        );
+      }
+
+      function getPreferredWeaponSynergy(character, inventory) {
+        const hasSynergy = hasPreferredWeaponEquipped(character, inventory);
+        if (!hasSynergy) return 1.0;
+
+        const weapon = getEquippedWeaponForCharacter(character, inventory);
+        const enhanceLevel = weapon ? toFiniteNumber(weapon.enhanceLevel, 0) : 0;
+
+        // Base 1.25 + 0.01 per enhance level, capped at 1.5
+        const multiplier = 1.25 + enhanceLevel * 0.01;
+        return Math.min(1.5, toFiniteNumber(multiplier, 1.25));
       }
 
       function normalizeGameState(state, language = "en") {
@@ -2375,12 +2410,22 @@
               character,
               enhancementInventory,
             );
+            const synergyActive = hasPreferredWeaponEquipped(
+              character,
+              enhancementInventory,
+            );
+            const synergyMultiplier = getPreferredWeaponSynergy(
+              character,
+              enhancementInventory,
+            );
             return {
               ...character,
               definition,
               name: characterText(definition.nameKey),
               rarityLabel: characterRarityLabel(definition.rarity),
               equippedWeapon,
+              synergyActive,
+              synergyMultiplier,
             };
           })
           .filter(Boolean);
@@ -3513,6 +3558,32 @@
                                       ? `${character.equippedWeapon.name} +${character.equippedWeapon.enhanceLevel}`
                                       : "None"}
                                   </div>
+                                  <div className="text-[10px] font-bold text-gray-400 mt-0.5">
+                                    Pref:{" "}
+                                    {character.definition.preferredWeaponType ||
+                                      "None"}
+                                  </div>
+                                  {character.synergyActive && (
+                                    <div className="mt-1 flex items-center gap-1.5">
+                                      <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-sm font-black uppercase tracking-tight">
+                                        Synergy Active
+                                      </span>
+                                      <span className="text-green-600 font-black text-xs">
+                                        x{character.synergyMultiplier.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {!character.synergyActive &&
+                                    character.equippedWeapon && (
+                                      <div className="mt-1 flex items-center gap-1.5 opacity-50">
+                                        <span className="bg-gray-100 text-gray-500 text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-tight">
+                                          No Synergy
+                                        </span>
+                                        <span className="text-gray-500 font-bold text-xs">
+                                          x1.00
+                                        </span>
+                                      </div>
+                                    )}
                                 </div>
                                 <div className="text-right">
                                   <div className="font-black text-gray-700">
