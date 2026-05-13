@@ -423,6 +423,33 @@
         return { selectedContractId: contractId, outcomeLabel, successChance, projectedGain, projectedLoss, confidenceLevel, explanation };
       }
 
+      // Pure helper — builds a preview-only history entry from current bet state
+      function createDefenseContractPreviewHistoryEntry(betSlip, assetList, highestStage, squadDps) {
+        const contractId = betSlip?.selectedContractId;
+        if (!contractId) return null;
+        const asset = (assetList || []).find((a) => a.id === contractId);
+        if (!asset) return null;
+        const stake = Math.max(0, toFiniteNumber(betSlip?.stake, 0));
+        if (stake <= 0) return null;
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        const odds = getDefenseContractOdds(asset, stage);
+        const projectedPayout = getDefenseContractProjectedPayout(asset, stage, dps);
+        const outcome = getDefenseContractSimulatedOutcome(betSlip, assetList, stage, dps);
+        if (!outcome) return null;
+        return {
+          id: `prev-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+          contractId,
+          contractName: DEFENSE_CONTRACT_FLAVOR[contractId]?.displayName || asset.name,
+          stake,
+          odds,
+          projectedPayout,
+          outcomeLabel: outcome.outcomeLabel,
+          createdAt: Date.now(),
+          status: "preview",
+        };
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -1751,6 +1778,7 @@
           investment: {
             holdings: createDefaultInvestmentHoldings(),
             betSlip: { selectedContractId: null, stake: 0 },
+            contractHistory: [],
           },
           enhancement: {
             inventory: [],
@@ -2368,6 +2396,23 @@
                   : null,
               stake: Math.max(0, toFiniteNumber(investment.betSlip?.stake, 0)),
             },
+            contractHistory: Array.isArray(investment.contractHistory)
+              ? investment.contractHistory
+                  .filter(
+                    (e) =>
+                      e &&
+                      typeof e.id === "string" &&
+                      typeof e.contractId === "string" &&
+                      typeof e.contractName === "string" &&
+                      typeof e.stake === "number" &&
+                      typeof e.odds === "number" &&
+                      typeof e.projectedPayout === "number" &&
+                      typeof e.outcomeLabel === "string" &&
+                      typeof e.createdAt === "number" &&
+                      e.status === "preview",
+                  )
+                  .slice(-10)
+              : [],
           },
           enhancement: {
             ...defaults.enhancement,
@@ -3360,6 +3405,29 @@
           }));
         };
 
+        const saveDefenseContractPreviewToHistory = () => {
+          setGameState((prev) => {
+            const entry = createDefenseContractPreviewHistoryEntry(
+              prev.investment.betSlip,
+              investmentAssets,
+              prev.rpg?.highestStage || 0,
+              totalTeamDps,
+            );
+            if (!entry) return prev;
+            const existing = Array.isArray(prev.investment.contractHistory)
+              ? prev.investment.contractHistory
+              : [];
+            const updated = [...existing, entry].slice(-10);
+            return {
+              ...prev,
+              investment: {
+                ...prev.investment,
+                contractHistory: updated,
+              },
+            };
+          });
+        };
+
         const pickGachaRarity = () => {
           const totalWeight = GACHA_RARITIES.reduce(
             (total, rarity) => total + rarity.weight,
@@ -4036,6 +4104,19 @@
                           </div>
                         )}
 
+                        {/* Save to preview history */}
+                        <button
+                          onClick={saveDefenseContractPreviewToHistory}
+                          disabled={!simulatedOutcome || toFiniteNumber(gameState.investment.betSlip?.stake, 0) <= 0}
+                          className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
+                            simulatedOutcome && toFiniteNumber(gameState.investment.betSlip?.stake, 0) > 0
+                              ? "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
+                              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          Save Preview to History
+                        </button>
+
                         {/* Real settlement locked */}
                         <button
                           disabled
@@ -4054,11 +4135,44 @@
                     )}
                   </div>
 
-                  {/* Settlement History placeholder */}
-                  <div className="mx-4 mb-3 border border-dashed border-gray-200 rounded-md p-3 text-center">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Settlement History</div>
-                    <div className="text-[10px] text-gray-400 mt-1">Coming Soon — past bet results will appear here</div>
-                  </div>
+                  {/* Preview history — no real settlement */}
+                  {(() => {
+                    const history = Array.isArray(gameState.investment.contractHistory)
+                      ? gameState.investment.contractHistory
+                      : [];
+                    return (
+                      <div className="mx-4 mb-3 border border-gray-200 rounded-md overflow-hidden">
+                        <div className="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
+                          <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Preview History</div>
+                          <div className="text-[9px] font-bold text-gray-400">Preview only — not settled</div>
+                        </div>
+                        {history.length === 0 ? (
+                          <div className="p-3 text-center">
+                            <div className="text-[10px] text-gray-400">No previews saved yet — select a contract and stake, then save.</div>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-gray-100">
+                            {[...history].reverse().map((entry) => (
+                              <div key={entry.id} className="px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  <div className="text-[10px] font-black text-gray-700 truncate">{entry.contractName}</div>
+                                  <div className="text-[9px] text-gray-400">
+                                    Stake {formatMoney(toFiniteNumber(entry.stake, 0))} · {toFiniteNumber(entry.odds, 0)}% odds · ×{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)}
+                                  </div>
+                                </div>
+                                <div className={`text-[9px] font-black uppercase shrink-0 ${
+                                  entry.outcomeLabel === "Favorable" ? "text-emerald-600" :
+                                  entry.outcomeLabel === "Neutral" ? "text-yellow-600" : "text-red-500"
+                                }`}>
+                                  {entry.outcomeLabel}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="bg-gray-50 p-4 space-y-3">
                     {investmentAssets.map((asset) => (
