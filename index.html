@@ -538,6 +538,39 @@
         };
       }
 
+      // Pure helper — deterministic settlement result, same logic as dry-run
+      function createDefenseContractSettlementResult(gameState, assetList, highestStage, squadDps) {
+        const validation = validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps);
+        if (!validation.canSettle) return null;
+        const { selectedContractId: contractId, stake, odds, projectedPayout } = validation;
+        const asset = (assetList || []).find((a) => a.id === contractId);
+        if (!asset) return null;
+        const successChance = toFiniteNumber(odds, 0);
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        const stageSignal = Math.min(10, Math.round((stage / NORMAL_ENDING_STAGE) * 10));
+        const dpsSignal = dps > 0 ? 3 : 0;
+        const wouldWin = (successChance + stageSignal + dpsSignal) >= 60;
+        const safePayout = Math.max(1, toFiniteNumber(projectedPayout, 1));
+        const safeStake = Math.max(0, toFiniteNumber(stake, 0));
+        const netResult = wouldWin
+          ? toFiniteNumber(safeStake * (safePayout - 1), 0)
+          : -safeStake;
+        return {
+          id: `settled-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+          contractId,
+          contractName: DEFENSE_CONTRACT_FLAVOR[contractId]?.displayName || asset.name,
+          stake: safeStake,
+          odds,
+          projectedPayout: safePayout,
+          successChance,
+          wouldWin,
+          netResult,
+          createdAt: Date.now(),
+          status: "settled",
+        };
+      }
+
       function createDefaultInvestmentHoldings() {
         return INVESTMENT_ASSETS.map((asset) => ({
           id: asset.id,
@@ -1869,6 +1902,7 @@
             contractHistory: [],
             contractSettlementUnlocked: false,
             lastContractDryRun: null,
+            contractSettlementHistory: [],
           },
           enhancement: {
             inventory: [],
@@ -2523,6 +2557,24 @@
               ) return null;
               return d;
             })(),
+            contractSettlementHistory: Array.isArray(investment.contractSettlementHistory)
+              ? investment.contractSettlementHistory
+                  .filter(
+                    (e) =>
+                      e &&
+                      typeof e.id === "string" &&
+                      typeof e.contractId === "string" &&
+                      typeof e.contractName === "string" &&
+                      typeof e.stake === "number" &&
+                      typeof e.odds === "number" &&
+                      typeof e.projectedPayout === "number" &&
+                      typeof e.wouldWin === "boolean" &&
+                      typeof e.netResult === "number" &&
+                      typeof e.createdAt === "number" &&
+                      e.status === "settled",
+                  )
+                  .slice(-10)
+              : [],
           },
           enhancement: {
             ...defaults.enhancement,
@@ -3573,6 +3625,41 @@
           });
         };
 
+        const settleDefenseContract = () => {
+          setGameState((prev) => {
+            const entry = createDefenseContractSettlementResult(
+              prev,
+              investmentAssets,
+              prev.rpg?.highestStage || 0,
+              totalTeamDps,
+            );
+            if (!entry) return prev;
+            const currentCash = toFiniteNumber(prev.wallet.cash, 0);
+            const cashAfterDeduct = currentCash - entry.stake;
+            const cashFinal = entry.wouldWin
+              ? cashAfterDeduct + entry.stake * entry.projectedPayout
+              : cashAfterDeduct;
+            const existing = Array.isArray(prev.investment.contractSettlementHistory)
+              ? prev.investment.contractSettlementHistory
+              : [];
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: Math.max(0, toFiniteNumber(cashFinal, 0)),
+              },
+              investment: {
+                ...prev.investment,
+                betSlip: {
+                  ...prev.investment.betSlip,
+                  stake: 0,
+                },
+                contractSettlementHistory: [...existing, entry].slice(-10),
+              },
+            };
+          });
+        };
+
         const pickGachaRarity = () => {
           const totalWeight = GACHA_RARITIES.reduce(
             (total, rarity) => total + rarity.weight,
@@ -4330,8 +4417,13 @@
                               </div>
                               <div className="px-3 pb-3">
                                 <button
-                                  disabled
-                                  className="w-full py-2 rounded-md bg-gray-100 text-gray-400 font-black text-xs uppercase tracking-wider cursor-not-allowed"
+                                  onClick={v.canSettle ? settleDefenseContract : undefined}
+                                  disabled={!v.canSettle}
+                                  className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
+                                    v.canSettle
+                                      ? "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
+                                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  }`}
                                 >
                                   {v.canSettle ? "Settle Contract" : "Real Settlement Locked"}
                                 </button>
@@ -4426,6 +4518,53 @@
                                 </div>
                               </div>
                             ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Real settlement history */}
+                  {(() => {
+                    const settled = Array.isArray(gameState.investment.contractSettlementHistory)
+                      ? gameState.investment.contractSettlementHistory
+                      : [];
+                    return (
+                      <div className="mx-4 mb-3 border border-emerald-200 rounded-md overflow-hidden">
+                        <div className="bg-emerald-50 px-3 py-2 flex items-center justify-between border-b border-emerald-200">
+                          <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">Settlement History</div>
+                          <div className="text-[9px] font-bold text-emerald-500">Deterministic — no random outcome</div>
+                        </div>
+                        {settled.length === 0 ? (
+                          <div className="p-3 text-center">
+                            <div className="text-[10px] text-gray-400">No settlements yet — unlock gate and settle a contract.</div>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-emerald-50">
+                            {[...settled].reverse().map((entry) => {
+                              const ts = new Date(toFiniteNumber(entry.createdAt, Date.now())).toLocaleTimeString();
+                              const net = toFiniteNumber(entry.netResult, 0);
+                              return (
+                                <div key={entry.id} className="px-3 py-2">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="min-w-0">
+                                      <div className="text-[10px] font-black text-gray-700 truncate">{entry.contractName}</div>
+                                      <div className="text-[9px] text-gray-400">
+                                        Stake {formatMoney(toFiniteNumber(entry.stake, 0))} · {toFiniteNumber(entry.odds, 0)}% · ×{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)} · {ts}
+                                      </div>
+                                    </div>
+                                    <div className="shrink-0 text-right">
+                                      <div className={`text-[9px] font-black uppercase ${entry.wouldWin ? "text-emerald-600" : "text-red-500"}`}>
+                                        {entry.wouldWin ? "Won" : "Lost"}
+                                      </div>
+                                      <div className={`text-[9px] font-black ${net >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                                        {net >= 0 ? "+" : ""}{formatMoney(net)}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
