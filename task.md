@@ -75,6 +75,10 @@
 
 **RPG Master Blueprint expanded:** Added Normal Ending (Stage 100), Infinite Mode (Stage 101+), Hero's Fate Betting, and Dorothy's Infinite Mode unlock logic to the vision document.
 
+**Milestone 4D complete:** RPG Dividends reward foundation implemented. Monsters now award Dividends on defeat, with stage-based scaling rewards displayed in the live RPG dashboard.
+
+**Milestone 4E complete:** RPG Dividends Upgrade Foundation implemented. Players can now spend Dividends on ATK, SPD, and PEN boosts. ATK and SPD upgrades directly multiply Total Team DPS, while PEN is prepared for future defense-heavy Infinite Mode stages.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.

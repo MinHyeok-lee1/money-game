@@ -1655,6 +1655,11 @@
             stageKills: 0,
             dividends: 0,
             lastRpgReward: 0,
+            upgrades: {
+              atkLevel: 0,
+              spdLevel: 0,
+              penLevel: 0,
+            },
           },
           settings: {
             language,
@@ -1962,6 +1967,24 @@
         return Math.floor(10 * Math.pow(s, 1.15));
       }
 
+      function getRpgUpgradeLevel(state, key) {
+        if (!state?.rpg?.upgrades) return 0;
+        return Math.max(0, Math.floor(toFiniteNumber(state.rpg.upgrades[key], 0)));
+      }
+
+      function getRpgUpgradeCost(key, level) {
+        const l = Math.max(0, Math.floor(toFiniteNumber(level, 0)));
+        return Math.floor(50 * Math.pow(1.18, l));
+      }
+
+      function getRpgUpgradeEffect(key, level) {
+        const l = Math.max(0, Math.floor(toFiniteNumber(level, 0)));
+        if (key === "atkLevel") return 1 + l * 0.02;
+        if (key === "spdLevel") return 1 + l * 0.01;
+        if (key === "penLevel") return Math.min(0.8, l * 0.005);
+        return 0;
+      }
+
       function getTotalTeamDps(state) {
         if (!state || !state.rpg) return 0;
         const characters = Array.isArray(state.rpg.characters)
@@ -1998,7 +2021,7 @@
           return acc;
         }, {});
 
-        return ownedCharacterDetails.reduce((sum, char) => {
+        const baseTeamDps = ownedCharacterDetails.reduce((sum, char) => {
           const levelDps = getCharacterLevelDps(char);
           const weaponDps = char.equippedWeapon
             ? toFiniteNumber(char.equippedWeapon.power, 0)
@@ -2010,6 +2033,17 @@
             (levelDps + weaponDps) * char.synergyMultiplier * factionMult;
           return sum + totalDps;
         }, 0);
+
+        const atkMult = getRpgUpgradeEffect(
+          "atkLevel",
+          getRpgUpgradeLevel(state, "atkLevel"),
+        );
+        const spdMult = getRpgUpgradeEffect(
+          "spdLevel",
+          getRpgUpgradeLevel(state, "spdLevel"),
+        );
+
+        return baseTeamDps * atkMult * spdMult;
       }
 
       function applyCombatTick(state, deltaSeconds) {
@@ -2219,6 +2253,11 @@
             stageKills: Math.max(0, Math.floor(toFiniteNumber(rpg.stageKills, 0))),
             dividends: Math.max(0, toFiniteNumber(rpg.dividends, 0)),
             lastRpgReward: Math.max(0, toFiniteNumber(rpg.lastRpgReward, 0)),
+            upgrades: {
+              atkLevel: clampNumber(rpg.upgrades?.atkLevel, 0, 1000, 0),
+              spdLevel: clampNumber(rpg.upgrades?.spdLevel, 0, 1000, 0),
+              penLevel: clampNumber(rpg.upgrades?.penLevel, 0, 1000, 0),
+            },
           },
           settings: {
             ...defaults.settings,
@@ -3295,6 +3334,32 @@
           }));
         };
 
+        const buyRpgUpgrade = (key) => {
+          const validKeys = ["atkLevel", "spdLevel", "penLevel"];
+          if (!validKeys.includes(key)) return;
+
+          updateGameState((prev) => {
+            if (!prev.rpg?.upgrades) return prev;
+            const currentLevel = toFiniteNumber(prev.rpg.upgrades[key], 0);
+            const cost = getRpgUpgradeCost(key, currentLevel);
+            const currentDividends = toFiniteNumber(prev.rpg.dividends, 0);
+
+            if (currentDividends < cost) return prev;
+
+            return {
+              ...prev,
+              rpg: {
+                ...prev.rpg,
+                dividends: currentDividends - cost,
+                upgrades: {
+                  ...prev.rpg.upgrades,
+                  [key]: currentLevel + 1,
+                },
+              },
+            };
+          });
+        };
+
         const renderSparkline = (history) => {
           const points = normalizePriceHistory(history, 1);
           const min = Math.min(...points);
@@ -4109,6 +4174,78 @@
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-4">
+                    <section className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+                      <div className="bg-gray-800 text-white p-3 flex justify-between items-center">
+                        <h2 className="text-xs font-black uppercase tracking-widest">
+                          RPG Dividends Upgrades
+                        </h2>
+                        <div className="text-yellow-400 font-black text-sm">
+                          {formatDps(gameState.rpg?.dividends || 0)} DIV
+                        </div>
+                      </div>
+                      <div className="p-3 space-y-3">
+                        {/* ATK Upgrade */}
+                        <div className="flex items-center justify-between gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                          <div>
+                            <div className="text-xs font-black text-gray-800 uppercase">
+                              ATK Boost (Lv.{getRpgUpgradeLevel(gameState, "atkLevel")})
+                            </div>
+                            <div className="text-[10px] font-bold text-emerald-600">
+                              Team DPS Multiplier: x{getRpgUpgradeEffect("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel")).toFixed(2)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => buyRpgUpgrade("atkLevel")}
+                            disabled={(gameState.rpg?.dividends || 0) < getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel"))}
+                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel")) ? "bg-red-600 text-white shadow-sm hover:bg-red-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                          >
+                            {formatDps(getRpgUpgradeCost("atkLevel", getRpgUpgradeLevel(gameState, "atkLevel")))}
+                          </button>
+                        </div>
+
+                        {/* SPD Upgrade */}
+                        <div className="flex items-center justify-between gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                          <div>
+                            <div className="text-xs font-black text-gray-800 uppercase">
+                              SPD Boost (Lv.{getRpgUpgradeLevel(gameState, "spdLevel")})
+                            </div>
+                            <div className="text-[10px] font-bold text-blue-600">
+                              Combat Freq. Multiplier: x{getRpgUpgradeEffect("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")).toFixed(2)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => buyRpgUpgrade("spdLevel")}
+                            disabled={(gameState.rpg?.dividends || 0) < getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel"))}
+                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")) ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                          >
+                            {formatDps(getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")))}
+                          </button>
+                        </div>
+
+                        {/* PEN Upgrade */}
+                        <div className="flex items-center justify-between gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100 opacity-80">
+                          <div>
+                            <div className="text-xs font-black text-gray-800 uppercase">
+                              PEN Boost (Lv.{getRpgUpgradeLevel(gameState, "penLevel")})
+                            </div>
+                            <div className="text-[10px] font-bold text-orange-600">
+                              Def. Penetration: {(getRpgUpgradeEffect("penLevel", getRpgUpgradeLevel(gameState, "penLevel")) * 100).toFixed(1)}%
+                            </div>
+                            <div className="text-[8px] font-black text-gray-400 uppercase mt-1">
+                              * Ready for Infinite Mode
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => buyRpgUpgrade("penLevel")}
+                            disabled={(gameState.rpg?.dividends || 0) < getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel"))}
+                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel")) ? "bg-orange-600 text-white shadow-sm hover:bg-orange-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                          >
+                            {formatDps(getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel")))}
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
                         Top 5 Squad Members
