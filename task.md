@@ -28,6 +28,8 @@
 - [ ] 3-2. 무기 강화 시스템 (성공/실패/하락/파괴) 및 이펙트 구현.
 - [ ] 3-3. 장착 및 시너지(캐릭터+전용무기) 데이터 구조 세팅.
 
+**Milestone 3B complete:** Enhancement tab has Draw 1/Draw 10, shared wallet spending, rarity counts, recent pull history, and inventory controls.
+
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
 **목표:** 강화된 캐릭터로 몬스터를 사냥하고 특수 재화를 파밍하는 엔드 콘텐츠.
