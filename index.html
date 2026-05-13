@@ -281,6 +281,7 @@
       const GAME_STATE_STORAGE_KEY = "moneyGameUniverseStateV1";
       const LEGACY_LANDLORD_STORAGE_KEY = "idleLandlordSaveV4";
       const INVESTMENT_HISTORY_LIMIT = 30;
+      const GACHA_DRAW_COST = 1000;
       const INVESTMENT_ASSETS = [
         {
           id: "blue-chip-stock",
@@ -318,6 +319,73 @@
         }));
       }
 
+      const GACHA_RARITIES = [
+        { name: "Normal", weight: 60 },
+        { name: "Rare", weight: 25 },
+        { name: "Epic", weight: 10 },
+        { name: "Legendary", weight: 4 },
+        { name: "Mythic", weight: 1 },
+      ];
+
+      const GACHA_ITEMS = [
+        {
+          id: "rookie-merchant",
+          name: "Rookie Merchant",
+          type: "character",
+          rarity: "Normal",
+          power: 10,
+        },
+        {
+          id: "iron-dagger",
+          name: "Iron Dagger",
+          type: "weapon",
+          rarity: "Normal",
+          power: 12,
+        },
+        {
+          id: "market-scout",
+          name: "Market Scout",
+          type: "character",
+          rarity: "Rare",
+          power: 28,
+        },
+        {
+          id: "silver-blade",
+          name: "Silver Blade",
+          type: "weapon",
+          rarity: "Rare",
+          power: 34,
+        },
+        {
+          id: "coin-oracle",
+          name: "Coin Oracle",
+          type: "character",
+          rarity: "Epic",
+          power: 75,
+        },
+        {
+          id: "golden-axe",
+          name: "Golden Axe",
+          type: "weapon",
+          rarity: "Epic",
+          power: 86,
+        },
+        {
+          id: "tycoon-hero",
+          name: "Tycoon Hero",
+          type: "character",
+          rarity: "Legendary",
+          power: 180,
+        },
+        {
+          id: "mythic-ledger",
+          name: "Mythic Ledger",
+          type: "weapon",
+          rarity: "Mythic",
+          power: 420,
+        },
+      ];
+
       function createDefaultGameState(language = "en") {
         return {
           version: GAME_STATE_VERSION,
@@ -343,6 +411,7 @@
           enhancement: {
             inventory: [],
             failStacks: 0,
+            lastPulledItem: null,
           },
           rpg: {
             characters: [],
@@ -384,6 +453,23 @@
         return cleaned.length > 0 ? cleaned : [safeFallback];
       }
 
+      function normalizeGachaItem(item, fallbackIndex = 0) {
+        const definition = GACHA_ITEMS.find((candidate) => candidate.id === item?.id);
+        if (!definition) return null;
+
+        return {
+          instanceId:
+            typeof item.instanceId === "string" && item.instanceId.length > 0
+              ? item.instanceId
+              : `${definition.id}-${fallbackIndex}`,
+          id: definition.id,
+          name: definition.name,
+          type: definition.type,
+          rarity: definition.rarity,
+          power: Math.max(0, toFiniteNumber(item.power, definition.power)),
+        };
+      }
+
       function normalizeGameState(state, language = "en") {
         const defaults = createDefaultGameState(language);
         const landlord = state?.landlord || {};
@@ -394,6 +480,13 @@
         const savedHoldings = Array.isArray(investment.holdings)
           ? investment.holdings
           : [];
+        const enhancement = state?.enhancement || {};
+        const savedInventory = Array.isArray(enhancement.inventory)
+          ? enhancement.inventory
+          : [];
+        const normalizedInventory = savedInventory
+          .map((item, index) => normalizeGachaItem(item, index))
+          .filter(Boolean);
 
         return {
           ...defaults,
@@ -457,11 +550,13 @@
           },
           enhancement: {
             ...defaults.enhancement,
-            ...(state?.enhancement || {}),
-            inventory: Array.isArray(state?.enhancement?.inventory)
-              ? state.enhancement.inventory
-              : [],
-            failStacks: toFiniteNumber(state?.enhancement?.failStacks, 0),
+            ...enhancement,
+            inventory: normalizedInventory,
+            failStacks: toFiniteNumber(enhancement.failStacks, 0),
+            lastPulledItem:
+              normalizeGachaItem(enhancement.lastPulledItem) ||
+              normalizedInventory[normalizedInventory.length - 1] ||
+              null,
           },
           rpg: {
             ...defaults.rpg,
@@ -799,6 +894,8 @@
         const cash = Math.max(0, toFiniteNumber(gameState.wallet.cash, 0));
         const landlord = gameState.landlord;
         const investmentHoldings = gameState.investment.holdings;
+        const enhancementInventory = gameState.enhancement.inventory;
+        const lastPulledItem = gameState.enhancement.lastPulledItem;
         const clickPower = landlord.clickPower;
         const clickUpgradeCost = landlord.clickUpgradeCost;
         const rebirthCount = landlord.rebirthCount;
@@ -852,6 +949,12 @@
           0,
         );
         const totalNetWorth = cash + totalPortfolioValue;
+        const inventoryByRarity = GACHA_RARITIES.reduce((counts, rarity) => {
+          counts[rarity.name] = enhancementInventory.filter(
+            (item) => item.rarity === rarity.name,
+          ).length;
+          return counts;
+        }, {});
 
         const updateGameState = (updater) => {
           setGameState((prev) => {
@@ -1236,6 +1339,58 @@
           });
         };
 
+        const pickGachaRarity = () => {
+          const totalWeight = GACHA_RARITIES.reduce(
+            (total, rarity) => total + rarity.weight,
+            0,
+          );
+          let roll = Math.random() * totalWeight;
+
+          for (const rarity of GACHA_RARITIES) {
+            roll -= rarity.weight;
+            if (roll <= 0) return rarity.name;
+          }
+
+          return GACHA_RARITIES[0].name;
+        };
+
+        const createPulledGachaItem = () => {
+          const rarity = pickGachaRarity();
+          const candidates = GACHA_ITEMS.filter((item) => item.rarity === rarity);
+          const item =
+            candidates[Math.floor(Math.random() * candidates.length)] ||
+            GACHA_ITEMS[0];
+
+          return {
+            ...item,
+            instanceId: `${item.id}-${Date.now()}-${Math.random()
+              .toString(36)
+              .slice(2, 8)}`,
+          };
+        };
+
+        const drawGachaItem = () => {
+          if (cash < GACHA_DRAW_COST) return;
+
+          updateGameState((prev) => {
+            if (prev.wallet.cash < GACHA_DRAW_COST) return prev;
+
+            const pulledItem = createPulledGachaItem();
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash - GACHA_DRAW_COST,
+              },
+              enhancement: {
+                ...prev.enhancement,
+                inventory: [...prev.enhancement.inventory, pulledItem],
+                lastPulledItem: pulledItem,
+              },
+            };
+          });
+        };
+
         const renderSparkline = (history) => {
           const points = normalizePriceHistory(history, 1);
           const min = Math.min(...points);
@@ -1275,6 +1430,14 @@
               />
             </svg>
           );
+        };
+
+        const rarityTextClass = (rarity) => {
+          if (rarity === "Mythic") return "text-fuchsia-600";
+          if (rarity === "Legendary") return "text-amber-600";
+          if (rarity === "Epic") return "text-purple-600";
+          if (rarity === "Rare") return "text-blue-600";
+          return "text-gray-600";
         };
 
         const formatMoney = (val) => {
@@ -1571,6 +1734,124 @@
                         </div>
                       </div>
                     ))}
+                  </div>
+                </section>
+              ) : activeTab === "enhancement" ? (
+                <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-700 to-rose-600 text-white p-5">
+                    <h1 className="text-xl font-black">
+                      Gacha & Enhancement
+                    </h1>
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <div className="text-purple-100 text-xs font-bold uppercase">
+                          Wallet Cash
+                        </div>
+                        <div className="text-lg font-black">
+                          {formatMoney(cash)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-purple-100 text-xs font-bold uppercase">
+                          Draw Cost
+                        </div>
+                        <div className="text-lg font-black">
+                          {formatMoney(GACHA_DRAW_COST)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 space-y-4">
+                    <button
+                      onClick={drawGachaItem}
+                      disabled={cash < GACHA_DRAW_COST}
+                      className={`w-full rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST ? "bg-purple-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                    >
+                      Draw 1
+                    </button>
+
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="text-xs font-bold text-gray-400 uppercase">
+                        Last Pull
+                      </div>
+                      {lastPulledItem ? (
+                        <div className="mt-2 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="font-black text-gray-800">
+                              {lastPulledItem.name}
+                            </div>
+                            <div
+                              className={`text-xs font-bold uppercase ${rarityTextClass(lastPulledItem.rarity)}`}
+                            >
+                              {lastPulledItem.rarity} {lastPulledItem.type}
+                            </div>
+                          </div>
+                          <div className="font-black text-gray-700">
+                            {lastPulledItem.power}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-2 font-bold text-gray-400">-</div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-2">
+                      {GACHA_RARITIES.map((rarity) => (
+                        <div
+                          key={rarity.name}
+                          className="bg-white border border-gray-200 rounded-md p-2 text-center"
+                        >
+                          <div
+                            className={`text-[10px] font-black uppercase ${rarityTextClass(rarity.name)}`}
+                          >
+                            {rarity.name}
+                          </div>
+                          <div className="font-black text-gray-800">
+                            {inventoryByRarity[rarity.name] || 0}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          Inventory
+                        </h2>
+                        <div className="text-xs font-black text-gray-500">
+                          {enhancementInventory.length}
+                        </div>
+                      </div>
+                      <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
+                        {enhancementInventory.length > 0 ? (
+                          enhancementInventory.map((item) => (
+                            <div
+                              key={item.instanceId}
+                              className="flex items-center justify-between gap-3 bg-gray-50 rounded-md p-3"
+                            >
+                              <div>
+                                <div className="font-bold text-gray-800">
+                                  {item.name}
+                                </div>
+                                <div
+                                  className={`text-xs font-bold uppercase ${rarityTextClass(item.rarity)}`}
+                                >
+                                  {item.rarity} {item.type}
+                                </div>
+                              </div>
+                              <div className="font-black text-gray-700">
+                                {item.power}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="py-8 text-center font-bold text-gray-400">
+                            Empty
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </section>
               ) : (
