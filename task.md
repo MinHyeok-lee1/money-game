@@ -15,10 +15,10 @@
 **목표:** 하이리스크 하이리턴의 변동성 시장 엔진 구축.
 
 - [x] 2-1. 실시간 가격 변동 알고리즘(Random Walk) 뼈대 구축.
-- [ ] 2-2. 우량주/잡코인 종목 데이터 구성 및 차트 UI 렌더링.
+- [x] 2-2. 우량주/잡코인 종목 데이터 구성 및 차트 UI 렌더링.
 - [x] 2-3. 매수/매도 로직 구현 및 Global Wallet의 `cash`와 연동.
 
-**Milestone 2A complete:** Investment tab has a basic static asset list, bounded active-tab price updates, and Buy 1/Sell 1 actions connected to Global Wallet `cash`.
+**Milestone 2C complete:** Investment tab has a basic static asset list, bounded active-tab price updates, Buy 1/Sell 1 actions, portfolio metrics, and lightweight mini charts connected to Global Wallet `cash`.
 
 ## 🏁 Milestone 3: 뽑기 및 무기 강화 시스템 (Gacha & Enhancement)
 
