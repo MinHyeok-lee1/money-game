@@ -65,6 +65,8 @@
 
 **Milestone 4B complete:** Basic idle combat engine implemented with stage-based monster HP scaling, active combat loop gated by RPG tab, and monster defeat tracking.
 
+**Milestone 4C complete:** Basic stage progression foundation implemented. Stage advances every 5 kills, with monster HP scaling and highest stage tracking integrated into the live combat UI.
+
 - [ ] 4-1. 자동 전투 엔진 (캐릭터 합산 DPS vs 몬스터 체력) 구현.
 - [ ] 4-2. 무한 스테이지 등반 및 보스전 로직.
 - [ ] 4-3. 몬스터 처치 시 특수 재화(다이아몬드 등) 획득 및 마스터 지갑 연동.

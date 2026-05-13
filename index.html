@@ -1652,6 +1652,7 @@
             monsterHp: 100,
             monsterMaxHp: 100,
             defeatedMonsters: 0,
+            stageKills: 0,
           },
           settings: {
             language,
@@ -1945,6 +1946,10 @@
         return 1.0;
       }
 
+      function getKillsRequiredForStage(stage) {
+        return 5;
+      }
+
       function getMonsterMaxHp(stage) {
         const s = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
         return Math.floor(100 * Math.pow(1.3, s - 1));
@@ -2011,12 +2016,32 @@
         if (nextHp <= 0) {
           const nextDefeated =
             toFiniteNumber(state.rpg.defeatedMonsters, 0) + 1;
-          const stage = Math.max(1, toFiniteNumber(state.rpg.currentStage, 1));
-          const maxHp = getMonsterMaxHp(stage);
+          const currentStage = Math.max(
+            1,
+            toFiniteNumber(state.rpg.currentStage, 1),
+          );
+          const currentStageKills = toFiniteNumber(state.rpg.stageKills, 0);
+          const killsRequired = getKillsRequiredForStage(currentStage);
+
+          let nextStage = currentStage;
+          let nextStageKills = currentStageKills + 1;
+          let nextHighestStage = toFiniteNumber(state.rpg.highestStage, 0);
+
+          if (nextStageKills >= killsRequired) {
+            nextStage = currentStage + 1;
+            nextStageKills = 0;
+            nextHighestStage = Math.max(nextHighestStage, nextStage);
+          }
+
+          const maxHp = getMonsterMaxHp(nextStage);
+
           return {
             ...state,
             rpg: {
               ...state.rpg,
+              currentStage: nextStage,
+              highestStage: nextHighestStage,
+              stageKills: nextStageKills,
               monsterHp: maxHp,
               monsterMaxHp: maxHp,
               defeatedMonsters: nextDefeated,
@@ -2181,6 +2206,7 @@
               0,
               Math.floor(toFiniteNumber(rpg.defeatedMonsters, 0)),
             ),
+            stageKills: Math.max(0, Math.floor(toFiniteNumber(rpg.stageKills, 0))),
           },
           settings: {
             ...defaults.settings,
@@ -3999,10 +4025,13 @@
                       </div>
                       <div className="bg-black/20 rounded-md p-2">
                         <div className="text-red-100 text-[10px] font-black uppercase">
-                          Stage {gameState.rpg?.currentStage || 1}
+                          Stage {gameState.rpg?.currentStage || 1} Progress
                         </div>
                         <div className="text-lg font-black leading-tight">
-                          {gameState.rpg?.defeatedMonsters || 0} Defeated
+                          {gameState.rpg?.stageKills || 0} /{" "}
+                          {getKillsRequiredForStage(
+                            gameState.rpg?.currentStage || 1,
+                          )}
                         </div>
                       </div>
                     </div>
@@ -4037,8 +4066,14 @@
                             ),
                           ),
                         )}
-                        % Health Remaining
+                        % Health · Total {gameState.rpg?.defeatedMonsters || 0}{" "}
+                        Kills
                       </div>
+                    </div>
+
+                    <div className="mt-2 px-1 flex justify-between items-center text-[10px] font-bold text-red-300/40 uppercase">
+                      <span>Highest Stage: {gameState.rpg?.highestStage || 1}</span>
+                      <span>Team Ready for Combat</span>
                     </div>
                   </div>
 
