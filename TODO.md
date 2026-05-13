@@ -40,6 +40,8 @@
 - [ ] **52-Character Detailed Data Sheet**: Define granular stats for the complete character roster.
 - [ ] **Mythic Authority Triggers**: Implement endgame characters with reality-warping authority skills.
 - [ ] **Character Storylines**: Add lore integration for characters and factions.
+- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering system.
+- [ ] **Infinite Mode Scaling**: Mathematical modeling for monster growth beyond Stage 100.
 - [ ] Character collection and party setup.
 - [ ] Auto-battle and endless stage progression.
 - [ ] Boss rewards that connect back into the shared economy.

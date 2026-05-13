@@ -13,11 +13,36 @@ The Money Game Universe RPG is not just a combat mini-game; it is the **ultimate
 
 ---
 
+## 🏆 Game Structure: Normal Ending & Infinite Mode
+The RPG progression is divided into two distinct chapters:
+
+### 1. Stage 1–100: The Normal Ending
+- **Objective**: Reach and defeat the final boss at Stage 100.
+- **Design Philosophy**: This chapter is designed to be clearable using **RPG-only systems** (Dividends, Gacha, Standard Enhancements).
+- **External Capital**: Not strictly required, but provides a "Pay-to-Win" style shortcut if already available.
+- **Reward**: Upon clearing Stage 100, the player reaches a "Normal Ending" narrative point, acknowledging their success as a top-tier Sponsor.
+
+### 2. Stage 101+: Infinite Mode (The God Track)
+- **Objective**: Infinite climbing against exponentially scaling monsters.
+- **The True Wall**: Monster HP and DEF growth become mathematically impossible for standard RPG growth to overcome.
+- **Unlock**: Requires the **Dorothy Proposal** event to be triggered and accepted.
+- **Focus**: The transition from tactical management to mathematical authority.
+
+---
+
 ## 💰 Early RPG Economy: Dividends
 - **Dividends**: The first RPG-specific currency.
 - **Source**: Earned primarily through monster defeats and stage completion.
 - **Usage**: Upgrading base RPG stats (ATK, ACC, CRT, SPD, PEN) before external capital linkage is available.
 - **Isolation**: In the early game, Dividends cannot be bought with Cash, forcing players to engage with the combat loop.
+
+---
+
+## 🎲 Hero's Fate Betting (Future Integration)
+A high-stakes linkage between the Investment module and the RPG module.
+- **Concept**: Players "bet" on their own squad's performance in upcoming difficult stages or boss battles.
+- **Mechanic**: Use Investment holdings as collateral to multiply RPG rewards or receive a massive Cash windfall upon success.
+- **Risk**: Failure results in temporary "Capital Freeze" in the Investment module or loss of character stamina.
 
 ---
 
@@ -27,7 +52,7 @@ At certain stage milestones (e.g., Stage 100, 500, 1000), monster HP and DEF sca
 ---
 
 ## 🏛️ External Capital Leverage (The Bridge)
-This system allows the player's economic success to directly manipulate RPG combat stats:
+This system allows the player's economic success to directly manipulate RPG combat stats. **This system remains locked until the Dorothy Proposal is accepted.**
 - **Real Estate Leverage**: Total property value reduces RPG upgrade costs or increases base ATK.
 - **Stock Market Leverage**: Investment portfolio value increases CRT (Critical Rate) or SPD (Attack Speed).
 - **Rebirth Authority**: Total rebirth count provides a multiplier to PEN (Penetration), essential for late-game high-DEF monsters.
@@ -36,9 +61,10 @@ This system allows the player's economic success to directly manipulate RPG comb
 ---
 
 ## 💃 Dorothy Proposal Event
-A special UI event triggered when the player hits "The Wall" and possesses significant wealth.
+A special UI event triggered when the player hits "The Wall" (Stage 100 Boss or early Infinite Mode) and possesses significant wealth.
 - **Dorothy**: An AI/capital mediator who offers to "inject external capital" into the RPG engine.
-- **Effect**: Unlocks the conversion of `Cash` -> `Dividends` at high rates and enables Mythic Authority upgrades.
+- **Infinite Mode Unlock**: Accepting the proposal unlocks progression beyond Stage 100.
+- **Authority Unlock**: Enables the conversion of `Cash` -> `Dividends` at high rates and unlocks "External Capital Leverage" stats.
 
 ---
 
@@ -65,3 +91,5 @@ Special 5-star+ characters that have "Authority Skills":
 - [ ] **Faction Upgrade Tables**: Detailed cost and scaling for faction-specific bonuses.
 - [ ] **Dorothy Integration Proposal Script**: Dialog and UI flow for the Dorothy Event.
 - [ ] **Dividends Economy Balance Sheet**: Tuning the income/expense ratio for the first RPG reward.
+- [ ] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system.
+- [ ] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100.
