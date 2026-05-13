@@ -28,3 +28,11 @@
 
 - Phase 1 (Idle Landlord) 구현 완료.
 - 생태계 확장을 위한 `task.md` 마일스톤 설계 완료.
+
+### Milestone 1 Completion
+
+- Current playable module: Idle Landlord.
+- Planned modules: Investment, Enhancement, and RPG are visible as Coming Soon tabs.
+- Global Wallet is now the shared state foundation.
+- Canonical localStorage key: `moneyGameUniverseStateV1`.
+- Legacy `idleLandlordSaveV4` saves are migrated into the canonical state and removed.

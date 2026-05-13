@@ -8,6 +8,8 @@
 - [x] 1-2. 게임 간 화면 전환을 위한 최상단 네비게이션 탭(GNB) UI 추가 (건물주 / 투자 / 강화 / RPG).
 - [x] 1-3. 기존 `Idle Landlord`의 재화를 `Global Wallet`의 `cash`로 마이그레이션 연동.
 
+**Milestone 1 complete:** Global Wallet state is saved under `moneyGameUniverseStateV1`; legacy `idleLandlordSaveV4` data is migrated and removed.
+
 ## 🏁 Milestone 2: 투자 게임 (Investment Master) 구현
 
 **목표:** 하이리스크 하이리턴의 변동성 시장 엔진 구축.
