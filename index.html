@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Play Idle Landlord, the ultimate real estate tycoon clicker game. Earn money, invest in properties, and build your empire. 건물주 키우기 게임 플레이!"
+      content="Play Idle Landlord, the ultimate real estate tycoon clicker game. Earn money, invest in properties, and build your empire. ?꿸쑨????꿎뫖??????繹먮굝????嚥▲굧??????????"
     />
     <title>
-      Idle Landlord - Clicker Tycoon Game | 건물주 키우기 방치형 게임
+      Idle Landlord - Clicker Tycoon Game | ?꿸쑨????꿎뫖??????繹먮굝????熬곣뫖?삥납????嚥▲굧????
     </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,7 +24,7 @@
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- 사용자님의 실제 구글 애드센스 스크립트 -->
+    <!-- ??????嶺?????繹먮냱議???? ????ル뒇???濚밸Ŧ援앾㎘????熬곣뫗逾?濚???-->
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6423816528159440"
@@ -91,35 +91,35 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      const REBIRTH_REQUIREMENT = 2000000000; // 환생 기준: 20억
+      const REBIRTH_REQUIREMENT = 2000000000; // ??嶺뚮슣堉붹룇 ???뚯???: 20??
       const NORMAL_ENDING_STAGE = 100;
 
       const TRANSLATIONS = {
         ko: {
-          title: "💸 건물주 키우기",
-          rebirth: "환생",
-          rebirthDesc: "20억 달성 시 가능",
-          rebirthSuccess: "환생 성공! 수익 배율이 증가했습니다.",
+          title: "????꿸쑨????꿎뫖??????繹먮굝???,
+          rebirth: "??嶺뚮슣堉붹룇",
+          rebirthDesc: "20??????????醫딆쓧???,
+          rebirthSuccess: "??嶺뚮슣堉붹룇 ?嚥싲갭횧?蹂좎쒜? ????볥궙???熬곣뫖利?????꿔꺂?ｉ뜮?뚮쑏???????????딅젩.",
           rebirthConfirm:
-            "환생하시겠습니까? 모든 건물과 돈이 초기화되지만 영구 배율이 1 증가합니다.",
-          multiplier: "수익 배율",
-          sec: "초",
-          click: "클릭",
-          tapToEarn: "터치해서 돈 벌기!",
-          investments: "투자 (상점)",
-          mousePower: "마우스 강화",
-          lv: "레벨",
+            "??嶺뚮슣堉붹룇??嶺뚮슣?쒙쭛?嚥▲굧?묌큺???????? ?꿔꺂??袁ㅻ븶????꿸쑨?????????繹먮굟瑗??潁??용끏????됰Ŧ???룐뫁???됱삩??????????熬곣뫖利????1 ?꿔꺂?ｉ뜮?뚮쑏???嶺뚮ㅎ????",
+          multiplier: "????볥궙???熬곣뫖利???,
+          sec: "??,
+          click: "?????,
+          tapToEarn: "???????????ㅻ샑筌????筌????癒?렓?",
+          investments: "????(????쇨덫??",
+          mousePower: "?꿔꺂????????醫딆┫???,
+          lv: "????戮?땁",
           format: "ko-KR",
           currency: "KRW",
-          dorothyLine1: "...드디어 왔군요. 100층을 돌파한 용사에게 인사를 전합니다.",
-          dorothyLine2: "이 세계는 원래 100층에서 끝나도록 설계된 '닫힌 세계'였어요.",
-          dorothyLine3: "하지만 당신처럼 그 경계를 넘는 자가 나타나면... 세계는 다시 열립니다.",
-          dorothyLine4: "101층부터는 '무한 모드'입니다. 아직 그 문은 잠겨 있지만, 곧 외부 자본 레버리지가 해금될 거예요.",
-          dorothyAcknowledge: "알겠습니다, 도로시",
-          dorothyAcknowledged: "도로시의 제안을 확인했습니다 — 무한 모드 해금 대기 중",
+          dorothyLine1: "...??嶺뚮㉡?ㅷ댆?????됰Ŧ???? 100?꿔꺂???뱀벖??????ㅻ깹??????꾩룆????????癲ル슢?????????꾣뤃??????딅젩.",
+          dorothyLine2: "???癲ル슢?ο㎖????????100?꿔꺂???뱀벖?????嶺뚮∥梨띄뙴????썹땟怨⒲뀋?????고뀘???'??????癲ル슢?ο㎖????????ㅼ굡??",
+          dorothyLine3: "????????????貫????獄????嚥▲굧????β뼯猷?????β뼯爰귨㎘???? ?????????.. ?癲ル슢?ο㎖???????⑤베鍮??????????딅젩.",
+          dorothyLine4: "101?꿔꺂???뱀벑?????살퓢??'???類ㅺ튃???꿔꺂??袁ㅻ븶????????뉖뤁?? ????썹땟?㏓퉲??????戮?뜪? ????ャ룄??????? ???癲? ???雅?????源낆툒?????醫딆쓧? ???繹먮굝鍮???꿸쑨??????",
+          dorothyAcknowledge: "?????????? ????썹땟怨⒲뀋??,
+          dorothyAcknowledged: "????썹땟怨⒲뀋??嶺뚮??←댆???嶺?????癲ル슢캉?????????????딅젩 ?????類ㅺ튃???꿔꺂??袁ㅻ븶??????繹먮굝鍮?????嚥?,
         },
         en: {
-          title: "💸 Idle Landlord",
+          title: "???Idle Landlord",
           rebirth: "Rebirth",
           rebirthDesc: "Need $2B to Rebirth",
           rebirthSuccess: "Rebirth Successful! Permanent Multiplier Increased.",
@@ -135,11 +135,11 @@
           format: "en-US",
           currency: "USD",
           dorothyLine1: "...So you finally made it. I offer my greetings to the hero who broke through Stage 100.",
-          dorothyLine2: "This world was designed to end at Stage 100 — a closed world, by intention.",
+          dorothyLine2: "This world was designed to end at Stage 100 ??a closed world, by intention.",
           dorothyLine3: "But when someone like you crosses that boundary... the world opens again.",
-          dorothyLine4: "Stage 101 and beyond is Infinite Mode. That door is still locked — but external capital leverage will unlock soon.",
+          dorothyLine4: "Stage 101 and beyond is Infinite Mode. That door is still locked ??but external capital leverage will unlock soon.",
           dorothyAcknowledge: "Understood, Dorothy",
-          dorothyAcknowledged: "Dorothy's proposal acknowledged — awaiting Infinite Mode unlock",
+          dorothyAcknowledged: "Dorothy's proposal acknowledged ??awaiting Infinite Mode unlock",
         },
       };
 
@@ -156,73 +156,73 @@
         ko: [
           {
             id: 1,
-            name: "붕어빵 노점상",
+            name: "???곗뵯繹???????癲ル슢?????,
             baseCost: 100,
             baseIncome: 5,
-            icon: "🌭",
+            icon: "???,
           },
           {
             id: 2,
-            name: "동네 편의점",
+            name: "???筌먐살? ?癲ル슢???븍┛??,
             baseCost: 1500,
             baseIncome: 60,
-            icon: "🏪",
+            icon: "???,
           },
           {
             id: 3,
-            name: "피자 프랜차이즈",
+            name: "??濚밸Ŧ?긷칰?????썹땟?筌뚮????紐꾪???レ탳??,
             baseCost: 8000,
             baseIncome: 300,
-            icon: "🍕",
+            icon: "???,
           },
           {
             id: 4,
-            name: "프랜차이즈 카페",
+            name: "????썹땟?筌뚮????紐꾪???レ탳????⑤㈇????,
             baseCost: 35000,
             baseIncome: 1200,
-            icon: "☕",
+            icon: "??,
           },
           {
             id: 5,
-            name: "대형 PC방",
+            name: "????PC??,
             baseCost: 150000,
             baseIncome: 5000,
-            icon: "🖥️",
+            icon: "????블뀬??,
           },
           {
             id: 6,
-            name: "강남 오피스텔",
+            name: "??醫딆┫?뺢퀣횞???????덉쭗?????먃?,
             baseCost: 800000,
             baseIncome: 25000,
-            icon: "🏢",
+            icon: "???,
           },
           {
             id: 7,
-            name: "대형 복합 마트",
+            name: "??????⑤슢?뽫뵓怨뺛뀑?? ?꿔꺂?????,
             baseCost: 4000000,
             baseIncome: 120000,
-            icon: "🛒",
+            icon: "???,
           },
           {
             id: 8,
-            name: "5성급 럭셔리 호텔",
+            name: "5?嚥싲갭횧????????⑤８???癲ル슢?뤸뤃??,
             baseCost: 25000000,
             baseIncome: 700000,
-            icon: "🏨",
+            icon: "???,
           },
           {
             id: 9,
-            name: "글로벌 테마파크",
+            name: "???뚭퐫??汝??吏??노??????????ㅼ뒩??,
             baseCost: 150000000,
             baseIncome: 4000000,
-            icon: "🎡",
+            icon: "???,
           },
           {
             id: 10,
-            name: "초고층 랜드마크",
+            name: "?潁???????嶺뚮㉡???녳뵾??逾??癒?Ъ?,
             baseCost: 1000000000,
             baseIncome: 25000000,
-            icon: "🏙️",
+            icon: "???룸????,
           },
         ],
         en: [
@@ -231,70 +231,70 @@
             name: "Hotdog Stand",
             baseCost: 100,
             baseIncome: 5,
-            icon: "🌭",
+            icon: "???,
           },
           {
             id: 2,
             name: "Convenience Store",
             baseCost: 1500,
             baseIncome: 60,
-            icon: "🏪",
+            icon: "???,
           },
           {
             id: 3,
             name: "Pizza Franchise",
             baseCost: 8000,
             baseIncome: 300,
-            icon: "🍕",
+            icon: "???,
           },
           {
             id: 4,
             name: "Coffee Franchise",
             baseCost: 35000,
             baseIncome: 1200,
-            icon: "☕",
+            icon: "??,
           },
           {
             id: 5,
             name: "Cyber Cafe",
             baseCost: 150000,
             baseIncome: 5000,
-            icon: "🖥️",
+            icon: "????블뀬??,
           },
           {
             id: 6,
             name: "Luxury Apartment",
             baseCost: 800000,
             baseIncome: 25000,
-            icon: "🏢",
+            icon: "???,
           },
           {
             id: 7,
             name: "Supermarket",
             baseCost: 4000000,
             baseIncome: 120000,
-            icon: "🛒",
+            icon: "???,
           },
           {
             id: 8,
             name: "5-Star Hotel",
             baseCost: 25000000,
             baseIncome: 700000,
-            icon: "🏨",
+            icon: "???,
           },
           {
             id: 9,
             name: "Theme Park",
             baseCost: 150000000,
             baseIncome: 4000000,
-            icon: "🎡",
+            icon: "???,
           },
           {
             id: 10,
             name: "Skyscraper",
             baseCost: 1000000000,
             baseIncome: 25000000,
-            icon: "🏙️",
+            icon: "???룸????,
           },
         ],
       };
@@ -350,7 +350,7 @@
         },
       };
 
-      // Defense Contract preview helpers — derived-only, no state mutation
+      // Defense Contract preview helpers ??derived-only, no state mutation
       function getDefenseContractRiskTier(asset) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
         if (vol <= 0.03) return { label: "Stable",    color: "text-emerald-600" };
@@ -360,7 +360,7 @@
 
       function getDefenseContractOdds(asset, highestStage) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Lower volatility → higher base defense odds (range 30–80)
+        // Lower volatility ??higher base defense odds (range 30??0)
         const base = Math.round(Math.max(30, Math.min(80, (1 - vol * 3.5) * 100)));
         // RPG stage progress adds up to +10 bonus
         const stageBonus = Math.min(10, Math.round(
@@ -371,7 +371,7 @@
 
       function getDefenseContractProjectedPayout(asset, highestStage, squadDps) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Higher risk → higher projected multiplier (base range ~1.08–1.48)
+        // Higher risk ??higher projected multiplier (base range ~1.08??.48)
         const baseMultiplier = 1 + vol * 4;
         // Squad DPS adds a small log-scaled bonus (capped at +0.20)
         const dps = toFiniteNumber(squadDps, 0);
@@ -380,7 +380,7 @@
         return Math.max(1.05, Math.min(2.5, raw));
       }
 
-      // Derived-only bet slip preview — no state mutation, no settlement
+      // Derived-only bet slip preview ??no state mutation, no settlement
       function getDefenseContractBetPreview(betSlip, assetList, highestStage, squadDps) {
         const contractId = betSlip?.selectedContractId;
         if (!contractId) return null;
@@ -396,7 +396,7 @@
         return { asset, odds, payout, tier, stake, projectedWin };
       }
 
-      // Derived-only simulated outcome — deterministic preview, no random settlement
+      // Derived-only simulated outcome ??deterministic preview, no random settlement
       function getDefenseContractSimulatedOutcome(betSlip, assetList, highestStage, squadDps) {
         const contractId = betSlip?.selectedContractId;
         if (!contractId) return null;
@@ -423,7 +423,7 @@
         return { selectedContractId: contractId, outcomeLabel, successChance, projectedGain, projectedLoss, confidenceLevel, explanation };
       }
 
-      // Pure helper — builds a preview-only history entry from current bet state
+      // Pure helper ??builds a preview-only history entry from current bet state
       function createDefenseContractPreviewHistoryEntry(betSlip, assetList, highestStage, squadDps) {
         const contractId = betSlip?.selectedContractId;
         if (!contractId) return null;
@@ -450,15 +450,15 @@
         };
       }
 
-      // Pure derived helper — no mutation, reads only contractSettlementUnlocked flag
+      // Pure derived helper ??no mutation, reads only contractSettlementUnlocked flag
       function isDefenseContractSettlementUnlocked(gameState) {
         return gameState?.investment?.contractSettlementUnlocked === true;
       }
 
-      // Pure validation helper — no mutation, returns structured canSettle result
+      // Pure validation helper ??no mutation, returns structured canSettle result
       function validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps) {
         const investment = gameState?.investment;
-        const cash = toFiniteNumber(gameState?.wallet?.cash, 0);
+        const capital = toFiniteNumber(gameState?.investment?.capital, 0);
         const contractId = investment?.betSlip?.selectedContractId || null;
         const stake = Math.max(0, toFiniteNumber(investment?.betSlip?.stake, 0));
 
@@ -480,8 +480,8 @@
             checks: { settlementUnlocked: true, contractSelected: true, stakePositive: false, stakeWithinCash: false, oddsValid: false, payoutValid: false } };
         }
 
-        if (stake > cash) {
-          return { ...base, canSettle: false, reason: "Stake exceeds available War Chest balance.",
+        if (stake > capital) {
+          return { ...base, canSettle: false, reason: "Stake exceeds available Contract Capital balance.",
             checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: false, oddsValid: false, payoutValid: false } };
         }
 
@@ -503,7 +503,7 @@
           checks: { settlementUnlocked: true, contractSelected: true, stakePositive: true, stakeWithinCash: true, oddsValid: true, payoutValid: true } };
       }
 
-      // Pure helper — deterministic dry-run, no Math.random for outcome, no cash mutation
+      // Pure helper ??deterministic dry-run, no Math.random for outcome, no cash mutation
       function createDefenseContractDryRunResult(gameState, assetList, highestStage, squadDps) {
         const validation = validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps);
         if (!validation.canSettle) return null;
@@ -538,7 +538,7 @@
         };
       }
 
-      // Pure helper — deterministic settlement result, same logic as dry-run
+      // Pure helper ??deterministic settlement result, same logic as dry-run
       function createDefenseContractSettlementResult(gameState, assetList, highestStage, squadDps) {
         const validation = validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps);
         if (!validation.canSettle) return null;
@@ -1799,81 +1799,81 @@
             "Adds future boss HP-percent damage under eclipse contracts.",
         },
         ko: {
-          "characters.realtyNormalYardBroker.name": "마당 중개인",
-          "characters.realtyNormalYardBroker.title": "초기 임대 타격수",
+          "characters.realtyNormalYardBroker.name": "?꿔꺂?????嚥싳쉶瑗??꾧틒???,
+          "characters.realtyNormalYardBroker.title": "?潁??용끏????? ???嚥▲굥?멩납??,
           "characters.realtyNormalYardBroker.description":
-            "작은 계약을 직접적인 공격력으로 바꿉니다.",
-          "characters.realtyRareLeaseKnight.name": "임대 기사",
-          "characters.realtyRareLeaseKnight.title": "전방 계약 검객",
+            "??? ??影??낟????꿔꺂????????쇨덫???????????????熬곣뫖利???????딅젩.",
+          "characters.realtyRareLeaseKnight.name": "??? ???뚯??影?곸뮏?,
+          "characters.realtyRareLeaseKnight.title": "????쏙쭗?ㅒ???影??낟???嚥▲굧????,
           "characters.realtyRareLeaseKnight.description":
-            "근접 임대 파쇄 공격으로 적을 베어냅니다.",
-          "characters.realtyEpicHotelDuelist.name": "호텔 결투가",
-          "characters.realtyEpicHotelDuelist.title": "스위트층 결정타",
+            "????????? ??????????????Β??????쇨덫???筌??節꾪렭??곗쟼?????뉖뤁??",
+          "characters.realtyEpicHotelDuelist.name": "?癲ル슢?뤸뤃???嚥▲굧??????곗??",
+          "characters.realtyEpicHotelDuelist.title": "???繹먮굞異?癲ル슢??????嚥▲굧?????",
           "characters.realtyEpicHotelDuelist.description":
-            "상층에서 정밀한 마무리 피해를 줍니다.",
-          "characters.realtyLegendaryEmpireAuctioneer.name": "제국 경매인",
-          "characters.realtyLegendaryEmpireAuctioneer.title": "자본 망치 호출자",
+            "????쇨덧鶯??????癲????꿔꺂???熬곎듑?????筌뤿굝琉??嚥싳쉶瑗??????",
+          "characters.realtyLegendaryEmpireAuctioneer.name": "???곌떽?댁맾 ?嚥▲굧?????,
+          "characters.realtyLegendaryEmpireAuctioneer.title": "???雅??꿔꺂???????癲ル슢?????,
           "characters.realtyLegendaryEmpireAuctioneer.description":
-            "묵직한 폭발 피해로 최종 낙찰을 선언합니다.",
-          "characters.realtyMythicDeedSovereign.name": "권리증 군주",
-          "characters.realtyMythicDeedSovereign.title": "부동산 수입의 권위",
+            "???類ㅼ벖傭?????????筌뤿굝琉???꿔꺂????쭍?瑜귣젺??????ロ떙???????떔???嶺뚮ㅎ????",
+          "characters.realtyMythicDeedSovereign.name": "???????κ땀?????援온影?쀫굜?,
+          "characters.realtyMythicDeedSovereign.title": "???낇뀘??????눫?????볥궙?????????,
           "characters.realtyMythicDeedSovereign.description":
-            "부동산 수입을 미래 DPS 권위로 전환합니다.",
-          "characters.tickerNormalFloorRunner.name": "장내 러너",
-          "characters.tickerNormalFloorRunner.title": "개장 종 타격수",
+            "???낇뀘??????눫?????볥궙??????붺몭?겹럷??DPS ??????熬곣뫖??????꾣뤃???嶺뚮ㅎ????",
+          "characters.tickerNormalFloorRunner.name": "?逆곷틳源븃떋?????,
+          "characters.tickerNormalFloorRunner.title": "??醫딆┻????????嚥▲굥?멩납??,
           "characters.tickerNormalFloorRunner.description":
-            "빠른 장내 공격으로 목표에게 돌진합니다.",
-          "characters.tickerMythicIndexArchon.name": "지수 집정관",
-          "characters.tickerMythicIndexArchon.title": "포트폴리오 속도의 권위",
+            "??辱???逆곷틳源븃떋??????????Β???꿔꺂??袁ㅻ븶?猷뱀떻???????????嶺뚮ㅎ????",
+          "characters.tickerMythicIndexArchon.name": "?꿔꺂??????꿔꺂???겸꼻???⑤똻??",
+          "characters.tickerMythicIndexArchon.title": "?????????????戮?덫????????,
           "characters.tickerMythicIndexArchon.description":
-            "포트폴리오 가치를 미래 공격 속도 엔진으로 사용합니다.",
-          "characters.luxuryMythicCashCrownedEmpress.name": "현금관 여제",
-          "characters.luxuryMythicCashCrownedEmpress.title": "유동 화력의 권위",
+            "???????????醫딆쓧???⑤㈇??? ???붺몭?겹럷????????????戮?덫 ???됰Ŋ??????Β???????嶺뚮ㅎ????",
+          "characters.luxuryMythicCashCrownedEmpress.name": "????꾤뙴????援온 ????,
+          "characters.luxuryMythicCashCrownedEmpress.title": "????ル뒇嶺????됰Ŧ??????????,
           "characters.luxuryMythicCashCrownedEmpress.description":
-            "지갑 현금을 미래 치명타 화력으로 바꿉니다.",
-          "characters.shadowMythicEclipseUnderboss.name": "일식 언더보스",
-          "characters.shadowMythicEclipseUnderboss.title": "보스 처형의 권위",
+            "?꿔꺂?????????꾤뙴??????붺몭?겹럷????⑤㈇???レ뵛??? ???됰Ŧ??????Β???熬곣뫖利???????딅젩.",
+          "characters.shadowMythicEclipseUnderboss.name": "??濚밸Ŧ援앾쭛??癲ル슢??????λ돥影??퉻??,
+          "characters.shadowMythicEclipseUnderboss.title": "??⑤슢?????꿔꺂??節뉖き?????????,
           "characters.shadowMythicEclipseUnderboss.description":
-            "일식 계약으로 미래 보스 체력 비례 피해를 더합니다.",
+            "??濚밸Ŧ援앾쭛???影??낟?????Β?????붺몭?겹럷????⑤슢?????꿔꺂????????? ???筌뤿굝琉???????????????딅젩.",
         },
         ja: {
-          "characters.realtyNormalYardBroker.name": "ヤードブローカー",
-          "characters.realtyNormalYardBroker.title": "初期リースストライカー",
+          "characters.realtyNormalYardBroker.name": "????ルㅏ堉??欲꼲??????壤굿??뽯펿",
+          "characters.realtyNormalYardBroker.title": "???嶺????⑸㎦???袁⑸젽??????椰꾨텑?????ルㅏ???,
           "characters.realtyNormalYardBroker.description":
-            "小さな契約を直接的な攻撃力に変えます。",
-          "characters.realtyRareLeaseKnight.name": "リースナイト",
-          "characters.realtyRareLeaseKnight.title": "前線契約ブレード",
+            "?臾먭컼????댄????怨몄벖?????夷??嶺뚮ㅎ???????펺誘?뼀??潁?????關逾???ル폇嶺뚮씭?ョ댚???筌?源??,
+          "characters.realtyRareLeaseKnight.name": "????⑸㎦???袁⑸젽??????ルㅏ猷?,
+          "characters.realtyRareLeaseKnight.title": "??嶺뚮ㅏ援????怨쀬굦嶺??癲ル슢????????뉖？",
           "characters.realtyRareLeaseKnight.description":
-            "近接のリースブレイク攻撃で敵を切り裂きます。",
-          "characters.realtyEpicHotelDuelist.name": "ホテルデュエリスト",
-          "characters.realtyEpicHotelDuelist.title": "スイート階の決定打",
+            "??嶺????????戮?Ⅴ?癲ル슢???????ルㅏ???潁??????琉?雅?퍔瑗?????잙?????耀붾굝??????깃묄??,
+          "characters.realtyEpicHotelDuelist.name": "?????猷??壤굿??뽯：?耀붿빘堉낁떋????⑸㎣???,
+          "characters.realtyEpicHotelDuelist.title": "??袁⑸젽???????뉖＜????臾롫궃???⑤벡??┼??,
           "characters.realtyEpicHotelDuelist.description":
-            "上層階から精密なフィニッシュダメージを与えます。",
-          "characters.realtyLegendaryEmpireAuctioneer.name": "エンパイア競売人",
-          "characters.realtyLegendaryEmpireAuctioneer.title": "資本ハンマーの号令役",
+            "鵝?챶?녽뜮戮щ┛???뒋??????????β뼯爰???용Ъ?癲ル슢흮????壤굿??????룸챶堉?????耀붾굝梨??癲ル슢二?뇡?얠쑋鵝?챶?녽뜮??ⓥ뫗????筌?源??,
+          "characters.realtyLegendaryEmpireAuctioneer.name": "????????뺢광??嶺????留뚩遺얘턂獒??,
+          "characters.realtyLegendaryEmpireAuctioneer.title": "????낆졒??癲ル슢??린??????ㅻ샑???癲ル슢??怨⒲뀋???獒?,
           "characters.realtyLegendaryEmpireAuctioneer.description":
-            "重いバーストダメージで最後の落札を告げます。",
-          "characters.realtyMythicDeedSovereign.name": "ディードソブリン",
-          "characters.realtyMythicDeedSovereign.title": "不動産収入の権威",
+            "??耀붾굝梨???????袁⑸젽??????耀붾굝梨??癲ル슢二?뇡癒?????酉???븍９臾??嶺뚮ㅎ?э㎗?雅?퍔瑗????雅?퍔瑗?袁ㅻ쇊????깃묄??,
+          "characters.realtyMythicDeedSovereign.name": "???β뼯援??????뉖？????????⑸㎦??,
+          "characters.realtyMythicDeedSovereign.title": "鵝?챶?녽뜮???鶯ㅺ동????노돎?耀붿빘堉껆㎉???삳괘???",
           "characters.realtyMythicDeedSovereign.description":
-            "不動産収入を将来のDPS権威へ変換します。",
-          "characters.tickerNormalFloorRunner.name": "フロアランナー",
-          "characters.tickerNormalFloorRunner.title": "オープニングベルの打撃手",
+            "鵝?챶?녽뜮???鶯ㅺ동????노돎?耀붿빘堉낉쭔????猷멸강?????쒖뱻S??????癲ル슢?泳?낱?????節뗫뤉???筌?源??,
+          "characters.tickerNormalFloorRunner.name": "?癲ル슢흮???????????뉖쨨??,
+          "characters.tickerNormalFloorRunner.title": "????⑸㎦???壤굿??뽯쨬?????눫????⑥쥓鍮????????룻꼤??,
           "characters.tickerNormalFloorRunner.description":
-            "素早い市場フロア攻撃で対象へ突撃します。",
-          "characters.tickerMythicIndexArchon.name": "インデックスアルコン",
-          "characters.tickerMythicIndexArchon.title": "ポートフォリオ速度の権威",
+            "?????????????뱁깯?????潁?????轅롫굻獒???燁????뤒??????壤굿?袁る쐾????깃묄??,
+          "characters.tickerMythicIndexArchon.name": "????ルㅏ堉???β뼯援ε퐲?????????????뉖?",
+          "characters.tickerMythicIndexArchon.title": "?????얜펿???嚥??耀붾굝梨??????????????蹂㏓떑?,
           "characters.tickerMythicIndexArchon.description":
-            "ポートフォリオ価値を将来の攻撃速度エンジンにします。",
+            "?????얜펿???嚥??耀붾굝梨????ш끽維?????ル봾??臾먭컼??????????몄넕??????????癲ル슢二?뇡遺얜???壤굿?袁⑤뤉???筌?源??,
           "characters.luxuryMythicCashCrownedEmpress.name":
-            "キャッシュクラウンの女帝",
-          "characters.luxuryMythicCashCrownedEmpress.title": "流動火力の権威",
+            "??嚥????볤텠??耀붿빘堉낁떋??耀붾굝梨???????굅??怨쀬굦???,
+          "characters.luxuryMythicCashCrownedEmpress.title": "???뉐첎????潁뺛깿吏????蹂㏓떑?,
           "characters.luxuryMythicCashCrownedEmpress.description":
-            "ウォレット現金を将来のクリティカル火力へ変えます。",
-          "characters.shadowMythicEclipseUnderboss.name": "エクリプスアンダーボス",
-          "characters.shadowMythicEclipseUnderboss.title": "ボス処刑の権威",
+            "???????????ш끽維?????뺢광???꾨녕뭐癒?턁椰????????⑸㎦??鶯ㅺ동???⑸㎦??????逾????節띾뻶???ル폇嶺뚮씭?ョ댚???筌?源??,
+          "characters.shadowMythicEclipseUnderboss.name": "????????⑸㎣筌??袁⑸젽?????????戮??,
+          "characters.shadowMythicEclipseUnderboss.title": "????????????蹂㏓떑?,
           "characters.shadowMythicEclipseUnderboss.description":
-            "日食契約で将来のボスHP割合ダメージを加えます。",
+            "???????猿딅????뺥깫????獄?낮??耀붿빘堉껆㎉?????됱ⅩP??遺얘꺅泳??????耀붾굝梨??癲ル슢二?뇡?얠쑋??釉뚰??귢턀???筌?源??,
         },
       };
 
@@ -1898,6 +1898,8 @@
           },
           investment: {
             holdings: createDefaultInvestmentHoldings(),
+            capital: 0,
+            supportGrantClaimed: false,
             betSlip: { selectedContractId: null, stake: 0 },
             contractHistory: [],
             contractSettlementUnlocked: false,
@@ -1910,10 +1912,15 @@
             lastPulledItem: null,
             recentPulls: [],
             lastEnhancementResult: null,
+            starterWeaponGranted: false,
+            weaponMastery: {},
+            weaponLevels: {},
           },
           rpg: {
             characters: [],
             highestStage: 0,
+            tickets: 1,
+            unlockedCharacterIds: [],
             currentStage: 1,
             monsterHp: 100,
             monsterMaxHp: 100,
@@ -1927,6 +1934,14 @@
               atkLevel: 0,
               spdLevel: 0,
               penLevel: 0,
+            },
+            run: {
+              activeUnits: [],
+              isActive: false,
+              wave: 0,
+              stage: 1,
+              runId: null,
+              resultHistory: [],
             },
           },
           settings: {
@@ -2021,6 +2036,19 @@
           .map((item, index) => normalizeGachaItem(item, index))
           .filter(Boolean)
           .slice(-GACHA_RECENT_PULL_LIMIT);
+      }
+
+      function createStarterWeaponInstance() {
+        return normalizeInventoryItem(
+          {
+            id: "iron-dagger",
+            instanceId: `starter-iron-dagger-${Date.now()}-${Math.random()
+              .toString(36)
+              .slice(2, 8)}`,
+            enhanceLevel: 0,
+          },
+          0,
+        );
       }
 
       function ensureUniqueGachaInstanceIds(items) {
@@ -2188,6 +2216,49 @@
         return Math.min(1.5, toFiniteNumber(multiplier, 1.25));
       }
 
+      function getWeaponMasteryBonus(unit, enhancementState) {
+        const definition = getCharacterDefinition(unit?.characterId);
+        const preferredType = getCharacterPreferredWeaponType(definition);
+        if (!preferredType) return 1;
+
+        const weaponLevels = enhancementState?.weaponLevels || {};
+        const savedLevel = Math.max(
+          0,
+          Math.floor(toFiniteNumber(weaponLevels[preferredType], 0)),
+        );
+        return Math.min(2, 1 + savedLevel * 0.05);
+      }
+
+      function createRunCharacterUnit(characterId, fallbackIndex = 0) {
+        const created = createCharacterInstance(characterId);
+        if (created) return created;
+        const definition = getCharacterDefinition(characterId);
+        if (!definition) return null;
+        return {
+          instanceId: `run-${definition.id}-${fallbackIndex}`,
+          characterId: definition.id,
+          level: 1,
+          stars: 0,
+          equippedWeaponInstanceId: null,
+        };
+      }
+
+      function getStarterRunCharacterIds(rpgState) {
+        const unlocked = Array.isArray(rpgState?.unlockedCharacterIds)
+          ? rpgState.unlockedCharacterIds.filter((id) => getCharacterDefinition(id))
+          : [];
+        if (unlocked.length > 0) return unlocked;
+        return [
+          "realty-normal-yard-broker",
+          "ticker-normal-floor-runner",
+          "luxury-normal-boutique-slasher",
+        ];
+      }
+
+      function getRunTicketCost() {
+        return 100;
+      }
+
       function getCharacterBaseDps(characterInstance) {
         if (!characterInstance?.characterId) return 0;
         const gachaItem = GACHA_ITEMS.find(
@@ -2270,8 +2341,8 @@
 
       function getTeamBaseAtk(state) {
         if (!state || !state.rpg) return 0;
-        const characters = Array.isArray(state.rpg.characters)
-          ? state.rpg.characters
+        const characters = Array.isArray(state.rpg.run?.activeUnits)
+          ? state.rpg.run.activeUnits
           : [];
         const inventory = Array.isArray(state.enhancement?.inventory)
           ? state.enhancement.inventory
@@ -2289,11 +2360,16 @@
               character,
               inventory,
             );
+            const masteryMultiplier = getWeaponMasteryBonus(
+              character,
+              state.enhancement,
+            );
             return {
               ...character,
               definition,
               equippedWeapon,
               synergyMultiplier,
+              masteryMultiplier,
             };
           })
           .filter(Boolean);
@@ -2313,7 +2389,10 @@
             ownedFactionCounts[char.definition.faction] || 0,
           );
           const totalDps =
-            (levelDps + weaponDps) * char.synergyMultiplier * factionMult;
+            (levelDps + weaponDps) *
+            char.synergyMultiplier *
+            char.masteryMultiplier *
+            factionMult;
           return sum + totalDps;
         }, 0);
       }
@@ -2333,7 +2412,7 @@
         const crtBase = 0.05;
 
         // Small bonus for Legendary/Mythic characters
-        const characters = state.rpg?.characters || [];
+        const characters = state.rpg?.run?.activeUnits || [];
         const highTierCount = characters.filter((c) => {
           const def = getCharacterDefinition(c.characterId);
           return (
@@ -2357,6 +2436,7 @@
       }
 
       function applyCombatTick(state, deltaSeconds) {
+        if (state.rpg?.run?.isActive !== true) return state;
         const dps = getTotalTeamDps(state);
         const damage = dps * deltaSeconds;
         if (damage <= 0) return state;
@@ -2403,6 +2483,11 @@
               dividends: toFiniteNumber(state.rpg.dividends, 0) + reward,
               lastRpgReward: reward,
               normalEndingReached: reachedNormalEnding,
+              run: {
+                ...state.rpg.run,
+                stage: nextStage,
+                wave: nextDefeated,
+              },
             },
           };
         }
@@ -2412,6 +2497,11 @@
           rpg: {
             ...state.rpg,
             monsterHp: nextHp,
+            run: {
+              ...state.rpg.run,
+              stage: Math.max(1, toFiniteNumber(state.rpg.run?.stage, state.rpg.currentStage)),
+              wave: Math.max(0, toFiniteNumber(state.rpg.run?.wave, state.rpg.defeatedMonsters)),
+            },
           },
         };
       }
@@ -2453,6 +2543,55 @@
           normalizedCharacters,
           normalizedInventory,
         );
+        const normalizedUnlockedCharacterIds = Array.from(
+          new Set([
+            ...(Array.isArray(rpg.unlockedCharacterIds)
+              ? rpg.unlockedCharacterIds.filter((id) => getCharacterDefinition(id))
+              : []),
+            ...equippedNormalizedCharacters.map((character) => character.characterId),
+          ]),
+        );
+        const normalizedWeaponLevels = normalizedInventory.reduce((levels, item) => {
+          if (item.type !== "weapon") return levels;
+          const weaponType = getWeaponType(item);
+          if (!weaponType) return levels;
+          const currentLevel = Math.max(
+            0,
+            Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
+          );
+          levels[weaponType] = Math.max(
+            Math.floor(toFiniteNumber(levels[weaponType], 0)),
+            currentLevel,
+          );
+          return levels;
+        }, { ...(enhancement.weaponLevels || {}) });
+        const normalizedWeaponMastery = Object.keys(normalizedWeaponLevels).reduce(
+          (mastery, weaponType) => {
+            mastery[weaponType] = Math.min(
+              2,
+              1 + Math.max(0, toFiniteNumber(normalizedWeaponLevels[weaponType], 0)) * 0.05,
+            );
+            return mastery;
+          },
+          { ...(enhancement.weaponMastery || {}) },
+        );
+        const run = rpg.run || {};
+        const savedActiveUnits = Array.isArray(run.activeUnits) ? run.activeUnits : [];
+        const normalizedRunUnits = ensureUniqueCharacterInstanceIds(
+          savedActiveUnits
+            .map((character, index) => normalizeOwnedCharacter(character, index))
+            .filter(Boolean),
+        );
+        const normalizedRunHistory = Array.isArray(run.resultHistory)
+          ? run.resultHistory
+              .filter(
+                (entry) =>
+                  entry &&
+                  typeof entry.id === "string" &&
+                  typeof entry.result === "string",
+              )
+              .slice(-10)
+          : [];
 
         return {
           ...defaults,
@@ -2484,6 +2623,8 @@
           investment: {
             ...defaults.investment,
             ...investment,
+            capital: Math.max(0, toFiniteNumber(investment.capital, 0)),
+            supportGrantClaimed: investment.supportGrantClaimed === true,
             holdings: defaults.investment.holdings.map((holding) => {
               const savedHolding = savedHoldings.find(
                 (item) => item.id === holding.id,
@@ -2581,6 +2722,9 @@
             ...enhancement,
             inventory: normalizedInventory,
             failStacks: toFiniteNumber(enhancement.failStacks, 0),
+            starterWeaponGranted: enhancement.starterWeaponGranted === true,
+            weaponLevels: normalizedWeaponLevels,
+            weaponMastery: normalizedWeaponMastery,
             lastPulledItem:
               normalizeGachaItem(enhancement.lastPulledItem) ||
               normalizedRecentPulls[normalizedRecentPulls.length - 1] ||
@@ -2613,6 +2757,8 @@
             ...defaults.rpg,
             ...rpg,
             characters: equippedNormalizedCharacters,
+            tickets: Math.max(0, Math.floor(toFiniteNumber(rpg.tickets, 1))),
+            unlockedCharacterIds: normalizedUnlockedCharacterIds,
             highestStage: Math.max(0, Math.floor(toFiniteNumber(rpg.highestStage, 0))),
             currentStage: Math.max(1, Math.floor(toFiniteNumber(rpg.currentStage, 1))),
             monsterMaxHp: Math.max(1, toFiniteNumber(rpg.monsterMaxHp, 100)),
@@ -2635,6 +2781,17 @@
               atkLevel: clampNumber(rpg.upgrades?.atkLevel, 0, 1000, 0),
               spdLevel: clampNumber(rpg.upgrades?.spdLevel, 0, 1000, 0),
               penLevel: clampNumber(rpg.upgrades?.penLevel, 0, 1000, 0),
+            },
+            run: {
+              ...defaults.rpg.run,
+              ...run,
+              activeUnits:
+                run.isActive === true ? normalizedRunUnits : [],
+              isActive: run.isActive === true && normalizedRunUnits.length > 0,
+              wave: Math.max(0, Math.floor(toFiniteNumber(run.wave, 0))),
+              stage: Math.max(1, Math.floor(toFiniteNumber(run.stage, 1))),
+              runId: typeof run.runId === "string" ? run.runId : null,
+              resultHistory: normalizedRunHistory,
             },
           },
           settings: {
@@ -2728,48 +2885,48 @@
         );
       }
 
-      // 국가별 공략집 데이터 분리
+      // ?????????댁벑??잙컾維??????????????곗뒩泳??
       const SEO_CONTENT = {
         ko: (
           <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
             <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
-              📖 건물주 키우기: 공식 공략집 및 게임 위키
+              ????꿸쑨????꿎뫖??????繹먮굝??? ????댁벖??????댁벑??잙컾維?????嚥▲굧????????꾣뤃??
             </h1>
 
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-3 text-green-700">
-                1. 게임 소개
+                1. ?嚥▲굧???????嶺?
               </h2>
               <p className="mb-4">
-                건물주 키우기(Idle Landlord)는 누구나 쉽게 브라우저에서 즐길 수
-                있는 중독성 높은 방치형 클리커(Incremental Clicker) 시뮬레이션
-                게임입니다. 초기 자본 없이 시작하여, 마우스를 클릭해 시드 머니를
-                모으고, 이를 다양한 부동산과 사업체에 재투자하여 거대한 부를
-                축적하는 것이 목표입니다.
+                ?꿸쑨????꿎뫖??????繹먮굝???Idle Landlord)??????꾤뙴??????ш끽維쀨린????⑥ル츥??????????꿔꺂?ｉ뜮戮깆뒜癲???
+                ?????됲닓 嚥싳쉶瑗??꾧틚????雅? ?熬곣뫖?삥납???????????Incremental Clicker) ??????繹먮굟瑗??
+                ?嚥▲굧????????뉖뤁?? ?潁??용끏?????雅?????ㅼ굡????嶺뚮??ｆ뤃??嶺뚮슣??굢? ?꿔꺂??????? ????????嶺뚮㉡????亦껋꼦維쀦뤃?耀붾굛???
+                ?꿔꺂??袁ㅻ븶????? ???? ????⑥쥓??????낇뀘??????눫?????뀀돃?뚨뙴????ㅿ폑獄??????沃섃뫂??먮뎨???꿸쑨?????????낇뀘???
+                ???ㅻ쿋繹????β뼯爰귨㎘??嚥▲굧?????꿔꺂??袁ㅻ븶?猷뱀떻?????뉖뤁??
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-3 text-green-700">
-                2. 핵심 게임 플레이 방법
+                2. ??????嚥▲굧???????????熬곣뫖?삥납????
               </h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
                 <li>
-                  <strong>수동 클릭:</strong> 초반 성장의 핵심입니다. 화면
-                  중앙의 돈뭉치 아이콘을 클릭하면 즉시 현금이 생성됩니다.
+                  <strong>???β뼯爰껃퐲??????</strong> ?潁?熬곊뮻??嚥싲갭큔?????????????뉖뤁?? ???됰Ŧ六??
+                  嚥싳쉶瑗??꾧틡???????怨뺣┸??????썹땟?㈑??ш끽維??????????????꿔꺂?ｉ뜮戮녹춹??????꾤뙴??????꾩룆????嶺뚮ㅎ????
                 </li>
                 <li>
-                  <strong>마우스 강화:</strong> 모은 돈으로 클릭 파워를
-                  업그레이드할 수 있습니다. 적극적인 클릭 유저에게 필수적입니다.
+                  <strong>?꿔꺂????????醫딆┫???</strong> ?꿔꺂??袁ㅻ븶? ???繹먮겧嫄?????????????
+                  ????⑸늉????繹먮굟瑗?????ъ떫 ????????????딅젩. ?????????쇨덫???????????????????썹땟?????쇨덫??????딅젩.
                 </li>
                 <li>
-                  <strong>부동산 투자:</strong> 붕어빵 노점상부터 초고층
-                  랜드마크까지 구매하여 가만히 있어도 돈이 들어오는 패시브
-                  인컴을 창출하세요.
+                  <strong>???낇뀘??????눫?????</strong> ???곗뵯繹???????癲ル슢?????????潁?????
+                  ??嶺뚮㉡???녳뵾??逾??癒?Ъ嶺뚮Ŋ???? ????彛???嶺뚮슣??굢???醫딆쓧??꿔꺂?????????⑥ろ맖?????繹먮굟瑗?????⑥ろ맖????紐꾪닓 ??潁뺛꺈彛??
+                  ?癲ル슢???由???꿔꺂??????嶺뚮슣堉???
                 </li>
                 <li>
-                  <strong>자동 저장 시스템:</strong> 모든 진행 상황은 브라우저에
-                  안전하게 자동 저장됩니다.
+                  <strong>???嶺???????嶺?筌??</strong> ?꿔꺂??袁ㅻ븶????꿔꺂????紐꾩뗄???????? ???⑥ル츥??????
+                  ???繹먮냱踰????怨뺤퓡 ???嶺????逆곷틳爰덂퐲?????딅젩.
                 </li>
               </ul>
             </section>
@@ -2780,57 +2937,57 @@
 
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-3 text-green-700">
-                3. 고급 투자 공략 가이드
+                3. ???쒙쭫??????????댁벑????醫딆쓧??????
               </h2>
               <ol className="list-decimal pl-6 mb-4 space-y-2">
                 <li>
-                  <strong>초반은 마우스에 집중하세요:</strong> 극초반에는 건물을
-                  사는 것보다 마우스 업그레이드에 돈을 쓰는 것이 수익 효율이
-                  훨씬 높습니다.
+                  <strong>?潁?熬곊뮻?? ?꿔꺂????????⑥쥓援??꿔꺂???겸꼻?믠벀???嶺뚮슣堉???</strong> ???녾컯???꾩룄???嶺뚮슣?㎬キ???꿸쑨??????
+                  ?????嚥▲굧??????꿔꺂??????????⑸늉????繹먮굟瑗??嶺?獄????繹먮굛??????살퓢???嚥▲굧????????볥궙??????숈춻??
+                  ??潁???雅?퍔瑗ⓩ뤃罐吏?????딅젩.
                 </li>
                 <li>
-                  <strong>1.15배의 법칙:</strong> 건물을 구매할 때마다 해당
-                  건물의 다음 구매 가격은 정확히 15% 상승합니다. 따라서 한
-                  종류의 건물만 사는 것은 비효율적입니다. 분산 투자하세요!
+                  <strong>1.15?熬곣뫖利????筌???묐┛??</strong> ?꿸쑨??????????彛??????????????
+                  ?꿸쑨?????????繹먮굞??????彛????醫딆쓧??嚥▲굥?멩납? ?癲ル슢怡?怨뚯꼫??15% ????쇨덧???嶺뚮ㅎ???? ????산뭐?????
+                  ????띻샴癲???꿸쑨????꿎뫖????????嚥▲굧??? ?????????????뉖뤁?? ???곗뒩泳??踰??????嶺뚮슣堉???
                 </li>
                 <li>
-                  <strong>환생을 향한 질주:</strong> 자산 20억(2B)을 달성하면
-                  환생할 수 있습니다. 환생 시 영구적인 수익 배수를 얻으므로
-                  최대한 빨리 20억을 모으는 것이 최종 목표입니다.
+                  <strong>??嶺뚮슣堉붹룇???嚥싳쇎紐???꿔꺂????釉먮굜?</strong> ?????20??2B)???????????
+                  ??嶺뚮슣堉붹룇??????????????딅젩. ??嶺뚮슣堉붹룇 ???????????쇨덫??????볥궙???熬곣뫖利???釉랁닑??????⑤짅嫄ч썒??붹틦???
+                  ?꿔꺂????쭍?????力????20??????꿔꺂??袁ㅻ븶????嚥▲굧?????꿔꺂????쭍?瑜귣젺??꿔꺂??袁ㅻ븶?猷뱀떻?????뉖뤁??
                 </li>
               </ol>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-3 text-green-700">
-                4. 자주 묻는 질문 (FAQ)
+                4. ????????ル맪????꿔꺂???熬곻퐢利?(FAQ)
               </h2>
               <div className="space-y-4">
                 <div>
                   <strong className="block text-gray-800">
-                    Q: 오프라인 상태에서도 돈을 버나요?
+                    Q: ?????덈???濚밸Ŧ???????븐뻤??????????繹먮굛???筌????筌??
                   </strong>
                   <span className="text-gray-600">
-                    A: 현재는 브라우저가 켜져 있을 때만 수익이 발생합니다. (추후
-                    업데이트 예정)
+                    A: ????썹땟??????⑥ル츥??????醫딆쓧? ??獄쏅챷??????繹먮굛???????????볥궙????熬곣뫖利든뜏類ｋ렱???嶺뚮ㅎ???? (?????
+                    ?????욍걛???ш끽維?????繹먮냱??
                   </span>
                 </div>
                 <div>
                   <strong className="block text-gray-800">
-                    Q: 게임 데이터를 초기화하려면 어떻게 하나요?
+                    Q: ?嚥▲굧?????????????? ?潁??용끏???????????ル봾諭??????嫄걔?????β뼯援η뙴??
                   </strong>
                   <span className="text-gray-600">
-                    A: 브라우저의 인터넷 사용 기록에서 쿠키 및 사이트 데이터를
-                    삭제하시면 됩니다.
+                    A: ???⑥ル츥???????癲ル슢?뤸뤃??????????뚯????덈춣?????????筌잂뼺踰??????????????????
+                    ?????嶺뚮슣?쒙쭛節뤴뵾???嶺뚮ㅎ????
                   </span>
                 </div>
                 <div>
                   <strong className="block text-gray-800">
-                    Q: 오토마우스나 매크로를 써도 되나요?
+                    Q: ?????숇??꿔꺂????????⑤베利??꿔꺂????關臾쇘춯癒?돵??? ?????노덫 ???β뼯援η뙴??
                   </strong>
                   <span className="text-gray-600">
-                    A: 싱글 플레이 게임이므로 제재는 없습니다. 편하신 방법으로
-                    부를 축적하세요!
+                    A: ?嚥? ???????嚥▲굧???????????嶺뚮??ｆ쾮??????ㅿ폍??????딅젩. ?癲ル슢?뤸뤃??뎨???熬곣뫖?삥납???????Β??
+                    ???낇뀘??????ㅻ쿋繹???嶺뚮슣堉???
                   </span>
                 </div>
               </div>
@@ -2840,7 +2997,7 @@
         en: (
           <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
             <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
-              📖 Idle Landlord: Ultimate Strategy Guide & Game Wiki
+              ???Idle Landlord: Ultimate Strategy Guide & Game Wiki
             </h1>
 
             <section className="mb-8">
@@ -2947,22 +3104,383 @@
         ),
       };
 
+      const UI_TEXT = {
+        ko: {
+          tabLandlord: "?꿸쑨????꿎뫖???,
+          tabInvestment: "?熬곣뫖?삥납??關?귞뼨?彛??影??낟??,
+          tabEnhancement: "??醫딆┫???,
+          tabRpg: "RPG",
+          walletHeader: "???뚭퐫??汝??吏??노?????됰Ŧ???,
+          walletCash: "????꾤뙴??,
+          walletDiamond: "???繹먮굟瑗??,
+          walletDividends: "?熬곣뫖利???,
+          saveData: "?癲ル슢???뼘???????????,
+          save: "????,
+          export: "????????源낇꺙",
+          import: "???곗뵯??????곗뵚??,
+          defenseContracts: "????쇨덫?????癲??熬곣뫖利???,
+          warChest: "????썹땟???????,
+          contractValue: "??影??낟????醫딆쓧???,
+          totalCapital: "?????雅?,
+          gachaEnhancement: "??醫딆쓧???& ??醫딆┫???,
+          drawCost: "?꿔꺂??嶺뚣끇?싮??????,
+          draw1: "1???꿔꺂??嶺뚣끇?싮?,
+          draw10: "10???꿔꺂??嶺뚣끇?싮?,
+          lastPull: "?꿔꺂????쭍??????蹂λ쑋",
+          lastEnhancement: "?꿔꺂????쭍????醫딆┫???,
+          ownedCharacters: "??⑤슢???? ??????,
+          recentPulls: "?꿔꺂????쭍???꿔꺂??嶺뚣끇?싮?,
+          inventory: "?癲ル슢??誘?㎟????リ뭡??,
+          weapon: "???類ｌ꽀??,
+          none: "????ㅼ굡??,
+          equipFirst: "?????類ｌ꽀?????濡?씀?,
+          unequip: "????ㅼ굣??,
+          defenseCommand: "?????????꿔꺂?????嶺뚮슣???,
+          battleStatPreview: "????꾣뤃?????熬곥굥六????붺몭?겹럷???????源낇꺙",
+          dividendsUpgrades: "RPG ?熬곣뫖利???????⑸늉????繹먮굟瑗??,
+          topSquad: "????쇨덫嶺?5?????繹먮끍???,
+          battleNotice: "????꾣뤃????嶺?筌???????",
+        },
+        en: {
+          tabLandlord: "Landlord",
+          tabInvestment: "Defense",
+          tabEnhancement: "Enhancement",
+          tabRpg: "RPG",
+          walletHeader: "Global Wallet",
+          walletCash: "Cash",
+          walletDiamond: "Diamond",
+          walletDividends: "Dividends",
+          saveData: "Save Data",
+          save: "Save",
+          export: "Export",
+          import: "Import",
+          defenseContracts: "Hero's Fate Betting",
+          warChest: "War Chest",
+          contractValue: "Contract Value",
+          totalCapital: "Total Capital",
+          gachaEnhancement: "Gacha & Enhancement",
+          drawCost: "Draw Cost",
+          draw1: "Draw 1",
+          draw10: "Draw 10",
+          lastPull: "Last Pull",
+          lastEnhancement: "Last Enhancement",
+          ownedCharacters: "Owned Characters",
+          recentPulls: "Recent Pulls",
+          inventory: "Inventory",
+          weapon: "Weapon",
+          none: "None",
+          equipFirst: "Equip First",
+          unequip: "Unequip",
+          defenseCommand: "Defense Command",
+          battleStatPreview: "Battle Stat Preview",
+          dividendsUpgrades: "RPG Dividends Upgrades",
+          topSquad: "Top 5 Squad Members",
+          battleNotice: "Battle System Notice",
+        },
+      };
+
+      const SEO_TAB_CONTENT = {
+        ko: {
+          landlord: SEO_CONTENT.ko,
+          investment: (
+            <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
+              <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+                Hero's Fate Betting / Defense Contracts ????꾣뤃??              </h1>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  1. ??嶺?筌????醫딆┻???                </h2>
+                <p className="mb-4">
+                  Defense Contracts ??? ???뚯????????????源????嫄???????????嶺뚮㉡?????潁??????녿뮝?? ?꿔꺂?????                  ???됰Ŧ六???????썹땟???? ????쇨덫???熬곣뫖?삥납??關???嚥▲굧????????雅???꿸쑨??????熬곣뫖利????????ㅼ굡獒????됰Ŧ六?????Β??                  ????고뀘???嶺뚮슣??땻???????????딅젩. ????????????댁벖?? Cash?????????影??낟??????쒙쭫???琉뮻?stake??                  ???繹먮냱????? ????썹땟???????먃??? ?꿔꺂????紐꾩뗄??? ?? DPS???꿔꺂??癰귥빖?????癲ル슢캉????????                  ??????嶺뚮ㅎ????
+                </p>
+                <p className="mb-4">
+                  ????嶺?筌??? `betSlip`, `contractHistory`,
+                  `contractSettlementHistory`, `contractSettlementUnlocked`,
+                  dry-run, settlement validation?????뚯???維◈????Β??????源껎꺘??嶺뚮ㅎ???? ????산뭐????癲ル슢?뤸뤃?꾨쨨??                  ?熬곣뫖利??????????ㅻ깹???癲ル슢???뼘??????源?????????? ???뚯??????? ?????????????癲ル슢?뤸뤃??嚥싲갭큔?源겶?                  ??影??낟????⑤슢?????嶺뚮ㅎ????
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  2. ?癲ル슢캉?????????                </h2>
+                <p className="mb-4">
+                  stake?????繹먮냱議??癲ル슢캉????????筌???熬?留??꿔꺂?볟젆怨ㅼ춻??뮻???? ??袁⑸즴移??payout ??????袁⑸즴移????됰슦????夷??                  ?꿔꺂???????????筌???熬?留??꿔꺂??????궰?嶺뚮씞猷뉐퐲?????딅젩. ???붺몭?겹럷???????源낇꺙(dry-run)???嚥▲굧?????ル벥嫄??????⑸윞????袁⑦꺙
+                  ????꾣뤃管逾???????癲ル슢???ъ쒜????????꾤뙴??????꿔꺂??????レ탳?? ??????????딅젩. settlement history??                  ?꿔꺂????쭍??10??醫딆┻?????????????嶺뚮슣??땻??????????????? ??縕??????怨뺤퓡 ??影?れ쉬??꿔꺂??? ?????노덫??                  ???援온??잙갭큔筌띲렔??????딅젩.
+                </p>
+                <p className="mb-4">
+                  ?? ??影??낟??????ｋ?? stake ????怨몄７, dry-run ?癲ル슢캉???? ???繹먮냱議?settlement????????                  ???곗뒩泳???嶺뚮슣??땻????繹먮겧嫄х솾? ?嚥▲굧?????汝??吏?癒곕㎦?? ????썹땟??wallet cash, contract odds,
+                  projected payout, stage progress, squad DPS????壤굿??좊㎧ ?嚥▲굧????????????딅젩.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  3. ????ㅼ굡獒???                </h2>
+                <p className="mb-4">
+                  Stage??醫딆쓧? ?雅?퍔瑗ⓩ뤃??癒?븸???留??釉???Defense Contracts??????リ탷??? ????ㅻ샑筌??熬곣뫖?삥납????????????                  ???繹먮겧嫄ч썒??붹틦??? ?潁?熬곊뮻?????????썹땟??????꾤뙴?????? ?꿸쑨??????熬곣뫖?삥납??癰귙룗猷????stake?????곗뒩泳???                  ??잙갭큔?딆뼍吏??? ???β뼯爰귟キ???癲ル슢???뼘??????繹먮냱?????쇨덫??????딅젩. Landlord?? RPG?????????⑤８鍮????????                  ????꾣뤃???嚥싲갭횧?蹂좎쒜??夷???쎛 ?嚥▲굧?????????됰Ŧ六????熬곣뫖利??????뚯?????醫딆┫?????熬곣뫖利??????? ???????????                  ?????????뉖뤁??
+                </p>
+              </section>
+            </article>
+          ),
+          enhancement: (
+            <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
+              <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+                Gacha & Enhancement ????꾣뤃??              </h1>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  1. ??醫딆쓧???辱? ?逆????醫딆┫????????                </h2>
+                <p className="mb-4">
+                  ????? ??潁??????썹땟?㈑???꿔꺂??袁ㅻ븶筌믠뫀萸??????썹땟???? ???????癲ル슢???ъ쒜?? ???類ｌ꽀???嚥싲갭큔???????뚯???維◈??                  ???β뼯爰귨㎘???????????낅튂?????뉖뤁?? ????????살퓢??`gameState.rpg.characters` ????썹땟???                  ??醫딆┻???instance?????逆곷틳源얗얜뀥??諭?? ???類ｌ꽀??? ????썹땟?㈑???
+                  `gameState.enhancement.inventory` ????썹땟??????逆곷틳爰덂퐲?????딅젩. ????산뭐????꿔꺂??嶺뚣끇?싮?                  ?嚥▲굧?????戮곗?? ???????????怨ㅲ뵾???? ???類ｌ꽀??癲???????산뭐??????????썹땟?熬곻퐢夷???쎛 ?????봔????됱삩??? ?꿔꺂????쭍???꿔꺂??嶺뚣끇?싮??
+                  ?꿔꺂??????????蹂λ쑋 ??嶺?筌??????????怨뺣윞??UX???癲ル슢캉?????????????????딅젩.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  2. ???類ｌ꽀????醫딆┫???? ???濡?씀?                </h2>
+                <p className="mb-4">
+                  ???類ｌ꽀????醫딆┫????wallet cash????????? ?嚥싲갭횧?蹂좎쒜??筌믨퀣泥???????? ??醫딆┫???????戮?땁??????산뭐??                  ????????????? ???濡?씀?? ???類ｌ꽀??`instanceId`?????뚯???????Β?????????????援?????쇰뮚?????
+                  ??????????살퓢???????類ｌ꽀?繹먭퍓?鶯? ?????類ｌ꽀?????????????산뭐?????濡?씀??????????????딅젩.
+                  ???濡?씀????????類ｌ꽀?繹먭퍒?루춯? ???? ?????봔????????????援?????쇰뮚????????딅젩?? ???뚯????????쇰뮚???
+                  ???繹먮냱踰????怨뺤퓡 ????ㅼ굣???????????????산뭐勇???????嶺뚮ㅎ????
+                </p>
+                <p className="mb-4">
+                  ??????????????汝??吏??뮤???嶺?獄????됰슦?????? ?????놃닓 ???類ｌ꽀???꿔꺂??癰?????嚥싳쉶瑗??꾧틚?????濡?씀?????븐뻤??쒖몴筌???쎛
+                  ???嶺????Β???癲ル슢???뚭괌??嶺뚮슣??땻?`equippedWeaponInstanceId`??醫딆쓧? `null`????⑤슢?뽫뵓嫄붋???嶺뚮ㅎ????
+                  ???癲ル슢?????????怨대뜲???癲ル슢???뼘???⑥ル츥?????낇뀘????곗뒩泳?????Β?????嶺???癲ル슢???뼘???⑥ル츥???꿔꺂????쭍??????繹먮냱踰????怨뺤퓡
+                  ??⑤슢?뽫뵓???嶺뚮ㅎ????
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  3. ????ъ군濚????類ｌ꽀????嶺??쀫챿?????
+                </h2>
+                <p className="mb-4">
+                  ??52??????????살퓢??`preferredWeaponType`????醫딆쓧??꿔꺂????????繹먮겧嫄х솾? ???濡?씀?????類ｌ꽀???                  `weaponType`????濚밸Ŧ遊얕맱???嚥▲굧????????ъ군濚????類ｌ꽀????嶺??쀫챿???????醫딆쓧? ??嶺?????됰Ŧ?뉐＄?????딅젩. ????썹땟???                  ????꾣뤃????꿔꺂???????影?얜＞????쇳맪??꿔꺂??? ????? ??嶺??쀫챿????? ????븐뻤??? multiplier??醫딆쓧? UI????嶺?筌??嶺뚮슣??땻?                  ?嚥??RPG ????꾣뤃??? ????ㅻ쿋??????고뀘??β뼯猷??????꾣뤃管逾????뚯???維◈????????????산뭐勇???嶺뚮??↑짆??嶺뚮ㅎ????
+                </p>
+              </section>
+            </article>
+          ),
+          rpg: (
+            <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
+              <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+                RPG Defense ????꾣뤃??              </h1>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  1. ?꿔꺂????紐꾩뗄?????源??                </h2>
+                <p className="mb-4">
+                  RPG ??? Sponsor ??Commander ??Wall ??God??????ㅿ폎?묐쵓????????轝꿸섣????嚥싲갭큔??????ㅻ쿋繹??                  ???뚯???????Β??????고뀘???嶺뚮슣??땻???????????딅젩. ????썹땟???????닻뇦??筌??????????Stage 1~100??                  Normal Ending foundation, Stage 101+ Infinite Mode ?꿔꺂?????????維◈?
+                  Dorothy proposal, Dividends economy, ???녾컯嶺????맘??ATK / ACC / CRT / SPD /
+                  PEN ???뚯???維◈?????꾣뤃?????熬곥굥六?????썼キ?κ괌????? ?????嶺뚮ㅎ????
+                </p>
+                <p className="mb-4">
+                  ?????????????????살퓢??52???癲ル슢캉????癲ル슢캉???┛?????녾컯嶺?????????? ???繹먮냱議???⑤슢???? ????????살퓢??                  ??醫딆쓧????嚥▲굧?????????산뭐??instance ????숈춹熬??????逆곷틳爰덂퐲?????딅젩. ????산뭐???????볥굜???????戮?땁??
+                  ?逆???????? ????ㅻ쿋????嶺??쀫챿?????, ??⑤슢?????꿔꺂??????醫딆쓧? ???ㅻ쿋?????β뼯爰껓쭕????ㅻ깹??????썹땟???癲ル슢???뼘??????源????嫄?                  ????ㅿ폎???????????????딅젩.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  2. ????꾣뤃??? ?熬곣뫖利???                </h2>
+                <p className="mb-4">
+                  ????썹땟?????됰Ŧ六?????⑤슢?????DPS, Stage progress, Monster HP, Dividends, Upgrade
+                  cost???꿔꺂??袁ㅻ븶?癲??轝꿸섣??????쇨덫???熬곣뫖?삥납???????꾣뤃????猷매?댚???우몷嶺?????꾣뤃管逾????뚯???維◈?????뉖뤁?? Dividends??                  RPG ???? ????????Global Wallet???嚥▲굧??????????????댁벖?????β뼯爰귨㎘???⑤슢???????ㅻ쿋繹?????                  ???援온??잙갭큔筌??? ?????Investment?? Honor loop??????쇰뮚?????????곌떽釉붾????怨뺤퓡 ??嶺뚮ㅎ????
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  3. Dorothy?? Normal Ending
+                </h2>
+                <p className="mb-4">
+                  Stage 100 ????썹땟??????ш끽維??Dorothy proposal?? ???癲ル슢?ο㎖??β셽?깆?? ?????????源??嚥??? ????썹땟????                  ?癲? ???雅???꿔꺂???? ?嚥싲갭큔??????Β??????⑤베鍮?????????????딅젩?????繹먮냱?????⑤슢??????????類λ뤁??
+                  ????썹땟??Infinite Mode ??????????ャ룄??????? UI?? ?癲ル슢???뼘??????源??????癲ル슢캉????                  ????볥궙獒?????????ㅻ덫?????? 嚥싳쉶瑗ц짆堉샕?????????????????딅젩.
+                </p>
+              </section>
+            </article>
+          ),
+        },
+        en: {
+          landlord: SEO_CONTENT.en,
+          investment: (
+            <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
+              <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+                Hero's Fate Betting / Defense Contracts Wiki
+              </h1>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  1. System Overview
+                </h2>
+                <p className="mb-4">
+                  The Investment tab now leans into Defense Contracts as a betting and
+                  capital allocation system rather than a pure stock-trading screen.
+                  Players fund hero defenses with shared wallet cash, choose a contract,
+                  set a stake, and review derived odds and payout projections based on
+                  current stage progress and squad DPS.
+                </p>
+                <p className="mb-4">
+                  The underlying structure still preserves `betSlip`,
+                  `contractHistory`, `contractSettlementHistory`,
+                  `contractSettlementUnlocked`, dry-run previews, and settlement
+                  validation. That means the UI can evolve without breaking the
+                  canonical `gameState.investment` save format.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  2. Settlement Rules
+                </h2>
+                <p className="mb-4">
+                  Stakes are deducted exactly once during real settlement. Payout is
+                  granted exactly once on a win. Dry-run previews never move cash and
+                  only exist to explain projected outcomes. Settlement history is capped
+                  to the latest 10 entries so persistence stays bounded.
+                </p>
+                <p className="mb-4">
+                  Validation checks settlement gate state, selected contract, positive
+                  stake, available wallet cash, valid odds, and valid projected payout
+                  before allowing real resolution. This keeps contract flow stable even
+                  when older saves are loaded.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  3. Strategy Notes
+                </h2>
+                <p className="mb-4">
+                  Higher stages and stronger squads improve how contracts should be
+                  interpreted, so early play benefits from smaller, split stakes rather
+                  than all-in settlements. The bigger design loop is that Landlord
+                  provides capital, RPG provides defense context, and Defense Contracts
+                  convert both into risk-managed payouts.
+                </p>
+              </section>
+            </article>
+          ),
+          enhancement: (
+            <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
+              <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+                Gacha & Enhancement Wiki
+              </h1>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  1. Why This Tab Matters
+                </h2>
+                <p className="mb-4">
+                  This tab is the bridge between collection and combat. Character pulls
+                  become owned RPG character instances under `gameState.rpg.characters`,
+                  while weapon and item pulls stay under
+                  `gameState.enhancement.inventory`. The recent-pull feed and last-pull
+                  display still present both reward types through one consistent surface.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  2. Enhancement and Equip Rules
+                </h2>
+                <p className="mb-4">
+                  Weapon enhancement spends shared wallet cash and keeps item identity at
+                  the instance level. Equip links are stored through
+                  `equippedWeaponInstanceId`, and only real weapon instances can be
+                  equipped. One character can hold one weapon, and one weapon can belong
+                  to one character at a time.
+                </p>
+                <p className="mb-4">
+                  Load normalization also repairs stale references and duplicate equip
+                  states. If a saved weapon no longer exists, or if multiple characters
+                  reference the same weapon, the invalid references are safely cleared.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  3. Preferred Weapon Synergy
+                </h2>
+                <p className="mb-4">
+                  Each of the 52 static characters already includes a
+                  `preferredWeaponType`. When an equipped weapon instance exposes a
+                  matching `weaponType`, the UI can show a bounded preferred-weapon
+                  synergy multiplier. That multiplier is currently informational only and
+                  is reserved for future RPG combat calculations.
+                </p>
+              </section>
+            </article>
+          ),
+          rpg: (
+            <article className="w-full max-w-4xl bg-white p-8 mt-8 shadow-md rounded-lg mb-20 text-gray-700 leading-relaxed border-t-4 border-green-500">
+              <h1 className="text-3xl font-black mb-6 text-gray-900 border-b pb-4">
+                RPG Defense Wiki
+              </h1>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  1. Progression Blueprint
+                </h2>
+                <p className="mb-4">
+                  The RPG tab follows a long-form defense blueprint built around Sponsor,
+                  Commander, Wall, and God progression. The current foundation already
+                  preserves Stage 1-100 Normal Ending flow, Stage 101+ Infinite Mode
+                  framing, Dorothy's proposal, the dividends economy, and the ATK / ACC /
+                  CRT / SPD / PEN stat model.
+                </p>
+                <p className="mb-4">
+                  The 52-character dataset is preserved as immutable source data, while
+                  owned characters are stored as normalized instances. That separation is
+                  what will make future equipment, synergies, and battle tuning possible
+                  without breaking save compatibility.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  2. Combat and Dividends Foundation
+                </h2>
+                <p className="mb-4">
+                  Visible team DPS, stage progress, monster HP, dividends, and upgrade
+                  costs already form the backbone of the future idle defense loop.
+                  Dividends act as an internal RPG economy while still fitting the wider
+                  universe economy that later connects back into betting and honor loops.
+                </p>
+              </section>
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-3 text-green-700">
+                  3. Dorothy and the Normal Ending
+                </h2>
+                <p className="mb-4">
+                  Dorothy's proposal at Stage 100 establishes that the first ending is a
+                  narrative threshold, not the end of the design space. Infinite Mode is
+                  still gated, but the UI, progression state, and reward structures are
+                  already being shaped to support that expansion later.
+                </p>
+              </section>
+            </article>
+          ),
+        },
+      };
+
       function GameApp() {
-        // 사용자 브라우저 언어 자동 감지
+        // ????????⑥ル츥???? ?癲ル슢???????嶺???醫딆┫??
         const userLang = (
           navigator.language || navigator.userLanguage
         ).includes("ko")
           ? "ko"
           : "en";
-        const t = TRANSLATIONS[userLang];
-
         const [activeTab, setActiveTab] = useState("landlord");
         const [gameState, setGameState] = useState(() =>
           loadGameState(userLang),
         );
         const [clicks, setClicks] = useState([]);
+        const language = gameState.settings?.language || userLang;
+        const t = TRANSLATIONS[language] || TRANSLATIONS.en;
+        const ui = UI_TEXT[language] || UI_TEXT.en;
 
         const cash = Math.max(0, toFiniteNumber(gameState.wallet.cash, 0));
+        const diamonds = Math.max(
+          0,
+          toFiniteNumber(gameState.wallet.diamonds, 0),
+        );
+        const dividends = Math.max(0, toFiniteNumber(gameState.rpg?.dividends, 0));
+        const contractCapital = Math.max(
+          0,
+          toFiniteNumber(gameState.investment?.capital, 0),
+        );
+        const supportGrantClaimed =
+          gameState.investment?.supportGrantClaimed === true;
+        const runTickets = Math.max(0, toFiniteNumber(gameState.rpg?.tickets, 0));
+        const starterWeaponGranted =
+          gameState.enhancement?.starterWeaponGranted === true;
         const landlord = gameState.landlord;
         const investmentHoldings = gameState.investment.holdings;
         const enhancementInventory = gameState.enhancement.inventory;
@@ -2971,11 +3489,18 @@
         const lastEnhancementResult =
           gameState.enhancement.lastEnhancementResult;
         const ownedCharacters = gameState.rpg.characters;
+        const unlockedCharacterIds = Array.isArray(gameState.rpg.unlockedCharacterIds)
+          ? gameState.rpg.unlockedCharacterIds
+          : [];
+        const runState = gameState.rpg.run || {};
+        const runResultHistory = Array.isArray(runState.resultHistory)
+          ? runState.resultHistory
+          : [];
         const clickPower = landlord.clickPower;
         const clickUpgradeCost = landlord.clickUpgradeCost;
         const rebirthCount = landlord.rebirthCount;
         const multiplier = landlord.multiplier;
-        const properties = PROPERTIES_DATA[userLang].map((property) => {
+        const properties = PROPERTIES_DATA[language].map((property) => {
           const savedProperty = landlord.properties.find(
             (item) => item.id === property.id,
           );
@@ -3023,19 +3548,27 @@
           (total, asset) => total + toFiniteNumber(asset.value, 0),
           0,
         );
-        const totalNetWorth = cash + totalPortfolioValue;
+        const totalNetWorth = cash + contractCapital + totalPortfolioValue;
         const characterText = (key) =>
-          CHARACTER_LOCALIZATION[userLang]?.[key] ||
+          CHARACTER_LOCALIZATION[language]?.[key] ||
           CHARACTER_LOCALIZATION.en?.[key] ||
           key;
         const characterRarityLabel = (rarity) =>
           typeof rarity === "string" && rarity.length > 0
             ? rarity.charAt(0).toUpperCase() + rarity.slice(1)
             : "Normal";
-        const ownedCharacterDetails = ownedCharacters
-          .map((character) => {
-            const definition = getCharacterDefinition(character.characterId);
+        const ownedCharacterDetails = unlockedCharacterIds
+          .map((characterId, index) => {
+            const definition = getCharacterDefinition(characterId);
             if (!definition) return null;
+            const character =
+              ownedCharacters.find((item) => item.characterId === characterId) || {
+                instanceId: `codex-${characterId}-${index}`,
+                characterId,
+                level: 1,
+                stars: 0,
+                equippedWeaponInstanceId: null,
+              };
             const equippedWeapon = getEquippedWeaponForCharacter(
               character,
               enhancementInventory,
@@ -3066,24 +3599,51 @@
           return acc;
         }, {});
 
-        const characterDetailsWithDps = ownedCharacterDetails
+        const activeRunCharacterDetails = (Array.isArray(runState.activeUnits)
+          ? runState.activeUnits
+          : [])
           .map((char) => {
+            const definition = getCharacterDefinition(char.characterId);
+            if (!definition) return null;
+            const equippedWeapon = getEquippedWeaponForCharacter(
+              char,
+              enhancementInventory,
+            );
             const levelDps = getCharacterLevelDps(char);
-            const weaponDps = char.equippedWeapon
-              ? toFiniteNumber(char.equippedWeapon.power, 0)
+            const weaponDps = equippedWeapon
+              ? toFiniteNumber(equippedWeapon.power, 0)
               : 0;
+            const synergyMultiplier = getPreferredWeaponSynergy(
+              char,
+              enhancementInventory,
+            );
+            const masteryMultiplier = getWeaponMasteryBonus(
+              char,
+              gameState.enhancement,
+            );
             const factionMult = getFactionSynergyMultiplier(
-              ownedFactionCounts[char.definition.faction] || 0,
+              ownedFactionCounts[definition.faction] || 0,
             );
             const totalDps =
-              (levelDps + weaponDps) * char.synergyMultiplier * factionMult;
-            return { ...char, totalDps };
+              (levelDps + weaponDps) *
+              synergyMultiplier *
+              masteryMultiplier *
+              factionMult;
+            return {
+              ...char,
+              definition,
+              name: characterText(definition.nameKey),
+              rarityLabel: characterRarityLabel(definition.rarity),
+              equippedWeapon,
+              totalDps,
+            };
           })
+          .filter(Boolean)
           .sort((a, b) => b.totalDps - a.totalDps);
 
         const combatStats = getRpgCombatStats(gameState);
         const totalTeamDps = combatStats.totalDps;
-        const top5Characters = characterDetailsWithDps.slice(0, 5);
+        const top5Characters = activeRunCharacterDetails.slice(0, 5);
         const betPreview = getDefenseContractBetPreview(
           gameState.investment.betSlip,
           investmentAssets,
@@ -3128,6 +3688,30 @@
           ranks[rarity.name] = index;
           return ranks;
         }, {});
+        const headerPrimaryLabel =
+          activeTab === "investment"
+            ? "Contract Capital"
+            : activeTab === "landlord"
+              ? "Passive Income"
+              : "Dividends";
+        const headerPrimaryValue =
+          activeTab === "investment"
+            ? formatMoney(contractCapital)
+            : activeTab === "landlord"
+              ? `${formatMoney(incomePerSec)}/${t.sec}`
+              : formatDps(dividends);
+        const headerSecondaryLabel =
+          activeTab === "rpg" || activeTab === "enhancement"
+            ? "Tickets"
+            : activeTab === "investment"
+              ? "Stage Signal"
+              : "Multiplier";
+        const headerSecondaryValue =
+          activeTab === "rpg" || activeTab === "enhancement"
+            ? `${runTickets}`
+            : activeTab === "investment"
+              ? `${gameState.rpg?.highestStage || 0}`
+              : `x${multiplier}`;
         const sortedEnhancementInventory = [...enhancementInventory].sort(
           (a, b) => {
             const rarityDelta =
@@ -3140,11 +3724,27 @@
         const updateGameState = (updater) => {
           setGameState((prev) => {
             const next = typeof updater === "function" ? updater(prev) : updater;
-            return normalizeGameState(next, userLang);
+            return normalizeGameState(next, language);
           });
         };
 
-        // 자동 저장 로직
+        // ???嶺??????汝??吏?癒곕㎦?
+        useEffect(() => {
+          if (gameState.settings?.language === userLang) return;
+          setGameState((prev) =>
+            normalizeGameState(
+              {
+                ...prev,
+                settings: {
+                  ...prev.settings,
+                  language: userLang,
+                },
+              },
+              userLang,
+            ),
+          );
+        }, [gameState.settings?.language, userLang]);
+
         useEffect(() => {
           saveGameState(gameState);
         }, [gameState]);
@@ -3213,13 +3813,13 @@
         }, [activeTab]);
 
         useEffect(() => {
-          if (activeTab !== "rpg") return;
+          if (activeTab !== "rpg" || runState.isActive !== true) return;
 
           const timer = setInterval(() => {
             updateGameState((prev) => applyCombatTick(prev, 1));
           }, 1000);
           return () => clearInterval(timer);
-        }, [activeTab]);
+        }, [activeTab, runState.isActive]);
 
         const handleMainClick = (e) => {
           const gain = clickPower * multiplier;
@@ -3261,7 +3861,7 @@
               },
               landlord: {
                 ...prev.landlord,
-                properties: createDefaultGameState(userLang).landlord
+                properties: createDefaultGameState(language).landlord
                   .properties,
                 rebirthCount: prev.landlord.rebirthCount + 1,
                 multiplier: prev.landlord.multiplier + 1,
@@ -3281,7 +3881,7 @@
           );
           if (cash >= cost) {
             updateGameState((prev) => {
-              const baseProperty = PROPERTIES_DATA[userLang].find(
+              const baseProperty = PROPERTIES_DATA[language].find(
                 (property) => property.id === id,
               );
               const currentProperty = prev.landlord.properties.find(
@@ -3341,7 +3941,7 @@
 
         const buyInvestmentAsset = (id) => {
           const asset = investmentAssets.find((item) => item.id === id);
-          if (!asset || cash < asset.price) return;
+          if (!asset || contractCapital < asset.price) return;
 
           updateGameState((prev) => {
             const currentHolding = prev.investment.holdings.find(
@@ -3361,16 +3961,16 @@
             const nextOwned = currentOwned + 1;
             const nextAvgBuyPrice =
               ((currentAvgBuyPrice * currentOwned) + currentPrice) / nextOwned;
-            if (prev.wallet.cash < currentPrice) return prev;
+            if (toFiniteNumber(prev.investment.capital, 0) < currentPrice) return prev;
 
             return {
               ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash - currentPrice,
-              },
               investment: {
                 ...prev.investment,
+                capital: Math.max(
+                  0,
+                  toFiniteNumber(prev.investment.capital, 0) - currentPrice,
+                ),
                 holdings: prev.investment.holdings.map((holding) =>
                   holding.id === id
                     ? {
@@ -3410,12 +4010,10 @@
 
             return {
               ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash + currentPrice,
-              },
               investment: {
                 ...prev.investment,
+                capital:
+                  toFiniteNumber(prev.investment.capital, 0) + currentPrice,
                 holdings: prev.investment.holdings.map((holding) =>
                   holding.id === id
                     ? {
@@ -3436,7 +4034,7 @@
 
         const buyMaxInvestmentAsset = (id) => {
           const asset = investmentAssets.find((item) => item.id === id);
-          if (!asset || cash < asset.price) return;
+          if (!asset || contractCapital < asset.price) return;
 
           updateGameState((prev) => {
             const currentHolding = prev.investment.holdings.find(
@@ -3448,7 +4046,9 @@
               asset.price * 2,
               asset.price,
             );
-            const buyQuantity = Math.floor(prev.wallet.cash / currentPrice);
+            const buyQuantity = Math.floor(
+              toFiniteNumber(prev.investment.capital, 0) / currentPrice,
+            );
             if (buyQuantity <= 0) return prev;
 
             const currentOwned = toOwnedQuantity(currentHolding?.owned);
@@ -3464,12 +4064,13 @@
 
             return {
               ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash - currentPrice * buyQuantity,
-              },
               investment: {
                 ...prev.investment,
+                capital: Math.max(
+                  0,
+                  toFiniteNumber(prev.investment.capital, 0) -
+                    currentPrice * buyQuantity,
+                ),
                 holdings: prev.investment.holdings.map((holding) =>
                   holding.id === id
                     ? {
@@ -3508,12 +4109,11 @@
 
             return {
               ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash + currentPrice * currentOwned,
-              },
               investment: {
                 ...prev.investment,
+                capital:
+                  toFiniteNumber(prev.investment.capital, 0) +
+                  currentPrice * currentOwned,
                 holdings: prev.investment.holdings.map((holding) =>
                   holding.id === id
                     ? {
@@ -3547,7 +4147,7 @@
 
         const updateDefenseContractStake = (rawValue) => {
           setGameState((prev) => {
-            const maxStake = Math.max(0, toFiniteNumber(prev.wallet.cash, 0));
+            const maxStake = Math.max(0, toFiniteNumber(prev.investment.capital, 0));
             const parsed = toFiniteNumber(Number(rawValue), 0);
             const clamped = Math.min(maxStake, Math.max(0, parsed));
             return {
@@ -3634,22 +4234,19 @@
               totalTeamDps,
             );
             if (!entry) return prev;
-            const currentCash = toFiniteNumber(prev.wallet.cash, 0);
-            const cashAfterDeduct = currentCash - entry.stake;
-            const cashFinal = entry.wouldWin
-              ? cashAfterDeduct + entry.stake * entry.projectedPayout
-              : cashAfterDeduct;
+            const currentCapital = toFiniteNumber(prev.investment.capital, 0);
+            const capitalAfterDeduct = currentCapital - entry.stake;
+            const capitalFinal = entry.wouldWin
+              ? capitalAfterDeduct + entry.stake * entry.projectedPayout
+              : capitalAfterDeduct;
             const existing = Array.isArray(prev.investment.contractSettlementHistory)
               ? prev.investment.contractSettlementHistory
               : [];
             return {
               ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: Math.max(0, toFiniteNumber(cashFinal, 0)),
-              },
               investment: {
                 ...prev.investment,
+                capital: Math.max(0, toFiniteNumber(capitalFinal, 0)),
                 betSlip: {
                   ...prev.investment.betSlip,
                   stake: 0,
@@ -3693,10 +4290,10 @@
         const drawGachaItems = (quantity) => {
           const drawQuantity = Math.max(1, Math.floor(toFiniteNumber(quantity, 1)));
           const totalCost = GACHA_DRAW_COST * drawQuantity;
-          if (cash < totalCost) return;
+          if (dividends < totalCost) return;
 
           updateGameState((prev) => {
-            if (prev.wallet.cash < totalCost) return prev;
+            if (toFiniteNumber(prev.rpg.dividends, 0) < totalCost) return prev;
 
             const pulledItems = Array.from({ length: drawQuantity }, () =>
               createPulledGachaItem(),
@@ -3707,19 +4304,32 @@
             );
             const pulledCharacters = pulledItems
               .filter((item) => item.type === "character")
-              .map((item) => createCharacterInstance(item.characterId))
+              .map((item) => item.characterId)
               .filter(Boolean);
             const recentPulls = [
               ...normalizeRecentPulls(prev.enhancement.recentPulls),
               ...pulledItems,
             ].slice(-GACHA_RECENT_PULL_LIMIT);
+            const unlockedCharacterIds = Array.isArray(prev.rpg.unlockedCharacterIds)
+              ? prev.rpg.unlockedCharacterIds
+              : [];
+            const nextUnlockedCharacterIds = Array.from(
+              new Set([...unlockedCharacterIds, ...pulledCharacters]),
+            );
+            const legacyCharacters = Array.isArray(prev.rpg.characters)
+              ? prev.rpg.characters
+              : [];
+            const nextLegacyCharacters = [...legacyCharacters];
+            pulledCharacters.forEach((characterId, index) => {
+              if (nextLegacyCharacters.some((item) => item.characterId === characterId)) {
+                return;
+              }
+              const created = createRunCharacterUnit(characterId, index);
+              if (created) nextLegacyCharacters.push(created);
+            });
 
             return {
               ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash - totalCost,
-              },
               enhancement: {
                 ...prev.enhancement,
                 inventory: [
@@ -3731,7 +4341,9 @@
               },
               rpg: {
                 ...prev.rpg,
-                characters: [...prev.rpg.characters, ...pulledCharacters],
+                dividends: Math.max(0, toFiniteNumber(prev.rpg.dividends, 0) - totalCost),
+                unlockedCharacterIds: nextUnlockedCharacterIds,
+                characters: nextLegacyCharacters,
               },
             };
           });
@@ -3743,6 +4355,162 @@
 
         const drawTenGachaItems = () => {
           drawGachaItems(10);
+        };
+
+        const claimInvestmentSupportGrant = () => {
+          updateGameState((prev) => {
+            if (prev.investment.supportGrantClaimed === true) return prev;
+            return {
+              ...prev,
+              investment: {
+                ...prev.investment,
+                capital: toFiniteNumber(prev.investment.capital, 0) + 5000,
+                supportGrantClaimed: true,
+              },
+            };
+          });
+        };
+
+        const transferCashToInvestment = (amount) => {
+          updateGameState((prev) => {
+            const transferAmount = Math.max(
+              0,
+              Math.min(
+                toFiniteNumber(prev.wallet.cash, 0),
+                Math.floor(toFiniteNumber(amount, 0)),
+              ),
+            );
+            if (transferAmount <= 0) return prev;
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                cash: prev.wallet.cash - transferAmount,
+              },
+              investment: {
+                ...prev.investment,
+                capital: toFiniteNumber(prev.investment.capital, 0) + transferAmount,
+              },
+            };
+          });
+        };
+
+        const claimStarterWeapon = () => {
+          updateGameState((prev) => {
+            if (prev.enhancement.starterWeaponGranted === true) return prev;
+            const starterWeapon = createStarterWeaponInstance();
+            if (!starterWeapon) return prev;
+            return {
+              ...prev,
+              enhancement: {
+                ...prev.enhancement,
+                starterWeaponGranted: true,
+                inventory: [...prev.enhancement.inventory, starterWeapon],
+                lastPulledItem: starterWeapon,
+                recentPulls: [
+                  ...normalizeRecentPulls(prev.enhancement.recentPulls),
+                  starterWeapon,
+                ].slice(-GACHA_RECENT_PULL_LIMIT),
+              },
+            };
+          });
+        };
+
+        const buyRunTicket = () => {
+          updateGameState((prev) => {
+            const cost = getRunTicketCost();
+            const currentDividends = toFiniteNumber(prev.rpg.dividends, 0);
+            if (currentDividends < cost) return prev;
+            return {
+              ...prev,
+              rpg: {
+                ...prev.rpg,
+                dividends: currentDividends - cost,
+                tickets: toFiniteNumber(prev.rpg.tickets, 0) + 1,
+              },
+            };
+          });
+        };
+
+        const startDefenseRun = () => {
+          updateGameState((prev) => {
+            if (prev.rpg.run?.isActive === true) return prev;
+            const tickets = Math.max(0, Math.floor(toFiniteNumber(prev.rpg.tickets, 0)));
+            if (tickets <= 0) return prev;
+            const starterIds = getStarterRunCharacterIds(prev.rpg);
+            const selectedIds = starterIds.slice(0, 5);
+            const activeUnits = ensureUniqueCharacterInstanceIds(
+              selectedIds
+                .map((characterId, index) => createRunCharacterUnit(characterId, index))
+                .filter(Boolean),
+            );
+            if (activeUnits.length === 0) return prev;
+            const maxHp = getMonsterMaxHp(1);
+            const runId = `run-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+            return {
+              ...prev,
+              rpg: {
+                ...prev.rpg,
+                tickets: tickets - 1,
+                currentStage: 1,
+                monsterHp: maxHp,
+                monsterMaxHp: maxHp,
+                defeatedMonsters: 0,
+                stageKills: 0,
+                lastRpgReward: 0,
+                run: {
+                  ...prev.rpg.run,
+                  activeUnits,
+                  isActive: true,
+                  wave: 1,
+                  stage: 1,
+                  runId,
+                },
+              },
+            };
+          });
+        };
+
+        const endDefenseRun = (result = "retreat") => {
+          updateGameState((prev) => {
+            if (prev.rpg.run?.isActive !== true) return prev;
+            const history = Array.isArray(prev.rpg.run?.resultHistory)
+              ? prev.rpg.run.resultHistory
+              : [];
+            const entry = {
+              id: `run-result-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+              runId: prev.rpg.run?.runId || null,
+              result,
+              stage: Math.max(1, Math.floor(toFiniteNumber(prev.rpg.currentStage, 1))),
+              defeatedMonsters: Math.max(
+                0,
+                Math.floor(toFiniteNumber(prev.rpg.defeatedMonsters, 0)),
+              ),
+              createdAt: Date.now(),
+            };
+            const maxHp = getMonsterMaxHp(1);
+            return {
+              ...prev,
+              rpg: {
+                ...prev.rpg,
+                currentStage: 1,
+                monsterHp: maxHp,
+                monsterMaxHp: maxHp,
+                defeatedMonsters: 0,
+                stageKills: 0,
+                lastRpgReward: 0,
+                run: {
+                  ...prev.rpg.run,
+                  activeUnits: [],
+                  isActive: false,
+                  wave: 0,
+                  stage: 1,
+                  runId: null,
+                  resultHistory: [...history, entry].slice(-10),
+                },
+              },
+            };
+          });
         };
 
         const getEnhanceCost = (level) => {
@@ -3790,6 +4558,18 @@
               success,
               level: nextLevel,
             };
+            const weaponType = getWeaponType(item);
+            const nextWeaponLevels = { ...(prev.enhancement.weaponLevels || {}) };
+            const nextWeaponMastery = { ...(prev.enhancement.weaponMastery || {}) };
+            if (weaponType) {
+              const previousSavedLevel = Math.max(
+                0,
+                Math.floor(toFiniteNumber(nextWeaponLevels[weaponType], 0)),
+              );
+              const highestLevel = Math.max(previousSavedLevel, nextLevel);
+              nextWeaponLevels[weaponType] = highestLevel;
+              nextWeaponMastery[weaponType] = Math.min(2, 1 + highestLevel * 0.05);
+            }
 
             return {
               ...prev,
@@ -3799,6 +4579,8 @@
               },
               enhancement: {
                 ...prev.enhancement,
+                weaponLevels: nextWeaponLevels,
+                weaponMastery: nextWeaponMastery,
                 inventory: prev.enhancement.inventory.map((candidate) =>
                   candidate.instanceId === instanceId
                     ? { ...candidate, enhanceLevel: nextLevel }
@@ -3937,11 +4719,11 @@
         };
 
         const rarityTextClass = (rarity) => {
-          if (rarity === "Mythic") return "text-fuchsia-600";
-          if (rarity === "Legendary") return "text-amber-600";
-          if (rarity === "Unique") return "text-orange-600";
-          if (rarity === "Epic") return "text-purple-600";
-          if (rarity === "Rare") return "text-blue-600";
+          if (rarity === "Mythic") return "text-emerald-800";
+          if (rarity === "Legendary") return "text-emerald-700";
+          if (rarity === "Unique") return "text-emerald-600";
+          if (rarity === "Epic") return "text-green-700";
+          if (rarity === "Rare") return "text-green-600";
           return "text-gray-600";
         };
 
@@ -3968,7 +4750,7 @@
         );
         const dominantFaction = (() => {
           const entries = Object.entries(ownedFactionCounts);
-          if (entries.length === 0) return "—";
+          if (entries.length === 0) return "None";
           return entries.sort((a, b) => b[1] - a[1])[0][0];
         })();
         const capitalPressure = totalNetWorth > 0
@@ -3976,24 +4758,67 @@
           : 0;
 
         const tabs = [
-          { id: "landlord", label: "Landlord" },
-          { id: "investment", label: "Investment" },
-          { id: "enhancement", label: "Enhancement" },
-          { id: "rpg", label: "RPG" },
+          { id: "landlord", label: ui.tabLandlord },
+          { id: "investment", label: ui.tabInvestment },
+          { id: "enhancement", label: ui.tabEnhancement },
+          { id: "rpg", label: ui.tabRpg },
         ];
-        const comingSoonTitle =
-          tabs.find((tab) => tab.id === activeTab)?.label || "Coming Soon";
 
         return (
           <div className="w-full max-w-4xl flex flex-col items-center">
-            {/* 게임 메인 컨테이너 */}
+            {/* ?嚥▲굧?????꿔꺂???????????????*/}
             <div className="w-full max-w-md">
-              <nav className="w-full bg-white shadow-sm rounded-lg mb-4 p-1 grid grid-cols-4 gap-1 border border-gray-100">
+              <section className="w-full bg-white shadow-sm rounded-xl mb-4 border border-emerald-100 overflow-hidden sticky top-2 z-20">
+                <div className="bg-gradient-to-r from-green-700 to-emerald-600 text-white px-4 py-3 flex items-center justify-between">
+                  <h2 className="text-xs font-black uppercase tracking-widest">
+                    {ui.walletHeader}
+                  </h2>
+                  <div className="text-[10px] font-bold text-green-100">
+                    {tabs.find((tab) => tab.id === activeTab)?.label}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 divide-x divide-emerald-100">
+                  <div className="px-4 py-3 bg-white">
+                    <div className="text-[10px] font-black uppercase text-gray-400">
+                      {ui.walletCash}
+                    </div>
+                    <div className="text-lg font-black text-emerald-700">
+                      {formatMoney(cash)}
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-white">
+                    <div className="text-[10px] font-black uppercase text-gray-400">
+                      {ui.walletDiamond}
+                    </div>
+                    <div className="text-lg font-black text-emerald-700">
+                      {diamonds}
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-white">
+                    <div className="text-[10px] font-black uppercase text-gray-400">
+                      {headerPrimaryLabel}
+                    </div>
+                    <div className="text-lg font-black text-emerald-700">
+                      {headerPrimaryValue}
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-white">
+                    <div className="text-[10px] font-black uppercase text-gray-400">
+                      {headerSecondaryLabel}
+                    </div>
+                    <div className="text-lg font-black text-emerald-700">
+                      {headerSecondaryValue}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <nav className="w-full bg-white shadow-sm rounded-xl mb-4 p-1 grid grid-cols-4 gap-1 border border-emerald-100">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-2 py-2 rounded-md text-xs font-bold transition-colors ${activeTab === tab.id ? "bg-green-600 text-white" : "text-gray-500 hover:bg-gray-100"}`}
+                    className={`px-2 py-2 rounded-lg text-xs font-bold transition-colors ${activeTab === tab.id ? "bg-green-600 text-white" : "text-gray-500 hover:bg-emerald-50"}`}
                   >
                     {tab.label}
                   </button>
@@ -4002,7 +4827,7 @@
 
               {activeTab === "landlord" ? (
                 <>
-              {/* 상단 환생 버튼 및 상태 영역 */}
+              {/* ????욱룏????嶺뚮슣堉붹룇 ?筌???????????븐뻤??????쇨덧??*/}
               <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center rounded-lg mb-4 border-b-2 border-green-200">
                 <div>
                   <h1 className="text-xl font-black text-green-600">
@@ -4020,7 +4845,7 @@
                 </button>
               </div>
 
-              {/* 게임 메인 UI 패널 */}
+              {/* ?嚥▲굧?????꿔꺂?????UI ????됰Þ??*/}
               <div className="w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-[650px]">
                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center">
                   <div className="text-4xl font-extrabold mb-1">
@@ -4083,14 +4908,14 @@
                         key={p.id}
                         onClick={() => buyProperty(p.id)}
                         disabled={cash < cost}
-                        className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl border transition-all ${cash >= cost ? "bg-white border-blue-200 shadow-sm" : "bg-gray-100 opacity-50"}`}
+                      className={`w-full flex justify-between items-center p-4 mb-3 rounded-xl border transition-all ${cash >= cost ? "bg-white border-emerald-200 shadow-sm" : "bg-gray-100 opacity-50"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{p.icon}</span>
                           <div className="text-left">
                             <div className="font-bold">
                               {p.name}{" "}
-                              <span className="text-blue-500 text-xs bg-blue-50 px-1.5 py-0.5 rounded ml-1">
+                              <span className="text-emerald-600 text-xs bg-emerald-50 px-1.5 py-0.5 rounded ml-1">
                                 {t.lv}.{p.count}
                               </span>
                             </div>
@@ -4099,7 +4924,7 @@
                             </div>
                           </div>
                         </div>
-                        <div className="font-black text-blue-600">
+                        <div className="font-black text-emerald-600">
                           {formatMoney(cost)}
                         </div>
                       </button>
@@ -4108,43 +4933,43 @@
                 </div>
               </div>
 
-                  <section className="w-full bg-white shadow-sm rounded-lg mt-4 p-4 border border-gray-100">
+                  <section className="w-full bg-white shadow-sm rounded-xl mt-4 p-4 border border-emerald-100">
                     <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-                      Save Data
+                      {ui.saveData}
                     </h2>
                     <div className="grid grid-cols-3 gap-2">
                       <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
-                        Save
+                        {ui.save}
                       </button>
                       <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
-                        Export
+                        {ui.export}
                       </button>
                       <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
-                        Import
+                        {ui.import}
                       </button>
                     </div>
                   </section>
                 </>
               ) : activeTab === "investment" ? (
-                <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                <section className="w-full bg-white shadow-sm rounded-xl border border-emerald-100 overflow-hidden">
                   <div className="bg-gradient-to-r from-green-700 to-emerald-600 text-white p-5">
-                    <h1 className="text-xl font-black">Defense Contracts</h1>
+                    <h1 className="text-xl font-black">{ui.defenseContracts}</h1>
                     <p className="mt-1 text-xs font-medium text-green-100">
                       Fund hero squads. Rates shift with each defense outcome.
-                      War chest shared with Landlord.
+                      Build with independent contract capital, then use Landlord cash only as an optional booster.
                     </p>
                     <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                       <div>
                         <div className="text-green-100 text-xs font-bold uppercase">
-                          War Chest
+                          Contract Capital
                         </div>
                         <div className="text-lg font-black">
-                          {formatMoney(cash)}
+                          {formatMoney(contractCapital)}
                         </div>
                       </div>
                       <div>
                         <div className="text-green-100 text-xs font-bold uppercase">
-                          Contract Value
+                          {ui.contractValue}
                         </div>
                         <div className="text-lg font-black">
                           {formatMoney(totalPortfolioValue)}
@@ -4152,7 +4977,7 @@
                       </div>
                       <div>
                         <div className="text-green-100 text-xs font-bold uppercase">
-                          Total Capital
+                          {ui.totalCapital}
                         </div>
                         <div className="text-lg font-black">
                           {formatMoney(totalNetWorth)}
@@ -4170,8 +4995,48 @@
                         as squads clear higher stages. The upcoming{" "}
                         <span className="font-black">Hero's Fate Betting</span> system
                         will let you wager directly on defense outcomes.
-                        For now — fund wisely. I am watching the market.
+                        For now, build capital first and settle carefully.
                       </p>
+                    </div>
+                  </div>
+                  <div className="bg-white border-b border-gray-100 px-4 py-3 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          Independent Entry
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Claim a one-time support grant, or convert Landlord cash
+                          into Contract Capital when you want a booster.
+                        </div>
+                      </div>
+                      <button
+                        onClick={claimInvestmentSupportGrant}
+                        disabled={supportGrantClaimed}
+                        className={`rounded-md px-3 py-2 text-xs font-black transition-colors ${
+                          supportGrantClaimed
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-emerald-600 text-white hover:bg-emerald-700"
+                        }`}
+                      >
+                        {supportGrantClaimed ? "Grant Claimed" : "Claim Support Grant"}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1000, 5000, 10000].map((amount) => (
+                        <button
+                          key={amount}
+                          onClick={() => transferCashToInvestment(amount)}
+                          disabled={cash < amount}
+                          className={`rounded-md py-2 text-xs font-black transition-colors ${
+                            cash >= amount
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          Boost {formatMoney(amount)}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
@@ -4243,7 +5108,7 @@
                                 {DEFENSE_CONTRACT_FLAVOR[betPreview.asset.id]?.displayName || betPreview.asset.name}
                               </div>
                               <div className={`text-[10px] font-black uppercase mt-0.5 ${betPreview.tier.color}`}>
-                                {betPreview.tier.label} · {betPreview.odds}% Defense Odds
+                                {betPreview.tier.label} 夷?{betPreview.odds}% Defense Odds
                               </div>
                             </div>
                             <div className="text-right">
@@ -4258,13 +5123,13 @@
                           <div className="flex items-center justify-between mb-1.5">
                             <div className="text-[9px] font-black text-gray-400 uppercase">Stake Amount</div>
                             <div className="text-[9px] font-bold text-gray-400 uppercase">
-                              War Chest: {formatMoney(cash)}
+                              Contract Capital: {formatMoney(contractCapital)}
                             </div>
                           </div>
                           <input
                             type="number"
                             min="0"
-                            max={cash}
+                            max={contractCapital}
                             value={gameState.investment.betSlip?.stake ?? 0}
                             onChange={(e) => updateDefenseContractStake(e.target.value)}
                             className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-sm font-black text-gray-800 focus:outline-none focus:border-emerald-400"
@@ -4274,7 +5139,7 @@
                             {[0.25, 0.5, 1.0].map((frac) => (
                               <button
                                 key={frac}
-                                onClick={() => updateDefenseContractStake(Math.floor(cash * frac))}
+                                onClick={() => updateDefenseContractStake(Math.floor(contractCapital * frac))}
                                 className="rounded py-1 text-[9px] font-black bg-gray-200 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors uppercase"
                               >
                                 {frac === 1.0 ? "Max" : `${frac * 100}%`}
@@ -4377,7 +5242,7 @@
                             { label: "Settlement Unlocked", pass: checks.settlementUnlocked },
                             { label: "Contract Selected",   pass: checks.contractSelected },
                             { label: "Stake > 0",           pass: checks.stakePositive },
-                            { label: "Stake ≤ Balance",     pass: checks.stakeWithinCash },
+                            { label: "Stake <= Capital",     pass: checks.stakeWithinCash },
                             { label: "Odds Valid",          pass: checks.oddsValid },
                             { label: "Payout Valid",        pass: checks.payoutValid },
                           ];
@@ -4396,7 +5261,7 @@
                                     <div key={row.label} className="flex items-center justify-between">
                                       <span className="text-[9px] text-gray-500">{row.label}</span>
                                       <span className={`text-[9px] font-black ${row.pass ? "text-emerald-600" : "text-gray-300"}`}>
-                                        {row.pass ? "✓" : "✗"}
+                                        {row.pass ? "Ready" : "Locked"}
                                       </span>
                                     </div>
                                   ))}
@@ -4408,7 +5273,7 @@
                                   disabled={!v.canSettle}
                                   className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
                                     v.canSettle
-                                      ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                                      ? "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
                                       : "bg-gray-100 text-gray-300 cursor-not-allowed"
                                   }`}
                                 >
@@ -4437,10 +5302,10 @@
                           const dr = gameState.investment.lastContractDryRun;
                           const ts = new Date(toFiniteNumber(dr.createdAt, Date.now())).toLocaleTimeString();
                           return (
-                            <div className="border border-blue-200 rounded-md overflow-hidden">
-                              <div className="bg-blue-50 px-3 py-2 flex items-center justify-between border-b border-blue-200">
-                                <div className="text-[9px] font-black text-blue-700 uppercase tracking-wider">Dry-Run Result</div>
-                                <div className="text-[9px] text-blue-500">{ts}</div>
+                            <div className="border border-emerald-200 rounded-md overflow-hidden">
+                              <div className="bg-emerald-50 px-3 py-2 flex items-center justify-between border-b border-emerald-200">
+                                <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">Dry-Run Result</div>
+                                <div className="text-[9px] text-emerald-500">{ts}</div>
                               </div>
                               <div className="px-3 py-2 space-y-1">
                                 <div className="flex items-center justify-between">
@@ -4459,7 +5324,7 @@
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="text-[9px] text-gray-500">Projected Payout</span>
-                                  <span className="text-[9px] font-black text-gray-700">×{toFiniteNumber(dr.projectedPayout, 1).toFixed(2)}</span>
+                                  <span className="text-[9px] font-black text-gray-700">x{toFiniteNumber(dr.projectedPayout, 1).toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="text-[9px] text-gray-500">Net Preview</span>
@@ -4469,7 +5334,7 @@
                                 </div>
                               </div>
                               <div className="px-3 pb-2">
-                                <div className="text-[9px] text-blue-500 italic">Dry-run only — no cash moved.</div>
+                                <div className="text-[9px] text-emerald-500 italic">Dry-run only; no capital moved.</div>
                               </div>
                             </div>
                           );
@@ -4477,7 +5342,7 @@
                       </div>
                     ) : (
                       <div className="py-4 text-center">
-                        <div className="text-sm font-black text-gray-400">No contract selected</div>
+                        <div className="text-sm font-black text-gray-400">No contract selected yet</div>
                         <div className="text-[10px] font-bold text-gray-400 mt-1">
                           Select a contract below to build your bet slip
                         </div>
@@ -4485,7 +5350,7 @@
                     )}
                   </div>
 
-                  {/* Preview history — no real settlement */}
+                  {/* Preview history ??no real settlement */}
                   {(() => {
                     const history = Array.isArray(gameState.investment.contractHistory)
                       ? gameState.investment.contractHistory
@@ -4494,11 +5359,11 @@
                       <div className="mx-4 mb-3 border border-gray-200 rounded-md overflow-hidden">
                         <div className="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
                           <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Preview History</div>
-                          <div className="text-[9px] font-bold text-gray-400">Preview only — not settled</div>
+                          <div className="text-[9px] font-bold text-gray-400">Preview only, not settled</div>
                         </div>
                         {history.length === 0 ? (
                           <div className="p-3 text-center">
-                            <div className="text-[10px] text-gray-400">No previews saved yet — select a contract and stake, then save.</div>
+                            <div className="text-[10px] text-gray-400">No previews saved yet. Select a contract and stake, then save.</div>
                           </div>
                         ) : (
                           <div className="divide-y divide-gray-100">
@@ -4507,7 +5372,7 @@
                                 <div className="min-w-0">
                                   <div className="text-[10px] font-black text-gray-700 truncate">{entry.contractName}</div>
                                   <div className="text-[9px] text-gray-400">
-                                    Stake {formatMoney(toFiniteNumber(entry.stake, 0))} · {toFiniteNumber(entry.odds, 0)}% odds · ×{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)}
+                                    Stake {formatMoney(toFiniteNumber(entry.stake, 0))} 夷?{toFiniteNumber(entry.odds, 0)}% odds 夷?x{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)}
                                   </div>
                                 </div>
                                 <div className={`text-[9px] font-black uppercase shrink-0 ${
@@ -4533,11 +5398,11 @@
                       <div className="mx-4 mb-3 border border-emerald-200 rounded-md overflow-hidden">
                         <div className="bg-emerald-50 px-3 py-2 flex items-center justify-between border-b border-emerald-200">
                           <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">Settlement History</div>
-                          <div className="text-[9px] font-bold text-emerald-500">Deterministic — no random outcome</div>
+                          <div className="text-[9px] font-bold text-emerald-500">Deterministic outcome</div>
                         </div>
                         {settled.length === 0 ? (
                           <div className="p-3 text-center">
-                            <div className="text-[10px] text-gray-400">No settlements yet — unlock gate and settle a contract.</div>
+                            <div className="text-[10px] text-gray-400">No settlements yet. Unlock the gate and settle a contract.</div>
                           </div>
                         ) : (
                           <div className="divide-y divide-emerald-50">
@@ -4550,7 +5415,7 @@
                                     <div className="min-w-0">
                                       <div className="text-[10px] font-black text-gray-700 truncate">{entry.contractName}</div>
                                       <div className="text-[9px] text-gray-400">
-                                        Stake {formatMoney(toFiniteNumber(entry.stake, 0))} · {toFiniteNumber(entry.odds, 0)}% · ×{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)} · {ts}
+                                        Stake {formatMoney(toFiniteNumber(entry.stake, 0))} 夷?{toFiniteNumber(entry.odds, 0)}% 夷?x{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)} 夷?{ts}
                                       </div>
                                     </div>
                                     <div className="shrink-0 text-right">
@@ -4644,7 +5509,7 @@
 
                         {renderSparkline(asset.history)}
 
-                        {/* Defense Contract odds preview — derived only, no settlement */}
+                        {/* Defense Contract odds preview ??derived only, no settlement */}
                         {(() => {
                           const tier = getDefenseContractRiskTier(asset);
                           const odds = getDefenseContractOdds(asset, gameState.rpg?.highestStage || 0);
@@ -4656,7 +5521,7 @@
                                   Contract Preview
                                 </div>
                                 <div className="text-[8px] font-bold text-gray-400 italic">
-                                  Preview only — Hero's Fate settlement not active
+                                  Preview uses live contract rules
                                 </div>
                               </div>
                               <div className="grid grid-cols-2 gap-x-3 gap-y-2">
@@ -4675,7 +5540,7 @@
                                 <div>
                                   <div className="text-[9px] font-black text-gray-400 uppercase">Linked RPG Signal</div>
                                   <div className="text-[10px] font-black text-gray-700">
-                                    Stg {gameState.rpg?.highestStage || 0} · {formatDps(totalTeamDps)} DPS
+                                    Stg {gameState.rpg?.highestStage || 0} 夷?{formatDps(totalTeamDps)} DPS
                                   </div>
                                 </div>
                               </div>
@@ -4686,15 +5551,15 @@
                         <div className="grid grid-cols-2 gap-2 mt-4">
                           <button
                             onClick={() => buyInvestmentAsset(asset.id)}
-                            disabled={cash < asset.price}
-                            className={`rounded-md py-2 text-sm font-bold transition-colors ${cash >= asset.price ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                            disabled={contractCapital < asset.price}
+                            className={`rounded-md py-2 text-sm font-bold transition-colors ${contractCapital >= asset.price ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                           >
                             Back 1
                           </button>
                           <button
                             onClick={() => buyMaxInvestmentAsset(asset.id)}
-                            disabled={cash < asset.price}
-                            className={`rounded-md py-2 text-sm font-bold transition-colors ${cash >= asset.price ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                            disabled={contractCapital < asset.price}
+                            className={`rounded-md py-2 text-sm font-bold transition-colors ${contractCapital >= asset.price ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                           >
                             Back Max
                           </button>
@@ -4724,7 +5589,7 @@
                           }`}
                         >
                           {gameState.investment.betSlip?.selectedContractId === asset.id
-                            ? "✓ Selected for Bet Slip"
+                            ? "Selected for Bet Slip"
                             : "Select Contract"}
                         </button>
                       </div>
@@ -4732,52 +5597,82 @@
                   </div>
                 </section>
               ) : activeTab === "enhancement" ? (
-                <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                <section className="w-full bg-white shadow-sm rounded-xl border border-emerald-100 overflow-hidden">
                   <div className="bg-gradient-to-r from-green-700 to-emerald-600 text-white p-5">
                     <h1 className="text-xl font-black">
-                      Gacha & Enhancement
+                      {ui.gachaEnhancement}
                     </h1>
                     <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <div className="text-green-100 text-xs font-bold uppercase">
-                          Wallet Cash
+                          {ui.walletDividends}
                         </div>
                         <div className="text-lg font-black">
-                          {formatMoney(cash)}
+                          {formatDps(dividends)}
                         </div>
                       </div>
                       <div>
                         <div className="text-green-100 text-xs font-bold uppercase">
-                          Draw Cost
+                          {ui.drawCost}
                         </div>
                         <div className="text-lg font-black">
-                          {formatMoney(GACHA_DRAW_COST)}
+                          {formatDps(GACHA_DRAW_COST)}
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-4">
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            Entry Support
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Gacha now spends Dividends. Claim one starter weapon so
+                            Enhancement stays independently playable, then use cash as
+                            a booster for upgrades.
+                          </div>
+                        </div>
+                        <button
+                          onClick={claimStarterWeapon}
+                          disabled={starterWeaponGranted}
+                          className={`rounded-md px-3 py-2 text-xs font-black transition-colors ${
+                            starterWeaponGranted
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-emerald-600 text-white hover:bg-emerald-700"
+                          }`}
+                        >
+                          {starterWeaponGranted ? "Starter Granted" : "Claim Starter Weapon"}
+                        </button>
+                      </div>
+                      <div className="text-[11px] font-bold text-emerald-700">
+                        Draws spend Dividends earned from RPG runs. Weapon enhancement
+                        levels and mastery remain permanent between runs.
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={drawGachaItem}
-                        disabled={cash < GACHA_DRAW_COST}
-                        className={`rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                        disabled={dividends < GACHA_DRAW_COST}
+                        className={`rounded-md py-3 text-sm font-black transition-colors ${dividends >= GACHA_DRAW_COST ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                       >
-                        Draw 1
+                        {ui.draw1}
                       </button>
                       <button
                         onClick={drawTenGachaItems}
-                        disabled={cash < GACHA_DRAW_COST * 10}
-                        className={`rounded-md py-3 text-sm font-black transition-colors ${cash >= GACHA_DRAW_COST * 10 ? "bg-green-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                        disabled={dividends < GACHA_DRAW_COST * 10}
+                        className={`rounded-md py-3 text-sm font-black transition-colors ${dividends >= GACHA_DRAW_COST * 10 ? "bg-green-600 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                       >
-                        Draw 10
+                        {ui.draw10}
                       </button>
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="text-xs font-bold text-gray-400 uppercase">
-                        Last Pull
+                        {ui.lastPull}
                       </div>
                       {lastPulledItem ? (
                         <div className="mt-2 flex items-center justify-between gap-3">
@@ -4802,7 +5697,7 @@
 
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="text-xs font-bold text-gray-400 uppercase">
-                        Last Enhancement
+                        {ui.lastEnhancement}
                       </div>
                       {lastEnhancementResult ? (
                         <div className="mt-2 flex items-center justify-between gap-3">
@@ -4848,7 +5743,7 @@
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                          Owned Characters
+                          {ui.ownedCharacters}
                         </h2>
                         <div className="text-xs font-black text-gray-500">
                           {ownedCharacterDetails.length}
@@ -4929,14 +5824,14 @@
                                   <div
                                     className={`text-xs font-bold uppercase ${rarityTextClass(character.rarityLabel)}`}
                                   >
-                                    {character.rarityLabel} ·{" "}
+                                    {character.rarityLabel} ??" "}
                                     {character.definition.faction}
                                   </div>
                                   <div className="text-xs font-bold text-gray-500">
-                                    Weapon:{" "}
+                                    {ui.weapon}:{" "}
                                     {character.equippedWeapon
                                       ? `${character.equippedWeapon.name} +${character.equippedWeapon.enhanceLevel}`
-                                      : "None"}
+                                      : ui.none}
                                   </div>
                                   <div className="text-[10px] font-bold text-gray-400 mt-0.5">
                                     Pref:{" "}
@@ -4980,7 +5875,7 @@
                                       disabled={!fallbackWeapon}
                                       className={`rounded-md px-3 py-1 text-xs font-black transition-colors ${fallbackWeapon ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                                     >
-                                      Equip First
+                                      {ui.equipFirst}
                                     </button>
                                     <button
                                       onClick={() =>
@@ -4991,7 +5886,7 @@
                                       disabled={!character.equippedWeapon}
                                       className={`rounded-md px-3 py-1 text-xs font-black transition-colors ${character.equippedWeapon ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                                     >
-                                      Unequip
+                                      {ui.unequip}
                                     </button>
                                   </div>
                                 </div>
@@ -5001,7 +5896,7 @@
                         </div>
                       ) : (
                         <div className="py-6 text-center font-bold text-gray-400">
-                          Empty
+                          {ui.none}
                         </div>
                       )}
                     </div>
@@ -5009,7 +5904,7 @@
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                          Recent Pulls
+                          {ui.recentPulls}
                         </h2>
                         <div className="text-xs font-black text-gray-500">
                           {recentPulls.length}
@@ -5040,7 +5935,7 @@
                         </div>
                       ) : (
                         <div className="py-6 text-center font-bold text-gray-400">
-                          Empty
+                          {ui.none}
                         </div>
                       )}
                     </div>
@@ -5048,7 +5943,7 @@
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                          Inventory
+                          {ui.inventory}
                         </h2>
                         <div className="text-xs font-black text-gray-500">
                           {enhancementInventory.length}
@@ -5094,7 +5989,7 @@
                               </div>
                               {item.type === "weapon" ? (
                                 <div className="col-span-2 text-xs font-bold text-gray-500">
-                                  Cost: {formatMoney(getEnhanceCost(item.enhanceLevel))} · Chance: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%
+                                  Cost: {formatMoney(getEnhanceCost(item.enhanceLevel))} ??Chance: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%
                                 </div>
                               ) : null}
                             </div>
@@ -5109,9 +6004,9 @@
                   </div>
                 </section>
               ) : (
-                <section className="w-full bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                <section className="w-full bg-white shadow-sm rounded-xl border border-emerald-100 overflow-hidden">
                   <div className="bg-gradient-to-r from-green-800 to-emerald-700 text-white p-5">
-                    <h1 className="text-xl font-black">Battle Preview</h1>
+                    <h1 className="text-xl font-black">{ui.defenseCommand}</h1>
                     <p className="mt-1 text-xs font-medium text-green-100">
                       RPG combat foundation. Current team strength and squad
                       rankings.
@@ -5141,9 +6036,9 @@
                     <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                       <div className="bg-black/20 rounded-md p-2">
                         <div className="text-green-100 text-[10px] font-black uppercase">
-                          RPG Dividends
+                          {ui.walletDividends}
                         </div>
-                        <div className="text-lg font-black leading-tight text-yellow-400">
+                        <div className="text-lg font-black leading-tight text-emerald-200">
                           {formatDps(gameState.rpg?.dividends || 0)}
                         </div>
                       </div>
@@ -5157,7 +6052,64 @@
                       </div>
                     </div>
 
-                    <div className="mt-4 bg-black/40 rounded-lg p-4 border border-red-900/30">
+                    <div className="mt-3 bg-black/30 rounded-lg p-3 border border-emerald-900/20">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-[10px] font-black text-green-200 uppercase tracking-widest">
+                            Defense Run Controls
+                          </div>
+                          <div className="text-[10px] font-bold text-green-300/60 mt-1">
+                            Runs use tickets, create temporary active units, and clear
+                            when the run ends.
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-black text-white">
+                            {runState.isActive ? "Run Active" : "Run Idle"}
+                          </div>
+                          <div className="text-[9px] font-bold text-green-300/60">
+                            Tickets {runTickets}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 mt-3">
+                        <button
+                          onClick={startDefenseRun}
+                          disabled={runState.isActive === true || runTickets <= 0}
+                          className={`rounded-md py-2 text-[11px] font-black transition-colors ${
+                            runState.isActive === true || runTickets <= 0
+                              ? "bg-gray-700/40 text-gray-400 cursor-not-allowed"
+                              : "bg-emerald-600 text-white hover:bg-emerald-500"
+                          }`}
+                        >
+                          Start Defense Run
+                        </button>
+                        <button
+                          onClick={buyRunTicket}
+                          disabled={dividends < getRunTicketCost()}
+                          className={`rounded-md py-2 text-[11px] font-black transition-colors ${
+                            dividends >= getRunTicketCost()
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                              : "bg-gray-700/40 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          Buy Ticket ({formatDps(getRunTicketCost())})
+                        </button>
+                        <button
+                          onClick={() => endDefenseRun("retreat")}
+                          disabled={runState.isActive !== true}
+                          className={`rounded-md py-2 text-[11px] font-black transition-colors ${
+                            runState.isActive === true
+                              ? "bg-gray-900 text-white hover:bg-gray-800"
+                              : "bg-gray-700/40 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          End Run
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 bg-black/40 rounded-lg p-4 border border-emerald-900/30">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-[10px] font-black text-green-200 uppercase tracking-widest">
                           Monster HP
@@ -5167,7 +6119,7 @@
                           {formatDps(gameState.rpg?.monsterMaxHp || 100)}
                         </span>
                       </div>
-                      <div className="w-full h-4 bg-gray-900 rounded-full overflow-hidden border border-red-900/20">
+                      <div className="w-full h-4 bg-gray-900 rounded-full overflow-hidden border border-emerald-900/20">
                         <div
                           className="h-full bg-gradient-to-r from-emerald-600 to-green-500 transition-all duration-500"
                           style={{
@@ -5187,7 +6139,7 @@
                             ),
                           ),
                         )}
-                        % Health · Total {gameState.rpg?.defeatedMonsters || 0}{" "}
+                        % Health ??Total {gameState.rpg?.defeatedMonsters || 0}{" "}
                         Kills
                       </div>
                     </div>
@@ -5197,7 +6149,7 @@
                       <span>Highest Stage: {gameState.rpg?.highestStage || 1}</span>
                     </div>
 
-                    <div className="mt-3 bg-black/30 rounded-lg p-3 border border-red-900/20">
+                    <div className="mt-3 bg-black/30 rounded-lg p-3 border border-emerald-900/20">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-[10px] font-black text-green-200 uppercase tracking-widest">
                           Mode
@@ -5225,7 +6177,7 @@
                       <div className="mt-3 bg-gray-950 border border-yellow-600/40 rounded-lg overflow-hidden">
                         <div className="bg-yellow-900/60 px-3 py-2 flex items-center gap-2">
                           <span className="text-yellow-300 font-black text-[10px] uppercase tracking-widest">Dorothy</span>
-                          <span className="text-yellow-600/60 text-[9px] font-bold uppercase">— Proposal</span>
+                          <span className="text-yellow-600/60 text-[9px] font-bold uppercase">??Proposal</span>
                         </div>
                         <div className="p-3 space-y-2">
                           {DOROTHY_SCRIPTS.normalEndingProposal.map((line, i) => (
@@ -5257,7 +6209,7 @@
                     <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                       <div className="bg-gray-100 px-3 py-2 border-b border-gray-200">
                         <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                          Battle Stat Preview
+                          {ui.battleStatPreview}
                         </h2>
                       </div>
                       <div className="p-3 grid grid-cols-2 gap-3">
@@ -5267,11 +6219,11 @@
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
                           <div className="text-[9px] font-black text-gray-400 uppercase">Combat Freq (SPD)</div>
-                          <div className="text-sm font-black text-blue-600">x{combatStats.spd.toFixed(2)}</div>
+                          <div className="text-sm font-black text-emerald-600">x{combatStats.spd.toFixed(2)}</div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
                           <div className="text-[9px] font-black text-gray-400 uppercase">Penetration</div>
-                          <div className="text-sm font-black text-orange-600">{(combatStats.pen * 100).toFixed(1)}%</div>
+                          <div className="text-sm font-black text-emerald-600">{(combatStats.pen * 100).toFixed(1)}%</div>
                           <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">Preview</div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
@@ -5281,7 +6233,7 @@
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100 col-span-2">
                           <div className="text-[9px] font-black text-gray-400 uppercase">Critical Chance</div>
-                          <div className="text-sm font-black text-red-600">{(combatStats.crt * 100).toFixed(1)}%</div>
+                          <div className="text-sm font-black text-emerald-700">{(combatStats.crt * 100).toFixed(1)}%</div>
                           <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">Preview (Includes Rarity Bonus)</div>
                         </div>
                       </div>
@@ -5289,9 +6241,9 @@
                     <section className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                       <div className="bg-emerald-800 text-white p-3 flex justify-between items-center">
                         <h2 className="text-xs font-black uppercase tracking-widest">
-                          RPG Dividends Upgrades
+                          {ui.dividendsUpgrades}
                         </h2>
-                        <div className="text-yellow-400 font-black text-sm">
+                        <div className="text-emerald-200 font-black text-sm">
                           {formatDps(gameState.rpg?.dividends || 0)} DIV
                         </div>
                       </div>
@@ -5321,14 +6273,14 @@
                             <div className="text-xs font-black text-gray-800 uppercase">
                               SPD Boost (Lv.{getRpgUpgradeLevel(gameState, "spdLevel")})
                             </div>
-                            <div className="text-[10px] font-bold text-blue-600">
+                            <div className="text-[10px] font-bold text-emerald-600">
                               Combat Freq. Multiplier: x{getRpgUpgradeEffect("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")).toFixed(2)}
                             </div>
                           </div>
                           <button
                             onClick={() => buyRpgUpgrade("spdLevel")}
                             disabled={(gameState.rpg?.dividends || 0) < getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel"))}
-                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")) ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")) ? "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                           >
                             {formatDps(getRpgUpgradeCost("spdLevel", getRpgUpgradeLevel(gameState, "spdLevel")))}
                           </button>
@@ -5340,7 +6292,7 @@
                             <div className="text-xs font-black text-gray-800 uppercase">
                               PEN Boost (Lv.{getRpgUpgradeLevel(gameState, "penLevel")})
                             </div>
-                            <div className="text-[10px] font-bold text-orange-600">
+                            <div className="text-[10px] font-bold text-emerald-600">
                               Def. Penetration: {(getRpgUpgradeEffect("penLevel", getRpgUpgradeLevel(gameState, "penLevel")) * 100).toFixed(1)}%
                             </div>
                             <div className="text-[8px] font-black text-gray-400 uppercase mt-1">
@@ -5350,7 +6302,7 @@
                           <button
                             onClick={() => buyRpgUpgrade("penLevel")}
                             disabled={(gameState.rpg?.dividends || 0) < getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel"))}
-                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel")) ? "bg-orange-600 text-white shadow-sm hover:bg-orange-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                            className={`px-4 py-2 rounded-md font-black text-xs transition-all ${(gameState.rpg?.dividends || 0) >= getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel")) ? "bg-emerald-700 text-white shadow-sm hover:bg-emerald-800" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                           >
                             {formatDps(getRpgUpgradeCost("penLevel", getRpgUpgradeLevel(gameState, "penLevel")))}
                           </button>
@@ -5360,7 +6312,7 @@
 
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-                        Top 5 Squad Members
+                        {ui.topSquad}
                       </h2>
                       {top5Characters.length > 0 ? (
                         <div className="space-y-2">
@@ -5380,10 +6332,10 @@
                                   <div
                                     className={`text-[10px] font-bold uppercase ${rarityTextClass(char.rarityLabel)}`}
                                   >
-                                    {char.rarityLabel} · Lv {char.level}
+                                    {char.rarityLabel} ??Lv {char.level}
                                   </div>
                                   <div className="text-[10px] font-bold text-gray-400">
-                                    {char.definition.faction} ·{" "}
+                                    {char.definition.faction} ??" "}
                                     {char.equippedWeapon
                                       ? char.equippedWeapon.name
                                       : "No Weapon"}
@@ -5403,14 +6355,53 @@
                         </div>
                       ) : (
                         <div className="py-8 text-center font-bold text-gray-400">
-                          No characters in squad
+                          Start a defense run to deploy temporary units
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          Recent Run Results
+                        </h2>
+                        <div className="text-xs font-black text-gray-500">
+                          {runResultHistory.length}
+                        </div>
+                      </div>
+                      {runResultHistory.length > 0 ? (
+                        <div className="space-y-2">
+                          {[...runResultHistory].reverse().map((entry) => (
+                            <div
+                              key={entry.id}
+                              className="bg-gray-50 rounded-md p-3 flex items-center justify-between gap-3"
+                            >
+                              <div>
+                                <div className="font-black text-gray-800 text-sm">
+                                  {entry.result === "clear" ? "Cleared" : "Retreated"} Run
+                                </div>
+                                <div className="text-[10px] font-bold text-gray-400 uppercase">
+                                  Stage {entry.stage} · {entry.defeatedMonsters} kills
+                                </div>
+                              </div>
+                              <div className="text-[10px] font-black text-emerald-700">
+                                {new Date(
+                                  toFiniteNumber(entry.createdAt, Date.now()),
+                                ).toLocaleTimeString()}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-6 text-center font-bold text-gray-400">
+                          No run history yet
                         </div>
                       )}
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                        Battle System Notice
+                        {ui.battleNotice}
                       </h2>
                       <p className="text-xs text-gray-500 leading-relaxed">
                         Active combat and stage progression are currently in
@@ -5423,8 +6414,8 @@
               )}
             </div>
 
-            {/* 국가별로 렌더링되는 SEO 공략집 텍스트 영역 */}
-            {activeTab === "landlord" && SEO_CONTENT[userLang]}
+            {/* ?????⑤슢??????????????좏뀮???SEO ????댁벑??잙컾維??????紐꾨쫯??????쇨덧??*/}
+            {SEO_TAB_CONTENT[language]?.[activeTab] || SEO_CONTENT[language]}
           </div>
         );
       }
