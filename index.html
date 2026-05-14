@@ -2151,7 +2151,7 @@
 
       function getMonsterDefeatReward(stage) {
         const s = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
-        return Math.floor(10 * Math.pow(s, 1.15));
+        return Math.floor(25 * Math.pow(s, 1.05));
       }
 
       function getRpgUpgradeLevel(state, key) {
@@ -3110,6 +3110,8 @@
           noRunHistory: "아직 런 기록이 없습니다.",
           battleNoticeText:
             "현재 전투와 스테이지 진행은 실시간으로 반영되며, 표시되는 DPS는 기본 스탯과 레벨, 무기, 활성 시너지를 기준으로 계산됩니다.",
+          dividendsEmptyHint: "RPG 탭에서 Defense Run을 진행해 Dividends를 획득하세요.",
+          newPlayerHint: "처음이라면 RPG 탭에서 Defense Run을 시작해보세요.",
         },
         en: {
           tabLandlord: "Landlord",
@@ -3264,6 +3266,8 @@
           noRunHistory: "No run history yet.",
           battleNoticeText:
             "Active combat and stage progression are reflected live, and shown DPS is derived from base stats, level, weapon power, and active synergies.",
+          dividendsEmptyHint: "Run Defense stages in the RPG tab to earn Dividends.",
+          newPlayerHint: "New here? Try starting a Defense Run in the RPG tab.",
         },
       };
 
@@ -3553,6 +3557,10 @@
         const language = gameState.settings?.language || userLang;
         const t = TRANSLATIONS[language] || TRANSLATIONS.en;
         const ui = UI_TEXT[language] || UI_TEXT.en;
+
+        useEffect(() => {
+          document.documentElement.lang = language;
+        }, [language]);
 
         const cash = Math.max(0, toFiniteNumber(gameState.wallet.cash, 0));
         const diamonds = Math.max(
@@ -4915,6 +4923,9 @@
 
               {activeTab === "landlord" ? (
                 <>
+                  <div className="w-full bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded-r-lg">
+                    <p className="text-xs font-bold text-blue-700">{ui.newPlayerHint}</p>
+                  </div>
               {/* ????욱룏????嶺뚮슣堉붹룇 ?筌???????????븐뻤??????쇨덧??*/}
               <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center rounded-lg mb-4 border-b-2 border-green-200">
                 <div>
@@ -5754,6 +5765,13 @@
                         {ui.draw10}
                       </button>
                     </div>
+                    {dividends < GACHA_DRAW_COST && (
+                      <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-center">
+                        <p className="text-xs font-bold text-red-600">
+                          {ui.dividendsEmptyHint}
+                        </p>
+                      </div>
+                    )}
 
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="text-xs font-bold text-gray-400 uppercase">
@@ -6504,7 +6522,7 @@
             </div>
 
             {/* ?????⑤슢??????????????좏뀮???SEO ????댁벑??잙컾維??????紐꾨쫯??????쇨덧??*/}
-            {SEO_TAB_CONTENT[language]?.[activeTab] || SEO_CONTENT[language]}
+            {SEO_TAB_CONTENT[language]?.[activeTab] ?? null}
           </div>
         );
       }
