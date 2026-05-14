@@ -3125,8 +3125,8 @@
             "현재 전투와 스테이지 진행은 실시간으로 반영되며, 표시되는 DPS는 기본 스탯과 레벨, 무기, 활성 시너지를 기준으로 계산됩니다.",
           dividendsEmptyHint: "RPG 탭에서 Defense Run을 진행해 Dividends를 획득하세요.",
           newPlayerHint: "처음이라면 RPG 탭에서 Defense Run을 시작해보세요.",
-          gachaProgress: "첫 가챠까지 {amount} DIV 남았습니다.",
-          gachaReady: "가챠를 뽑을 수 있습니다. Enhancement 탭에서 장비를 강화하세요.",
+          gachaProgress: "DIV는 RPG 스탯 훈련 또는 가챠/장비 성장에 사용할 수 있습니다. 먼저 ATK/SPD/PEN 훈련으로 전투력을 올려보세요.",
+          gachaReady: "DIV가 충분합니다. RPG 스탯을 계속 훈련하거나, 선택적으로 가챠/장비 성장을 진행할 수 있습니다.",
         },
         en: {
           tabLandlord: "Landlord",
@@ -3283,8 +3283,8 @@
             "Active combat and stage progression are reflected live, and shown DPS is derived from base stats, level, weapon power, and active synergies.",
           dividendsEmptyHint: "Run Defense stages in the RPG tab to earn Dividends.",
           newPlayerHint: "New here? Try starting a Defense Run in the RPG tab.",
-          gachaProgress: "{amount} DIV left until your first Gacha draw.",
-          gachaReady: "You can draw Gacha now. Go to the Enhancement tab to upgrade your gear.",
+          gachaProgress: "DIV can be used for RPG stat training or optional Gacha/gear growth. Start by improving ATK/SPD/PEN to strengthen this run.",
+          gachaReady: "You have enough DIV for more options. Continue RPG stat training, or optionally use Gacha/gear growth.",
         },
       };
 
@@ -6259,10 +6259,7 @@
                       <div className="mb-4 p-2 rounded border border-emerald-500/20 bg-emerald-500/5 text-center">
                         {dividends < GACHA_DRAW_COST ? (
                           <p className="text-[10px] font-bold text-emerald-400">
-                            {ui.gachaProgress.replace(
-                              "{amount}",
-                              formatDps(GACHA_DRAW_COST - dividends),
-                            )}
+                            {ui.gachaProgress}
                           </p>
                         ) : (
                           <p className="text-[10px] font-black text-green-400 animate-pulse">
