@@ -17,7 +17,7 @@
    - Investment tab reframed as a Defense Contracts / Hero's Fate Betting system. Backed by the existing Buy/Sell engine (Back/Exit controls, sparklines, portfolio metrics).
    - Investment runs on its own `investment.capital` — players can enter without prior Landlord earnings.
    - Defense Contracts odds preview, bet slip, deterministic settlement preview, and preview history are live.
-   - Settlement gate is in place (`contractSettlementUnlocked: false`). Real settlement, stake deduction, and payout are **not yet active**.
+   - Settlement gate is in place. Real settlement, stake deduction, and payout are **unlocked via Dorothy Proposal acknowledgement** (Stage 100 boundary).
 3. **🗡️ Gacha & Enhancement (캐릭터 뽑기 및 강화 - Current)**
    - Gacha pulls spend RPG `dividends` (no longer forced through Landlord `cash`).
    - Enhancement tracks permanent weapon progression via `weaponMastery` / `weaponLevels`.
@@ -71,9 +71,8 @@
 - RPG runs use ticket-gated `rpg.run.activeUnits` (volatile per-run units); legacy `rpg.characters` preserved for save compatibility.
 - Normal Ending boundary at Stage 100; `normalEndingReached` / `normalEndingSeen` state fields and three-way mode label implemented.
 - Dorothy Proposal script foundation implemented (`DOROTHY_SCRIPTS`, KO/EN localization, acknowledge handler).
-- Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete (six layers). Real settlement is not active.
+- Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete. Real settlement is unlocked after Dorothy acknowledgement.
 
 **Next recommended steps:**
-1. Real settlement unlock — trigger `contractSettlementUnlocked: true` from a game condition (e.g., `highestStage >= 100`).
-2. Hero's Fate resolution formula — probabilistic win/loss with stake deduction and payout.
-3. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.
+1. Hero's Fate resolution formula — probabilistic win/loss with stake deduction and payout (currently deterministic placeholder).
+2. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.
