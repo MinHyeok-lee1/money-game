@@ -78,6 +78,19 @@
           box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
         }
       }
+      .reward-popup {
+        position: absolute;
+        left: 50%;
+        top: 20%;
+        transform: translateX(-50%);
+        font-weight: 900;
+        font-size: 1.25rem;
+        color: #fbbf24;
+        pointer-events: none;
+        animation: floatUp 1s ease-out forwards;
+        z-index: 50;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
     </style>
   </head>
   <body class="flex flex-col items-center min-h-screen">
@@ -89,7 +102,7 @@
 
     <!-- React Logic -->
     <script type="text/babel">
-      const { useState, useEffect } = React;
+      const { useState, useEffect, useRef } = React;
 
       const REBIRTH_REQUIREMENT = 2000000000; // ??嶺뚮슣堉붹룇 ???뚯???: 20??
       const NORMAL_ENDING_STAGE = 100;
@@ -3554,6 +3567,8 @@
           loadGameState(userLang),
         );
         const [clicks, setClicks] = useState([]);
+        const [rewardPopups, setRewardPopups] = useState([]);
+        const prevDefeatedRef = useRef(gameState.rpg?.defeatedMonsters || 0);
         const language = gameState.settings?.language || userLang;
         const t = TRANSLATIONS[language] || TRANSLATIONS.en;
         const ui = UI_TEXT[language] || UI_TEXT.en;
@@ -3844,6 +3859,23 @@
         useEffect(() => {
           saveGameState(gameState);
         }, [gameState]);
+
+        useEffect(() => {
+          const currentDefeated = gameState.rpg?.defeatedMonsters || 0;
+          if (currentDefeated > prevDefeatedRef.current) {
+            const reward = gameState.rpg?.lastRpgReward || 0;
+            if (reward > 0) {
+              const id = Date.now();
+              setRewardPopups((prev) => [...prev, { id, amount: reward }]);
+              setTimeout(() => {
+                setRewardPopups((prev) =>
+                  prev.filter((p) => p.id !== id),
+                );
+              }, 1000);
+            }
+          }
+          prevDefeatedRef.current = currentDefeated;
+        }, [gameState.rpg?.defeatedMonsters]);
 
         useEffect(() => {
           if (activeTab !== "landlord") return;
@@ -6214,7 +6246,12 @@
                       </div>
                     </div>
 
-                    <div className="mt-4 bg-black/40 rounded-lg p-4 border border-emerald-900/30">
+                    <div className="mt-4 bg-black/40 rounded-lg p-4 border border-emerald-900/30 relative">
+                      {rewardPopups.map((p) => (
+                        <div key={p.id} className="reward-popup">
+                          +{formatDps(p.amount)} DIV
+                        </div>
+                      ))}
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-[10px] font-black text-green-200 uppercase tracking-widest">
                           {language === "ko" ? "몬스터 HP" : "Monster HP"}
