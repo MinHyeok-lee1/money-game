@@ -22,9 +22,8 @@
 - [ ] Final report <!-- id: 11 -->
 
 ## Settlement Status (Audit 2026-05-14)
-- **Status Category**: **B / D** (Foundation exists, locked by default, reachable via dev toggle).
+- **Status Category**: **B / D** (Foundation exists, manual override available).
 - **Code Foundation**: `settleDefenseContract` and `createDefenseContractSettlementResult` are implemented with deterministic logic.
-- **Player Access**: Locked by `contractSettlementUnlocked: false`. No normal player unlock condition currently active.
+- **Player Access**: Unlocks when `gameState.rpg.normalEndingSeen === true` (Stage 100 / Dorothy boundary).
 - **Resolution Model**: Deterministic placeholder (threshold-based). Probabilistic Hero's Fate model (Math.random) is **not yet implemented**.
-- **Design Alignment**: Real settlement must remain locked until the God Phase transition.
-- **Recommended Unlock Trigger**: `gameState.rpg.normalEndingSeen === true` (Stage 100 / Dorothy boundary).
+- **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase.

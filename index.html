@@ -345,7 +345,10 @@
 
       // Pure derived helper ??no mutation, reads only contractSettlementUnlocked flag
       function isDefenseContractSettlementUnlocked(gameState) {
-        return gameState?.investment?.contractSettlementUnlocked === true;
+        return (
+          gameState?.investment?.contractSettlementUnlocked === true ||
+          gameState?.rpg?.normalEndingSeen === true
+        );
       }
 
       // Pure validation helper ??no mutation, returns structured canSettle result
@@ -3031,22 +3034,18 @@
           confidence: "신뢰도",
           signalAnalysis: "신호 분석",
           savePreviewToHistory: "미리보기를 기록에 저장",
-          devPreviewOnly: "개발용 미리보기 전용",
-          devPreviewDesc: "실제 정산 로직이 아니라 UI 확인용 토글입니다.",
-          unlockGate: "게이트 열기",
-          lockGate: "게이트 잠그기",
           settlementStatus: "정산 상태",
-          ready: "준비",
+          ready: "준비됨",
           locked: "잠김",
-          settlementUnlocked: "정산 해금",
-          contractSelected: "계약 선택",
-          positiveStake: "배팅 금액 0 초과",
-          stakeWithinCapital: "배팅 금액 <= 자본",
+          settlementUnlocked: "정산 기능 활성화",
+          contractSelected: "계약 선택됨",
+          positiveStake: "스테이크 > 0",
+          stakeWithinCapital: "스테이크 <= 자본",
           oddsValid: "배당률 유효",
-          payoutValid: "지급값 유효",
-          runDryRun: "드라이런 시뮬레이션",
-          settleContract: "계약 정산",
-          realSettlementLocked: "실정산 잠김",
+          payoutValid: "페이아웃 유효",
+          runDryRun: "드라이런 시뮬레이션 실행",
+          settleContract: "실제 정산 실행",
+          realSettlementLocked: "잠김 (도로시 수락 필요)",
           dryRunResult: "드라이런 결과",
           contract: "계약",
           wouldWin: "승리 예상",
@@ -3188,11 +3187,6 @@
           confidence: "Confidence",
           signalAnalysis: "Signal Analysis",
           savePreviewToHistory: "Save Preview to History",
-          devPreviewOnly: "Dev Preview Only",
-          devPreviewDesc:
-            "This toggle is for UI preview only, not real settlement logic.",
-          unlockGate: "Unlock Gate",
-          lockGate: "Lock Gate",
           settlementStatus: "Settlement Status",
           ready: "Ready",
           locked: "Locked",
@@ -3204,7 +3198,7 @@
           payoutValid: "Payout Valid",
           runDryRun: "Run Dry-Run Simulation",
           settleContract: "Settle Contract",
-          realSettlementLocked: "Real Settlement Locked",
+          realSettlementLocked: "Locked (Dorothy Required)",
           dryRunResult: "Dry-Run Result",
           contract: "Contract",
           wouldWin: "Would Win",
@@ -4328,15 +4322,6 @@
           });
         };
 
-        const toggleDefenseContractSettlementGate = () => {
-          updateGameState((prev) => ({
-            ...prev,
-            investment: {
-              ...prev.investment,
-              contractSettlementUnlocked: !prev.investment.contractSettlementUnlocked,
-            },
-          }));
-        };
 
         const runDefenseContractDryRun = () => {
           setGameState((prev) => {
@@ -5347,25 +5332,6 @@
                           {ui.savePreviewToHistory}
                         </button>
 
-                        {/* Dev-only settlement gate toggle */}
-                        <div className="border border-dashed border-yellow-300 rounded-md p-2 bg-yellow-50">
-                          <div className="flex items-center justify-between gap-2">
-                            <div>
-                              <div className="text-[9px] font-black text-yellow-700 uppercase tracking-wider">{ui.devPreviewOnly}</div>
-                              <div className="text-[9px] text-yellow-600 mt-0.5">{ui.devPreviewDesc}</div>
-                            </div>
-                            <button
-                              onClick={toggleDefenseContractSettlementGate}
-                              className={`shrink-0 px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider transition-colors ${
-                                gameState.investment.contractSettlementUnlocked
-                                  ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                                  : "bg-yellow-100 text-yellow-700 border border-yellow-300 hover:bg-yellow-200"
-                              }`}
-                            >
-                              {gameState.investment.contractSettlementUnlocked ? ui.lockGate : ui.unlockGate}
-                            </button>
-                          </div>
-                        </div>
 
                         {/* Settlement gate status + validation breakdown */}
                         {(() => {
