@@ -3125,6 +3125,8 @@
             "현재 전투와 스테이지 진행은 실시간으로 반영되며, 표시되는 DPS는 기본 스탯과 레벨, 무기, 활성 시너지를 기준으로 계산됩니다.",
           dividendsEmptyHint: "RPG 탭에서 Defense Run을 진행해 Dividends를 획득하세요.",
           newPlayerHint: "처음이라면 RPG 탭에서 Defense Run을 시작해보세요.",
+          gachaProgress: "첫 가챠까지 {amount} DIV 남았습니다.",
+          gachaReady: "가챠를 뽑을 수 있습니다. Enhancement 탭에서 장비를 강화하세요.",
         },
         en: {
           tabLandlord: "Landlord",
@@ -3281,6 +3283,8 @@
             "Active combat and stage progression are reflected live, and shown DPS is derived from base stats, level, weapon power, and active synergies.",
           dividendsEmptyHint: "Run Defense stages in the RPG tab to earn Dividends.",
           newPlayerHint: "New here? Try starting a Defense Run in the RPG tab.",
+          gachaProgress: "{amount} DIV left until your first Gacha draw.",
+          gachaReady: "You can draw Gacha now. Go to the Enhancement tab to upgrade your gear.",
         },
       };
 
@@ -6252,6 +6256,20 @@
                           +{formatDps(p.amount)} DIV
                         </div>
                       ))}
+                      <div className="mb-4 p-2 rounded border border-emerald-500/20 bg-emerald-500/5 text-center">
+                        {dividends < GACHA_DRAW_COST ? (
+                          <p className="text-[10px] font-bold text-emerald-400">
+                            {ui.gachaProgress.replace(
+                              "{amount}",
+                              formatDps(GACHA_DRAW_COST - dividends),
+                            )}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] font-black text-green-400 animate-pulse">
+                            {ui.gachaReady}
+                          </p>
+                        )}
+                      </div>
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-[10px] font-black text-green-200 uppercase tracking-widest">
                           {language === "ko" ? "몬스터 HP" : "Monster HP"}
