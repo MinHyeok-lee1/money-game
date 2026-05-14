@@ -290,6 +290,44 @@
       }
 
       // Derived-only simulated outcome ??deterministic preview, no random settlement
+      // Phase A: Probabilistic success chance helper ??pure and deterministic
+      function calculateDefenseContractSuccessChance(gameState, asset, highestStage, squadDps) {
+        const stage = toFiniteNumber(highestStage, 0);
+        const dps = toFiniteNumber(squadDps, 0);
+        const odds = getDefenseContractOdds(asset, stage);
+        
+        // RPG-specific signals
+        // 1. Stage Signal (Progress-based)
+        const stageSignal = Math.min(10, Math.round((stage / NORMAL_ENDING_STAGE) * 10));
+        
+        // 2. DPS Signal (Active Combat Power)
+        // We use squadDps which already includes ATK/SPD upgrades via getRpgCombatStats
+        const dpsSignal = dps > 0 ? 5 : 0; 
+        
+        // 3. PEN Signal (Armor Penetration utility)
+        const combatStats = getRpgCombatStats(gameState);
+        const penSignal = Math.round(combatStats.pen * 5); 
+
+        const rawChance = odds + stageSignal + dpsSignal + penSignal;
+        const boundedChance = Math.max(5, Math.min(95, rawChance));
+        
+        return {
+          successChance: boundedChance,
+          successProbability: boundedChance / 100,
+          rawChance,
+          boundedChance,
+          minChance: 5,
+          maxChance: 95,
+          squadSignal: dpsSignal + penSignal,
+          contractSignal: odds,
+          stageSignal,
+          dpsSignal,
+          penSignal,
+          riskModifier: 0, 
+          explanation: `Calculated from Base Odds (${odds}), Stage Signal (+${stageSignal}), and RPG Combat Power (+${dpsSignal + penSignal}).`
+        };
+      }
+
       function getDefenseContractSimulatedOutcome(betSlip, assetList, highestStage, squadDps) {
         const contractId = betSlip?.selectedContractId;
         if (!contractId) return null;
