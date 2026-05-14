@@ -49,11 +49,12 @@
 **Milestone 3-3 complete:** The RPG character and weapon equipment foundation is fully integrated.
 - 52-character definitions with faction/rarity balance.
 - Canonical owned character instance management.
-- Gacha integration for both characters and weapons.
+- Gacha integration for both characters and weapons; Gacha pulls now spend `dividends` (not `cash`).
+- Enhancement tracks permanent progression via `weaponMastery` / `weaponLevels`.
 - Weapon equip/unequip foundation.
 - Preferred weapon synergy preview and safe normalization.
 - Faction synergy preview and derived multiplier logic.
-- All systems use shared Global Wallet `cash` and preserve tab-scoped passive behaviors.
+- Tab-scoped passive behaviors are preserved across all modules.
 
 ## 🏁 Milestone 4: 방치형 RPG (Idle RPG) 구현
 
@@ -83,9 +84,15 @@
 
 **Milestone 4H complete:** Dorothy Proposal Script Foundation implemented. `DOROTHY_SCRIPTS.normalEndingProposal` added with four speaker/textKey lines; KO and EN localization entries added to `TRANSLATIONS`; `acknowledgeDorothyProposal` handler sets `normalEndingSeen: true`; RPG tab shows Dorothy proposal panel when `normalEndingReached && !normalEndingSeen` and a compact acknowledged note when `normalEndingSeen`; external capital leverage, Infinite Mode mechanics, and Dorothy UI beyond the script remain locked. Milestone 4-2 not yet complete.
 
-**UI Alignment pass complete:** Investment, Enhancement, and RPG tabs now follow the Landlord emerald/card layout. All tab headers use `from-green-700 to-emerald-600` gradient; buttons use emerald/green accents; red/teal/purple/slate/rose UI colors removed. No gameplay logic, data, or save state was modified.
-
-**Horizontal economy foundation complete:** Investment now uses independent `investment.capital` with a one-time support grant and optional cash-to-capital booster flow; Gacha now spends RPG `dividends`; RPG runs now use ticket-gated temporary `rpg.run.activeUnits` with capped run result history while preserving legacy `rpg.characters` for save compatibility.
+**UI & Economy Architecture pass complete:**
+- All four tabs unified on Emerald theme (`from-green-700 to-emerald-600` gradient); Global Wallet Header added.
+- i18n consolidated under `settings.language`.
+- Horizontal economy model adopted: `cash` is a cross-module booster, not a mandatory gateway.
+- Investment runs on `investment.capital` (independent entry; optional cash-to-capital booster flow).
+- Gacha pulls spend RPG `dividends` (not `cash`).
+- Enhancement uses permanent `weaponMastery` / `weaponLevels` axes.
+- RPG runs use ticket-gated `rpg.run.activeUnits` (volatile per-run); legacy `rpg.characters` preserved for save compatibility.
+- Canonical localStorage key `moneyGameUniverseStateV1`, save migration, and normalize paths unchanged.
 
 **Defense Contract deterministic real settlement foundation added:** `contractSettlementHistory: []` added to default state and normalization (10-entry cap, strict 10-field type check, `status === "settled"`). Pure helper `createDefenseContractSettlementResult` added — same deterministic win logic as dry-run (`successChance + stageSignal + dpsSignal >= 60`). Handler `settleDefenseContract` added using `setGameState` — deducts stake once, adds `stake * projectedPayout` to cash on win only, appends to `contractSettlementHistory`, clears bet slip stake, never touches holdings or RPG state. Settlement button now active (emerald, `onClick={settleDefenseContract}`) when `canSettle: true`. Real settlement history panel added showing Won/Lost, net result, odds, payout, timestamp per entry. No random outcome, no new localStorage key.
 

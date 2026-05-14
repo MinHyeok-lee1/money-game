@@ -7,17 +7,26 @@
 
 ## ✨ 핵심 콘텐츠 (Core Modules)
 
+> **Architecture note:** The four modules share a single Global Wallet state but operate as a **horizontal economy**. Landlord `cash` is a booster, not a prerequisite — each module has its own entry currency. The old vertical "cash → everything" dependency is removed.
+
 1. **🏢 Idle Landlord (건물주 키우기 - Current)**
    - 클릭 및 10단계 부동산 투자를 통한 안정적인 기초 자본(Cash) 생산.
    - 환생(Rebirth)을 통한 영구적인 수익 배수(Multiplier) 획득.
+   - `cash` is now a cross-module booster, not the mandatory gateway to other tabs.
 2. **📈 Defense Contracts / Hero's Fate Betting (투자 → 방어 계약 - Current)**
    - Investment tab reframed as a Defense Contracts / Hero's Fate Betting system. Backed by the existing Buy/Sell engine (Back/Exit controls, sparklines, portfolio metrics).
+   - Investment runs on its own `investment.capital` — players can enter without prior Landlord earnings.
    - Defense Contracts odds preview, bet slip, deterministic settlement preview, and preview history are live.
    - Settlement gate is in place (`contractSettlementUnlocked: false`). Real settlement, stake deduction, and payout are **not yet active**.
-3. **🗡️ Gacha & Enhancement (캐릭터 뽑기 및 강화 - Planned)**
-   - 등급별 캐릭터 뽑기와 무기 강화 시스템, 전용 무기 시너지 로직.
-4. **🌲 Idle RPG (방치형 RPG - Planned)**
-   - 스펙업한 캐릭터들로 무한 스테이지를 등반하고 특수 재화를 파밍하는 엔드게임.
+3. **🗡️ Gacha & Enhancement (캐릭터 뽑기 및 강화 - Current)**
+   - Gacha pulls spend RPG `dividends` (no longer forced through Landlord `cash`).
+   - Enhancement tracks permanent weapon progression via `weaponMastery` / `weaponLevels`.
+   - 52-character static roster with factions, rarities, and preferred weapon synergies.
+4. **🌲 Idle RPG (방치형 RPG - Current)**
+   - Auto-combat engine with stage progression, Dividends rewards, and ATK/SPD/PEN stat upgrades.
+   - RPG runs use a ticket-gated `rpg.run.activeUnits` structure (volatile per-run units).
+   - Normal Ending boundary at Stage 100; Dorothy Proposal script foundation implemented.
+   - Infinite Mode mechanics and External Capital Leverage remain locked.
 
 ## 🛠 기술 스택 (Tech Stack)
 
@@ -33,16 +42,14 @@
 
 ### Milestone 1 Completion
 
-- Current playable modules: Idle Landlord and Investment Master.
-- Planned modules: Enhancement and RPG are visible as Coming Soon tabs.
-- Global Wallet is now the shared state foundation.
+- All four modules are playable. Global Wallet Header shows shared state across tabs.
 - Canonical localStorage key: `moneyGameUniverseStateV1`.
 - Legacy `idleLandlordSaveV4` saves are migrated into the canonical state and removed.
+- UI: all tabs use a unified Emerald theme; i18n driven by `settings.language`.
 
 ### Milestone 2 Completion
 
-- Investment data is stored under the shared Global Game State.
-- Investment trading uses shared wallet `cash`.
+- Investment runs on its own `investment.capital` (independent of Landlord earnings).
 - Investment Master includes static assets, bounded price history, SVG sparklines, Buy 1/Sell 1, Buy Max/Sell All, portfolio value, net worth, average buy price, and unrealized gain/loss.
 - Trading is bounded to the active Investment tab only.
 
@@ -51,21 +58,22 @@
 - Gacha and inventory system foundations are complete.
 - Static data for 52 unique characters with factions (Realty, Ticker, Luxury, Shadow) and rarities is implemented.
 - Owned characters are stored as canonical instances with unique IDs.
-- Character/Weapon gacha integration: characters go to RPG state, weapons go to Enhancement inventory.
+- Gacha pulls spend RPG `dividends` (not Landlord `cash`).
+- Enhancement tracks permanent progression via `weaponMastery` / `weaponLevels`.
 - Basic equipment foundation: characters can equip/unequip weapons via instance IDs.
 - Preferred weapon synergy foundation: x1.25 multiplier (capped) for matching character preference.
 - Faction synergy foundation: multiplier previews for owning multiple characters of the same faction.
-- Enhancement and Draw logic use shared wallet `cash`.
 
 ### Milestone 4 (In Progress)
 
 - RPG Master Blueprint adopted (`RPG_MASTER_BLUEPRINT.md`) covering "Sponsor to God" progression.
-- Basic idle combat engine with monster HP scaling and stage progression is implemented.
-- Dividends reward and upgrade economy are implemented (ATK, SPD, PEN stat boosts).
-- Normal Ending boundary (Stage 100) and Dorothy Proposal script are implemented.
+- Auto-combat engine with stage progression, Dividends rewards, and ATK/SPD/PEN stat upgrades implemented.
+- RPG runs use ticket-gated `rpg.run.activeUnits` (volatile per-run units); legacy `rpg.characters` preserved for save compatibility.
+- Normal Ending boundary at Stage 100; `normalEndingReached` / `normalEndingSeen` state fields and three-way mode label implemented.
+- Dorothy Proposal script foundation implemented (`DOROTHY_SCRIPTS`, KO/EN localization, acknowledge handler).
 - Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete (six layers). Real settlement is not active.
 
 **Next recommended steps:**
-1. Real settlement unlock — trigger `contractSettlementUnlocked: true` from a game condition.
-2. Hero's Fate resolution formula — probabilistic win/loss with wallet stake deduction and payout.
+1. Real settlement unlock — trigger `contractSettlementUnlocked: true` from a game condition (e.g., `highestStage >= 100`).
+2. Hero's Fate resolution formula — probabilistic win/loss with stake deduction and payout.
 3. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.

@@ -4,6 +4,10 @@
 
 - [x] **Global Wallet foundation:** canonical shared `localStorage` state for all game modes. Current key: `moneyGameUniverseStateV1`.
 - [x] **Navigation (GNB):** Landlord, Investment, Enhancement, and RPG tabs keep shared state while switching views.
+- [x] **Global Wallet Header:** shared cash/state header visible across all tabs.
+- [x] **Emerald theme unification:** all four tabs use consistent `from-green-700 to-emerald-600` gradient header and emerald button accents.
+- [x] **i18n consolidation:** language detection and translations unified under `settings.language`.
+- [x] **Horizontal economy model:** `cash` is a cross-module booster; each module has its own entry currency (`investment.capital`, `dividends`, etc.). Vertical cash-gate dependency removed.
 - [x] **Integrated data schema:** wallet, landlord, investment, enhancement, RPG, and settings state are stored together.
 - [x] **Legacy save migration:** existing `idleLandlordSaveV4` data is migrated into Global Wallet and removed.
 - [ ] **Data portability:** add export/import support for saved data.
@@ -23,6 +27,7 @@
 - [x] Buy/sell logic connected to Global Wallet `cash`.
 - [x] Portfolio value, net worth, average buy price, and unrealized gain/loss.
 - [x] Buy Max and Sell All trading controls.
+- [x] **Independent capital base:** Investment uses `investment.capital` — players can enter without prior Landlord earnings; optional cash-to-capital booster flow available.
 - [x] **Defense Contracts presentation:** Investment tab reframed as Hero's Fate Betting UI — flavor names, Dorothy lore, Market Status panel, renamed labels.
 - [x] **Defense Contracts odds preview:** `getDefenseContractRiskTier`, `getDefenseContractOdds`, `getDefenseContractProjectedPayout` pure helpers; per-card Contract Preview panel.
 - [x] **Defense Contracts bet slip:** `betSlip` state, stake input (clamped 0–cash), 25%/50%/Max shortcuts, projected win display.
@@ -34,24 +39,24 @@
 
 ## Phase 3: Gacha & Enhancement
 
-- [x] Character and item gacha UI and reward logic.
-- [x] Weapon enhancement system with success/failure outcomes (Foundation).
+- [x] Character and item gacha UI and reward logic; pulls now spend RPG `dividends` (not `cash`).
+- [x] Weapon enhancement system with success/failure outcomes (Foundation); permanent progression via `weaponMastery` / `weaponLevels`.
 - [x] Inventory and equipment data model.
 - [x] Faction and weapon synergy data foundation.
 
 ## Phase 4: Idle RPG (RPG Master Blueprint adopted)
 
-- [ ] **Dividends Economy**: Implement the first RPG-specific currency for early-game stat upgrades.
-- [ ] **Combat Stat Model**: Add logic for ATK, ACC, CRT, SPD, and PEN stats.
-- [ ] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power.
-- [ ] **Dorothy UI & Event**: Create the "Dorothy Proposal" script and interaction flow.
-- [ ] **52-Character Detailed Data Sheet**: Define granular stats for the complete character roster.
-- [ ] **Mythic Authority Triggers**: Implement endgame characters with reality-warping authority skills.
-- [ ] **Character Storylines**: Add lore integration for characters and factions.
-- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering system. Presentation and preview foundations complete; real settlement not yet active.
-- [ ] **Infinite Mode Scaling**: Mathematical modeling for monster growth beyond Stage 100.
-- [ ] Character collection and party setup.
-- [ ] Auto-battle and endless stage progression.
+- [x] **Dividends Economy**: RPG-specific currency earned from monster defeats; ATK/SPD/PEN upgrade economy implemented.
+- [x] **Combat Stat Model**: ATK, SPD, PEN stat upgrades active; ACC and CRT preview implemented.
+- [x] **Normal Ending boundary**: Stage 100 marked as Normal Ending; `normalEndingReached` / `normalEndingSeen` state; three-way mode label (Normal Arc → Normal Ending Reached → Infinite Mode Preview).
+- [x] **Dorothy Proposal script**: `DOROTHY_SCRIPTS.normalEndingProposal`, KO/EN localization, acknowledge handler; panel visible after Stage 100, dismissed via button.
+- [x] **RPG run structure**: `rpg.run.activeUnits` ticket-gated volatile run units; legacy `rpg.characters` preserved for save compatibility.
+- [ ] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power (locked — requires Dorothy Proposal acceptance).
+- [ ] **Infinite Mode Scaling**: Monster HP growth and stage rewards beyond Stage 100.
+- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Presentation and preview foundations complete; real settlement not yet active.
+- [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
+- [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
+- [ ] **Character Storylines**: Lore integration for characters and factions.
 - [ ] Boss rewards that connect back into the shared economy.
 
 ## Phase 5: Prestige & Honor
