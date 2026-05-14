@@ -27,3 +27,4 @@
 - **Player Access**: Unlocks when `gameState.rpg.normalEndingSeen === true` (Stage 100 / Dorothy boundary).
 - **Resolution Model**: Deterministic placeholder (threshold-based). Probabilistic Hero's Fate model (Math.random) is **not yet implemented**.
 - **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase.
+- **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the future probabilistic model.

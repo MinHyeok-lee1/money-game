@@ -91,5 +91,5 @@ Special 5-star+ characters that have "Authority Skills":
 - [ ] **Faction Upgrade Tables**: Detailed cost and scaling for faction-specific bonuses.
 - [ ] **Dorothy Integration Proposal Script**: Dialog and UI flow for the Dorothy Event.
 - [ ] **Dividends Economy Balance Sheet**: Tuning the income/expense ratio for the first RPG reward.
-- [ ] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system.
+- [x] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system. (See [docs/HEROS_FATE_BETTING_SPEC.md](docs/HEROS_FATE_BETTING_SPEC.md))
 - [ ] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100.
