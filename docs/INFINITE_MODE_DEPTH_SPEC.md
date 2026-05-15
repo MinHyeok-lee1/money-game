@@ -371,6 +371,7 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-4B scope** defines the unified Reaper model fantasy, naming direction, form/mask model, gameplay model, scaling dimensions, UI direction, and future implementation phases.
 - **Phase I-4C scope** adds static `REAPER_FORMS` metadata and a pure `getInfiniteReaperProfile(stage)` helper. This is data/helper-only and does not change combat or UI behavior.
 - **Phase I-4D scope** displays the Reaper profile in the Stage 101+ RPG UI with identity, current mask/form, threat, intensity tier, and recommended counters. This remains display-only.
+- **Phase I-4D-1 QA** verified the Reaper panel is Stage 101+ only, translation-backed, additive to the existing archetype/boss panels, and does not change combat behavior.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
@@ -402,4 +403,5 @@ Phase I-4E should define:
 - **Phase I-4B**: Reaper Infinite Mode Model Design Spec — COMPLETE
 - **Phase I-4C**: Reaper Model Data Foundation — COMPLETE
 - **Phase I-4D**: Reaper UI Integration — COMPLETE
+- **Phase I-4D-1**: Reaper UI Smoke QA — COMPLETE
 - **Phase I-4E**: Reaper Form Modifier Integration — NEXT

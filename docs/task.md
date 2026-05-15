@@ -80,5 +80,6 @@
     - [x] Phase I-4B: Reaper Infinite Mode Model Design Spec (fantasy, naming, masks, scaling, UI, integration plan) <!-- id: 50 -->
     - [x] Phase I-4C: Reaper Model Data Foundation (static forms + pure profile helper, no combat changes) <!-- id: 51 -->
     - [x] Phase I-4D: Reaper UI Integration (Stage 101+ identity/threat/form/counter panel, display-only) <!-- id: 52 -->
-    - [ ] Phase I-4E: Reaper Form Modifier Integration <!-- id: 53 -->
+    - [x] Phase I-4D-1: Reaper UI Smoke QA (Stage gating, translations, existing panels, no combat changes verified) <!-- id: 53 -->
+    - [ ] Phase I-4E: Reaper Form Modifier Integration <!-- id: 54 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
