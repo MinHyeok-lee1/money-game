@@ -81,9 +81,10 @@ External specialization shouldn't just be a stat stick; it should enhance the pl
 | **Authority Insight** | PEN Specialization Level > 2 | Flat +1% insight bonus (Max +2%). |
 
 ### 3. Cap & Balance (G-4A)
-- **Shared Cap**: Specialization signals should share a unified cap with the Squad Tactical Signal.
-- **Proposed Cap Expansion**: Total Tactical Signal cap increases from **+12%** to **+15%**.
+- **Shared Cap**: Specialization signals share a unified cap with the Squad Tactical Signal.
+- **Cap Policy**: Total Tactical Signal cap **remains +12%** for the first implementation (G-4B).
 - **Double-Counting Prevention**: Alignment signals use the *Specialization Tier* (built through cost basis/diversity), not the raw *Leverage Value* (built through total wealth). This ensures the "God of Wealth" and the "God of Tactics" are distinct builds.
+- **Future Note**: A future Phase G-4C balance QA may evaluate expanding the cap to +15% once Infinite Mode metrics are stable, but this is not approved for G-4B.
 
 ---
 

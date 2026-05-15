@@ -124,7 +124,7 @@ In the God Phase, your portfolio choice (Specialization) acts as a high-level "I
 ### 2. Alignment Signal
 If a contract (e.g. "Vanguard Defense Fund") matches your Portfolio Specialization (Blue-Chip/Realty), you gain an **Alignment Signal**.
 - **Formula**: `+1%` per matching faction unit in the squad.
-- **Cap**: The total Tactical Signal (Squad + Alignment) is increased to a maximum of **+15%**.
+- **Cap**: The total Tactical Signal (Squad + Rarity + Alignment) is **capped at +12%**. Build Alignment provides a "safety net" to reach the cap even with a less-than-perfect squad, but does not stack beyond it.
 
 ### 3. UI Clarity
 The Signal Analysis UI will break out:

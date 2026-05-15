@@ -51,6 +51,7 @@
     - [x] Phase G-3C: Specialization Integration QA (Safe, bounded, no double-counting) <!-- id: 31 -->
 - **Phase G-4: Tactical Signal Synchronization**
     - [x] Phase G-4A: Tactical Signal Synchronization Design Spec (Alignment Signal defined) <!-- id: 32 -->
+    - [x] Phase G-4A-1: Tactical Signal Synchronization Cap Guardrail Patch (Capped at +12%) <!-- id: 33 -->
 - **Design Alignment**: 
     - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
     - Tactical Edge is now active in real settlement odds. 
