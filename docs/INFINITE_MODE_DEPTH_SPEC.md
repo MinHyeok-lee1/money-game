@@ -173,7 +173,8 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-2A scope** is display/foundation only: Stage 101+ shows deterministic archetype information in the RPG UI.
 - **Phase I-2B scope** activates only two bounded modifiers: Armor Wall damage reduction (`0.65 + PEN * 0.35`, capped at 1.0) and Regenerator healing (`1.5%` max HP per combat tick).
 - **Phase I-2C QA** verified that these modifiers are Stage 101+ only, neutral for Stage 1-100, bounded against zero/negative/over-max HP outcomes, and do not add save schema.
-- **Evasion / enrage / crit-gate mechanics** remain future work and should be applied as modifiers inside `applyCombatTick` without changing the core loop structure.
+- **Phase I-2D scope** activates bounded deterministic pressure for Phantom (`ACC`), Berserker (`SPD`), and Shadow Wraith (`CRT`) without random miss, timer, or crit-roll state.
+- **Authority Gate mechanics** remain future boss work for Phase I-3.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
@@ -185,6 +186,6 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-2A**: Monster Archetype Foundation — COMPLETE
 - **Phase I-2B**: Armor Wall / Regenerator Combat Modifier Foundation — COMPLETE
 - **Phase I-2C**: Armor Wall / Regenerator Balance QA — COMPLETE
-- **Phase I-2D**: Remaining Archetype Combat Modifiers — NOT STARTED
+- **Phase I-2D**: Phantom / Berserker / Shadow Wraith Combat Modifier Foundation — COMPLETE
 - **Phase I-3**: Boss Milestone Implementation — NOT STARTED
 - **Phase I-4**: Balance QA — NOT STARTED

@@ -70,7 +70,7 @@
     - [x] Phase I-2A: Monster Archetype Foundation (deterministic Stage 101+ archetype labels, UI panel, no combat modifiers) <!-- id: 39 -->
     - [x] Phase I-2B: Monster Archetype Combat Modifier Foundation (Armor Wall PEN scaling, Regenerator bounded healing) <!-- id: 42 -->
     - [x] Phase I-2C: Armor Wall / Regenerator Modifier Balance QA (bounds verified, Stage 1-100 neutral, no schema changes) <!-- id: 43 -->
-    - [ ] Phase I-2D: Remaining Archetype Combat Modifiers (Phantom, Berserker, Shadow Wraith) <!-- id: 44 -->
+    - [x] Phase I-2D: Remaining Archetype Combat Modifiers (Phantom ACC, Berserker SPD, Shadow Wraith CRT pressure) <!-- id: 44 -->
     - [ ] Phase I-3: Boss Milestone Implementation <!-- id: 40 -->
     - [ ] Phase I-4: Balance QA <!-- id: 41 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

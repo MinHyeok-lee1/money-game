@@ -56,6 +56,7 @@
 - [x] **Infinite Mode Archetype Foundation**: Stage 101+ deterministic monster archetype labels and RPG UI panel implemented (Phase I-2A, display-only).
 - [x] **Infinite Mode Bounded Modifiers**: Armor Wall PEN scaling and Regenerator healing active for Stage 101+ only (Phase I-2B).
 - [x] **Infinite Mode Modifier QA**: Armor Wall / Regenerator bounds verified; Stage 1-100 remains neutral (Phase I-2C).
+- [x] **Infinite Mode Remaining Modifiers**: Phantom ACC, Berserker SPD, and Shadow Wraith CRT pressure active with bounded deterministic formulas (Phase I-2D).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
