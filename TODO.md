@@ -53,6 +53,7 @@
 - [x] **RPG run structure**: `rpg.run.activeUnits` ticket-gated volatile run units; legacy `rpg.characters` preserved for save compatibility.
 - [x] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power (Phase G-1 foundation, G-2 Balance QA, G-3 Specialization active, G-4A Sync Design complete).
 - [x] **Infinite Mode Scaling**: Monster HP growth and stage rewards beyond Stage 100 (Phase F-1 foundation implemented).
+- [x] **Infinite Mode Archetype Foundation**: Stage 101+ deterministic monster archetype labels and RPG UI panel implemented (Phase I-2A, display-only).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).

@@ -108,6 +108,18 @@
       const REBIRTH_REQUIREMENT = 2000000000; // ??嶺뚮슣堉붹룇 ???뚯???: 20??
       const NORMAL_ENDING_STAGE = 100;
 
+      const INFINITE_MONSTER_ARCHETYPES = {
+        standard:      { id: "standard",      nameKey: "archetype_standard",      descKey: "archetypeDesc_standard",      counterKey: "counter_atk",    color: "text-green-400" },
+        armorWall:     { id: "armorWall",     nameKey: "archetype_armorWall",     descKey: "archetypeDesc_armorWall",     counterKey: "counter_pen",    color: "text-blue-400" },
+        phantom:       { id: "phantom",       nameKey: "archetype_phantom",       descKey: "archetypeDesc_phantom",       counterKey: "counter_acc",    color: "text-purple-400" },
+        regenerator:   { id: "regenerator",   nameKey: "archetype_regenerator",   descKey: "archetypeDesc_regenerator",   counterKey: "counter_spd",    color: "text-teal-400" },
+        berserker:     { id: "berserker",     nameKey: "archetype_berserker",     descKey: "archetypeDesc_berserker",     counterKey: "counter_spdAtk", color: "text-orange-400" },
+        shadowWraith:  { id: "shadowWraith",  nameKey: "archetype_shadowWraith",  descKey: "archetypeDesc_shadowWraith",  counterKey: "counter_crt",    color: "text-gray-400" },
+        authorityGate: { id: "authorityGate", nameKey: "archetype_authorityGate", descKey: "archetypeDesc_authorityGate", counterKey: "counter_all",    color: "text-yellow-400" },
+      };
+
+      const INFINITE_BOSS_STAGES = [150, 200, 300, 500, 1000];
+
       const TRANSLATIONS = {
         ko: {
           title: "아이들 랜드로드",
@@ -143,6 +155,30 @@
           gameOverOdds: "정산 확률",
           restartButton: "처음부터 다시 시작",
           infiniteModeDesc: "무한 모드: 스테이지당 몬스터 체력이 10% 추가로 강력해집니다.",
+          archetype_standard: "일반 몬스터",
+          archetype_armorWall: "강철 방벽",
+          archetype_phantom: "환영",
+          archetype_regenerator: "재생자",
+          archetype_berserker: "광전사",
+          archetype_shadowWraith: "그림자 망령",
+          archetype_authorityGate: "권위의 문",
+          archetypeDesc_standard: "특수 능력 없음. 기본 HP 압박.",
+          archetypeDesc_armorWall: "높은 피해 감소. 관통(PEN)으로 돌파하세요.",
+          archetypeDesc_phantom: "높은 회피율. 명중(ACC)이 필요합니다.",
+          archetypeDesc_regenerator: "매 틱마다 체력 재생. 속도(SPD)로 압도하세요.",
+          archetypeDesc_berserker: "시간이 지나면 강해집니다. 빠른 처치가 필요합니다.",
+          archetypeDesc_shadowWraith: "불안정한 피해 흡수. 치명타(CRT)로 돌파하세요.",
+          archetypeDesc_authorityGate: "보스: 모든 스탯을 시험합니다.",
+          archetypeCounter: "카운터",
+          archetypeBoss: "보스 스테이지",
+          infiniteArchetype: "무한 모드 적 유형",
+          counter_atk: "ATK",
+          counter_pen: "PEN",
+          counter_acc: "ACC",
+          counter_spd: "SPD",
+          counter_spdAtk: "SPD + ATK",
+          counter_crt: "CRT",
+          counter_all: "ALL",
           externalCapitalLeverage: "외부 자본 레버리지",
           leverageLocked: "도로시의 제안을 확인해야 해금됩니다.",
           leverageAtk: "공격력 보너스 (자산)",
@@ -192,6 +228,30 @@
           gameOverOdds: "Success Odds",
           restartButton: "Restart From Beginning",
           infiniteModeDesc: "Infinite Mode: Monster HP scales 10% harsher per stage.",
+          archetype_standard: "Standard",
+          archetype_armorWall: "Armor Wall",
+          archetype_phantom: "Phantom",
+          archetype_regenerator: "Regenerator",
+          archetype_berserker: "Berserker",
+          archetype_shadowWraith: "Shadow Wraith",
+          archetype_authorityGate: "Authority Gate",
+          archetypeDesc_standard: "No special ability. Pure HP pressure.",
+          archetypeDesc_armorWall: "High damage reduction. Counter with PEN.",
+          archetypeDesc_phantom: "High evasion rate. Counter with ACC.",
+          archetypeDesc_regenerator: "Regenerates HP each tick. Counter with SPD.",
+          archetypeDesc_berserker: "Grows stronger over time. Kill fast.",
+          archetypeDesc_shadowWraith: "Volatile damage absorption. Counter with CRT.",
+          archetypeDesc_authorityGate: "Boss: Tests all stats.",
+          archetypeCounter: "Counter",
+          archetypeBoss: "Boss Stage",
+          infiniteArchetype: "Infinite Archetype",
+          counter_atk: "ATK",
+          counter_pen: "PEN",
+          counter_acc: "ACC",
+          counter_spd: "SPD",
+          counter_spdAtk: "SPD + ATK",
+          counter_crt: "CRT",
+          counter_all: "ALL",
           externalCapitalLeverage: "External Capital Leverage",
           leverageLocked: "Requires Dorothy Proposal acknowledgement.",
           leverageAtk: "ATK Bonus (Wealth)",
@@ -2338,6 +2398,27 @@
 
       function isInfiniteModeStage(stage) {
         return toFiniteNumber(stage, 0) > NORMAL_ENDING_STAGE;
+      }
+
+      function getInfiniteMonsterArchetype(stage) {
+        const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        if (safeStage <= NORMAL_ENDING_STAGE) {
+          return INFINITE_MONSTER_ARCHETYPES.standard;
+        }
+
+        if (INFINITE_BOSS_STAGES.includes(safeStage)) {
+          return INFINITE_MONSTER_ARCHETYPES.authorityGate;
+        }
+
+        const rotation = [
+          INFINITE_MONSTER_ARCHETYPES.armorWall,
+          INFINITE_MONSTER_ARCHETYPES.phantom,
+          INFINITE_MONSTER_ARCHETYPES.regenerator,
+          INFINITE_MONSTER_ARCHETYPES.berserker,
+          INFINITE_MONSTER_ARCHETYPES.shadowWraith,
+          INFINITE_MONSTER_ARCHETYPES.standard,
+        ];
+        return rotation[(safeStage - NORMAL_ENDING_STAGE - 1) % rotation.length];
       }
 
       function getMonsterMaxHp(stage) {
@@ -6645,6 +6726,29 @@
                         </span>
                       </div>
                     )}
+
+                    {isInfiniteModeStage(gameState.rpg?.currentStage) && (() => {
+                      const archetype = getInfiniteMonsterArchetype(gameState.rpg?.currentStage);
+                      return (
+                        <div className="mt-2 bg-black/35 border border-emerald-500/20 rounded-md p-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="text-[9px] font-black text-emerald-300 uppercase tracking-widest">
+                              {t.infiniteArchetype}
+                            </div>
+                            <div className={`text-[10px] font-black uppercase ${archetype.color}`}>
+                              {t[archetype.nameKey]}
+                            </div>
+                          </div>
+                          <div className="mt-1 text-[10px] font-bold text-green-100/80 leading-relaxed">
+                            {t[archetype.descKey]}
+                          </div>
+                          <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase">
+                            <span className="text-green-300/50">{t.archetypeCounter}</span>
+                            <span className="text-white">{t[archetype.counterKey]}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                       <div className="bg-black/20 rounded-md p-2">

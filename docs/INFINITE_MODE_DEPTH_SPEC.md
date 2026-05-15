@@ -168,8 +168,9 @@ Each economic module should create a distinct advantage against specific archety
 
 This spec defines *design intent* only. Implementation considerations:
 
-- **Monster archetype data** can be defined as a constant lookup table (similar to `INVESTMENT_ASSETS` or `GACHA_ITEMS`).
-- **Spawn logic** can be a pure function of stage number — no new persistent state needed.
+- **Monster archetype data** is defined as `INFINITE_MONSTER_ARCHETYPES`, a static lookup table with translation keys for name, description, and counter stat.
+- **Spawn logic** is handled by `getInfiniteMonsterArchetype(stage)`, a pure function of stage number; no new persistent state is required.
+- **Phase I-2A scope** is display/foundation only: Stage 101+ shows deterministic archetype information in the RPG UI, while combat modifiers remain unimplemented.
 - **Damage reduction / evasion / regen** can be applied as modifiers inside `applyCombatTick` without changing the core loop structure.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
@@ -179,6 +180,7 @@ This spec defines *design intent* only. Implementation considerations:
 ## Status
 
 - **Phase I-1**: Design Spec — COMPLETE
-- **Phase I-2**: Monster Archetype Implementation — NOT STARTED
+- **Phase I-2A**: Monster Archetype Foundation — COMPLETE
+- **Phase I-2B**: Monster Archetype Combat Modifiers — NOT STARTED
 - **Phase I-3**: Boss Milestone Implementation — NOT STARTED
 - **Phase I-4**: Balance QA — NOT STARTED
