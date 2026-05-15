@@ -27,7 +27,7 @@
 - **Player Access**: Unlocks when `gameState.rpg.normalEndingSeen === true` (Stage 100 / Dorothy boundary).
 - **Resolution Model**: Deterministic placeholder currently active. Probabilistic Hero's Fate model foundation (Phase A) implemented.
     - [x] Phase A: Pure success chance helper foundation <!-- id: 12 -->
-    - [ ] Phase B: Wire dry-run preview to probabilistic helper
+    - [x] Phase B: Wire dry-run preview to probabilistic helper <!-- id: 13 -->
     - [ ] Phase C: Wire real settlement to probabilistic helper
 - **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase.
 - **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the future probabilistic model.

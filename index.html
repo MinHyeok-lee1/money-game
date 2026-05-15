@@ -328,34 +328,45 @@
         };
       }
 
-      function getDefenseContractSimulatedOutcome(betSlip, assetList, highestStage, squadDps) {
+      function getDefenseContractSimulatedOutcome(gameState, betSlip, assetList, highestStage, squadDps) {
         const contractId = betSlip?.selectedContractId;
         if (!contractId) return null;
         const asset = (assetList || []).find((a) => a.id === contractId);
         if (!asset) return null;
         const stage = toFiniteNumber(highestStage, 0);
         const dps = toFiniteNumber(squadDps, 0);
-        const odds = getDefenseContractOdds(asset, stage);
+        
+        const prob = calculateDefenseContractSuccessChance(gameState, asset, stage, dps);
+        const successChance = prob.successChance; // Percent scale (5-95)
         const payout = getDefenseContractProjectedPayout(asset, stage, dps);
         const stake = Math.max(0, toFiniteNumber(betSlip?.stake, 0));
-        const vol = toFiniteNumber(asset.volatility, 0.05);
-        const outcomeLabel = odds >= 60 ? "Favorable" : odds >= 45 ? "Neutral" : "Unfavorable";
-        const successChance = odds;
+        
+        const outcomeLabel = successChance >= 60 ? "Favorable" : successChance >= 40 ? "Neutral" : "Unfavorable";
         const projectedGain = toFiniteNumber(stake * (payout - 1), 0);
         const projectedLoss = stake;
+        
         let confidenceLevel;
-        if (vol <= 0.03 && stage >= 30) confidenceLevel = "High";
-        else if (vol <= 0.07 || stage >= 15) confidenceLevel = "Medium";
+        if (successChance >= 80) confidenceLevel = "High";
+        else if (successChance >= 40) confidenceLevel = "Medium";
         else confidenceLevel = "Low";
-        const stageSupportLabel = stage >= 50 ? "strongly supports" : stage >= 20 ? "partially supports" : "weakly supports";
-        const dpsSignal = dps > 0 ? "signal active" : "signal inactive";
+        
         const contractDisplayName = DEFENSE_CONTRACT_FLAVOR[asset.id]?.displayName || asset.name;
-        const explanation = `${contractDisplayName} shows a ${successChance}% defense success rate. Stage ${stage} progress ${stageSupportLabel} this contract. Squad DPS ${dpsSignal}.`;
-        return { selectedContractId: contractId, outcomeLabel, successChance, projectedGain, projectedLoss, confidenceLevel, explanation };
+        // Detailed explanation from the probabilistic helper
+        const explanation = `${contractDisplayName} shows a ${successChance}% success probability. ${prob.explanation}`;
+        
+        return { 
+          selectedContractId: contractId, 
+          outcomeLabel, 
+          successChance, 
+          projectedGain, 
+          projectedLoss, 
+          confidenceLevel, 
+          explanation 
+        };
       }
 
       // Pure helper ??builds a preview-only history entry from current bet state
-      function createDefenseContractPreviewHistoryEntry(betSlip, assetList, highestStage, squadDps) {
+      function createDefenseContractPreviewHistoryEntry(gameState, betSlip, assetList, highestStage, squadDps) {
         const contractId = betSlip?.selectedContractId;
         if (!contractId) return null;
         const asset = (assetList || []).find((a) => a.id === contractId);
@@ -364,10 +375,7 @@
         if (stake <= 0) return null;
         const stage = toFiniteNumber(highestStage, 0);
         const dps = toFiniteNumber(squadDps, 0);
-        const odds = getDefenseContractOdds(asset, stage);
-        const projectedPayout = getDefenseContractProjectedPayout(asset, stage, dps);
-        const outcome = getDefenseContractSimulatedOutcome(betSlip, assetList, stage, dps);
-        if (!outcome) return null;
+        const outcome = getDefenseContractSimulatedOutcome(gameState, betSlip, assetList, stage, dps);
         return {
           id: `prev-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
           contractId,
@@ -441,28 +449,31 @@
       function createDefenseContractDryRunResult(gameState, assetList, highestStage, squadDps) {
         const validation = validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps);
         if (!validation.canSettle) return null;
-        const { selectedContractId: contractId, stake, odds, projectedPayout } = validation;
+        const { selectedContractId: contractId, stake, projectedPayout } = validation;
         const asset = (assetList || []).find((a) => a.id === contractId);
         if (!asset) return null;
-        const successChance = toFiniteNumber(odds, 0);
         const stage = toFiniteNumber(highestStage, 0);
         const dps = toFiniteNumber(squadDps, 0);
-        // Deterministic win signal using contract odds + stage progress + DPS signal
-        const stageSignal = Math.min(10, Math.round((stage / NORMAL_ENDING_STAGE) * 10));
-        const dpsSignal = dps > 0 ? 3 : 0;
-        const winScore = successChance + stageSignal + dpsSignal;
-        const wouldWin = winScore >= 60;
+        
+        // Use the new probabilistic helper for deterministic dry-run decision
+        const prob = calculateDefenseContractSuccessChance(gameState, asset, stage, dps);
+        const successChance = prob.successChance; 
+        
+        // Dry-run remains deterministic (Threshold >= 60)
+        const wouldWin = successChance >= 60;
+        
         const safePayout = Math.max(1, toFiniteNumber(projectedPayout, 1));
         const safeStake = Math.max(0, toFiniteNumber(stake, 0));
         const netPreview = wouldWin
           ? toFiniteNumber(safeStake * (safePayout - 1), 0)
           : -safeStake;
+          
         return {
           id: `dryrun-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
           contractId,
           contractName: DEFENSE_CONTRACT_FLAVOR[contractId]?.displayName || asset.name,
           stake: safeStake,
-          odds,
+          odds: successChance, // Display the calculated success chance
           projectedPayout: safePayout,
           successChance,
           wouldWin,
@@ -3798,6 +3809,7 @@
           totalTeamDps,
         );
         const simulatedOutcome = getDefenseContractSimulatedOutcome(
+          gameState,
           gameState.investment.betSlip,
           investmentAssets,
           gameState.rpg?.highestStage || 0,
@@ -4340,6 +4352,7 @@
         const saveDefenseContractPreviewToHistory = () => {
           setGameState((prev) => {
             const entry = createDefenseContractPreviewHistoryEntry(
+              prev,
               prev.investment.betSlip,
               investmentAssets,
               prev.rpg?.highestStage || 0,
