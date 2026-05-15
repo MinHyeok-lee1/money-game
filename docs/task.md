@@ -77,5 +77,6 @@
     - [x] Phase I-3C: Stage 150 Iron Sentinel Boss Mechanic Foundation (PEN-based bounded damage check) <!-- id: 47 -->
     - [x] Phase I-3D: Iron Sentinel Boss Mechanic QA (Stage 150-only, bounded, no later boss mechanics) <!-- id: 48 -->
     - [x] Phase I-4A: Reaper Direction Alignment (unified recurring Reaper model; Stage 200/300/500/1000 mechanics deferred) <!-- id: 49 -->
-    - [ ] Phase I-4B: Reaper Infinite Mode Model Design Spec <!-- id: 50 -->
+    - [x] Phase I-4B: Reaper Infinite Mode Model Design Spec (fantasy, naming, masks, scaling, UI, integration plan) <!-- id: 50 -->
+    - [ ] Phase I-4C: Reaper Model Data Foundation <!-- id: 51 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

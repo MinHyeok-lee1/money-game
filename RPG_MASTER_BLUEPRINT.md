@@ -40,6 +40,8 @@ The Reaper should:
 
 The existing Stage 150 Iron Sentinel remains a completed prototype boss check. Stage 200 Phantom General, Stage 300 Eternal Hydra, Stage 500 Berserker King, and Stage 1000 The Authority are deferred as separate mechanics and may become Reaper forms, masks, titles, narrative overlays, or milestone warnings.
 
+Phase I-4B defines the Reaper model as a recurring Stage 101+ death entity with deterministic forms, stage-based intensity, archetype pressure profiles, compact UI warnings, and continued Hero's Fate / External Capital relevance. The next implementation phase should add Reaper model data first, not combat modifiers.
+
 ---
 
 ## 💰 Early RPG Economy: Dividends
@@ -105,4 +107,5 @@ Special 5-star+ characters that have "Authority Skills":
 - [ ] **Dividends Economy Balance Sheet**: Tuning the income/expense ratio for the first RPG reward.
 - [x] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system. (Phases A, B, C, D-1 complete). (See [docs/HEROS_FATE_BETTING_SPEC.md](docs/HEROS_FATE_BETTING_SPEC.md))
 - [x] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100 (Phase F-1 foundation implemented).
-- [ ] **Reaper Infinite Mode Model Spec**: Unified recurring Reaper enemy direction for Stage 101+ (Phase I-4B next).
+- [x] **Reaper Infinite Mode Model Spec**: Unified recurring Reaper enemy direction for Stage 101+ (Phase I-4B complete).
+- [ ] **Reaper Model Data Foundation**: Static Reaper profile/form data and deterministic helper behavior with no combat changes (Phase I-4C next).

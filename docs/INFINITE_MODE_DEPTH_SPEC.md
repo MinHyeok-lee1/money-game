@@ -60,6 +60,142 @@ The next design phase should define the unified Reaper model before any more mil
 
 ---
 
+## Phase I-4B Reaper Infinite Mode Model Design Spec
+
+### Reaper Core Fantasy
+
+The Reaper is a single recurring death-like entity that turns Infinite Mode into an endless confrontation. It does not need to be a unique boss encounter every time it appears. It can enter the same loop as regular Infinite Mode monsters, but the player should immediately read it as the final threat hiding inside the normal grind.
+
+Core fantasy targets:
+
+- A single recurring entity, not a roster of unrelated bosses.
+- Appears repeatedly like a normal monster in Stage 101+.
+- Feels like the final boss of Infinite Mode even when it is not using separate boss state.
+- Scales brutally as stages increase.
+- Represents Infinite Mode itself trying to end the player's run.
+- Feels oppressive, inevitable, and increasingly unfair, while remaining mathematically playable.
+
+### Naming Direction
+
+No final name is locked in Phase I-4B. The table below records tone and likely use.
+
+| Candidate | Language | Tone | Best Use Case | Fit |
+| :--- | :--- | :--- | :--- | :--- |
+| **어둠의 사신** | Korean | Dark, mythic, readable | Main enemy name or form title | Strong final-name candidate |
+| **죽음의 사신** | Korean | Direct death fantasy | UI label, warning text, tutorial copy | Clear but less distinctive |
+| **종말의 사신** | Korean | Apocalyptic, endgame-heavy | Late-stage title or Stage 1000 overlay | Best for peak threat |
+| **무한의 사신** | Korean | Tied directly to Infinite Mode | System label or recurring enemy name | Strong UI/system fit |
+| **Dark Reaper** | English | Clean, ominous | Main enemy name | Strong final-name candidate |
+| **Death Reaper** | English | Blunt, arcade-like | Early concept label | Clear but slightly generic |
+| **Endbringer Reaper** | English | Final-boss, dramatic | High-intensity form title | Strong milestone/title fit |
+| **Infinite Reaper** | English | Systemic, mode-specific | UI label, model name | Strong implementation/spec fit |
+| **The Reaper** | English | Minimal, iconic | Short UI label or final reveal | Strong if supported by flavor |
+
+### Reaper Form / Mask Model
+
+The deferred milestone bosses become Reaper manifestations rather than separate unrelated enemies.
+
+| Stage | Deferred Name | Reaper Interpretation | Pressure Profile | Design Role |
+| :--- | :--- | :--- | :--- | :--- |
+| **150** | Iron Sentinel | The Reaper wears an Iron Sentinel mask | **PEN** | Implemented prototype boss-grade penetration check |
+| **200** | Phantom General | The Reaper becomes a Phantom General aspect | **ACC** | Accuracy and consistency pressure |
+| **300** | Eternal Hydra | The Reaper takes an Eternal Hydra form | **DPS / SPD** | Throughput and regeneration pressure |
+| **500** | Berserker King | The Reaper wears a Berserker King mask | **SPD / CRT** | Tempo and burst pressure |
+| **1000** | The Authority | The Reaper reveals an Authority aspect | **All stats** | Full economic mastery warning |
+
+These names can function as masks, titles, aspects, milestone warnings, or narrative overlays. They should not force a separate bespoke boss implementation per milestone unless the Reaper model later proves too flat.
+
+### Gameplay Model
+
+Future implementation should fit inside the current Infinite Mode structure:
+
+- Reaper mode activates only after Stage 101.
+- The enemy can be selected through existing archetype logic or a small Reaper-specific wrapper around it.
+- Boss milestone stages become intensification points, not mandatory separate boss objects.
+- Reaper forms can inherit or combine existing archetype pressures: **PEN**, **ACC**, **SPD**, **CRT**, and **ATK**.
+- Stage 150 Iron Sentinel remains the first prototype form and should not be undone.
+- Regular archetype enemies can still exist; the Reaper should feel like the recurring apex inside that ecosystem.
+- No new persistent state is required for the first implementation if form, intensity, and title are deterministic from stage.
+
+Suggested future helper shape:
+
+```js
+getInfiniteReaperProfile(stage, archetype, bossMilestone)
+```
+
+This should be design guidance only for now. Phase I-4B does not implement it.
+
+### Scaling Model
+
+The global Infinite Mode HP formula should remain intact. Reaper pressure should layer on top through deterministic profiles rather than replacing the base scaling curve.
+
+Suggested future scaling dimensions:
+
+| Dimension | Purpose | Example Direction |
+| :--- | :--- | :--- |
+| **Reaper intensity tier** | Broad stage-based threat bracket | Tier 1 at 101+, Tier 2 at 200+, Tier 3 at 300+, etc. |
+| **Pressure profile** | Which stat pressure is active | PEN, ACC, SPD, CRT, ATK, or mixed |
+| **Stat check profile** | How strongly a counter stat recovers damage/output | Bounded multiplier recovery, never zeroing progress |
+| **Milestone form** | Presentation and flavor at key stages | Iron Sentinel, Phantom General, Eternal Hydra, etc. |
+| **UI threat level** | Player-readable danger summary | "Rising", "Severe", "Run-ending", "Absurd" |
+
+Rules:
+
+- Do not reduce global monster HP scaling.
+- Do not create hard locks.
+- Do not require new save schema for deterministic form selection.
+- Do not make one stat solve every Reaper form.
+- Reaper growth should become absurd over time, but still respond to patient economy growth and smart risk-taking.
+
+### UI / UX Direction
+
+The player should understand that the Reaper is both part of the normal Infinite Mode loop and a special existential threat.
+
+Future UI can show:
+
+- Reaper identity label, such as "The Reaper" or "무한의 사신".
+- Current form or mask, such as "Iron Sentinel Mask".
+- Recommended counter stat.
+- Threat warning.
+- Milestone warning when approaching 150/200/300/500/1000.
+- Flavor such as "The Reaper is adapting."
+
+The UI should stay compact and fit near the existing Infinite Mode archetype / boss milestone panel. It should not become a separate boss screen unless a later phase intentionally creates a larger encounter presentation.
+
+### Hero's Fate Integration
+
+Hero's Fate remains a dangerous acceleration tool:
+
+- Reaper pressure can make Defense Contracts more tempting.
+- Contracts should help players break through slow Reaper walls faster.
+- Hero's Fate should not be mandatory for every Reaper form.
+- Game Over / Restart on failed real settlement remains unchanged.
+- Failure should remain catastrophic; Reaper pressure should increase temptation, not remove consequence.
+
+Design intent: the Reaper makes the player ask, "Do I grind safely, or gamble the run to break this wall?"
+
+### External Capital Integration
+
+External Capital remains the main long-term answer to Reaper pressure:
+
+- Landlord property tiers provide stat counters and specialization routes.
+- Community property support can help ACC-oriented Reaper forms.
+- Enterprise property support can help SPD / throughput forms.
+- Authority property and rebirth pressure support PEN / authority forms.
+- Investment portfolio specialization supports speed, crit, and faction alignment.
+- Broad wealth helps through leverage, but should never fully trivialize the Reaper.
+
+The Reaper should reward diversified economic mastery rather than raw wealth alone.
+
+### Future Implementation Phases
+
+- **Phase I-4C: Reaper Model Data Foundation** — define static Reaper profile/form data and deterministic helper outputs without changing combat behavior.
+- **Phase I-4D: Reaper UI Integration** — display Reaper identity, current mask/form, counter stat, and threat level in the RPG UI.
+- **Phase I-4E: Reaper Form Modifier Integration** — fold existing archetype pressures into bounded Reaper modifiers, starting conservatively and preserving Stage 1-100 behavior.
+- **Phase I-4F: Reaper Balance QA** — verify scaling, caps, Hero's Fate pressure, External Capital relevance, and no hard-lock behavior.
+
+---
+
 ## Monster Archetypes (Stage 101+)
 
 Starting from Stage 101, regular waves mix in specialized monsters alongside standard HP-scaled enemies. Each archetype is hard-countered by a specific stat, creating build pressure across multiple upgrade paths.
@@ -232,18 +368,19 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-3C scope** activates only the Stage 150 Iron Sentinel boss check with bounded PEN-based damage recovery (`0.55 + PEN * 0.45`, capped at 1.0). Later boss milestones remain placeholder-only.
 - **Phase I-3D QA** verified the Iron Sentinel modifier is Stage 150-only, stronger than Armor Wall without becoming a hard lock, and does not activate mechanics for Stage 200/300/500/1000.
 - **Phase I-4A scope** redirects future Infinite Mode design toward a recurring Reaper enemy model. Stage 200/300/500/1000 individual boss mechanics are deferred.
+- **Phase I-4B scope** defines the unified Reaper model fantasy, naming direction, form/mask model, gameplay model, scaling dimensions, UI direction, and future implementation phases.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
-## Next Design Phase: I-4B Reaper Infinite Mode Model Design Spec
+## Next Implementation Phase: I-4C Reaper Model Data Foundation
 
-Phase I-4B should define:
+Phase I-4C should define:
 
-- Reaper scaling model
-- Reaper form/title progression
-- how archetype modifiers fold into the Reaper
-- how milestone stages change presentation without requiring separate boss state
-- how Hero's Fate and External Capital help but do not remove danger
+- static Reaper profile/form data
+- deterministic Reaper helper behavior
+- Stage 101+ activation rules
+- milestone form/title mapping
+- no combat behavior changes yet
 
 ---
 
@@ -260,4 +397,5 @@ Phase I-4B should define:
 - **Phase I-3C**: Stage 150 Iron Sentinel Boss Mechanic Foundation — COMPLETE
 - **Phase I-3D**: Iron Sentinel Boss Mechanic QA — COMPLETE
 - **Phase I-4A**: Reaper Direction Alignment — COMPLETE
-- **Phase I-4B**: Reaper Infinite Mode Model Design Spec — NEXT
+- **Phase I-4B**: Reaper Infinite Mode Model Design Spec — COMPLETE
+- **Phase I-4C**: Reaper Model Data Foundation — NEXT
