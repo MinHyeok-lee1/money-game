@@ -38,6 +38,7 @@
     - [x] Phase E-1: Probability formula audit and PEN signal fix <!-- id: 20 -->
     - [x] Phase E-2: Payout vs. Risk audit and multiplier tuning <!-- id: 21 -->
     - [x] Phase E-3: Hero's Fate Game Over / Restart Foundation <!-- id: 22 -->
+    - [x] Phase E-4: Hero's Fate Final Settlement Confirmation UX <!-- id: 23 -->
 - **Design Alignment**: 
     - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
     - Tactical Edge is now active in real settlement odds. 
