@@ -21,17 +21,18 @@ The settlement model is **probabilistic**, using a weighted success chance calcu
     - `highestStage`: Maximum stage reached.
     - `rpg.upgrades`: ATK, SPD, PEN levels.
     - `enhancement.inventory`: Equippable gear quality.
-- **Risk Modifiers**: Faction synergies or Character rarity bonuses (Future).
+- **Tactical Signals**: Faction synergies and Character rarity bonuses (Phase D-1).
 
 ### 2. Probability Bounds
 - **Minimum Win Chance**: 5%
 - **Maximum Win Chance**: 95%
 - **Success Formula (Policy C)**: 
-    `WinProb = clamp(BaseOdds + StageSignal + CombatSignals, 0.05, 0.95)`
+    `WinProb = clamp(BaseOdds + StageSignal + CombatSignals + TacticalSignal, 0.05, 0.95)`
     *   **BaseOdds**: Pure investment risk (30% to 80%).
     *   **StageSignal**: RPG progress bonus (up to +15%).
     *   **CombatSignals**: DPS (+5%) and PEN (+3% per level, max +15%).
-    *   **Headroom**: Total max bonus (+35%) allows tactical signals to remain impactful.
+    *   **TacticalSignal**: Composition bonuses from Factions and Rarity (up to +12% capped).
+    *   **Headroom**: Total max bonus (+47%) ensures even high-risk contracts remain challenging but solvable through tactics.
 
 ### 3. Settlement Outputs
 - **Win Outcome**:
@@ -42,6 +43,31 @@ The settlement model is **probabilistic**, using a weighted success chance calcu
     - `Investment.capital` decreases by `Stake`.
     - **Consequence**: Temporary "Capital Freeze" (Optional) or loss of RPG run tickets.
     - Entry added to `contractSettlementHistory` with `status: "lost"`.
+
+---
+
+## 🎨 Phase D-1: Tactical Signal Integration (Design)
+
+To deepen the RPG-Investment linkage, character composition now provides a "Tactical Edge" to specific contracts.
+
+### 1. Faction Mapping
+Each Defense Contract is categorized by its underlying asset type, matching a character faction:
+- **Realty Faction**: Stability-oriented (Real Estate, Bonds).
+- **Ticker Faction**: Market-standard (Index, ETFs).
+- **Luxury Faction**: High-payout/Premium (Gold, Art).
+- **Shadow Faction**: High-risk/Unstable (Crypto, Dark-market).
+
+### 2. Signal Calculation
+- **Faction Bonus**: `+2%` per active character matching the contract faction (Max **+10%**).
+- **Rarity Bonus**: 
+    - 4-Star Character: `+1%`
+    - 5-Star Character: `+2%`
+    - (Max total rarity bonus: **+5%**).
+- **Tactical Cap**: The combined Faction and Rarity bonus is capped at **+12%**.
+
+### 3. Display Requirements
+- **Signal Analysis**: Must break out "Tactical Edge" as a separate line.
+- **Dynamic Updates**: Recalculate whenever the active squad or contract selection changes.
 
 ---
 
@@ -61,15 +87,21 @@ To maintain the horizontal economy integrity, the following rules must be strict
 - [x] **Phase A: Probability Helper**: Implement `calculateDefenseContractSuccessChance` using real RPG combat stats.
 - [x] **Phase B: Dry-Run Parity**: Update the Dry-Run simulation to use the new probabilistic helper for "Confidence" and "Outcome" previews.
 - [x] **Phase C: Real Settlement Integration**: Wire the `settleDefenseContract` handler to use `Math.random()` against the calculated success chance.
-- **Phase D: Balance QA**: Tune the Payout vs. Risk ratio to ensure high-tier contracts are rewarding but dangerous.
+- **Phase D-0**: Probability formula tuning (decouple base odds) [DONE].
+- **Phase D-1: Tactical Integration**:
+    - [x] D-1A: Design Spec (Faction/Rarity Mapping).
+    - [ ] D-1B: Implement `factionSignal` and `raritySignal` helpers.
+    - [ ] D-1C: Update Signal Analysis UI and Previews.
+    - [ ] D-1D: Final balance QA.
+- **Phase E: Balance & Polish**: Final tuning of Payout vs. Risk ratios.
 
 ---
 
 ## ❓ Open Questions
 - **Payout Destination**: Should the payout go to `investment.capital` (to keep the loop independent) or directly to Global `cash`?
 - **Failure Consequence**: Should a loss only take the stake, or should it trigger a temporary cooldown (Capital Freeze) on all trading?
-- **RPG Multiplier**: Should winning a contract also grant a temporary buff to RPG Dividends gain?
-- **Odds Basis**: Should the contract difficulty be fixed to a Stage Tier (e.g., "Stage 50 Difficulty"), or should it scale dynamically with the player's current stage?
+- **Character Eligibility**: Should faction bonuses count only "Active Run" units, or the entire owned roster? (Design decision: **Active Run only** to emphasize squad management).
+- **Rarity Scaling**: Should higher rarity characters provide larger bonuses, or should we keep the range tight to prevent rarity-gating?
 
 ---
 

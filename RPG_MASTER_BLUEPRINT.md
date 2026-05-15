@@ -41,7 +41,7 @@ The RPG progression is divided into two distinct chapters:
 ## 🎲 Hero's Fate Betting (Current Integration)
 A high-stakes linkage between the Investment module and the RPG module.
 - **Concept**: Players "bet" on their own squad's performance in upcoming difficult stages or boss battles.
-- **Mechanic**: Use Investment holdings as collateral to multiply RPG rewards or receive a massive Cash windfall upon success.
+- **Mechanic**: Use Investment holdings as collateral to multiply RPG rewards or receive a massive Cash windfall upon success. Character factions and rarities provide a "Tactical Signal" to matching contract types (Phase D-1).
 - **Risk**: Failure results in temporary "Capital Freeze" in the Investment module or loss of character stamina.
 
 ---
