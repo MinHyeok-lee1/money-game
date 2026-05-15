@@ -69,6 +69,24 @@ Connecting economic activity to the 4 RPG Factions.
 
 ---
 
+## 🛰️ Tactical Signal Synchronization (Phase G-4)
+
+### 1. Vision
+External specialization shouldn't just be a stat stick; it should enhance the player's ability to analyze and execute high-stakes Defense Contracts. "Synchronization" creates a bridge where your portfolio build directly clarifies the tactical signals of matching contracts.
+
+### 2. Alignment Signal (Proposed)
+| Metric | Condition | Effect |
+| :--- | :--- | :--- |
+| **Portfolio Alignment** | Contract Faction matches Portfolio Specialization | +1% per squad unit of that faction. |
+| **Authority Insight** | PEN Specialization Level > 2 | Flat +1% insight bonus (Max +2%). |
+
+### 3. Cap & Balance (G-4A)
+- **Shared Cap**: Specialization signals should share a unified cap with the Squad Tactical Signal.
+- **Proposed Cap Expansion**: Total Tactical Signal cap increases from **+12%** to **+15%**.
+- **Double-Counting Prevention**: Alignment signals use the *Specialization Tier* (built through cost basis/diversity), not the raw *Leverage Value* (built through total wealth). This ensures the "God of Wealth" and the "God of Tactics" are distinct builds.
+
+---
+
 ## ✅ Integration QA (Phase G-3C)
 - [x] **Gating**: Verified that all bonuses are 0 until `normalEndingSeen` is true.
 - [x] **Bounds**: Verified that property bonuses are finite (capped by max 10 properties) and investment bonuses use logarithmic scaling.

@@ -113,3 +113,21 @@ To maintain the horizontal economy integrity, the following rules must be strict
 - **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1, E-3, E-4).
 - **Active Code**: Probabilistic resolution live (Math.random) with Tactical Signals active.
 - **Unlock Status**: Gated by Dorothy Proposal (Stage 100).
+
+---
+
+## 🛰️ Phase G-4: Tactical Signal Synchronization (Design Note)
+
+### 1. Synchronization Model
+In the God Phase, your portfolio choice (Specialization) acts as a high-level "Intel Feed" for related Defense Contracts. 
+
+### 2. Alignment Signal
+If a contract (e.g. "Vanguard Defense Fund") matches your Portfolio Specialization (Blue-Chip/Realty), you gain an **Alignment Signal**.
+- **Formula**: `+1%` per matching faction unit in the squad.
+- **Cap**: The total Tactical Signal (Squad + Alignment) is increased to a maximum of **+15%**.
+
+### 3. UI Clarity
+The Signal Analysis UI will break out:
+- **Squad Edge**: Base Faction/Rarity matches.
+- **Build Alignment**: Portfolio-driven specialization bonus.
+- **Total Tactical Signal**: The capped final bonus applied to odds.
