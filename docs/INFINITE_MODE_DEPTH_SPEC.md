@@ -4,7 +4,59 @@
 
 Stage 101+ currently scales only via harsher HP growth (1.1^n per stage beyond 100). This creates a smooth difficulty wall but no strategic variety — players simply need "more DPS."
 
-Phase I introduces **monster archetypes** and **boss milestones** that force diverse stat investment, squad composition choices, and economic integration. The goal: Infinite Mode should feel like an evolving challenge, not a number treadmill.
+Phase I introduces **monster archetypes** and boss-grade pressure that force diverse stat investment, squad composition choices, and economic integration. The goal: Infinite Mode should feel like an evolving challenge, not a number treadmill.
+
+## Phase I-4A Direction Alignment: Unified Reaper Model
+
+Future Infinite Mode direction is shifting away from a sequence of separate handcrafted bosses at Stage 200/300/500/1000. The preferred fantasy is a single recurring final-monster archetype: a Reaper-like death entity that appears like a normal Infinite Mode monster but carries boss-grade threat.
+
+Working concept names:
+
+| Korean Concepts | English Concepts |
+| :--- | :--- |
+| 어둠의 사신 | Dark Reaper |
+| 죽음의 사신 | Death Reaper |
+| 종말의 사신 | Endbringer Reaper |
+| 사신 | The Reaper |
+
+The exact name is not locked. The important design is the role: Infinite Mode should feel like an endless confrontation with a death entity that becomes more absurdly dangerous as stages rise.
+
+### Current Completed Infinite Mode Work
+
+- **F-1**: Infinite Mode scaling foundation is active from Stage 101+.
+- **I-1**: Infinite Mode boss/monster pattern design spec was created.
+- **I-2A**: Stage 101+ archetype foundation and UI panel were implemented.
+- **I-2B / I-2D**: Armor Wall, Regenerator, Phantom, Berserker, and Shadow Wraith bounded modifiers were implemented.
+- **I-2C / I-2E**: Archetype modifier QA passes confirmed Stage 1-100 compatibility and bounded behavior.
+- **I-3A**: Boss milestone placeholder metadata and UI were implemented for Stage 150/200/300/500/1000.
+- **I-3B**: Boss milestone foundation QA passed.
+- **I-3C**: Stage 150 Iron Sentinel PEN-based boss check was implemented.
+- **I-3D**: Iron Sentinel QA passed; later boss milestones remain placeholder-only.
+
+### Reaper Design Principles
+
+- The Reaper appears repeatedly like a normal monster in Infinite Mode.
+- It carries boss-grade pressure despite using the regular combat loop.
+- It scales brutally with stage so Infinite Mode feels like it is trying to end the run.
+- It should not require separate handcrafted boss mechanics at every milestone.
+- It should preserve the infinite loop feel rather than becoming a finite boss ladder.
+- It should continue to pressure **PEN**, **ACC**, **SPD**, **CRT**, and **ATK** through the existing archetype counter language.
+- External Capital should help break pressure points but never erase danger.
+- Hero's Fate should remain attractive as an acceleration/risk tool, not a mandatory wall key.
+
+### Boss Milestone Reframing
+
+Stage 150 Iron Sentinel remains as an implemented first experiment and historical prototype for a boss-grade PEN check.
+
+Stage 200 Phantom General, Stage 300 Eternal Hydra, Stage 500 Berserker King, and Stage 1000 The Authority are now **deferred as individual mechanics**. They should not be treated as the immediate implementation path. They may later return as:
+
+- Reaper phases
+- Reaper titles
+- Reaper masks/forms
+- narrative overlays
+- milestone warnings
+
+The next design phase should define the unified Reaper model before any more milestone-specific boss mechanics are implemented.
 
 ---
 
@@ -53,9 +105,9 @@ ACC currently has no upgrade path — it is only boosted by Community-tier Real 
 
 ---
 
-## Boss Milestone Plan
+## Historical Boss Milestone Plan
 
-Boss encounters appear at fixed stage milestones. Each boss tests a specific combination of stats and economic progression, functioning as a "skill check" gate.
+This plan records the existing milestone placeholders and the Stage 150 prototype. It is no longer the immediate implementation roadmap for separate Stage 200/300/500/1000 boss mechanics. Future work should reinterpret these names as possible Reaper forms, masks, titles, narrative overlays, or milestone warnings.
 
 ### Stage 150 — The Iron Sentinel (Armor Wall Boss)
 
@@ -179,8 +231,19 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-3B QA** verified boss milestone metadata/helper/UI gating and confirmed Authority Gate remains combat-neutral.
 - **Phase I-3C scope** activates only the Stage 150 Iron Sentinel boss check with bounded PEN-based damage recovery (`0.55 + PEN * 0.45`, capped at 1.0). Later boss milestones remain placeholder-only.
 - **Phase I-3D QA** verified the Iron Sentinel modifier is Stage 150-only, stronger than Armor Wall without becoming a hard lock, and does not activate mechanics for Stage 200/300/500/1000.
+- **Phase I-4A scope** redirects future Infinite Mode design toward a recurring Reaper enemy model. Stage 200/300/500/1000 individual boss mechanics are deferred.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
+
+## Next Design Phase: I-4B Reaper Infinite Mode Model Design Spec
+
+Phase I-4B should define:
+
+- Reaper scaling model
+- Reaper form/title progression
+- how archetype modifiers fold into the Reaper
+- how milestone stages change presentation without requiring separate boss state
+- how Hero's Fate and External Capital help but do not remove danger
 
 ---
 
@@ -196,5 +259,5 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-3B**: Boss Milestone Foundation QA — COMPLETE
 - **Phase I-3C**: Stage 150 Iron Sentinel Boss Mechanic Foundation — COMPLETE
 - **Phase I-3D**: Iron Sentinel Boss Mechanic QA — COMPLETE
-- **Phase I-3E**: Remaining Boss Milestone Combat Mechanics — NOT STARTED
-- **Phase I-4**: Balance QA — NOT STARTED
+- **Phase I-4A**: Reaper Direction Alignment — COMPLETE
+- **Phase I-4B**: Reaper Infinite Mode Model Design Spec — NEXT

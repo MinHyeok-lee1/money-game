@@ -28,6 +28,18 @@ The RPG progression is divided into two distinct chapters:
 - **Unlock**: Requires the **Dorothy Proposal** event to be triggered and accepted.
 - **Focus**: The transition from tactical management to mathematical authority.
 
+### Infinite Mode Direction: The Reaper Track
+Future Infinite Mode should center on a recurring Reaper-like enemy model rather than a chain of unrelated named bosses. The working fantasy is **어둠의 사신 / 죽음의 사신 / 종말의 사신** — a Dark Reaper, Death Reaper, or Endbringer Reaper that appears like a normal monster but carries final-boss pressure.
+
+The Reaper should:
+- appear repeatedly inside the normal Infinite Mode loop,
+- scale brutally as stages increase,
+- feel like Infinite Mode itself is trying to end the run,
+- pressure ATK, PEN, ACC, SPD, and CRT through the existing archetype language,
+- keep External Capital and Hero's Fate relevant without making them mandatory or safe.
+
+The existing Stage 150 Iron Sentinel remains a completed prototype boss check. Stage 200 Phantom General, Stage 300 Eternal Hydra, Stage 500 Berserker King, and Stage 1000 The Authority are deferred as separate mechanics and may become Reaper forms, masks, titles, narrative overlays, or milestone warnings.
+
 ---
 
 ## 💰 Early RPG Economy: Dividends
@@ -93,3 +105,4 @@ Special 5-star+ characters that have "Authority Skills":
 - [ ] **Dividends Economy Balance Sheet**: Tuning the income/expense ratio for the first RPG reward.
 - [x] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system. (Phases A, B, C, D-1 complete). (See [docs/HEROS_FATE_BETTING_SPEC.md](docs/HEROS_FATE_BETTING_SPEC.md))
 - [x] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100 (Phase F-1 foundation implemented).
+- [ ] **Reaper Infinite Mode Model Spec**: Unified recurring Reaper enemy direction for Stage 101+ (Phase I-4B next).
