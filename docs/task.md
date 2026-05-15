@@ -75,6 +75,7 @@
     - [x] Phase I-3A: Boss Milestone Placeholder Foundation (static metadata + Stage 150/200/300/500/1000 UI panel, no combat mechanics) <!-- id: 40 -->
     - [x] Phase I-3B: Boss Milestone Foundation QA (metadata/helper/UI verified, Authority Gate neutral) <!-- id: 46 -->
     - [x] Phase I-3C: Stage 150 Iron Sentinel Boss Mechanic Foundation (PEN-based bounded damage check) <!-- id: 47 -->
-    - [ ] Phase I-3D: Remaining Boss Milestone Combat Mechanics <!-- id: 48 -->
+    - [x] Phase I-3D: Iron Sentinel Boss Mechanic QA (Stage 150-only, bounded, no later boss mechanics) <!-- id: 48 -->
+    - [ ] Phase I-3E: Remaining Boss Milestone Combat Mechanics <!-- id: 49 -->
     - [ ] Phase I-4: Balance QA <!-- id: 41 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

@@ -178,6 +178,7 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-3A scope** adds static boss milestone metadata and a compact RPG UI panel for Stage 150/200/300/500/1000. Authority Gate combat mechanics remain neutral.
 - **Phase I-3B QA** verified boss milestone metadata/helper/UI gating and confirmed Authority Gate remains combat-neutral.
 - **Phase I-3C scope** activates only the Stage 150 Iron Sentinel boss check with bounded PEN-based damage recovery (`0.55 + PEN * 0.45`, capped at 1.0). Later boss milestones remain placeholder-only.
+- **Phase I-3D QA** verified the Iron Sentinel modifier is Stage 150-only, stronger than Armor Wall without becoming a hard lock, and does not activate mechanics for Stage 200/300/500/1000.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
@@ -194,5 +195,6 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-3A**: Boss Milestone Placeholder Foundation — COMPLETE
 - **Phase I-3B**: Boss Milestone Foundation QA — COMPLETE
 - **Phase I-3C**: Stage 150 Iron Sentinel Boss Mechanic Foundation — COMPLETE
-- **Phase I-3D**: Remaining Boss Milestone Combat Mechanics — NOT STARTED
+- **Phase I-3D**: Iron Sentinel Boss Mechanic QA — COMPLETE
+- **Phase I-3E**: Remaining Boss Milestone Combat Mechanics — NOT STARTED
 - **Phase I-4**: Balance QA — NOT STARTED

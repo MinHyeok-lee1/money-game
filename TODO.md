@@ -61,6 +61,7 @@
 - [x] **Infinite Mode Boss Milestone Placeholders**: Stage 150/200/300/500/1000 boss metadata and RPG UI panel implemented without combat mechanics (Phase I-3A).
 - [x] **Infinite Mode Boss Milestone QA**: Boss metadata/helper/UI gating verified; Authority Gate remains combat-neutral (Phase I-3B).
 - [x] **Iron Sentinel Boss Foundation**: Stage 150 now applies a bounded PEN-based damage check while later boss milestones remain placeholders (Phase I-3C).
+- [x] **Iron Sentinel Boss QA**: Stage 150 PEN boss check verified as bounded and isolated; later boss milestones remain placeholders (Phase I-3D).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
