@@ -483,30 +483,37 @@
         };
       }
 
-      // Pure helper ??deterministic settlement result, same logic as dry-run
+      // Pure helper ??probabilistic settlement result using Math.random()
       function createDefenseContractSettlementResult(gameState, assetList, highestStage, squadDps) {
         const validation = validateDefenseContractSettlement(gameState, assetList, highestStage, squadDps);
         if (!validation.canSettle) return null;
-        const { selectedContractId: contractId, stake, odds, projectedPayout } = validation;
+        const { selectedContractId: contractId, stake, projectedPayout } = validation;
         const asset = (assetList || []).find((a) => a.id === contractId);
         if (!asset) return null;
-        const successChance = toFiniteNumber(odds, 0);
+        
         const stage = toFiniteNumber(highestStage, 0);
         const dps = toFiniteNumber(squadDps, 0);
-        const stageSignal = Math.min(10, Math.round((stage / NORMAL_ENDING_STAGE) * 10));
-        const dpsSignal = dps > 0 ? 3 : 0;
-        const wouldWin = (successChance + stageSignal + dpsSignal) >= 60;
+        
+        // Phase C: Probabilistic settlement using the dedicated helper
+        const prob = calculateDefenseContractSuccessChance(gameState, asset, stage, dps);
+        const successChance = prob.successChance; // Percent scale (5-95)
+        const successProbability = prob.successProbability; // Decimal scale (0.05-0.95)
+        
+        // The real random roll
+        const wouldWin = Math.random() < successProbability;
+        
         const safePayout = Math.max(1, toFiniteNumber(projectedPayout, 1));
         const safeStake = Math.max(0, toFiniteNumber(stake, 0));
         const netResult = wouldWin
           ? toFiniteNumber(safeStake * (safePayout - 1), 0)
           : -safeStake;
+          
         return {
           id: `settled-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
           contractId,
           contractName: DEFENSE_CONTRACT_FLAVOR[contractId]?.displayName || asset.name,
           stake: safeStake,
-          odds,
+          odds: successChance, // Record the actual chance for history
           projectedPayout: safePayout,
           successChance,
           wouldWin,
