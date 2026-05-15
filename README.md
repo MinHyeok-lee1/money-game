@@ -74,5 +74,6 @@
 - Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete. Real settlement is unlocked after Dorothy acknowledgement.
 
 **Next recommended steps:**
-1. Faction/Rarity signal integration — add granular character-specific bonuses to the success chance formula.
+1. Phase E Balance & Polish — tuning payout vs. risk ratios for long-term sustainability.
 2. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.
+3. External Capital Leverage — bridge Landlord/Investment wealth into RPG combat power.

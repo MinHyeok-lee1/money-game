@@ -130,8 +130,8 @@
           dorothyLine4: "스테이지 101 이후는 무한 모드입니다. 그 문은 아직 잠겨 있지만 외부 자본의 힘이 곧 열어 줄 겁니다.",
           dorothyAcknowledge: "알겠습니다, 도로시",
           dorothyAcknowledged: "도로시의 제안을 확인했습니다. 무한 모드 해금 대기 중",
-          tacticalEdgeCandidate: "전술적 이점 후보",
-          notYetApplied: "(미적용)",
+          tacticalEdgeCandidate: "전술적 이점 적용 중",
+          notYetApplied: "(정산 확률에 반영됨)",
           factionBonus: "진영 보너스",
           rarityBonus: "희귀도 보너스",
         },
@@ -157,8 +157,8 @@
           dorothyLine4: "Stage 101 and beyond is Infinite Mode. That door is still locked - but external capital leverage will unlock soon.",
           dorothyAcknowledge: "Understood, Dorothy",
           dorothyAcknowledged: "Dorothy's proposal acknowledged - awaiting Infinite Mode unlock",
-          tacticalEdgeCandidate: "Tactical Edge Candidate",
-          notYetApplied: "(Not Applied)",
+          tacticalEdgeCandidate: "Tactical Edge Active",
+          notYetApplied: "(Applied to settlement odds)",
           factionBonus: "Faction Bonus",
           rarityBonus: "Rarity Bonus",
         },
@@ -359,10 +359,10 @@
         const combatStats = getRpgCombatStats(gameState);
         const penSignal = Math.round(combatStats.pen * 3); 
         
-        // Phase D-1B: Candidate tactical signal (Not added to rawChance yet)
+        // Phase D-1B: Candidate tactical signal (Now added to rawChance in Phase D-1D)
         const tacticalCandidate = calculateDefenseContractTacticalSignal(gameState, asset);
 
-        const rawChance = odds + stageSignal + dpsSignal + penSignal;
+        const rawChance = odds + stageSignal + dpsSignal + penSignal + tacticalCandidate.tacticalSignal;
         const boundedChance = Math.max(5, Math.min(95, rawChance));
         
         return {
@@ -379,7 +379,7 @@
           penSignal,
           riskModifier: 0, 
           tacticalSignalCandidate: tacticalCandidate,
-          explanation: `Base Odds (${odds}%) + RPG Progress (+${stageSignal}%) + Combat Power (+${dpsSignal + penSignal}%).`
+          explanation: `Base Odds (${odds}%) + RPG Progress (+${stageSignal}%) + Combat Power (+${dpsSignal + penSignal}%) + Tactical Edge (+${tacticalCandidate.tacticalSignal}%).`
         };
       }
 

@@ -90,9 +90,9 @@ To maintain the horizontal economy integrity, the following rules must be strict
 - **Phase D-0**: Probability formula tuning (decouple base odds) [DONE].
 - **Phase D-1: Tactical Integration**:
     - [x] D-1A: Design Spec (Faction/Rarity Mapping).
-    - [ ] D-1B: Implement `factionSignal` and `raritySignal` helpers.
-    - [ ] D-1C: Update Signal Analysis UI and Previews.
-    - [ ] D-1D: Final balance QA.
+    - [x] D-1B: Implement `factionSignal` and `raritySignal` helpers.
+    - [x] D-1C: Update Signal Analysis UI and Previews.
+    - [x] D-1D: Final balance QA and integration.
 - **Phase E: Balance & Polish**: Final tuning of Payout vs. Risk ratios.
 
 ---
@@ -106,6 +106,6 @@ To maintain the horizontal economy integrity, the following rules must be strict
 ---
 
 ## 📝 Status
-- **Current Status**: **IMPLEMENTED** (Phases A, B, C).
-- **Active Code**: Probabilistic resolution live (Math.random).
+- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1).
+- **Active Code**: Probabilistic resolution live (Math.random) with Tactical Signals active.
 - **Unlock Status**: Gated by Dorothy Proposal (Stage 100).

@@ -41,7 +41,7 @@ The RPG progression is divided into two distinct chapters:
 ## 🎲 Hero's Fate Betting (Current Integration)
 A high-stakes linkage between the Investment module and the RPG module.
 - **Concept**: Players "bet" on their own squad's performance in upcoming difficult stages or boss battles.
-- **Mechanic**: Use Investment holdings as collateral to multiply RPG rewards or receive a massive Cash windfall upon success. Character factions and rarities provide a "Tactical Signal" to matching contract types (Phase D-1).
+- **Mechanic**: Use Investment holdings as collateral to multiply RPG rewards or receive a massive Cash windfall upon success. Character factions and rarities provide a "Tactical Signal" to matching contract types (Implemented).
 - **Risk**: Failure results in temporary "Capital Freeze" in the Investment module or loss of character stamina.
 
 ---
@@ -91,5 +91,5 @@ Special 5-star+ characters that have "Authority Skills":
 - [ ] **Faction Upgrade Tables**: Detailed cost and scaling for faction-specific bonuses.
 - [ ] **Dorothy Integration Proposal Script**: Dialog and UI flow for the Dorothy Event.
 - [ ] **Dividends Economy Balance Sheet**: Tuning the income/expense ratio for the first RPG reward.
-- [x] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system. (Phases A, B, C complete). (See [docs/HEROS_FATE_BETTING_SPEC.md](docs/HEROS_FATE_BETTING_SPEC.md))
+- [x] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system. (Phases A, B, C, D-1 complete). (See [docs/HEROS_FATE_BETTING_SPEC.md](docs/HEROS_FATE_BETTING_SPEC.md))
 - [ ] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100.
