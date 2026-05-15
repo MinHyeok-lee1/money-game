@@ -176,6 +176,7 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-2D scope** activates bounded deterministic pressure for Phantom (`ACC`), Berserker (`SPD`), and Shadow Wraith (`CRT`) without random miss, timer, or crit-roll state.
 - **Phase I-2E QA** verified that Phantom, Berserker, and Shadow Wraith are bounded, Stage 1-100 neutral, and Authority Gate remains display-only. Phantom is intentionally mild with the current high ACC baseline and may need future tuning if it feels invisible.
 - **Phase I-3A scope** adds static boss milestone metadata and a compact RPG UI panel for Stage 150/200/300/500/1000. Authority Gate combat mechanics remain neutral.
+- **Phase I-3B QA** verified boss milestone metadata/helper/UI gating and confirmed Authority Gate remains combat-neutral.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
@@ -190,5 +191,6 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-2D**: Phantom / Berserker / Shadow Wraith Combat Modifier Foundation — COMPLETE
 - **Phase I-2E**: Remaining Archetype Modifier Balance QA — COMPLETE
 - **Phase I-3A**: Boss Milestone Placeholder Foundation — COMPLETE
-- **Phase I-3B**: Boss Milestone Combat Mechanics — NOT STARTED
+- **Phase I-3B**: Boss Milestone Foundation QA — COMPLETE
+- **Phase I-3C**: Boss Milestone Combat Mechanics — NOT STARTED
 - **Phase I-4**: Balance QA — NOT STARTED

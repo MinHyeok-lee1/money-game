@@ -59,6 +59,7 @@
 - [x] **Infinite Mode Remaining Modifiers**: Phantom ACC, Berserker SPD, and Shadow Wraith CRT pressure active with bounded deterministic formulas (Phase I-2D).
 - [x] **Infinite Mode Remaining Modifier QA**: Phantom/Berserker/Shadow Wraith bounds verified; Authority Gate remains boss-phase work (Phase I-2E).
 - [x] **Infinite Mode Boss Milestone Placeholders**: Stage 150/200/300/500/1000 boss metadata and RPG UI panel implemented without combat mechanics (Phase I-3A).
+- [x] **Infinite Mode Boss Milestone QA**: Boss metadata/helper/UI gating verified; Authority Gate remains combat-neutral (Phase I-3B).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
