@@ -57,6 +57,7 @@
 - [x] **Infinite Mode Bounded Modifiers**: Armor Wall PEN scaling and Regenerator healing active for Stage 101+ only (Phase I-2B).
 - [x] **Infinite Mode Modifier QA**: Armor Wall / Regenerator bounds verified; Stage 1-100 remains neutral (Phase I-2C).
 - [x] **Infinite Mode Remaining Modifiers**: Phantom ACC, Berserker SPD, and Shadow Wraith CRT pressure active with bounded deterministic formulas (Phase I-2D).
+- [x] **Infinite Mode Remaining Modifier QA**: Phantom/Berserker/Shadow Wraith bounds verified; Authority Gate remains boss-phase work (Phase I-2E).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
