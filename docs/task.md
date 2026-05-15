@@ -31,5 +31,6 @@
     - [x] Phase C: Wire real settlement to probabilistic helper <!-- id: 14 -->
     - [x] Phase D-0: Probability formula tuning (decouple base odds) <!-- id: 15 -->
     - [x] Phase D-1: Faction/Rarity design spec <!-- id: 16 -->
+    - [x] Phase D-1B: Implement candidate tactical signal helper <!-- id: 17 -->
 - **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase.
 - **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the probabilistic model details.

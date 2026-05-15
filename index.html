@@ -243,6 +243,12 @@
         },
       };
 
+      const DEFENSE_CONTRACT_FACTION_MAPPING = {
+        "blue-chip-stock": "realty",
+        "growth-stock": "ticker",
+        "meme-coin": "shadow",
+      };
+
       // Defense Contract preview helpers ??derived-only, no state mutation
       function getDefenseContractRiskTier(asset) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
@@ -286,6 +292,48 @@
       }
 
       // Derived-only simulated outcome ??deterministic preview, no random settlement
+      // Phase D-1B: Tactical Signal helper ??pure and candidate only
+      function calculateDefenseContractTacticalSignal(gameState, asset) {
+        const targetFaction = DEFENSE_CONTRACT_FACTION_MAPPING[asset?.id];
+        if (!targetFaction) return { tacticalSignal: 0, reason: "No faction mapping" };
+
+        const activeUnits = gameState.rpg?.run?.activeUnits || [];
+        let factionMatches = 0;
+        let rarityBonus = 0;
+
+        activeUnits.forEach((unit) => {
+          const def = getCharacterDefinition(unit.characterId);
+          if (!def) return;
+
+          if (def.faction === targetFaction) {
+            factionMatches++;
+          }
+
+          // Rarity mapping: legendary/mythic (+2), unique/epic (+1)
+          if (def.rarity === "mythic" || def.rarity === "legendary") {
+            rarityBonus += 2;
+          } else if (def.rarity === "unique" || def.rarity === "epic") {
+            rarityBonus += 1;
+          }
+        });
+
+        const factionSignal = Math.min(10, factionMatches * 2); // +2% per match, max 10
+        const cappedRaritySignal = Math.min(5, rarityBonus); // max 5
+        const combined = Math.min(12, factionSignal + cappedRaritySignal);
+
+        return {
+          factionSignal,
+          raritySignal: cappedRaritySignal,
+          tacticalSignal: combined,
+          tacticalCap: 12,
+          matchedFaction: targetFaction,
+          eligibleUnitCount: activeUnits.length,
+          matchingFactionCount: factionMatches,
+          rarityContribution: rarityBonus,
+          reason: `Faction: ${factionSignal}%, Rarity: ${cappedRaritySignal}% (Capped at 12%)`
+        };
+      }
+
       // Phase A: Probabilistic success chance helper ??pure and deterministic
       function calculateDefenseContractSuccessChance(gameState, asset, highestStage, squadDps) {
         const stage = toFiniteNumber(highestStage, 0);
@@ -302,6 +350,9 @@
         // 3. PEN Signal (Armor Penetration utility, +3% per level, Max +15%)
         const combatStats = getRpgCombatStats(gameState);
         const penSignal = Math.round(combatStats.pen * 3); 
+        
+        // Phase D-1B: Candidate tactical signal (Not added to rawChance yet)
+        const tacticalCandidate = calculateDefenseContractTacticalSignal(gameState, asset);
 
         const rawChance = odds + stageSignal + dpsSignal + penSignal;
         const boundedChance = Math.max(5, Math.min(95, rawChance));
@@ -319,6 +370,7 @@
           dpsSignal,
           penSignal,
           riskModifier: 0, 
+          tacticalSignalCandidate: tacticalCandidate,
           explanation: `Base Odds (${odds}%) + RPG Progress (+${stageSignal}%) + Combat Power (+${dpsSignal + penSignal}%).`
         };
       }
