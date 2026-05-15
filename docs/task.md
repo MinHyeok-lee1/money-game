@@ -41,6 +41,9 @@
     - [x] Phase E-4: Hero's Fate Final Settlement Confirmation UX <!-- id: 23 -->
 - **Phase F: Infinite Mode Scaling**
     - [x] Phase F-1: Infinite Mode Scaling Foundation <!-- id: 24 -->
+- **Phase G: External Capital Leverage**
+    - [x] Phase G-1: External Capital Leverage Foundation <!-- id: 25 -->
+    - [x] Phase G-1A: Source Alignment QA (Diamonds removed, Investment/Rebirth alignment verified) <!-- id: 26 -->
 - **Design Alignment**: 
     - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
     - Tactical Edge is now active in real settlement odds. 

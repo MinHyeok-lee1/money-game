@@ -141,6 +141,12 @@
           gameOverOdds: "정산 확률",
           restartButton: "처음부터 다시 시작",
           infiniteModeDesc: "무한 모드: 스테이지당 몬스터 체력이 10% 추가로 강력해집니다.",
+          externalCapitalLeverage: "외부 자본 레버리지",
+          leverageLocked: "도로시의 제안을 확인해야 해금됩니다.",
+          leverageAtk: "공격력 보너스 (자산)",
+          leverageSpd: "공격속도 보너스 (투자 유동성)",
+          leveragePen: "관통력 보너스 (환생 권위)",
+          leverageCrt: "치명타 보너스 (포트폴리오)",
           confirmSettlementTitle: "최종 정산 확인",
           confirmSettlementWarning: "주의: 실패 시 게임 오버",
           confirmSettlementDesc: "Defense Contract 정산을 진행하시겠습니까? 실패할 경우 모든 진행 상황이 초기화되고 처음부터 다시 시작해야 합니다.",
@@ -180,6 +186,12 @@
           gameOverOdds: "Success Odds",
           restartButton: "Restart From Beginning",
           infiniteModeDesc: "Infinite Mode: Monster HP scales 10% harsher per stage.",
+          externalCapitalLeverage: "External Capital Leverage",
+          leverageLocked: "Requires Dorothy Proposal acknowledgement.",
+          leverageAtk: "ATK Bonus (Wealth)",
+          leverageSpd: "SPD Bonus (Liquidity)",
+          leveragePen: "PEN Bonus (Rebirths)",
+          leverageCrt: "CRT Bonus (Portfolio)",
           confirmSettlementTitle: "Final Settlement Confirmation",
           confirmSettlementWarning: "Warning: Failure Causes Game Over",
           confirmSettlementDesc: "Are you sure you want to settle this Defense Contract? If it fails, your entire run will collapse, and you must restart from the beginning.",
@@ -2419,6 +2431,43 @@
         }, 0);
       }
 
+      function getExternalCapitalLeverageStats(state) {
+        const isUnlocked = state.rpg?.normalEndingSeen === true;
+        
+        // 1. ATK Bonus from Total Wealth (Capped at 50%)
+        const cash = toFiniteNumber(state.wallet?.cash, 0);
+        const capital = toFiniteNumber(state.investment?.capital, 0);
+        const multiplier = toFiniteNumber(state.landlord?.multiplier, 1);
+        const wealthProxy = cash + capital + (multiplier * 1000000); 
+        const atkBonus = isUnlocked ? Math.min(0.5, Math.max(0, Math.log10(wealthProxy / 100000 + 1) * 0.05)) : 0;
+
+        // 2. SPD Bonus from Investment Liquidity (Uninvested Capital) (Capped at 25%)
+        const spdBonus = isUnlocked ? Math.min(0.25, Math.max(0, Math.log10(capital / 1000000 + 1) * 0.05)) : 0;
+
+        // 3. PEN Bonus from Rebirth Authority (Capped at 50)
+        const rebirthCount = toFiniteNumber(state.landlord?.rebirthCount, 0);
+        const penBonus = isUnlocked ? Math.min(50, rebirthCount * 2) : 0;
+
+        // 4. CRT Bonus from Investment Portfolio Risk (Cost Basis) (Capped at 15%)
+        const holdings = state.investment?.holdings || [];
+        const portfolioCostBasis = holdings.reduce((sum, h) => sum + (toFiniteNumber(h.buyPrice, 0) * toFiniteNumber(h.quantity, 0)), 0);
+        const crtBonus = isUnlocked ? Math.min(0.15, Math.max(0, Math.log10(portfolioCostBasis / 1000000 + 1) * 0.02)) : 0;
+
+        return {
+          unlocked: isUnlocked,
+          atkBonus,
+          spdBonus,
+          penBonus,
+          crtBonus,
+          explanation: {
+            atk: isUnlocked ? `+${(atkBonus * 100).toFixed(1)}%` : "Locked",
+            spd: isUnlocked ? `+${(spdBonus * 100).toFixed(1)}%` : "Locked",
+            pen: isUnlocked ? `+${penBonus.toFixed(0)}` : "Locked",
+            crt: isUnlocked ? `+${(crtBonus * 100).toFixed(1)}%` : "Locked"
+          }
+        };
+      }
+
       function getRpgCombatStats(state) {
         const baseAtk = getTeamBaseAtk(state);
         const atkLevel = getRpgUpgradeLevel(state, "atkLevel");
@@ -2428,6 +2477,9 @@
         const atkMult = getRpgUpgradeEffect("atkLevel", atkLevel);
         const spdMult = getRpgUpgradeEffect("spdLevel", spdLevel);
         const penEffect = getRpgUpgradeEffect("penLevel", penLevel);
+
+        // Phase G-1: External Capital Leverage
+        const leverage = getExternalCapitalLeverageStats(state);
 
         // Future-ready derived stats
         const accBase = 0.95;
@@ -2441,15 +2493,20 @@
             def && (def.rarity === "legendary" || def.rarity === "mythic")
           );
         }).length;
-        const crtBonus = Math.min(0.1, highTierCount * 0.01);
+        const charCrtBonus = Math.min(0.1, highTierCount * 0.01);
+
+        const totalAtkMult = atkMult * (1 + leverage.atkBonus);
+        const totalSpdMult = spdMult * (1 + leverage.spdBonus);
+        const totalCrt = crtBase + charCrtBonus + leverage.crtBonus;
+        const totalPen = penEffect + leverage.penBonus * 0.01;
 
         return {
-          atk: baseAtk * atkMult,
-          spd: spdMult,
-          pen: penEffect,
+          atk: baseAtk * totalAtkMult,
+          spd: totalSpdMult,
+          pen: totalPen,
           acc: accBase,
-          crt: crtBase + crtBonus,
-          totalDps: baseAtk * atkMult * spdMult,
+          crt: totalCrt,
+          totalDps: baseAtk * totalAtkMult * totalSpdMult,
         };
       }
 
@@ -6466,6 +6523,50 @@
                           +{formatDps(gameState.rpg?.lastRpgReward || 0)}
                         </div>
                       </div>
+                    </div>
+
+                    <div className="mt-3 bg-black/40 rounded-lg p-3 border border-emerald-500/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                          {t.externalCapitalLeverage}
+                        </div>
+                        {!gameState.rpg?.normalEndingSeen && (
+                          <div className="text-[9px] font-bold text-red-400/80 uppercase animate-pulse">
+                            {language === "ko" ? "잠김" : "Locked"}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {(() => {
+                        const leverage = getExternalCapitalLeverageStats(gameState);
+                        if (!leverage.unlocked) {
+                          return (
+                            <div className="text-[10px] text-gray-500 font-bold italic py-1">
+                              {t.leverageLocked}
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] text-emerald-100/60 uppercase">{t.leverageAtk}</span>
+                              <span className="text-[10px] font-black text-emerald-400">{leverage.explanation.atk}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] text-emerald-100/60 uppercase">{t.leverageSpd}</span>
+                              <span className="text-[10px] font-black text-emerald-400">{leverage.explanation.spd}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] text-emerald-100/60 uppercase">{t.leveragePen}</span>
+                              <span className="text-[10px] font-black text-emerald-400">{leverage.explanation.pen}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] text-emerald-100/60 uppercase">{t.leverageCrt}</span>
+                              <span className="text-[10px] font-black text-emerald-400">{leverage.explanation.crt}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="mt-3 bg-black/30 rounded-lg p-3 border border-emerald-900/20">

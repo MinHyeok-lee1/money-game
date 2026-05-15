@@ -52,7 +52,7 @@ At certain stage milestones (e.g., Stage 100, 500, 1000), monster HP and DEF sca
 ---
 
 ## 🏛️ External Capital Leverage (The Bridge)
-This system allows the player's economic success to directly manipulate RPG combat stats. **This system remains locked until the Dorothy Proposal is accepted.**
+This system allows the player's economic success to directly manipulate RPG combat stats. **This system remains locked until the Dorothy Proposal is accepted.** Phase G-1 foundation is now live.
 - **Real Estate Leverage**: Total property value reduces RPG upgrade costs or increases base ATK.
 - **Stock Market Leverage**: Investment portfolio value increases CRT (Critical Rate) or SPD (Attack Speed).
 - **Rebirth Authority**: Total rebirth count provides a multiplier to PEN (Penetration), essential for late-game high-DEF monsters.
