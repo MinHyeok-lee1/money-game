@@ -66,3 +66,12 @@ Connecting economic activity to the 4 RPG Factions.
 
 ### 3. Data Integrity
 - [x] No changes to the `localStorage` schema are required, as all specialization values are derived from existing property/investment state.
+
+---
+
+## ✅ Integration QA (Phase G-3C)
+- [x] **Gating**: Verified that all bonuses are 0 until `normalEndingSeen` is true.
+- [x] **Bounds**: Verified that property bonuses are finite (capped by max 10 properties) and investment bonuses use logarithmic scaling.
+- [x] **Double-Counting**: Verified that specialization bonuses are additive within the `totalAtkMult` and do not re-apply existing leverage sources.
+- [x] **Hero's Fate Integrity**: Confirmed that `calculateDefenseContractSuccessChance` remains independent of specialization bonuses for now (no Tactical Signal leak).
+- [x] **Pressure Breaker**: Confirmed `pressureMult` is player-side and only active at Stage 101+.

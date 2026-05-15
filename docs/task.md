@@ -48,6 +48,7 @@
     - [x] Phase G-3A: Specialization Design Spec (RE/Stock mapping defined) <!-- id: 28 -->
     - [x] Phase G-3A-1: Spec Guardrail Patch (Schema & HP formula protection) <!-- id: 29 -->
     - [x] Phase G-3B: Specialization Foundation Implementation (RE/Inv/Faction multipliers active) <!-- id: 30 -->
+    - [x] Phase G-3C: Specialization Integration QA (Safe, bounded, no double-counting) <!-- id: 31 -->
 - **Design Alignment**: 
     - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
     - Tactical Edge is now active in real settlement odds. 
