@@ -75,6 +75,6 @@
 - External Capital Leverage Foundation (Phase G-1) implemented, allowing wealth and rebirths to boost RPG combat stats after Stage 100 (Balance QA complete).
 
 **Next recommended steps:**
-1. External Capital Specialization — implement Real Estate and Stock Portfolio specific leverage bonuses (Phase G-3A design complete).
+1. External Capital Specialization — implement Real Estate and Stock Portfolio specific leverage bonuses (Phase G-3 foundation active).
 2. Infinite Mode Depth — boss patterns and specialized monster types for Infinite Mode.
 3. Mythic Authority Triggers — endgame characters with authority skills (Inflation, Market Crash, Monopoly).

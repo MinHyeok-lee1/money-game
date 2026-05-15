@@ -147,6 +147,9 @@
           leverageSpd: "공격속도 보너스 (투자 유동성)",
           leveragePen: "관통력 보너스 (환생 권위)",
           leverageCrt: "치명타 보너스 (포트폴리오)",
+          buildSpecialization: "빌드 특화 (G-3)",
+          specializationRE: "부동산 특화",
+          specializationInv: "투자/팩션 브릿지",
           confirmSettlementTitle: "최종 정산 확인",
           confirmSettlementWarning: "주의: 실패 시 게임 오버",
           confirmSettlementDesc: "Defense Contract 정산을 진행하시겠습니까? 실패할 경우 모든 진행 상황이 초기화되고 처음부터 다시 시작해야 합니다.",
@@ -192,6 +195,9 @@
           leverageSpd: "SPD Bonus (Liquidity)",
           leveragePen: "PEN Bonus (Rebirths)",
           leverageCrt: "CRT Bonus (Portfolio)",
+          buildSpecialization: "Build Specialization (G-3)",
+          specializationRE: "RE Specialization",
+          specializationInv: "Inv/Faction Bridge",
           confirmSettlementTitle: "Final Settlement Confirmation",
           confirmSettlementWarning: "Warning: Failure Causes Game Over",
           confirmSettlementDesc: "Are you sure you want to settle this Defense Contract? If it fails, your entire run will collapse, and you must restart from the beginning.",
@@ -2433,6 +2439,76 @@
         }, 0);
       }
 
+      function getExternalCapitalSpecializationStats(state) {
+        const isUnlocked = state.rpg?.normalEndingSeen === true;
+        if (!isUnlocked) {
+          return {
+            unlocked: false,
+            atkBonus: 0, accBonus: 0, spdBonus: 0, penBonus: 0, pressureBreaker: 0,
+            realtyBonus: 0, tickerBonus: 0, shadowBonus: 0, luxuryBonus: 0,
+            explanation: { re: "Locked", inv: "Locked" }
+          };
+        }
+
+        // 1. Real Estate Specialization
+        const properties = state.landlord?.properties || [];
+        const getTierLevel = (ids) => properties.filter(p => ids.includes(p.id) && p.level > 0).length;
+        
+        const foundationLvl = getTierLevel([1, 2, 3]); // ATK
+        const communityLvl  = getTierLevel([4, 5]);    // ACC
+        const enterpriseLvl = getTierLevel([6, 7]);    // SPD
+        const authorityLvl  = getTierLevel([8, 9]);    // PEN
+        const frontierLvl   = getTierLevel([10]);       // Pressure Breaker
+
+        const reAtkBonus = foundationLvl * 0.02; // max 6%
+        const reAccBonus = communityLvl  * 0.01; // max 2%
+        const reSpdBonus = enterpriseLvl * 0.01; // max 2%
+        const rePenBonus = authorityLvl  * 1.5;  // max 3 (flat PEN)
+        const rePressure = frontierLvl   * 0.05; // max 5% DMG bonus vs 101+
+
+        // 2. Investment Specialization
+        const holdings = state.investment?.holdings || [];
+        const getCostBasis = (id) => {
+          const h = holdings.find(h => h.assetId === id);
+          return h ? toFiniteNumber(h.buyPrice, 0) * toFiniteNumber(h.quantity, 0) : 0;
+        };
+
+        const growthBasis   = getCostBasis("growth-stock");
+        const memeBasis     = getCostBasis("meme-coin");
+        const netWorth      = toFiniteNumber(state.wallet?.cash, 0) + toFiniteNumber(state.investment?.capital, 0);
+
+        // Faction Bridges
+        // Realty: Property Diversity (Unique owned count)
+        const uniqueProperties = properties.filter(p => p.level > 0).length;
+        const realtyBonus = Math.min(0.1, uniqueProperties * 0.01); 
+
+        // Ticker: Growth Portfolio Value (Ticker-like exposure)
+        const tickerBonus = Math.min(0.1, Math.max(0, Math.log10(growthBasis / 1000000 + 1) * 0.02)); 
+
+        // Shadow: High-Risk (Meme)
+        const shadowBonus = Math.min(0.1, Math.max(0, Math.log10(memeBasis / 1000000 + 1) * 0.02));
+
+        // Luxury: Absolute Wealth
+        const luxuryBonus = Math.min(0.1, Math.max(0, Math.log10(netWorth / 1000000000 + 1) * 0.02));
+
+        return {
+          unlocked: true,
+          atkBonus: reAtkBonus,
+          accBonus: reAccBonus,
+          spdBonus: reSpdBonus,
+          penBonus: rePenBonus,
+          pressureBreaker: rePressure,
+          realtyBonus,
+          tickerBonus,
+          shadowBonus,
+          luxuryBonus,
+          explanation: {
+            re: `ATK +${(reAtkBonus*100).toFixed(0)}%, ACC +${(reAccBonus*100).toFixed(0)}%, SPD +${(reSpdBonus*100).toFixed(0)}%, PEN +${rePenBonus.toFixed(0)}, PB +${(rePressure*100).toFixed(0)}%`,
+            inv: `RE +${(realtyBonus*100).toFixed(0)}%, TK +${(tickerBonus*100).toFixed(0)}%, SH +${(shadowBonus*100).toFixed(0)}%, LX +${(luxuryBonus*100).toFixed(0)}%`
+          }
+        };
+      }
+
       function getExternalCapitalLeverageStats(state) {
         const isUnlocked = state.rpg?.normalEndingSeen === true;
         
@@ -2484,8 +2560,9 @@
         const spdMult = getRpgUpgradeEffect("spdLevel", spdLevel);
         const penEffect = getRpgUpgradeEffect("penLevel", penLevel);
 
-        // Phase G-1: External Capital Leverage
+        // Phase G-1 & G-3: External Capital Leverage & Specialization
         const leverage = getExternalCapitalLeverageStats(state);
+        const specialization = getExternalCapitalSpecializationStats(state);
 
         // Future-ready derived stats
         const accBase = 0.95;
@@ -2501,18 +2578,37 @@
         }).length;
         const charCrtBonus = Math.min(0.1, highTierCount * 0.01);
 
-        const totalAtkMult = atkMult * (1 + leverage.atkBonus);
-        const totalSpdMult = spdMult * (1 + leverage.spdBonus);
+        // Faction-specific specialization bonuses (scaled by faction presence)
+        const factionCounts = characters.reduce((acc, c) => {
+          const def = getCharacterDefinition(c.characterId);
+          if (def) acc[def.faction] = (acc[def.faction] || 0) + 1;
+          return acc;
+        }, {});
+
+        const factionBonus = (
+          (factionCounts.realty || 0) * specialization.realtyBonus +
+          (factionCounts.ticker || 0) * specialization.tickerBonus +
+          (factionCounts.shadow || 0) * specialization.shadowBonus +
+          (factionCounts.luxury || 0) * specialization.luxuryBonus
+        ) / Math.max(1, characters.length);
+
+        const totalAtkMult = atkMult * (1 + leverage.atkBonus + specialization.atkBonus + factionBonus);
+        const totalSpdMult = spdMult * (1 + leverage.spdBonus + specialization.spdBonus);
         const totalCrt = crtBase + charCrtBonus + leverage.crtBonus;
-        const totalPen = penEffect + leverage.penBonus * 0.01;
+        const totalPen = penEffect + (leverage.penBonus + specialization.penBonus) * 0.01;
+        const totalAcc = accBase + specialization.accBonus;
+
+        // Pressure Breaker: DMG bonus applied against Stage 101+ enemies
+        const currentStage = toFiniteNumber(state.rpg?.currentStage, 1);
+        const pressureMult = (currentStage > 100) ? (1 + specialization.pressureBreaker) : 1;
 
         return {
-          atk: baseAtk * totalAtkMult,
+          atk: baseAtk * totalAtkMult * pressureMult,
           spd: totalSpdMult,
           pen: totalPen,
-          acc: accBase,
+          acc: totalAcc,
           crt: totalCrt,
-          totalDps: baseAtk * totalAtkMult * totalSpdMult,
+          totalDps: baseAtk * totalAtkMult * totalSpdMult * pressureMult,
         };
       }
 
@@ -6545,6 +6641,7 @@
                       
                       {(() => {
                         const leverage = getExternalCapitalLeverageStats(gameState);
+                        const specialization = getExternalCapitalSpecializationStats(gameState);
                         if (!leverage.unlocked) {
                           return (
                             <div className="text-[10px] text-gray-500 font-bold italic py-1">
@@ -6569,6 +6666,22 @@
                             <div className="flex justify-between items-center">
                               <span className="text-[9px] text-emerald-100/60 uppercase">{t.leverageCrt}</span>
                               <span className="text-[10px] font-black text-emerald-400">{leverage.explanation.crt}</span>
+                            </div>
+
+                            <div className="col-span-2 mt-2 pt-2 border-t border-emerald-500/10">
+                              <div className="text-[8px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1">
+                                {t.buildSpecialization}
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[8px] text-emerald-100/40 uppercase">{t.specializationRE}</span>
+                                  <span className="text-[9px] font-bold text-emerald-200/80">{specialization.explanation.re}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[8px] text-emerald-100/40 uppercase">{t.specializationInv}</span>
+                                  <span className="text-[9px] font-bold text-emerald-200/80">{specialization.explanation.inv}</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );

@@ -55,14 +55,14 @@ Connecting economic activity to the 4 RPG Factions.
 ## 📅 Implementation Plan (Phase G-3B)
 
 ### 1. Logic (Pure Helpers)
-- Implement `getExternalCapitalSpecializationStats(state)` in `index.html`.
-- Update `getRpgCombatStats(state)` to incorporate the results of the specialization helper.
-- Update `calculateDefenseContractTacticalSignal` to reflect specialization bonuses in Hero's Fate previews.
+- [x] Implement `getExternalCapitalSpecializationStats(state)` in `index.html`.
+- [x] Update `getRpgCombatStats(state)` to incorporate the results of the specialization helper.
+- [ ] Update `calculateDefenseContractTacticalSignal` to reflect specialization bonuses in Hero's Fate previews.
 
 ### 2. UI/UX
-- Extend the RPG "External Capital Leverage" panel with a "Specialization" section.
-- Add tooltips or small icons for each specialization category.
-- Clearly label "Locked" specializations with the required property/asset milestone.
+- [x] Extend the RPG "External Capital Leverage" panel with a "Specialization" section.
+- [x] Add tooltips or small icons for each specialization category.
+- [x] Clearly label "Locked" specializations with the required property/asset milestone.
 
 ### 3. Data Integrity
-- No changes to the `localStorage` schema are required, as all specialization values are derived from existing property/investment state.
+- [x] No changes to the `localStorage` schema are required, as all specialization values are derived from existing property/investment state.
