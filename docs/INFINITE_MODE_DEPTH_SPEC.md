@@ -373,18 +373,18 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-4D scope** displays the Reaper profile in the Stage 101+ RPG UI with identity, current mask/form, threat, intensity tier, and recommended counters. This remains display-only.
 - **Phase I-4D-1 QA** verified the Reaper panel is Stage 101+ only, translation-backed, additive to the existing archetype/boss panels, and does not change combat behavior.
 - **Phase I-4E scope** activates a small bounded Reaper pressure modifier for Stage 101+ (`1 - intensityTier * 0.025`, floored at `0.85`). The final stacked damage multiplier is bounded at `0.45..1.0`.
+- **Phase I-4F QA** verified Reaper pressure bounds, Stage 1-100 neutrality, Stage 150 Iron Sentinel stacking, and deferred Stage 200/300/500/1000 boss mechanics.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
-## Next Implementation Phase: I-4F Reaper Balance QA
+## Next Implementation Phase: I-5 Infinite Mode Reaper Iteration
 
-Phase I-4F should verify:
+Phase I-5 should decide whether to continue with:
 
-- Stage 1-100 neutral behavior
-- Stage 101+ Reaper pressure bounds
-- Stage 150 Iron Sentinel stacking behavior
-- Stage 200/300/500/1000 remain deferred as bespoke boss mechanics
-- Hero's Fate and External Capital boundaries remain unchanged
+- a Reaper pressure tuning pass,
+- Reaper presentation polish,
+- additional Reaper form behavior,
+- or a broader Infinite Mode playtest before adding more mechanics.
 
 ---
 
@@ -406,4 +406,5 @@ Phase I-4F should verify:
 - **Phase I-4D**: Reaper UI Integration — COMPLETE
 - **Phase I-4D-1**: Reaper UI Smoke QA — COMPLETE
 - **Phase I-4E**: Reaper Form Modifier Integration — COMPLETE
-- **Phase I-4F**: Reaper Balance QA — NEXT
+- **Phase I-4F**: Reaper Balance QA — COMPLETE
+- **Phase I-5**: Infinite Mode Reaper Iteration — NEXT

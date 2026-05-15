@@ -112,4 +112,5 @@ Special 5-star+ characters that have "Authority Skills":
 - [x] **Reaper UI Integration**: Compact Reaper identity and threat display for Stage 101+ (Phase I-4D complete).
 - [x] **Reaper UI Smoke QA**: Stage gating, translation coverage, and compatibility with existing Infinite Mode panels verified (Phase I-4D-1 complete).
 - [x] **Reaper Form Modifier Integration**: Bounded Stage 101+ Reaper pressure using existing profile data (Phase I-4E complete).
-- [ ] **Reaper Balance QA**: Verify pressure bounds, Stage 150 stacking, and deferred milestone safety (Phase I-4F next).
+- [x] **Reaper Balance QA**: Pressure bounds, Stage 150 stacking, and deferred milestone safety verified (Phase I-4F complete).
+- [ ] **Infinite Mode Reaper Iteration**: Next tuning, presentation, or form behavior decision after playtest review (Phase I-5 next).
