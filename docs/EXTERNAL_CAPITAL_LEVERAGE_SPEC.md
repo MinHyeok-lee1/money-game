@@ -16,7 +16,7 @@ Landlord properties influence core combat stability and authority.
 | **Community** | Tier 4-5 (Coffee, Cyber Cafe) | **ACC (Accuracy)** | "Community precision" to reduce misses. |
 | **Enterprise** | Tier 6-7 (Luxury Apt, Supermarket) | **SPD (Speed)** | "High volume logistics" for attack frequency. |
 | **Authority** | Tier 8-9 (Hotel, Global Tower) | **PEN (Penetration)** | "Institutional authority" to bypass late-game DEF. |
-| **Frontier** | Tier 10 (Lunar Colony) | **Pressure Breaker** | Reduces the Infinite Mode HP compounding rate slightly. |
+| **Frontier** | Tier 10 (Lunar Colony) | **Pressure Breaker** | Authority multiplier (DMG bonus) applied against Stage 101+ enemies. |
 
 ---
 
@@ -38,7 +38,7 @@ Connecting economic activity to the 4 RPG Factions.
 | Faction | Economic Anchor | Scaling Metric |
 | :--- | :--- | :--- |
 | **Realty** | Real Estate Diversification | Number of unique property types owned (max 10). |
-| **Ticker** | Trading Activity | Cumulative Buy/Sell transaction count. |
+| **Ticker** | Growth Portfolio Value | Total invested cost basis in Ticker-type (Growth) assets. |
 | **Shadow** | High-Risk Exposure | Total value of assets with >8% volatility. |
 | **Luxury** | Absolute Wealth | Net Worth milestones (1B, 1T, 1Q, etc.). |
 
