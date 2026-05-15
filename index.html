@@ -2469,6 +2469,22 @@
         return INFINITE_BOSS_MILESTONES[safeStage] || null;
       }
 
+      function getInfiniteBossCombatModifier(bossMilestone, combatStats, stage) {
+        const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        if (safeStage <= NORMAL_ENDING_STAGE || !bossMilestone) {
+          return { damageMultiplier: 1 };
+        }
+
+        if (safeStage === 150 && bossMilestone.stage === 150) {
+          const pen = Math.max(0, toFiniteNumber(combatStats?.pen, 0));
+          return {
+            damageMultiplier: Math.max(0.55, Math.min(1, 0.55 + pen * 0.45)),
+          };
+        }
+
+        return { damageMultiplier: 1 };
+      }
+
       function getInfiniteArchetypeCombatModifier(archetype, combatStats, stage) {
         const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
         if (safeStage <= NORMAL_ENDING_STAGE || !archetype) {
@@ -2813,8 +2829,13 @@
           toFiniteNumber(state.rpg.currentStage, 1),
         );
         const archetype = getInfiniteMonsterArchetype(currentStage);
+        const bossMilestone = getInfiniteBossMilestone(currentStage);
         const modifier = getInfiniteArchetypeCombatModifier(archetype, combatStats, currentStage);
-        const damage = Math.max(0, toFiniteNumber(dps * deltaSeconds * modifier.damageMultiplier, 0));
+        const bossModifier = getInfiniteBossCombatModifier(bossMilestone, combatStats, currentStage);
+        const archetypeMultiplier = toFiniteNumber(modifier.damageMultiplier, 1);
+        const bossDamageMultiplier = toFiniteNumber(bossModifier.damageMultiplier, 1);
+        const damageMultiplier = Math.max(0, Math.min(1, archetypeMultiplier * bossDamageMultiplier));
+        const damage = Math.max(0, toFiniteNumber(dps * deltaSeconds * damageMultiplier, 0));
         if (damage <= 0) return state;
 
         const currentHp = toFiniteNumber(state.rpg.monsterHp, 0);
