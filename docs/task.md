@@ -63,3 +63,11 @@
     - Payout multipliers scaled for better risk reward.
     - **FAILURE CONSEQUENCE REVISION**: Defense Contract failure now triggers **Game Over / Restart from beginning**, replacing the rejected "Capital Freeze" concept.
 - **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the probabilistic model details.
+
+## Phase I: Infinite Mode Depth
+- **Phase I-1: Boss & Monster Pattern Design**
+    - [x] Phase I-1A: Design Spec (Archetypes, boss milestones, stat counter mapping, economic integration) <!-- id: 38 -->
+    - [ ] Phase I-2: Monster Archetype Implementation <!-- id: 39 -->
+    - [ ] Phase I-3: Boss Milestone Implementation <!-- id: 40 -->
+    - [ ] Phase I-4: Balance QA <!-- id: 41 -->
+- **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
