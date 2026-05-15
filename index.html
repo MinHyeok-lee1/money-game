@@ -356,12 +356,13 @@
         const dpsSignal = dps > 0 ? 5 : 0; 
         
         // 3. PEN Signal (Armor Penetration utility, +3% per level, Max +15%)
-        const combatStats = getRpgCombatStats(gameState);
-        const penSignal = Math.round(combatStats.pen * 3); 
+        const penLevel = getRpgUpgradeLevel(gameState, "penLevel");
+        const penSignal = Math.min(15, penLevel * 3); 
         
         // Phase D-1B: Candidate tactical signal (Now added to rawChance in Phase D-1D)
         const tacticalCandidate = calculateDefenseContractTacticalSignal(gameState, asset);
 
+        // Success Formula: Base + Stage(15) + DPS(5) + PEN(15) + Tactical(12) = Max +47% Bonus
         const rawChance = odds + stageSignal + dpsSignal + penSignal + tacticalCandidate.tacticalSignal;
         const boundedChance = Math.max(5, Math.min(95, rawChance));
         

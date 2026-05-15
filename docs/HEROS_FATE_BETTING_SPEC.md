@@ -93,7 +93,9 @@ To maintain the horizontal economy integrity, the following rules must be strict
     - [x] D-1B: Implement `factionSignal` and `raritySignal` helpers.
     - [x] D-1C: Update Signal Analysis UI and Previews.
     - [x] D-1D: Final balance QA and integration.
-- **Phase E: Balance & Polish**: Final tuning of Payout vs. Risk ratios.
+- **Phase E: Balance & Polish**:
+    - [x] Phase E-1: Probability formula audit and PEN signal fix.
+    - [ ] Phase E-2: Payout vs. Risk ratio tuning.
 
 ---
 
