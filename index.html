@@ -2421,6 +2421,27 @@
         return rotation[(safeStage - NORMAL_ENDING_STAGE - 1) % rotation.length];
       }
 
+      function getInfiniteArchetypeCombatModifier(archetype, combatStats, stage) {
+        const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        if (safeStage <= NORMAL_ENDING_STAGE || !archetype) {
+          return { damageMultiplier: 1, regenRate: 0 };
+        }
+
+        if (archetype.id === "armorWall") {
+          const pen = Math.max(0, toFiniteNumber(combatStats?.pen, 0));
+          return {
+            damageMultiplier: Math.max(0.65, Math.min(1, 0.65 + pen * 0.35)),
+            regenRate: 0,
+          };
+        }
+
+        if (archetype.id === "regenerator") {
+          return { damageMultiplier: 1, regenRate: 0.015 };
+        }
+
+        return { damageMultiplier: 1, regenRate: 0 };
+      }
+
       function getMonsterMaxHp(stage) {
         const s = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
         const baseHp = Math.floor(100 * Math.pow(1.3, s - 1));
@@ -2713,20 +2734,28 @@
 
       function applyCombatTick(state, deltaSeconds) {
         if (state.rpg?.run?.isActive !== true) return state;
-        const dps = getTotalTeamDps(state);
-        const damage = dps * deltaSeconds;
+        const combatStats = getRpgCombatStats(state);
+        const dps = combatStats.totalDps;
+        const currentStage = Math.max(
+          1,
+          toFiniteNumber(state.rpg.currentStage, 1),
+        );
+        const archetype = getInfiniteMonsterArchetype(currentStage);
+        const modifier = getInfiniteArchetypeCombatModifier(archetype, combatStats, currentStage);
+        const damage = Math.max(0, toFiniteNumber(dps * deltaSeconds * modifier.damageMultiplier, 0));
         if (damage <= 0) return state;
 
         const currentHp = toFiniteNumber(state.rpg.monsterHp, 0);
-        const nextHp = Math.max(0, currentHp - damage);
+        const currentMaxHp = Math.max(1, toFiniteNumber(state.rpg.monsterMaxHp, getMonsterMaxHp(currentStage)));
+        const damagedHp = Math.max(0, currentHp - damage);
+        const regen = damagedHp > 0
+          ? currentMaxHp * modifier.regenRate * Math.max(0, toFiniteNumber(deltaSeconds, 0))
+          : 0;
+        const nextHp = Math.min(currentMaxHp, damagedHp + regen);
 
         if (nextHp <= 0) {
           const nextDefeated =
             toFiniteNumber(state.rpg.defeatedMonsters, 0) + 1;
-          const currentStage = Math.max(
-            1,
-            toFiniteNumber(state.rpg.currentStage, 1),
-          );
           const currentStageKills = toFiniteNumber(state.rpg.stageKills, 0);
           const killsRequired = getKillsRequiredForStage(currentStage);
 

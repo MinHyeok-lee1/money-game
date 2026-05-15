@@ -68,7 +68,8 @@
 - **Phase I-1: Boss & Monster Pattern Design**
     - [x] Phase I-1A: Design Spec (Archetypes, boss milestones, stat counter mapping, economic integration) <!-- id: 38 -->
     - [x] Phase I-2A: Monster Archetype Foundation (deterministic Stage 101+ archetype labels, UI panel, no combat modifiers) <!-- id: 39 -->
-    - [ ] Phase I-2B: Monster Archetype Combat Modifiers <!-- id: 42 -->
+    - [x] Phase I-2B: Monster Archetype Combat Modifier Foundation (Armor Wall PEN scaling, Regenerator bounded healing) <!-- id: 42 -->
+    - [ ] Phase I-2C: Remaining Archetype Combat Modifiers (Phantom, Berserker, Shadow Wraith) <!-- id: 43 -->
     - [ ] Phase I-3: Boss Milestone Implementation <!-- id: 40 -->
     - [ ] Phase I-4: Balance QA <!-- id: 41 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
