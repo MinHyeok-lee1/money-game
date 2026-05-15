@@ -274,12 +274,12 @@
 
       function getDefenseContractProjectedPayout(asset, highestStage, squadDps) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Higher risk ??higher projected multiplier (base range ~1.08??.48)
-        const baseMultiplier = 1 + vol * 4;
+        // Higher risk -> higher projected multiplier (base range ~1.20 - 2.20)
+        const baseMultiplier = 1 + vol * 10;
         // Squad DPS adds a small log-scaled bonus (capped at +0.20)
         const dps = toFiniteNumber(squadDps, 0);
         const dpsBonus = dps > 0 ? Math.min(0.2, Math.log10(dps + 1) * 0.02) : 0;
-        const raw = toFiniteNumber(baseMultiplier + dpsBonus, 1.1);
+        const raw = toFiniteNumber(baseMultiplier + dpsBonus, 1.2);
         return Math.max(1.05, Math.min(2.5, raw));
       }
 
@@ -418,6 +418,8 @@
           projectedLoss, 
           confidenceLevel, 
           explanation,
+          successChance,
+          projectedPayout: payout,
           tacticalSignalCandidate: prob.tacticalSignalCandidate
         };
       }
@@ -438,8 +440,8 @@
           contractId,
           contractName: DEFENSE_CONTRACT_FLAVOR[contractId]?.displayName || asset.name,
           stake,
-          odds,
-          projectedPayout,
+          odds: outcome.successChance,
+          projectedPayout: outcome.projectedPayout,
           outcomeLabel: outcome.outcomeLabel,
           createdAt: Date.now(),
           status: "preview",

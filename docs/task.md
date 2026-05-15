@@ -36,5 +36,6 @@
     - [x] Phase D-1D: Wire tactical signal into real settlement odds <!-- id: 19 -->
 - **Phase E: Balance & Polish**
     - [x] Phase E-1: Probability formula audit and PEN signal fix <!-- id: 20 -->
-- **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. Tactical Edge is now active in real settlement odds. PEN signal fixed to correctly use upgrade level.
+    - [x] Phase E-2: Payout vs. Risk audit and multiplier tuning <!-- id: 21 -->
+- **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. Tactical Edge is now active in real settlement odds. PEN signal and preview history payout bugs fixed. Payout multipliers scaled for better risk reward.
 - **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the probabilistic model details.

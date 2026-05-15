@@ -95,7 +95,7 @@ To maintain the horizontal economy integrity, the following rules must be strict
     - [x] D-1D: Final balance QA and integration.
 - **Phase E: Balance & Polish**:
     - [x] Phase E-1: Probability formula audit and PEN signal fix.
-    - [ ] Phase E-2: Payout vs. Risk ratio tuning.
+    - [x] Phase E-2: Payout vs. Risk ratio tuning and bug fix.
 
 ---
 
