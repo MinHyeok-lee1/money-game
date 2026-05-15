@@ -250,6 +250,10 @@
           reaperIntensityTier: "강도",
           reaperCounters: "권장 대응",
           reaperAdapting: "사신이 적응하고 있습니다.",
+          reaperPressure_active: "사신 압박",
+          reaperPressureDesc_active: "무한 모드의 사신이 피해 효율을 조금 낮춥니다.",
+          reaperPressure_none: "사신 압박 없음",
+          reaperPressureDesc_none: "일반 루트에서는 사신 압박이 적용되지 않습니다.",
           externalCapitalLeverage: "외부 자본 레버리지",
           leverageLocked: "도로시의 제안을 확인해야 해금됩니다.",
           leverageAtk: "공격력 보너스 (자산)",
@@ -376,6 +380,10 @@
           reaperIntensityTier: "Intensity",
           reaperCounters: "Recommended Counters",
           reaperAdapting: "The Reaper is adapting.",
+          reaperPressure_active: "Reaper Pressure",
+          reaperPressureDesc_active: "The Infinite Mode Reaper slightly reduces damage efficiency.",
+          reaperPressure_none: "No Reaper Pressure",
+          reaperPressureDesc_none: "Reaper pressure does not apply during the Normal Arc.",
           externalCapitalLeverage: "External Capital Leverage",
           leverageLocked: "Requires Dorothy Proposal acknowledgement.",
           leverageAtk: "ATK Bonus (Wealth)",
@@ -2602,6 +2610,24 @@
         return { damageMultiplier: 1 };
       }
 
+      function getInfiniteReaperCombatModifier(reaperProfile, combatStats, stage) {
+        const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        if (safeStage <= NORMAL_ENDING_STAGE || reaperProfile?.active !== true) {
+          return {
+            damageMultiplier: 1,
+            pressureLabelKey: "reaperPressure_none",
+            pressureDescriptionKey: "reaperPressureDesc_none",
+          };
+        }
+
+        const intensityTier = Math.max(1, Math.floor(toFiniteNumber(reaperProfile.intensityTier, 1)));
+        return {
+          damageMultiplier: Math.max(0.85, Math.min(1, 1 - intensityTier * 0.025)),
+          pressureLabelKey: "reaperPressure_active",
+          pressureDescriptionKey: "reaperPressureDesc_active",
+        };
+      }
+
       function getInfiniteArchetypeCombatModifier(archetype, combatStats, stage) {
         const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
         if (safeStage <= NORMAL_ENDING_STAGE || !archetype) {
@@ -2947,11 +2973,14 @@
         );
         const archetype = getInfiniteMonsterArchetype(currentStage);
         const bossMilestone = getInfiniteBossMilestone(currentStage);
+        const reaperProfile = getInfiniteReaperProfile(currentStage);
         const modifier = getInfiniteArchetypeCombatModifier(archetype, combatStats, currentStage);
         const bossModifier = getInfiniteBossCombatModifier(bossMilestone, combatStats, currentStage);
+        const reaperModifier = getInfiniteReaperCombatModifier(reaperProfile, combatStats, currentStage);
         const archetypeMultiplier = toFiniteNumber(modifier.damageMultiplier, 1);
         const bossDamageMultiplier = toFiniteNumber(bossModifier.damageMultiplier, 1);
-        const damageMultiplier = Math.max(0, Math.min(1, archetypeMultiplier * bossDamageMultiplier));
+        const reaperDamageMultiplier = toFiniteNumber(reaperModifier.damageMultiplier, 1);
+        const damageMultiplier = Math.max(0.45, Math.min(1, archetypeMultiplier * bossDamageMultiplier * reaperDamageMultiplier));
         const damage = Math.max(0, toFiniteNumber(dps * deltaSeconds * damageMultiplier, 0));
         if (damage <= 0) return state;
 

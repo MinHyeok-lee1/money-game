@@ -111,4 +111,5 @@ Special 5-star+ characters that have "Authority Skills":
 - [x] **Reaper Model Data Foundation**: Static Reaper profile/form data and deterministic helper behavior with no combat changes (Phase I-4C complete).
 - [x] **Reaper UI Integration**: Compact Reaper identity and threat display for Stage 101+ (Phase I-4D complete).
 - [x] **Reaper UI Smoke QA**: Stage gating, translation coverage, and compatibility with existing Infinite Mode panels verified (Phase I-4D-1 complete).
-- [ ] **Reaper Form Modifier Integration**: Bounded Stage 101+ Reaper pressure using existing profile data (Phase I-4E next).
+- [x] **Reaper Form Modifier Integration**: Bounded Stage 101+ Reaper pressure using existing profile data (Phase I-4E complete).
+- [ ] **Reaper Balance QA**: Verify pressure bounds, Stage 150 stacking, and deferred milestone safety (Phase I-4F next).

@@ -67,7 +67,8 @@
 - [x] **Reaper Model Data Foundation**: Static Reaper profile/form data and deterministic helper behavior added without combat changes (Phase I-4C).
 - [x] **Reaper UI Integration**: Display Reaper identity, current mask/form, intensity tier, threat label, and counter stats without adding combat mechanics (Phase I-4D).
 - [x] **Reaper UI Smoke QA**: Stage 101+ Reaper panel gating, translations, archetype/boss panel compatibility, and no-combat-change boundaries verified (Phase I-4D-1).
-- [ ] **Reaper Form Modifier Integration**: Fold Reaper forms into bounded Stage 101+ modifiers while preserving Stage 1-100 and existing systems (Phase I-4E).
+- [x] **Reaper Form Modifier Integration**: Added bounded Stage 101+ Reaper pressure while preserving Stage 1-100 and existing systems (Phase I-4E).
+- [ ] **Reaper Balance QA**: Verify Reaper pressure bounds, Stage 150 stacking, deferred milestone behavior, and system boundaries (Phase I-4F).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).

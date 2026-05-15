@@ -372,18 +372,19 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-4C scope** adds static `REAPER_FORMS` metadata and a pure `getInfiniteReaperProfile(stage)` helper. This is data/helper-only and does not change combat or UI behavior.
 - **Phase I-4D scope** displays the Reaper profile in the Stage 101+ RPG UI with identity, current mask/form, threat, intensity tier, and recommended counters. This remains display-only.
 - **Phase I-4D-1 QA** verified the Reaper panel is Stage 101+ only, translation-backed, additive to the existing archetype/boss panels, and does not change combat behavior.
+- **Phase I-4E scope** activates a small bounded Reaper pressure modifier for Stage 101+ (`1 - intensityTier * 0.025`, floored at `0.85`). The final stacked damage multiplier is bounded at `0.45..1.0`.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
-## Next Implementation Phase: I-4E Reaper Form Modifier Integration
+## Next Implementation Phase: I-4F Reaper Balance QA
 
-Phase I-4E should define:
+Phase I-4F should verify:
 
-- bounded Reaper form modifiers
 - Stage 1-100 neutral behavior
-- no new save schema
-- no Stage 200/300/500/1000 bespoke boss mechanics unless folded through the Reaper model
-- conservative QA gates before tuning upward
+- Stage 101+ Reaper pressure bounds
+- Stage 150 Iron Sentinel stacking behavior
+- Stage 200/300/500/1000 remain deferred as bespoke boss mechanics
+- Hero's Fate and External Capital boundaries remain unchanged
 
 ---
 
@@ -404,4 +405,5 @@ Phase I-4E should define:
 - **Phase I-4C**: Reaper Model Data Foundation — COMPLETE
 - **Phase I-4D**: Reaper UI Integration — COMPLETE
 - **Phase I-4D-1**: Reaper UI Smoke QA — COMPLETE
-- **Phase I-4E**: Reaper Form Modifier Integration — NEXT
+- **Phase I-4E**: Reaper Form Modifier Integration — COMPLETE
+- **Phase I-4F**: Reaper Balance QA — NEXT
