@@ -1,6 +1,6 @@
 # 🎲 Hero's Fate Betting: Probabilistic Settlement Spec
 
-This document defines the future implementation of the probabilistic settlement model for the "Hero's Fate" betting system (Investment Module -> RPG Module linkage).
+This document defines the implementation of the probabilistic settlement model for the "Hero's Fate" betting system (Investment Module -> RPG Module linkage).
 
 ---
 
@@ -11,7 +11,7 @@ Hero's Fate is the primary high-stakes linkage between **Investment Capital** an
 
 ## 🛠️ Probabilistic Settlement Model
 
-The current settlement is a deterministic placeholder. The future model will be **probabilistic**, using a weighted success chance calculated from the delta between Squad Power and Contract Difficulty.
+The settlement model is **probabilistic**, using a weighted success chance calculated from the delta between Squad Power and Contract Difficulty.
 
 ### 1. Model Inputs
 - **Contract Data**: Difficulty Tier (Stage Target), Base Odds, Payout Multiplier.
@@ -55,9 +55,9 @@ To maintain the horizontal economy integrity, the following rules must be strict
 
 ## 🚀 Implementation Phases
 
-- **Phase A: Probability Helper**: Implement `calculateDefenseContractSuccessChance` using real RPG combat stats.
-- **Phase B: Dry-Run Parity**: Update the Dry-Run simulation to use the new probabilistic helper for "Confidence" and "Outcome" previews.
-- **Phase C: Real Settlement Integration**: Wire the `settleDefenseContract` handler to use `Math.random()` against the calculated success chance.
+- [x] **Phase A: Probability Helper**: Implement `calculateDefenseContractSuccessChance` using real RPG combat stats.
+- [x] **Phase B: Dry-Run Parity**: Update the Dry-Run simulation to use the new probabilistic helper for "Confidence" and "Outcome" previews.
+- [x] **Phase C: Real Settlement Integration**: Wire the `settleDefenseContract` handler to use `Math.random()` against the calculated success chance.
 - **Phase D: Balance QA**: Tune the Payout vs. Risk ratio to ensure high-tier contracts are rewarding but dangerous.
 
 ---
@@ -71,6 +71,6 @@ To maintain the horizontal economy integrity, the following rules must be strict
 ---
 
 ## 📝 Status
-- **Current Status**: **DESIGN ONLY**. 
-- **Active Code**: Deterministic placeholder (Threshold >= 60).
+- **Current Status**: **IMPLEMENTED** (Phases A, B, C).
+- **Active Code**: Probabilistic resolution live (Math.random).
 - **Unlock Status**: Gated by Dorothy Proposal (Stage 100).

@@ -74,5 +74,5 @@
 - Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete. Real settlement is unlocked after Dorothy acknowledgement.
 
 **Next recommended steps:**
-1. Hero's Fate resolution formula — probabilistic win/loss with stake deduction and payout (currently deterministic placeholder).
+1. Faction/Rarity signal integration — add granular character-specific bonuses to the success chance formula.
 2. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.

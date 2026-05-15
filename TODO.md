@@ -35,7 +35,7 @@
 - [x] **Defense Contracts preview history:** `contractHistory` (max 10, `"preview"` status only), save handler, live history list UI.
 - [x] **Defense Contracts settlement gate:** `contractSettlementUnlocked: false` flag, `isDefenseContractSettlementUnlocked` helper, locked/unlocked status panel.
 - [x] **Real settlement unlock:** gated by `normalEndingSeen === true` (Dorothy Proposal acknowledgement).
-- [ ] **Hero's Fate resolution:** probabilistic win/loss, stake deduction, payout to wallet.
+- [x] **Hero's Fate resolution:** basic probabilistic win/loss, stake deduction, payout to wallet.
 
 ## Phase 3: Gacha & Enhancement
 
@@ -53,7 +53,7 @@
 - [x] **RPG run structure**: `rpg.run.activeUnits` ticket-gated volatile run units; legacy `rpg.characters` preserved for save compatibility.
 - [ ] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power (locked — requires Dorothy Proposal acceptance).
 - [ ] **Infinite Mode Scaling**: Monster HP growth and stage rewards beyond Stage 100.
-- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Presentation, preview, and Dorothy-gated real settlement foundations complete; probabilistic resolution not yet active.
+- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Basic probabilistic resolution (Phase C) is live; Faction/Rarity signal integration and Capital Freeze are future work.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
 - [ ] **Character Storylines**: Lore integration for characters and factions.

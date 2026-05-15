@@ -22,12 +22,12 @@
 - [ ] Final report <!-- id: 11 -->
 
 ## Settlement Status (Audit 2026-05-14)
-- **Status Category**: **B / D** (Foundation exists, public override UI removed).
-- **Code Foundation**: `settleDefenseContract` and `createDefenseContractSettlementResult` are implemented with deterministic logic.
+- **Status Category**: **A / D** (Real settlement probabilistic, Dorothy gate).
+- **Code Foundation**: `settleDefenseContract` and `createDefenseContractSettlementResult` are implemented with probabilistic logic.
 - **Player Access**: Unlocks when `gameState.rpg.normalEndingSeen === true` (Stage 100 / Dorothy boundary).
-- **Resolution Model**: Deterministic placeholder currently active. Probabilistic Hero's Fate model foundation (Phase A) implemented.
+- **Resolution Model**: Probabilistic Hero's Fate model now live.
     - [x] Phase A: Pure success chance helper foundation <!-- id: 12 -->
     - [x] Phase B: Wire dry-run preview to probabilistic helper <!-- id: 13 -->
     - [x] Phase C: Wire real settlement to probabilistic helper <!-- id: 14 -->
 - **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase.
-- **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the future probabilistic model.
+- **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the probabilistic model details.
