@@ -64,7 +64,8 @@
 - [x] **Iron Sentinel Boss QA**: Stage 150 PEN boss check verified as bounded and isolated; later boss milestones remain placeholders (Phase I-3D).
 - [x] **Infinite Mode Reaper Direction**: Future Stage 101+ direction reframed around a recurring Reaper-like final monster; Stage 200/300/500/1000 individual boss mechanics deferred (Phase I-4A).
 - [x] **Reaper Infinite Mode Model Spec**: Unified Reaper fantasy, naming, masks/forms, scaling dimensions, UI direction, and integration plan defined (Phase I-4B).
-- [ ] **Reaper Model Data Foundation**: Add static Reaper profile/form data and deterministic helper behavior without combat changes (Phase I-4C).
+- [x] **Reaper Model Data Foundation**: Static Reaper profile/form data and deterministic helper behavior added without combat changes (Phase I-4C).
+- [ ] **Reaper UI Integration**: Display Reaper identity, current mask/form, intensity tier, threat label, and counter stats without adding combat mechanics (Phase I-4D).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).

@@ -369,17 +369,18 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-3D QA** verified the Iron Sentinel modifier is Stage 150-only, stronger than Armor Wall without becoming a hard lock, and does not activate mechanics for Stage 200/300/500/1000.
 - **Phase I-4A scope** redirects future Infinite Mode design toward a recurring Reaper enemy model. Stage 200/300/500/1000 individual boss mechanics are deferred.
 - **Phase I-4B scope** defines the unified Reaper model fantasy, naming direction, form/mask model, gameplay model, scaling dimensions, UI direction, and future implementation phases.
+- **Phase I-4C scope** adds static `REAPER_FORMS` metadata and a pure `getInfiniteReaperProfile(stage)` helper. This is data/helper-only and does not change combat or UI behavior.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
-## Next Implementation Phase: I-4C Reaper Model Data Foundation
+## Next Implementation Phase: I-4D Reaper UI Integration
 
-Phase I-4C should define:
+Phase I-4D should define:
 
-- static Reaper profile/form data
-- deterministic Reaper helper behavior
-- Stage 101+ activation rules
-- milestone form/title mapping
+- compact Reaper identity display
+- current form/mask label
+- current intensity tier and threat label
+- recommended counter stat display
 - no combat behavior changes yet
 
 ---
@@ -398,4 +399,5 @@ Phase I-4C should define:
 - **Phase I-3D**: Iron Sentinel Boss Mechanic QA — COMPLETE
 - **Phase I-4A**: Reaper Direction Alignment — COMPLETE
 - **Phase I-4B**: Reaper Infinite Mode Model Design Spec — COMPLETE
-- **Phase I-4C**: Reaper Model Data Foundation — NEXT
+- **Phase I-4C**: Reaper Model Data Foundation — COMPLETE
+- **Phase I-4D**: Reaper UI Integration — NEXT

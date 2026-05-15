@@ -128,6 +128,16 @@
         1000: { stage: 1000, nameKey: "boss_theAuthority", primaryCheckKey: "bossCheck_all", roleKey: "bossRole_theAuthority" },
       };
 
+      const REAPER_FORMS = {
+        dormant:       { id: "dormant",       nameKey: "reaper_dormant",       titleKey: "reaperTitle_dormant",       descKey: "reaperDesc_dormant",       threatKey: "reaperThreat_dormant",       counterKeys: [],                           phaseLabelKey: "reaperPhase_inactive" },
+        darkReaper:    { id: "darkReaper",    nameKey: "reaper_darkReaper",    titleKey: "reaperTitle_darkReaper",    descKey: "reaperDesc_darkReaper",    threatKey: "reaperThreat_rising",        counterKeys: ["counter_atk"],              phaseLabelKey: "reaperPhase_recurring" },
+        ironSentinel:  { id: "ironSentinel",  nameKey: "boss_ironSentinel",    titleKey: "reaperTitle_ironSentinel",  descKey: "reaperDesc_ironSentinel",  threatKey: "reaperThreat_severe",        counterKeys: ["counter_pen"],              phaseLabelKey: "reaperPhase_mask" },
+        phantomGeneral:{ id: "phantomGeneral",nameKey: "boss_phantomGeneral",  titleKey: "reaperTitle_phantomGeneral",descKey: "reaperDesc_phantomGeneral",threatKey: "reaperThreat_severe",        counterKeys: ["counter_acc"],              phaseLabelKey: "reaperPhase_aspect" },
+        eternalHydra:  { id: "eternalHydra",  nameKey: "boss_eternalHydra",    titleKey: "reaperTitle_eternalHydra",  descKey: "reaperDesc_eternalHydra",  threatKey: "reaperThreat_runEnding",     counterKeys: ["counter_spd", "counter_atk"], phaseLabelKey: "reaperPhase_form" },
+        berserkerKing: { id: "berserkerKing", nameKey: "boss_berserkerKing",   titleKey: "reaperTitle_berserkerKing", descKey: "reaperDesc_berserkerKing", threatKey: "reaperThreat_runEnding",     counterKeys: ["counter_spdAtk", "counter_crt"], phaseLabelKey: "reaperPhase_mask" },
+        authority:     { id: "authority",     nameKey: "boss_theAuthority",    titleKey: "reaperTitle_authority",     descKey: "reaperDesc_authority",     threatKey: "reaperThreat_absurd",        counterKeys: ["counter_all"],              phaseLabelKey: "reaperPhase_revelation" },
+      };
+
       const TRANSLATIONS = {
         ko: {
           title: "아이들 랜드로드",
@@ -204,6 +214,36 @@
           bossRole_eternalHydra: "재생을 압도할 처리량과 속도를 요구합니다.",
           bossRole_berserkerKing: "템포와 치명타 폭발력을 시험합니다.",
           bossRole_theAuthority: "전체 경제 숙련도를 시험하는 최종 관문입니다.",
+          reaper_dormant: "잠든 사신",
+          reaper_darkReaper: "어둠의 사신",
+          reaper_deathReaper: "죽음의 사신",
+          reaper_endbringerReaper: "종말의 사신",
+          reaper_infiniteReaper: "무한의 사신",
+          reaperTitle_dormant: "비활성",
+          reaperTitle_darkReaper: "반복 출현",
+          reaperTitle_ironSentinel: "철갑의 가면",
+          reaperTitle_phantomGeneral: "환영의 형상",
+          reaperTitle_eternalHydra: "재생의 형상",
+          reaperTitle_berserkerKing: "광전사의 가면",
+          reaperTitle_authority: "권위의 현현",
+          reaperDesc_dormant: "사신은 일반 루트에서는 깨어나지 않습니다.",
+          reaperDesc_darkReaper: "무한 모드에 반복 출현하는 죽음의 존재입니다.",
+          reaperDesc_ironSentinel: "사신이 철갑의 가면을 쓰고 관통력을 시험합니다.",
+          reaperDesc_phantomGeneral: "사신이 환영의 형상으로 명중 안정성을 시험합니다.",
+          reaperDesc_eternalHydra: "사신이 재생의 형상으로 처리량과 속도를 시험합니다.",
+          reaperDesc_berserkerKing: "사신이 광전사의 가면으로 템포와 폭발력을 시험합니다.",
+          reaperDesc_authority: "사신이 권위의 형상으로 모든 성장을 시험합니다.",
+          reaperThreat_dormant: "비활성",
+          reaperThreat_rising: "상승",
+          reaperThreat_severe: "심각",
+          reaperThreat_runEnding: "런 종료 위험",
+          reaperThreat_absurd: "비상식적 위협",
+          reaperPhase_inactive: "비활성",
+          reaperPhase_recurring: "반복 사신",
+          reaperPhase_mask: "사신의 가면",
+          reaperPhase_aspect: "사신의 형상",
+          reaperPhase_form: "사신의 변이",
+          reaperPhase_revelation: "사신의 현현",
           externalCapitalLeverage: "외부 자본 레버리지",
           leverageLocked: "도로시의 제안을 확인해야 해금됩니다.",
           leverageAtk: "공격력 보너스 (자산)",
@@ -294,6 +334,36 @@
           bossRole_eternalHydra: "Requires throughput and speed to overpower regeneration.",
           bossRole_berserkerKing: "Tests tempo and burst pressure.",
           bossRole_theAuthority: "Final gate for full economic mastery.",
+          reaper_dormant: "Dormant Reaper",
+          reaper_darkReaper: "Dark Reaper",
+          reaper_deathReaper: "Death Reaper",
+          reaper_endbringerReaper: "Endbringer Reaper",
+          reaper_infiniteReaper: "Infinite Reaper",
+          reaperTitle_dormant: "Inactive",
+          reaperTitle_darkReaper: "Recurring Threat",
+          reaperTitle_ironSentinel: "Iron Mask",
+          reaperTitle_phantomGeneral: "Phantom Aspect",
+          reaperTitle_eternalHydra: "Regenerating Form",
+          reaperTitle_berserkerKing: "Berserker Mask",
+          reaperTitle_authority: "Authority Revelation",
+          reaperDesc_dormant: "The Reaper does not awaken during the Normal Arc.",
+          reaperDesc_darkReaper: "A recurring death entity haunting Infinite Mode.",
+          reaperDesc_ironSentinel: "The Reaper wears the Iron Sentinel mask to test penetration.",
+          reaperDesc_phantomGeneral: "The Reaper takes a phantom aspect to test accuracy consistency.",
+          reaperDesc_eternalHydra: "The Reaper takes a regenerating form to test throughput and speed.",
+          reaperDesc_berserkerKing: "The Reaper wears the Berserker King's mask to test tempo and burst.",
+          reaperDesc_authority: "The Reaper reveals authority to test every form of growth.",
+          reaperThreat_dormant: "Inactive",
+          reaperThreat_rising: "Rising",
+          reaperThreat_severe: "Severe",
+          reaperThreat_runEnding: "Run-ending",
+          reaperThreat_absurd: "Absurd",
+          reaperPhase_inactive: "Inactive",
+          reaperPhase_recurring: "Recurring Reaper",
+          reaperPhase_mask: "Reaper Mask",
+          reaperPhase_aspect: "Reaper Aspect",
+          reaperPhase_form: "Reaper Form",
+          reaperPhase_revelation: "Reaper Revelation",
           externalCapitalLeverage: "External Capital Leverage",
           leverageLocked: "Requires Dorothy Proposal acknowledgement.",
           leverageAtk: "ATK Bonus (Wealth)",
@@ -2467,6 +2537,41 @@
         const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
         if (safeStage <= NORMAL_ENDING_STAGE) return null;
         return INFINITE_BOSS_MILESTONES[safeStage] || null;
+      }
+
+      function getInfiniteReaperProfile(stage) {
+        const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        if (safeStage <= NORMAL_ENDING_STAGE) {
+          return {
+            active: false,
+            form: REAPER_FORMS.dormant,
+            intensityTier: 0,
+            milestone: null,
+            isMilestone: false,
+          };
+        }
+
+        const milestone = getInfiniteBossMilestone(safeStage);
+        const milestoneForms = {
+          150: REAPER_FORMS.ironSentinel,
+          200: REAPER_FORMS.phantomGeneral,
+          300: REAPER_FORMS.eternalHydra,
+          500: REAPER_FORMS.berserkerKing,
+          1000: REAPER_FORMS.authority,
+        };
+        const intensityTier = safeStage >= 1000 ? 5
+          : safeStage >= 500 ? 4
+          : safeStage >= 300 ? 3
+          : safeStage >= 200 ? 2
+          : 1;
+
+        return {
+          active: true,
+          form: milestoneForms[safeStage] || REAPER_FORMS.darkReaper,
+          intensityTier,
+          milestone,
+          isMilestone: Boolean(milestone),
+        };
       }
 
       function getInfiniteBossCombatModifier(bossMilestone, combatStats, stage) {
