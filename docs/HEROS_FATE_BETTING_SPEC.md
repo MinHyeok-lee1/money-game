@@ -96,6 +96,7 @@ To maintain the horizontal economy integrity, the following rules must be strict
 - **Phase E: Balance & Polish**:
     - [x] Phase E-1: Probability formula audit and PEN signal fix.
     - [x] Phase E-2: Payout vs. Risk ratio tuning and bug fix.
+    - [x] Phase E-3: Game Over / Restart foundation implementation.
 
 ---
 
@@ -108,6 +109,6 @@ To maintain the horizontal economy integrity, the following rules must be strict
 ---
 
 ## 📝 Status
-- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1).
+- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1, E-3).
 - **Active Code**: Probabilistic resolution live (Math.random) with Tactical Signals active.
 - **Unlock Status**: Gated by Dorothy Proposal (Stage 100).

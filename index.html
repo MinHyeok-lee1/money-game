@@ -134,6 +134,12 @@
           notYetApplied: "(정산 확률에 반영됨)",
           factionBonus: "진영 보너스",
           rarityBonus: "희귀도 보너스",
+          gameOverTitle: "작전 실패 / 부대 괴멸",
+          gameOverReason: "히어로즈 페이트 정산 실패로 인해 부대가 괴멸하고 자본이 소멸되었습니다.",
+          gameOverContract: "실패한 계약",
+          gameOverStake: "손실 금액",
+          gameOverOdds: "정산 확률",
+          restartButton: "처음부터 다시 시작",
         },
         en: {
           title: "Idle Landlord",
@@ -161,6 +167,12 @@
           notYetApplied: "(Applied to settlement odds)",
           factionBonus: "Faction Bonus",
           rarityBonus: "Rarity Bonus",
+          gameOverTitle: "Operation Failed / Squad Wiped",
+          gameOverReason: "The Hero's Fate settlement failed. Your squad has been wiped and your capital has vanished.",
+          gameOverContract: "Failed Contract",
+          gameOverStake: "Capital Lost",
+          gameOverOdds: "Success Odds",
+          restartButton: "Restart From Beginning",
         },
       };
 
@@ -1923,6 +1935,9 @@
               resultHistory: [],
             },
           },
+          meta: {
+            gameOver: null,
+          },
           settings: {
             language,
             lastSavedAt: null,
@@ -2572,10 +2587,25 @@
               .slice(-10)
           : [];
 
+        const meta = state?.meta || {};
+
         return {
           ...defaults,
           ...state,
           version: GAME_STATE_VERSION,
+          meta: {
+            ...defaults.meta,
+            ...meta,
+            gameOver: meta.gameOver && typeof meta.gameOver === 'object'
+              ? {
+                reason: String(meta.gameOver.reason || "unknown"),
+                contractName: String(meta.gameOver.contractName || "Unknown"),
+                stake: toFiniteNumber(meta.gameOver.stake, 0),
+                odds: toFiniteNumber(meta.gameOver.odds, 0),
+                timestamp: toFiniteNumber(meta.gameOver.timestamp, Date.now()),
+              }
+              : null,
+          },
           wallet: {
             ...defaults.wallet,
             ...(state?.wallet || {}),
@@ -4437,7 +4467,8 @@
             const existing = Array.isArray(prev.investment.contractSettlementHistory)
               ? prev.investment.contractSettlementHistory
               : [];
-            return {
+            
+            const nextState = {
               ...prev,
               investment: {
                 ...prev.investment,
@@ -4449,6 +4480,24 @@
                 contractSettlementHistory: [...existing, entry].slice(-10),
               },
             };
+
+            if (!entry.wouldWin) {
+              return {
+                ...nextState,
+                meta: {
+                  ...prev.meta,
+                  gameOver: {
+                    reason: "defense_contract_failure",
+                    contractName: entry.contractName,
+                    stake: entry.stake,
+                    odds: entry.odds,
+                    timestamp: Date.now(),
+                  }
+                }
+              };
+            }
+
+            return nextState;
           });
         };
 
@@ -4846,6 +4895,17 @@
           }));
         };
 
+        const handleRestart = () => {
+          const newDefaults = createDefaultGameState(language);
+          setGameState({
+            ...newDefaults,
+            settings: {
+              ...newDefaults.settings,
+              language: gameState.settings?.language || language,
+            }
+          });
+        };
+
         const buyRpgUpgrade = (key) => {
           const validKeys = ["atkLevel", "spdLevel", "penLevel"];
           if (!validKeys.includes(key)) return;
@@ -4960,7 +5020,55 @@
         ];
 
         return (
-          <div className="w-full max-w-4xl flex flex-col items-center">
+          <div className="w-full max-w-4xl flex flex-col items-center relative">
+            {gameState.meta?.gameOver && (
+              <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+                <div className="w-full max-w-sm bg-gray-900 border-2 border-red-900/50 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-20 h-20 bg-red-900/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2 italic">
+                      {t.gameOverTitle}
+                    </h2>
+                    
+                    <p className="text-gray-400 text-sm font-bold leading-relaxed mb-8">
+                      {t.gameOverReason}
+                    </p>
+                    
+                    <div className="w-full bg-black/40 rounded-xl p-4 mb-8 border border-white/5 space-y-3">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-gray-500 uppercase">{t.gameOverContract}</span>
+                        <span className="text-red-400">{gameState.meta.gameOver.contractName}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-gray-500 uppercase">{t.gameOverStake}</span>
+                        <span className="text-white font-black">{formatMoney(gameState.meta.gameOver.stake)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-gray-500 uppercase">{t.gameOverOdds}</span>
+                        <span className="text-gray-300 font-black">{gameState.meta.gameOver.odds}%</span>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={handleRestart}
+                      className="w-full py-4 bg-white hover:bg-gray-100 text-black font-black text-sm rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-white/5 active:scale-95"
+                    >
+                      {t.restartButton}
+                    </button>
+                    
+                    <p className="mt-6 text-[10px] font-black text-gray-600 uppercase tracking-widest opacity-50">
+                      Money Game Universe / Hero's Fate
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ?嚥▲굧?????꿔꺂???????????????*/}
             <div className="w-full max-w-md">
               <section className="w-full bg-white shadow-sm rounded-xl mb-4 border border-emerald-100 overflow-hidden sticky top-2 z-20">
