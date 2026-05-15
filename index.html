@@ -120,6 +120,14 @@
 
       const INFINITE_BOSS_STAGES = [150, 200, 300, 500, 1000];
 
+      const INFINITE_BOSS_MILESTONES = {
+        150: { stage: 150, nameKey: "boss_ironSentinel", primaryCheckKey: "bossCheck_pen", roleKey: "bossRole_ironSentinel" },
+        200: { stage: 200, nameKey: "boss_phantomGeneral", primaryCheckKey: "bossCheck_acc", roleKey: "bossRole_phantomGeneral" },
+        300: { stage: 300, nameKey: "boss_eternalHydra", primaryCheckKey: "bossCheck_dpsSpd", roleKey: "bossRole_eternalHydra" },
+        500: { stage: 500, nameKey: "boss_berserkerKing", primaryCheckKey: "bossCheck_spdCrt", roleKey: "bossRole_berserkerKing" },
+        1000: { stage: 1000, nameKey: "boss_theAuthority", primaryCheckKey: "bossCheck_all", roleKey: "bossRole_theAuthority" },
+      };
+
       const TRANSLATIONS = {
         ko: {
           title: "아이들 랜드로드",
@@ -179,6 +187,23 @@
           counter_spdAtk: "SPD + ATK",
           counter_crt: "CRT",
           counter_all: "ALL",
+          bossMilestone: "보스 마일스톤",
+          bossPrimaryCheck: "주요 체크",
+          boss_ironSentinel: "아이언 센티널",
+          boss_phantomGeneral: "팬텀 장군",
+          boss_eternalHydra: "이터널 히드라",
+          boss_berserkerKing: "버서커 킹",
+          boss_theAuthority: "디 오소리티",
+          bossCheck_pen: "PEN",
+          bossCheck_acc: "ACC",
+          bossCheck_dpsSpd: "DPS / SPD",
+          bossCheck_spdCrt: "SPD / CRT",
+          bossCheck_all: "모든 스탯",
+          bossRole_ironSentinel: "첫 방어/권위 장벽입니다. 관통 투자를 확인합니다.",
+          bossRole_phantomGeneral: "명중률과 부동산 다각화를 시험합니다.",
+          bossRole_eternalHydra: "재생을 압도할 처리량과 속도를 요구합니다.",
+          bossRole_berserkerKing: "템포와 치명타 폭발력을 시험합니다.",
+          bossRole_theAuthority: "전체 경제 숙련도를 시험하는 최종 관문입니다.",
           externalCapitalLeverage: "외부 자본 레버리지",
           leverageLocked: "도로시의 제안을 확인해야 해금됩니다.",
           leverageAtk: "공격력 보너스 (자산)",
@@ -252,6 +277,23 @@
           counter_spdAtk: "SPD + ATK",
           counter_crt: "CRT",
           counter_all: "ALL",
+          bossMilestone: "Boss Milestone",
+          bossPrimaryCheck: "Primary Check",
+          boss_ironSentinel: "Iron Sentinel",
+          boss_phantomGeneral: "Phantom General",
+          boss_eternalHydra: "Eternal Hydra",
+          boss_berserkerKing: "Berserker King",
+          boss_theAuthority: "The Authority",
+          bossCheck_pen: "PEN",
+          bossCheck_acc: "ACC",
+          bossCheck_dpsSpd: "DPS / SPD",
+          bossCheck_spdCrt: "SPD / CRT",
+          bossCheck_all: "All Stats",
+          bossRole_ironSentinel: "First armor/authority wall. Tests penetration investment.",
+          bossRole_phantomGeneral: "Tests accuracy and real estate diversification.",
+          bossRole_eternalHydra: "Requires throughput and speed to overpower regeneration.",
+          bossRole_berserkerKing: "Tests tempo and burst pressure.",
+          bossRole_theAuthority: "Final gate for full economic mastery.",
           externalCapitalLeverage: "External Capital Leverage",
           leverageLocked: "Requires Dorothy Proposal acknowledgement.",
           leverageAtk: "ATK Bonus (Wealth)",
@@ -2419,6 +2461,12 @@
           INFINITE_MONSTER_ARCHETYPES.standard,
         ];
         return rotation[(safeStage - NORMAL_ENDING_STAGE - 1) % rotation.length];
+      }
+
+      function getInfiniteBossMilestone(stage) {
+        const safeStage = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
+        if (safeStage <= NORMAL_ENDING_STAGE) return null;
+        return INFINITE_BOSS_MILESTONES[safeStage] || null;
       }
 
       function getInfiniteArchetypeCombatModifier(archetype, combatStats, stage) {
@@ -6782,23 +6830,45 @@
 
                     {isInfiniteModeStage(gameState.rpg?.currentStage) && (() => {
                       const archetype = getInfiniteMonsterArchetype(gameState.rpg?.currentStage);
+                      const bossMilestone = getInfiniteBossMilestone(gameState.rpg?.currentStage);
                       return (
-                        <div className="mt-2 bg-black/35 border border-emerald-500/20 rounded-md p-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="text-[9px] font-black text-emerald-300 uppercase tracking-widest">
-                              {t.infiniteArchetype}
+                        <div className="mt-2 space-y-2">
+                          <div className="bg-black/35 border border-emerald-500/20 rounded-md p-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="text-[9px] font-black text-emerald-300 uppercase tracking-widest">
+                                {t.infiniteArchetype}
+                              </div>
+                              <div className={`text-[10px] font-black uppercase ${archetype.color}`}>
+                                {t[archetype.nameKey]}
+                              </div>
                             </div>
-                            <div className={`text-[10px] font-black uppercase ${archetype.color}`}>
-                              {t[archetype.nameKey]}
+                            <div className="mt-1 text-[10px] font-bold text-green-100/80 leading-relaxed">
+                              {t[archetype.descKey]}
+                            </div>
+                            <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase">
+                              <span className="text-green-300/50">{t.archetypeCounter}</span>
+                              <span className="text-white">{t[archetype.counterKey]}</span>
                             </div>
                           </div>
-                          <div className="mt-1 text-[10px] font-bold text-green-100/80 leading-relaxed">
-                            {t[archetype.descKey]}
-                          </div>
-                          <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase">
-                            <span className="text-green-300/50">{t.archetypeCounter}</span>
-                            <span className="text-white">{t[archetype.counterKey]}</span>
-                          </div>
+                          {bossMilestone && (
+                            <div className="bg-yellow-950/30 border border-yellow-500/30 rounded-md p-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-[9px] font-black text-yellow-300 uppercase tracking-widest">
+                                  {t.bossMilestone} / Stage {bossMilestone.stage}
+                                </div>
+                                <div className="text-[10px] font-black uppercase text-yellow-200">
+                                  {t[bossMilestone.nameKey]}
+                                </div>
+                              </div>
+                              <div className="mt-1 text-[10px] font-bold text-yellow-50/80 leading-relaxed">
+                                {t[bossMilestone.roleKey]}
+                              </div>
+                              <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase">
+                                <span className="text-yellow-200/50">{t.bossPrimaryCheck}</span>
+                                <span className="text-white">{t[bossMilestone.primaryCheckKey]}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
