@@ -53,7 +53,7 @@
 - [x] **RPG run structure**: `rpg.run.activeUnits` ticket-gated volatile run units; legacy `rpg.characters` preserved for save compatibility.
 - [ ] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power (locked — requires Dorothy Proposal acceptance).
 - [ ] **Infinite Mode Scaling**: Monster HP growth and stage rewards beyond Stage 100.
-- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Capital Freeze and Infinite Mode scaling are future work.
+- [ ] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation is the next implementation target.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
 - [ ] **Character Storylines**: Lore integration for characters and factions.

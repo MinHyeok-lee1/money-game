@@ -37,5 +37,11 @@
 - **Phase E: Balance & Polish**
     - [x] Phase E-1: Probability formula audit and PEN signal fix <!-- id: 20 -->
     - [x] Phase E-2: Payout vs. Risk audit and multiplier tuning <!-- id: 21 -->
-- **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. Tactical Edge is now active in real settlement odds. PEN signal and preview history payout bugs fixed. Payout multipliers scaled for better risk reward.
+    - [ ] Phase E-3: Hero's Fate Game Over / Restart Foundation <!-- id: 22 -->
+- **Design Alignment**: 
+    - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
+    - Tactical Edge is now active in real settlement odds. 
+    - PEN signal and preview history payout bugs fixed. 
+    - Payout multipliers scaled for better risk reward.
+    - **FAILURE CONSEQUENCE REVISION**: Defense Contract failure now triggers **Game Over / Restart from beginning**, replacing the rejected "Capital Freeze" concept.
 - **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the probabilistic model details.

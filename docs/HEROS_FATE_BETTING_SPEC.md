@@ -41,7 +41,7 @@ The settlement model is **probabilistic**, using a weighted success chance calcu
     - Entry added to `contractSettlementHistory` with `status: "won"`.
 - **Loss Outcome**:
     - `Investment.capital` decreases by `Stake`.
-    - **Consequence**: Temporary "Capital Freeze" (Optional) or loss of RPG run tickets.
+    - **Consequence**: Game Over / Run Collapse (Restart from beginning).
     - Entry added to `contractSettlementHistory` with `status: "lost"`.
 
 ---
@@ -101,7 +101,7 @@ To maintain the horizontal economy integrity, the following rules must be strict
 
 ## ❓ Open Questions
 - **Payout Destination**: Should the payout go to `investment.capital` (to keep the loop independent) or directly to Global `cash`?
-- **Failure Consequence**: Should a loss only take the stake, or should it trigger a temporary cooldown (Capital Freeze) on all trading?
+- **Failure Consequence**: Should a loss only take the stake, or should it trigger a Game Over? (Confirmed: Settlement failure triggers Game Over/Restart; Capital Freeze is rejected).
 - **Character Eligibility**: Should faction bonuses count only "Active Run" units, or the entire owned roster? (Design decision: **Active Run only** to emphasize squad management).
 - **Rarity Scaling**: Should higher rarity characters provide larger bonuses, or should we keep the range tight to prevent rarity-gating?
 
