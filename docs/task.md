@@ -18,8 +18,8 @@
 - [x] Apply UX/Hint fixes <!-- id: 9 -->
 
 ### Phase 3: Verification
-- [ ] Verify diffs <!-- id: 10 -->
-- [ ] Final report <!-- id: 11 -->
+- [x] Verify diffs (SEO fix applied) <!-- id: 10 -->
+- [x] Final report <!-- id: 11 -->
 
 ## Settlement Status (Audit 2026-05-14)
 - **Status Category**: **A / D** (Real settlement probabilistic, Dorothy gate).
