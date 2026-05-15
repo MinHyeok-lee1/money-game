@@ -130,6 +130,10 @@
           dorothyLine4: "스테이지 101 이후는 무한 모드입니다. 그 문은 아직 잠겨 있지만 외부 자본의 힘이 곧 열어 줄 겁니다.",
           dorothyAcknowledge: "알겠습니다, 도로시",
           dorothyAcknowledged: "도로시의 제안을 확인했습니다. 무한 모드 해금 대기 중",
+          tacticalEdgeCandidate: "전술적 이점 후보",
+          notYetApplied: "(미적용)",
+          factionBonus: "진영 보너스",
+          rarityBonus: "희귀도 보너스",
         },
         en: {
           title: "Idle Landlord",
@@ -153,6 +157,10 @@
           dorothyLine4: "Stage 101 and beyond is Infinite Mode. That door is still locked - but external capital leverage will unlock soon.",
           dorothyAcknowledge: "Understood, Dorothy",
           dorothyAcknowledged: "Dorothy's proposal acknowledged - awaiting Infinite Mode unlock",
+          tacticalEdgeCandidate: "Tactical Edge Candidate",
+          notYetApplied: "(Not Applied)",
+          factionBonus: "Faction Bonus",
+          rarityBonus: "Rarity Bonus",
         },
       };
 
@@ -408,7 +416,8 @@
           projectedGain, 
           projectedLoss, 
           confidenceLevel, 
-          explanation 
+          explanation,
+          tacticalSignalCandidate: prob.tacticalSignalCandidate
         };
       }
 
@@ -5421,6 +5430,21 @@
                               <div className="text-[9px] font-black text-gray-400 uppercase mb-1">{ui.signalAnalysis}</div>
                               <div className="text-[10px] text-gray-600 leading-relaxed">{simulatedOutcome.explanation}</div>
                             </div>
+                            
+                            {/* Phase D-1C: Tactical Edge Preview (Informational Only) */}
+                            {simulatedOutcome?.tacticalSignalCandidate && simulatedOutcome.tacticalSignalCandidate.tacticalSignal > 0 && (
+                              <div className="bg-emerald-50 border border-emerald-100 rounded p-2 mt-2">
+                                <div className="text-[9px] font-black text-emerald-600 uppercase mb-1">
+                                  {ui.tacticalEdgeCandidate} <span className="text-emerald-400 font-normal normal-case">{ui.notYetApplied}</span>
+                                </div>
+                                <div className="text-[10px] text-emerald-800 leading-relaxed font-bold">
+                                  +{simulatedOutcome.tacticalSignalCandidate.tacticalSignal}% 
+                                  <span className="text-emerald-600 font-normal ml-1">
+                                    ({ui.factionBonus} +{simulatedOutcome.tacticalSignalCandidate.factionSignal}%, {ui.rarityBonus} +{simulatedOutcome.tacticalSignalCandidate.raritySignal}%)
+                                  </span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
