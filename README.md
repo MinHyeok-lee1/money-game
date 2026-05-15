@@ -26,7 +26,7 @@
    - Auto-combat engine with stage progression, Dividends rewards, and ATK/SPD/PEN stat upgrades.
    - RPG runs use a ticket-gated `rpg.run.activeUnits` structure (volatile per-run units).
    - Normal Ending boundary at Stage 100; Dorothy Proposal script foundation implemented.
-   - Infinite Mode mechanics and External Capital Leverage remain locked.
+   - Infinite Mode Scaling Foundation (Phase F-1) and External Capital Leverage Foundation (Phase G-1, G-3 Specialization) are implemented beyond Stage 100.
 
 ## 🛠 기술 스택 (Tech Stack)
 
