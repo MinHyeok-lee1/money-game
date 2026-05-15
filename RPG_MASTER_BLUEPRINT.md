@@ -92,4 +92,4 @@ Special 5-star+ characters that have "Authority Skills":
 - [ ] **Dorothy Integration Proposal Script**: Dialog and UI flow for the Dorothy Event.
 - [ ] **Dividends Economy Balance Sheet**: Tuning the income/expense ratio for the first RPG reward.
 - [x] **Hero's Fate Betting Spec**: Detailed logic for the Investment/RPG wagering system. (Phases A, B, C, D-1 complete). (See [docs/HEROS_FATE_BETTING_SPEC.md](docs/HEROS_FATE_BETTING_SPEC.md))
-- [ ] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100.
+- [x] **Infinite Mode Scaling Curve**: Mathematical modeling for monster growth beyond Stage 100 (Phase F-1 foundation implemented).

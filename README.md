@@ -64,16 +64,16 @@
 - Preferred weapon synergy foundation: x1.25 multiplier (capped) for matching character preference.
 - Faction synergy foundation: multiplier previews for owning multiple characters of the same faction.
 
-### Milestone 4 (In Progress)
+### Milestone 4 Completion
 
 - RPG Master Blueprint adopted (`RPG_MASTER_BLUEPRINT.md`) covering "Sponsor to God" progression.
 - Auto-combat engine with stage progression, Dividends rewards, and ATK/SPD/PEN stat upgrades implemented.
-- RPG runs use ticket-gated `rpg.run.activeUnits` (volatile per-run units); legacy `rpg.characters` preserved for save compatibility.
-- Normal Ending boundary at Stage 100; `normalEndingReached` / `normalEndingSeen` state fields and three-way mode label implemented.
-- Dorothy Proposal script foundation implemented (`DOROTHY_SCRIPTS`, KO/EN localization, acknowledge handler).
-- Defense Contracts / Hero's Fate Betting presentation and preview foundations are complete. Real settlement is unlocked after Dorothy acknowledgement.
+- Normal Ending boundary at Stage 100; Dorothy Proposal script and acknowledgement flow implemented.
+- Defense Contracts / Hero's Fate Betting system is fully live with probabilistic settlement, Tactical Signals, and a Game Over / Restart-from-beginning failure consequence.
+- Settlement Confirmation UX implemented to prevent accidental run collapses.
+- Infinite Mode Scaling Foundation (Phase F-1) implemented, with harsher monster HP scaling beyond Stage 100.
 
 **Next recommended steps:**
-1. Phase E Balance & Polish — tuning payout vs. risk ratios and implementing Phase E-3 Game Over / Restart foundation.
-2. Infinite Mode scaling — monster HP growth and stage rewards beyond Stage 100.
-3. External Capital Leverage — bridge Landlord/Investment wealth into RPG combat power.
+1. External Capital Leverage — bridge Landlord/Investment wealth into RPG combat power (requires Dorothy Proposal acceptance).
+2. Infinite Mode Depth — boss patterns and specialized monster types for Infinite Mode.
+3. Mythic Authority Triggers — endgame characters with authority skills (Inflation, Market Crash, Monopoly).

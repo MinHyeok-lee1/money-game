@@ -52,7 +52,7 @@
 - [x] **Dorothy Proposal script**: `DOROTHY_SCRIPTS.normalEndingProposal`, KO/EN localization, acknowledge handler; panel visible after Stage 100, dismissed via button.
 - [x] **RPG run structure**: `rpg.run.activeUnits` ticket-gated volatile run units; legacy `rpg.characters` preserved for save compatibility.
 - [ ] **External Capital Leverage**: Bridge Landlord/Investment wealth into RPG combat power (locked — requires Dorothy Proposal acceptance).
-- [ ] **Infinite Mode Scaling**: Monster HP growth and stage rewards beyond Stage 100.
+- [x] **Infinite Mode Scaling**: Monster HP growth and stage rewards beyond Stage 100 (Phase F-1 foundation implemented).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
