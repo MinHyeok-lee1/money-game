@@ -44,6 +44,7 @@
 - **Phase G: External Capital Leverage**
     - [x] Phase G-1: External Capital Leverage Foundation <!-- id: 25 -->
     - [x] Phase G-1A: Source Alignment QA (Diamonds removed, Investment/Rebirth alignment verified) <!-- id: 26 -->
+    - [x] Phase G-2: Leverage Balance QA (Tactical trade-offs confirmed) <!-- id: 27 -->
 - **Design Alignment**: 
     - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
     - Tactical Edge is now active in real settlement odds. 

@@ -311,8 +311,10 @@
       function getDefenseContractProjectedPayout(asset, highestStage, squadDps) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
         // Higher risk -> higher projected multiplier (base range ~1.20 - 2.20)
+        // Intent: Reward users for picking volatile contracts that rely on tactical signals.
         const baseMultiplier = 1 + vol * 10;
         // Squad DPS adds a small log-scaled bonus (capped at +0.20)
+        // Intent: Diminishing returns on DPS ensure contracts remain risky regardless of power level.
         const dps = toFiniteNumber(squadDps, 0);
         const dpsBonus = dps > 0 ? Math.min(0.2, Math.log10(dps + 1) * 0.02) : 0;
         const raw = toFiniteNumber(baseMultiplier + dpsBonus, 1.2);
@@ -2435,6 +2437,7 @@
         const isUnlocked = state.rpg?.normalEndingSeen === true;
         
         // 1. ATK Bonus from Total Wealth (Capped at 50%)
+        // Logarithmic scaling rewards growth across many orders of magnitude.
         const cash = toFiniteNumber(state.wallet?.cash, 0);
         const capital = toFiniteNumber(state.investment?.capital, 0);
         const multiplier = toFiniteNumber(state.landlord?.multiplier, 1);
@@ -2442,13 +2445,16 @@
         const atkBonus = isUnlocked ? Math.min(0.5, Math.max(0, Math.log10(wealthProxy / 100000 + 1) * 0.05)) : 0;
 
         // 2. SPD Bonus from Investment Liquidity (Uninvested Capital) (Capped at 25%)
+        // This creates a tactical trade-off: hold liquid capital for SPD, or invest for CRT.
         const spdBonus = isUnlocked ? Math.min(0.25, Math.max(0, Math.log10(capital / 1000000 + 1) * 0.05)) : 0;
 
         // 3. PEN Bonus from Rebirth Authority (Capped at 50)
+        // Flat additive bonus representing metaphysical progression authority.
         const rebirthCount = toFiniteNumber(state.landlord?.rebirthCount, 0);
         const penBonus = isUnlocked ? Math.min(50, rebirthCount * 2) : 0;
 
         // 4. CRT Bonus from Investment Portfolio Risk (Cost Basis) (Capped at 15%)
+        // Rewards active market participation and risk-taking.
         const holdings = state.investment?.holdings || [];
         const portfolioCostBasis = holdings.reduce((sum, h) => sum + (toFiniteNumber(h.buyPrice, 0) * toFiniteNumber(h.quantity, 0)), 0);
         const crtBonus = isUnlocked ? Math.min(0.15, Math.max(0, Math.log10(portfolioCostBasis / 1000000 + 1) * 0.02)) : 0;
