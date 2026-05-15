@@ -244,6 +244,12 @@
           reaperPhase_aspect: "사신의 형상",
           reaperPhase_form: "사신의 변이",
           reaperPhase_revelation: "사신의 현현",
+          reaperIdentity: "사신",
+          reaperCurrentForm: "현재 가면",
+          reaperThreatLevel: "위협 단계",
+          reaperIntensityTier: "강도",
+          reaperCounters: "권장 대응",
+          reaperAdapting: "사신이 적응하고 있습니다.",
           externalCapitalLeverage: "외부 자본 레버리지",
           leverageLocked: "도로시의 제안을 확인해야 해금됩니다.",
           leverageAtk: "공격력 보너스 (자산)",
@@ -364,6 +370,12 @@
           reaperPhase_aspect: "Reaper Aspect",
           reaperPhase_form: "Reaper Form",
           reaperPhase_revelation: "Reaper Revelation",
+          reaperIdentity: "Reaper",
+          reaperCurrentForm: "Current Mask",
+          reaperThreatLevel: "Threat Level",
+          reaperIntensityTier: "Intensity",
+          reaperCounters: "Recommended Counters",
+          reaperAdapting: "The Reaper is adapting.",
           externalCapitalLeverage: "External Capital Leverage",
           leverageLocked: "Requires Dorothy Proposal acknowledgement.",
           leverageAtk: "ATK Bonus (Wealth)",
@@ -6955,10 +6967,50 @@
                     )}
 
                     {isInfiniteModeStage(gameState.rpg?.currentStage) && (() => {
+                      const reaperProfile = getInfiniteReaperProfile(gameState.rpg?.currentStage);
                       const archetype = getInfiniteMonsterArchetype(gameState.rpg?.currentStage);
                       const bossMilestone = getInfiniteBossMilestone(gameState.rpg?.currentStage);
+                      const reaperCounters = reaperProfile.form.counterKeys.length > 0
+                        ? reaperProfile.form.counterKeys.map((key) => t[key]).join(" / ")
+                        : "-";
                       return (
                         <div className="mt-2 space-y-2">
+                          {reaperProfile.active && (
+                            <div className="bg-red-950/25 border border-red-500/30 rounded-md p-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-[9px] font-black text-red-300 uppercase tracking-widest">
+                                  {t.reaperIdentity} / {t[reaperProfile.form.phaseLabelKey]}
+                                </div>
+                                <div className="text-[10px] font-black uppercase text-red-100">
+                                  {t[reaperProfile.form.nameKey]}
+                                </div>
+                              </div>
+                              <div className="mt-1 flex items-center justify-between gap-2 text-[9px] font-black uppercase">
+                                <span className="text-red-200/60">{t.reaperCurrentForm}</span>
+                                <span className="text-white">{t[reaperProfile.form.titleKey]}</span>
+                              </div>
+                              <div className="mt-1 text-[10px] font-bold text-red-50/80 leading-relaxed">
+                                {t[reaperProfile.form.descKey]}
+                              </div>
+                              <div className="mt-1 grid grid-cols-2 gap-2 text-[9px] font-black uppercase">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-red-200/50">{t.reaperThreatLevel}</span>
+                                  <span className="text-white">{t[reaperProfile.form.threatKey]}</span>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-red-200/50">{t.reaperIntensityTier}</span>
+                                  <span className="text-white">{reaperProfile.intensityTier}</span>
+                                </div>
+                              </div>
+                              <div className="mt-1 flex items-center justify-between gap-2 text-[9px] font-black uppercase">
+                                <span className="text-red-200/50">{t.reaperCounters}</span>
+                                <span className="text-white">{reaperCounters}</span>
+                              </div>
+                              <div className="mt-1 text-[9px] font-bold text-red-200/70 uppercase">
+                                {t.reaperAdapting}
+                              </div>
+                            </div>
+                          )}
                           <div className="bg-black/35 border border-emerald-500/20 rounded-md p-2">
                             <div className="flex items-center justify-between gap-2">
                               <div className="text-[9px] font-black text-emerald-300 uppercase tracking-widest">

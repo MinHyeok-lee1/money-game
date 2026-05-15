@@ -75,6 +75,6 @@
 - External Capital Leverage Foundation (Phase G-1) implemented, allowing wealth and rebirths to boost RPG combat stats after Stage 100 (Balance QA complete).
 
 **Next recommended steps:**
-1. Infinite Mode Depth — unified Reaper enemy model for Stage 101+ (Phase I-4C data foundation complete, Phase I-4D UI integration next).
+1. Infinite Mode Depth — unified Reaper enemy model for Stage 101+ (Phase I-4D UI integration complete, Phase I-4E form modifiers next).
 2. Mythic Authority Triggers — endgame characters with authority skills (Inflation, Market Crash, Monopoly).
 3. Prestige / Honor system — meta-progression across runs.

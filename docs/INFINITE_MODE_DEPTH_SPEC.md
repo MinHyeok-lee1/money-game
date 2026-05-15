@@ -370,18 +370,19 @@ This spec defines *design intent* only. Implementation considerations:
 - **Phase I-4A scope** redirects future Infinite Mode design toward a recurring Reaper enemy model. Stage 200/300/500/1000 individual boss mechanics are deferred.
 - **Phase I-4B scope** defines the unified Reaper model fantasy, naming direction, form/mask model, gameplay model, scaling dimensions, UI direction, and future implementation phases.
 - **Phase I-4C scope** adds static `REAPER_FORMS` metadata and a pure `getInfiniteReaperProfile(stage)` helper. This is data/helper-only and does not change combat or UI behavior.
+- **Phase I-4D scope** displays the Reaper profile in the Stage 101+ RPG UI with identity, current mask/form, threat, intensity tier, and recommended counters. This remains display-only.
 - **Boss encounters** can be flagged via stage number checks (e.g., `stage === 150`) within the existing combat flow.
 - **No new localStorage fields** are required if archetype assignment is deterministic from stage number.
 
-## Next Implementation Phase: I-4D Reaper UI Integration
+## Next Implementation Phase: I-4E Reaper Form Modifier Integration
 
-Phase I-4D should define:
+Phase I-4E should define:
 
-- compact Reaper identity display
-- current form/mask label
-- current intensity tier and threat label
-- recommended counter stat display
-- no combat behavior changes yet
+- bounded Reaper form modifiers
+- Stage 1-100 neutral behavior
+- no new save schema
+- no Stage 200/300/500/1000 bespoke boss mechanics unless folded through the Reaper model
+- conservative QA gates before tuning upward
 
 ---
 
@@ -400,4 +401,5 @@ Phase I-4D should define:
 - **Phase I-4A**: Reaper Direction Alignment — COMPLETE
 - **Phase I-4B**: Reaper Infinite Mode Model Design Spec — COMPLETE
 - **Phase I-4C**: Reaper Model Data Foundation — COMPLETE
-- **Phase I-4D**: Reaper UI Integration — NEXT
+- **Phase I-4D**: Reaper UI Integration — COMPLETE
+- **Phase I-4E**: Reaper Form Modifier Integration — NEXT
