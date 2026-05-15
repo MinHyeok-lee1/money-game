@@ -24,11 +24,14 @@ The settlement model is **probabilistic**, using a weighted success chance calcu
 - **Risk Modifiers**: Faction synergies or Character rarity bonuses (Future).
 
 ### 2. Probability Bounds
-- **Minimum Win Chance**: 5% (Guaranteed small chance to win despite overwhelming odds).
-- **Maximum Win Chance**: 95% (Guaranteed small chance to fail despite overwhelming power).
-- **Success Formula (Conceptual)**: 
-    `WinProb = clamp((SquadPower / ContractDifficulty) * BaseOdds, 0.05, 0.95)`
-    *Where `SquadPower` is a derived value from DPS, PEN, and Stage Progress.*
+- **Minimum Win Chance**: 5%
+- **Maximum Win Chance**: 95%
+- **Success Formula (Policy C)**: 
+    `WinProb = clamp(BaseOdds + StageSignal + CombatSignals, 0.05, 0.95)`
+    *   **BaseOdds**: Pure investment risk (30% to 80%).
+    *   **StageSignal**: RPG progress bonus (up to +15%).
+    *   **CombatSignals**: DPS (+5%) and PEN (+3% per level, max +15%).
+    *   **Headroom**: Total max bonus (+35%) allows tactical signals to remain impactful.
 
 ### 3. Settlement Outputs
 - **Win Outcome**:

@@ -253,13 +253,9 @@
 
       function getDefenseContractOdds(asset, highestStage) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Lower volatility ??higher base defense odds (range 30??0)
-        const base = Math.round(Math.max(30, Math.min(80, (1 - vol * 3.5) * 100)));
-        // RPG stage progress adds up to +10 bonus
-        const stageBonus = Math.min(10, Math.round(
-          (toFiniteNumber(highestStage, 0) / NORMAL_ENDING_STAGE) * 10
-        ));
-        return Math.min(90, base + stageBonus);
+        // Base odds are now purely volatility-driven (range 30-80)
+        // This decouples investment risk from RPG progress signals.
+        return Math.round(Math.max(30, Math.min(80, (1 - vol * 3.5) * 100)));
       }
 
       function getDefenseContractProjectedPayout(asset, highestStage, squadDps) {
@@ -296,17 +292,16 @@
         const dps = toFiniteNumber(squadDps, 0);
         const odds = getDefenseContractOdds(asset, stage);
         
-        // RPG-specific signals
-        // 1. Stage Signal (Progress-based)
-        const stageSignal = Math.min(10, Math.round((stage / NORMAL_ENDING_STAGE) * 10));
+        // RPG-specific signals (Total Max Bonus: +35%)
+        // 1. Stage Signal (Progress-based, Max +15%)
+        const stageSignal = Math.min(15, Math.round((stage / NORMAL_ENDING_STAGE) * 15));
         
-        // 2. DPS Signal (Active Combat Power)
-        // We use squadDps which already includes ATK/SPD upgrades via getRpgCombatStats
+        // 2. DPS Signal (Active Combat Power, +5%)
         const dpsSignal = dps > 0 ? 5 : 0; 
         
-        // 3. PEN Signal (Armor Penetration utility)
+        // 3. PEN Signal (Armor Penetration utility, +3% per level, Max +15%)
         const combatStats = getRpgCombatStats(gameState);
-        const penSignal = Math.round(combatStats.pen * 5); 
+        const penSignal = Math.round(combatStats.pen * 3); 
 
         const rawChance = odds + stageSignal + dpsSignal + penSignal;
         const boundedChance = Math.max(5, Math.min(95, rawChance));
@@ -324,7 +319,7 @@
           dpsSignal,
           penSignal,
           riskModifier: 0, 
-          explanation: `Calculated from Base Odds (${odds}), Stage Signal (+${stageSignal}), and RPG Combat Power (+${dpsSignal + penSignal}).`
+          explanation: `Base Odds (${odds}%) + RPG Progress (+${stageSignal}%) + Combat Power (+${dpsSignal + penSignal}%).`
         };
       }
 

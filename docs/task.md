@@ -29,5 +29,6 @@
     - [x] Phase A: Pure success chance helper foundation <!-- id: 12 -->
     - [x] Phase B: Wire dry-run preview to probabilistic helper <!-- id: 13 -->
     - [x] Phase C: Wire real settlement to probabilistic helper <!-- id: 14 -->
+    - [x] Phase D-0: Probability formula tuning (decouple base odds) <!-- id: 15 -->
 - **Design Alignment**: Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase.
 - **Detailed Spec**: See [HEROS_FATE_BETTING_SPEC.md](HEROS_FATE_BETTING_SPEC.md) for the probabilistic model details.
