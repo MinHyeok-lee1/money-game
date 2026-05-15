@@ -110,8 +110,9 @@ To maintain the horizontal economy integrity, the following rules must be strict
 ---
 
 ## 📝 Status
-- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1, E-3, E-4).
+- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1, E-3, E-4, G-4B).
 - **Active Code**: Probabilistic resolution live (Math.random) with Tactical Signals active.
+- **G-4B Build Alignment**: Specialization faction alignment contributes a small Build Alignment signal (max +3%) inside the existing +12% Tactical Signal cap. Locked to 0 before Dorothy acknowledgement.
 - **Unlock Status**: Gated by Dorothy Proposal (Stage 100).
 
 ---

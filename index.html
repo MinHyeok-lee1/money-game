@@ -135,6 +135,7 @@
           notYetApplied: "(정산 확률에 반영됨)",
           factionBonus: "진영 보너스",
           rarityBonus: "희귀도 보너스",
+          buildAlignment: "빌드 정렬",
           gameOverTitle: "작전 실패 / 부대 괴멸",
           gameOverReason: "히어로즈 페이트 정산 실패로 인해 부대가 괴멸하고 자본이 소멸되었습니다.",
           gameOverContract: "실패한 계약",
@@ -183,6 +184,7 @@
           notYetApplied: "(Applied to settlement odds)",
           factionBonus: "Faction Bonus",
           rarityBonus: "Rarity Bonus",
+          buildAlignment: "Build Align",
           gameOverTitle: "Operation Failed / Squad Wiped",
           gameOverReason: "The Hero's Fate settlement failed. Your squad has been wiped and your capital has vanished.",
           gameOverContract: "Failed Contract",
@@ -348,7 +350,7 @@
       // Phase D-1B: Tactical Signal helper ??pure and candidate only
       function calculateDefenseContractTacticalSignal(gameState, asset) {
         const targetFaction = DEFENSE_CONTRACT_FACTION_MAPPING[asset?.id];
-        if (!targetFaction) return { tacticalSignal: 0, reason: "No faction mapping" };
+        if (!targetFaction) return { tacticalSignal: 0, buildAlignment: 0, reason: "No faction mapping" };
 
         const activeUnits = gameState.rpg?.run?.activeUnits || [];
         let factionMatches = 0;
@@ -362,7 +364,6 @@
             factionMatches++;
           }
 
-          // Rarity mapping: legendary/mythic (+2), unique/epic (+1)
           if (def.rarity === "mythic" || def.rarity === "legendary") {
             rarityBonus += 2;
           } else if (def.rarity === "unique" || def.rarity === "epic") {
@@ -370,20 +371,30 @@
           }
         });
 
-        const factionSignal = Math.min(10, factionMatches * 2); // +2% per match, max 10
-        const cappedRaritySignal = Math.min(5, rarityBonus); // max 5
-        const combined = Math.min(12, factionSignal + cappedRaritySignal);
+        const factionSignal = Math.min(10, factionMatches * 2);
+        const cappedRaritySignal = Math.min(5, rarityBonus);
+
+        const specStats = getExternalCapitalSpecializationStats(gameState);
+        let buildAlignment = 0;
+        if (specStats.unlocked) {
+          const factionBonusMap = { realty: specStats.realtyBonus, ticker: specStats.tickerBonus, shadow: specStats.shadowBonus, luxury: specStats.luxuryBonus };
+          const matchingBonus = factionBonusMap[targetFaction] || 0;
+          buildAlignment = matchingBonus > 0 ? Math.min(3, Math.round(matchingBonus * 100 * 0.5)) : 0;
+        }
+
+        const combined = Math.min(12, factionSignal + cappedRaritySignal + buildAlignment);
 
         return {
           factionSignal,
           raritySignal: cappedRaritySignal,
+          buildAlignment,
           tacticalSignal: combined,
           tacticalCap: 12,
           matchedFaction: targetFaction,
           eligibleUnitCount: activeUnits.length,
           matchingFactionCount: factionMatches,
           rarityContribution: rarityBonus,
-          reason: `Faction: ${factionSignal}%, Rarity: ${cappedRaritySignal}% (Capped at 12%)`
+          reason: `Faction: ${factionSignal}%, Rarity: ${cappedRaritySignal}%, Align: ${buildAlignment}% (Capped at 12%)`
         };
       }
 
@@ -5788,9 +5799,9 @@
                                   {ui.tacticalEdgeCandidate} <span className="text-emerald-400 font-normal normal-case">{ui.notYetApplied}</span>
                                 </div>
                                 <div className="text-[10px] text-emerald-800 leading-relaxed font-bold">
-                                  +{simulatedOutcome.tacticalSignalCandidate.tacticalSignal}% 
+                                  +{simulatedOutcome.tacticalSignalCandidate.tacticalSignal}%
                                   <span className="text-emerald-600 font-normal ml-1">
-                                    ({ui.factionBonus} +{simulatedOutcome.tacticalSignalCandidate.factionSignal}%, {ui.rarityBonus} +{simulatedOutcome.tacticalSignalCandidate.raritySignal}%)
+                                    ({ui.factionBonus} +{simulatedOutcome.tacticalSignalCandidate.factionSignal}%, {ui.rarityBonus} +{simulatedOutcome.tacticalSignalCandidate.raritySignal}%{simulatedOutcome.tacticalSignalCandidate.buildAlignment > 0 ? `, ${ui.buildAlignment} +${simulatedOutcome.tacticalSignalCandidate.buildAlignment}%` : ""})
                                   </span>
                                 </div>
                               </div>

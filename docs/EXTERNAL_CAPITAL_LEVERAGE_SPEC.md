@@ -92,5 +92,6 @@ External specialization shouldn't just be a stat stick; it should enhance the pl
 - [x] **Gating**: Verified that all bonuses are 0 until `normalEndingSeen` is true.
 - [x] **Bounds**: Verified that property bonuses are finite (capped by max 10 properties) and investment bonuses use logarithmic scaling.
 - [x] **Double-Counting**: Verified that specialization bonuses are additive within the `totalAtkMult` and do not re-apply existing leverage sources.
-- [x] **Hero's Fate Integrity**: Confirmed that `calculateDefenseContractSuccessChance` remains independent of specialization bonuses for now (no Tactical Signal leak).
+- [x] **Hero's Fate Integrity**: Specialization now contributes a small Build Alignment signal (max +3%) inside the existing +12% Tactical Signal cap via `calculateDefenseContractTacticalSignal`. This is faction-alignment-based, not wealth-based.
 - [x] **Pressure Breaker**: Confirmed `pressureMult` is player-side and only active at Stage 101+.
+- [x] **G-4B Implementation**: Build Alignment signal is live. Uses specialization faction bonus (realtyBonus/tickerBonus/shadowBonus/luxuryBonus) to determine alignment with contract faction. Locked to 0 before Dorothy gate.
