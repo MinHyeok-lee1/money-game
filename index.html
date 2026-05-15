@@ -466,15 +466,17 @@
         // Detailed explanation from the probabilistic helper
         const explanation = `${contractDisplayName} shows a ${successChance}% success probability. ${prob.explanation}`;
         
-        return { 
-          selectedContractId: contractId, 
-          outcomeLabel, 
-          successChance, 
-          projectedGain, 
-          projectedLoss, 
-          confidenceLevel, 
-          explanation,
+        return {
+          selectedContractId: contractId,
+          contractName: contractDisplayName,
+          stake,
+          odds: successChance,
+          outcomeLabel,
           successChance,
+          projectedGain,
+          projectedLoss,
+          confidenceLevel,
+          explanation,
           projectedPayout: payout,
           tacticalSignalCandidate: prob.tacticalSignalCandidate
         };

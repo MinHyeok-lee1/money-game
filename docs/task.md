@@ -55,6 +55,7 @@
     - [x] Phase G-4B: Tactical Signal Build Alignment Implementation (Specialization → faction alignment signal, capped within +12%) <!-- id: 34 -->
     - [x] Phase G-4C: Tactical Signal Build Alignment Balance QA (Cap verified, high-risk contracts remain risky, no double-counting) <!-- id: 35 -->
     - [x] Phase G-4D: Defense Contract Base Odds Tier Calibration (vol^0.6 power curve, tiers now Stable 79% / Volatile 62% / High Risk 32%) <!-- id: 36 -->
+    - [x] Phase G-4E: Hero's Fate End-to-End Regression QA (Confirmation modal missing properties fixed, all flows verified) <!-- id: 37 -->
 - **Design Alignment**: 
     - Real settlement is locked during the "Sponsor" phase and becomes active in the "God" phase. 
     - Tactical Edge is now active in real settlement odds. 
