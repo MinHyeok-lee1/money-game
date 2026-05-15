@@ -28,7 +28,7 @@ The settlement model is **probabilistic**, using a weighted success chance calcu
 - **Maximum Win Chance**: 95%
 - **Success Formula (Policy C)**: 
     `WinProb = clamp(BaseOdds + StageSignal + CombatSignals + TacticalSignal, 0.05, 0.95)`
-    *   **BaseOdds**: Pure investment risk (30% to 80%).
+    *   **BaseOdds**: Pure investment risk (30% to 80%). Derived via power-curve `(1 - vol^0.6 * 3.5) * 100` (Phase G-4D). Stable ~79%, Volatile ~62%, High Risk ~32%.
     *   **StageSignal**: RPG progress bonus (up to +15%).
     *   **CombatSignals**: DPS (+5%) and PEN (+3% per level, max +15%).
     *   **TacticalSignal**: Composition bonuses from Factions and Rarity (up to +12% capped).
@@ -110,7 +110,7 @@ To maintain the horizontal economy integrity, the following rules must be strict
 ---
 
 ## 📝 Status
-- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1, E-3, E-4, G-4B).
+- **Current Status**: **IMPLEMENTED** (Phases A, B, C, D-0, D-1, E-3, E-4, G-4B, G-4D).
 - **Active Code**: Probabilistic resolution live (Math.random) with Tactical Signals active.
 - **G-4B Build Alignment**: Specialization faction alignment contributes a small Build Alignment signal (max +3%) inside the existing +12% Tactical Signal cap. Locked to 0 before Dorothy acknowledgement.
 - **Unlock Status**: Gated by Dorothy Proposal (Stage 100).

@@ -312,9 +312,9 @@
 
       function getDefenseContractOdds(asset, highestStage) {
         const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Base odds are now purely volatility-driven (range 30-80)
-        // This decouples investment risk from RPG progress signals.
-        return Math.round(Math.max(30, Math.min(80, (1 - vol * 3.5) * 100)));
+        // Power-curve scaling: vol^0.6 penalizes mid-range volatility harder than linear,
+        // producing distinct tiers (Stable ~79%, Volatile ~62%, High Risk ~32%).
+        return Math.round(Math.max(30, Math.min(80, (1 - Math.pow(vol, 0.6) * 3.5) * 100)));
       }
 
       function getDefenseContractProjectedPayout(asset, highestStage, squadDps) {
