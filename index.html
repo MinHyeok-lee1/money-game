@@ -6014,15 +6014,15 @@
                   </div>
 
                   {/* Bet Slip panel */}
-                  <div className="bg-white border-b border-gray-100 px-4 py-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                          {ui.betSlip}
-                        </div>
+                  <div className="bg-white border-b border-gray-100 px-4 py-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-xs font-black text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🧾</span> {ui.betSlip}
+                      </div>
                       {betPreview && (
                         <button
                           onClick={clearDefenseContractBetSlip}
-                          className="text-[9px] font-black text-gray-400 uppercase hover:text-red-500 transition-colors"
+                          className="text-[10px] font-black text-gray-400 uppercase hover:text-red-500 transition-colors bg-gray-50 px-2 py-0.5 rounded border"
                         >
                           {ui.clear}
                         </button>
@@ -6030,115 +6030,130 @@
                     </div>
 
                     {betPreview ? (
-                      <div className="space-y-3">
-                        {/* Selected contract summary */}
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-md p-3">
-                          <div className="flex items-center justify-between">
+                      <div className="space-y-4">
+                        {/* A. Selected Prediction Summary */}
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3.5">
+                          <div className="text-[9px] font-black text-emerald-800 uppercase tracking-widest mb-1.5">선택한 전술적 예측</div>
+                          <h3 className="font-black text-gray-900 text-sm">
+                            {DEFENSE_CONTRACT_FLAVOR[betPreview.asset.id]?.displayName || betPreview.asset.name}
+                          </h3>
+                          <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-emerald-100 text-[11px]">
                             <div>
-                              <div className="font-black text-gray-800 text-sm">
-                                {DEFENSE_CONTRACT_FLAVOR[betPreview.asset.id]?.displayName || betPreview.asset.name}
-                              </div>
-                              <div className={`text-[10px] font-black uppercase mt-0.5 ${betPreview.tier.color}`}>
-                                {betPreview.tier.label} / {betPreview.odds}% {ui.defenseOdds}
-                              </div>
+                              <span className="text-gray-400">예측한 운명:</span>
+                              <div className="font-black text-emerald-700">🛡️ 영웅 생존 / 방어 성공</div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-[9px] font-bold text-gray-400 uppercase">{ui.projectedPayout}</div>
-                              <div className="text-sm font-black text-emerald-700">x{betPreview.payout.toFixed(2)}</div>
+                            <div>
+                              <span className="text-gray-400">성공 확률 / 배당률:</span>
+                              <div className="font-black text-emerald-800">{betPreview.odds}% / x{betPreview.payout.toFixed(2)}</div>
                             </div>
+                          </div>
+                          <div className="mt-2.5 bg-white bg-opacity-60 rounded-md p-2 text-[10px] space-y-1 text-gray-600 leading-snug">
+                            <div className="text-red-500 font-bold">• 실패 시: 영웅 사망 및 전선 지원 기금 전액 소실 위험</div>
+                            <div>• 현재 지원: <span className="font-bold text-gray-700">생존 예측 중심</span></div>
+                            <div className="text-gray-400 text-[9px]">• 영웅 사망 예측 및 1:1 결투 예측은 향후 확장 예정</div>
                           </div>
                         </div>
 
-                        {/* Stake input */}
-                        <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
-                          <div className="flex items-center justify-between mb-1.5">
-                            <div className="text-[9px] font-black text-gray-400 uppercase">{ui.stakeAmount}</div>
-                            <div className="text-[9px] font-bold text-gray-400 uppercase">
-                              {ui.contractCapital}: {formatMoney(contractCapital)}
-                            </div>
+                        {/* B. Stake Input Area */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3.5">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-[10px] font-black text-gray-700 uppercase">참전 지원 기금 설정</label>
+                            <span className="text-[10px] font-bold text-gray-400">
+                              {ui.contractCapital}: <span className="font-black text-emerald-700">{formatMoney(contractCapital)}</span>
+                            </span>
                           </div>
-                          <input
-                            type="number"
-                            min="0"
-                            max={contractCapital}
-                            value={gameState.investment.betSlip?.stake ?? 0}
-                            onChange={(e) => updateDefenseContractStake(e.target.value)}
-                            className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-sm font-black text-gray-800 focus:outline-none focus:border-emerald-400"
-                            placeholder="0"
-                          />
-                          <div className="grid grid-cols-3 gap-1 mt-1.5">
+                          <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-gray-400 font-black text-xs">₩</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max={contractCapital}
+                              value={gameState.investment.betSlip?.stake ?? 0}
+                              onChange={(e) => updateDefenseContractStake(e.target.value)}
+                              className="w-full bg-white border border-gray-300 rounded-lg pl-7 pr-3 py-2 text-sm font-black text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-1.5 mt-2">
                             {[0.25, 0.5, 1.0].map((frac) => (
                               <button
                                 key={frac}
                                 onClick={() => updateDefenseContractStake(Math.floor(contractCapital * frac))}
-                                className="rounded py-1 text-[9px] font-black bg-gray-200 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors uppercase"
+                                className="rounded-lg py-1.5 text-[10px] font-black bg-white border border-gray-200 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 transition-all uppercase"
                               >
-                                {frac === 1.0 ? "Max" : `${frac * 100}%`}
+                                {frac === 1.0 ? "최대 기금" : `${frac * 100}%`}
                               </button>
                             ))}
                           </div>
                         </div>
 
-                        {/* Projected payout preview */}
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="bg-gray-50 border border-gray-100 rounded-md p-2">
-                            <div className="text-[9px] font-black text-gray-400 uppercase">{ui.stakeAmount}</div>
-                            <div className="text-sm font-black text-gray-800">
+                        {/* C. Probability / Reward Summary */}
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-center">
+                            <div className="text-[9px] font-black text-gray-400 uppercase mb-1">지원 기금액</div>
+                            <div className="text-base font-black text-gray-800">
                               {formatMoney(toFiniteNumber(gameState.investment.betSlip?.stake, 0))}
                             </div>
                           </div>
-                          <div className="bg-emerald-50 border border-emerald-100 rounded-md p-2">
-                            <div className="text-[9px] font-black text-gray-400 uppercase">{ui.projectedWin}</div>
-                            <div className="text-sm font-black text-emerald-700">
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
+                            <div className="text-[9px] font-black text-gray-400 uppercase mb-1">예상 획득 자금</div>
+                            <div className="text-base font-black text-emerald-700">
                               {formatMoney(betPreview.projectedWin)}
                             </div>
                           </div>
                         </div>
 
-                        {/* Settlement {ui.preview} panel */}
+                        {/* Settlement Simulated Preview Panel */}
                         {simulatedOutcome && (
-                          <div className="border border-emerald-100 rounded-md bg-emerald-50 p-3 space-y-2">
-                            <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">{ui.settlementPreview}</div>
+                          <div className="border border-emerald-100 rounded-xl bg-emerald-50 bg-opacity-40 p-3.5 space-y-2.5">
+                            <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">📡 전선 사전 모의 작전 결과 분석</div>
                             <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-white border border-gray-100 rounded p-2">
-                                <div className="text-[9px] font-black text-gray-400 uppercase">{ui.successChance}</div>
+                              <div className="bg-white border border-gray-100 rounded-lg p-2.5">
+                                <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.successChance}</div>
                                 <div className="text-sm font-black text-emerald-700">{simulatedOutcome.successChance}%</div>
                               </div>
-                              <div className="bg-white border border-gray-100 rounded p-2">
-                                <div className="text-[9px] font-black text-gray-400 uppercase">{ui.outcome}</div>
-                                <div className={`text-sm font-black ${simulatedOutcome.outcomeLabel === "Favorable" ? "text-emerald-700" : simulatedOutcome.outcomeLabel === "Neutral" ? "text-yellow-600" : "text-red-500"}`}>
-                                  {simulatedOutcome.outcomeLabel}
+                              <div className="bg-white border border-gray-100 rounded-lg p-2.5">
+                                <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.outcome}</div>
+                                <div className={`text-sm font-black uppercase ${simulatedOutcome.outcomeLabel === "Favorable" ? "text-emerald-700" : simulatedOutcome.outcomeLabel === "Neutral" ? "text-yellow-600" : "text-red-500"}`}>
+                                  {simulatedOutcome.outcomeLabel === "Favorable" ? "생존" : "전멸 위험"}
                                 </div>
                               </div>
-                              <div className="bg-white border border-gray-100 rounded p-2">
-                                <div className="text-[9px] font-black text-gray-400 uppercase">{ui.projectedGain}</div>
+                              <div className="bg-white border border-gray-100 rounded-lg p-2.5">
+                                <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.projectedGain}</div>
                                 <div className="text-sm font-black text-emerald-700">+{formatMoney(simulatedOutcome.projectedGain)}</div>
                               </div>
-                              <div className="bg-white border border-gray-100 rounded p-2">
-                                <div className="text-[9px] font-black text-gray-400 uppercase">{ui.projectedLoss}</div>
+                              <div className="bg-white border border-gray-100 rounded-lg p-2.5">
+                                <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.projectedLoss}</div>
                                 <div className="text-sm font-black text-red-500">-{formatMoney(simulatedOutcome.projectedLoss)}</div>
                               </div>
                             </div>
-                            <div className="bg-white border border-gray-100 rounded p-2">
-                              <div className="text-[9px] font-black text-gray-400 uppercase mb-1">{ui.confidence}</div>
-                              <div className={`text-xs font-black ${simulatedOutcome.confidenceLevel === "High" ? "text-emerald-700" : simulatedOutcome.confidenceLevel === "Medium" ? "text-yellow-600" : "text-gray-500"}`}>
-                                {simulatedOutcome.confidenceLevel}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-white border border-gray-100 rounded-lg p-2">
+                                <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.confidence}</div>
+                                <div className={`text-xs font-black ${simulatedOutcome.confidenceLevel === "High" ? "text-emerald-700" : simulatedOutcome.confidenceLevel === "Medium" ? "text-yellow-600" : "text-gray-500"}`}>
+                                  {simulatedOutcome.confidenceLevel}
+                                </div>
+                              </div>
+                              <div className="bg-white border border-gray-100 rounded-lg p-2">
+                                <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">전선 위험도</div>
+                                <span className={`text-xs font-black ${betPreview.tier.color}`}>{betPreview.tier.label}</span>
                               </div>
                             </div>
-                            <div className="bg-white border border-gray-100 rounded p-2">
+                            <div className="bg-white border border-gray-100 rounded-lg p-2.5">
                               <div className="text-[9px] font-black text-gray-400 uppercase mb-1">{ui.signalAnalysis}</div>
                               <div className="text-[10px] text-gray-600 leading-relaxed">{simulatedOutcome.explanation}</div>
                             </div>
                             
-                            {/* Phase D-1C: Tactical Edge Preview (Informational Only) */}
+                            {/* Phase D-1C: Tactical Edge Preview */}
                             {simulatedOutcome?.tacticalSignalCandidate && simulatedOutcome.tacticalSignalCandidate.tacticalSignal > 0 && (
-                              <div className="bg-emerald-50 border border-emerald-100 rounded p-2 mt-2">
-                                <div className="text-[9px] font-black text-emerald-600 uppercase mb-1">
-                                  {ui.tacticalEdgeCandidate} <span className="text-emerald-400 font-normal normal-case">{ui.notYetApplied}</span>
+                              <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5">
+                                <div className="text-[9px] font-black text-emerald-600 uppercase mb-1 flex items-center justify-between">
+                                  <span>{ui.tacticalEdgeCandidate}</span>
+                                  <span className="text-emerald-400 font-normal text-[8px]">{ui.notYetApplied}</span>
                                 </div>
                                 <div className="text-[10px] text-emerald-800 leading-relaxed font-bold">
                                   +{simulatedOutcome.tacticalSignalCandidate.tacticalSignal}%
-                                  <span className="text-emerald-600 font-normal ml-1">
+                                  <span className="text-emerald-600 font-normal ml-1 block text-[8px]">
                                     ({ui.factionBonus} +{simulatedOutcome.tacticalSignalCandidate.factionSignal}%, {ui.rarityBonus} +{simulatedOutcome.tacticalSignalCandidate.raritySignal}%{simulatedOutcome.tacticalSignalCandidate.buildAlignment > 0 ? `, ${ui.buildAlignment} +${simulatedOutcome.tacticalSignalCandidate.buildAlignment}%` : ""})
                                   </span>
                                 </div>
@@ -6151,73 +6166,59 @@
                         <button
                           onClick={saveDefenseContractPreviewToHistory}
                           disabled={!simulatedOutcome || toFiniteNumber(gameState.investment.betSlip?.stake, 0) <= 0}
-                          className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
+                          className={`w-full py-2.5 rounded-lg font-black text-xs uppercase tracking-wider transition-colors border ${
                             simulatedOutcome && toFiniteNumber(gameState.investment.betSlip?.stake, 0) > 0
-                              ? "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
-                              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              ? "bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50 cursor-pointer shadow-sm"
+                              : "bg-gray-100 border-transparent text-gray-400 cursor-not-allowed"
                           }`}
                         >
                           {ui.savePreviewToHistory}
                         </button>
 
-
-                        {/* Settlement gate status + validation breakdown */}
+                        {/* D. Risk Warning & Settlement Gating */}
                         {(() => {
                           const v = settlementValidation;
-                          const checks = v.checks;
-                          const checkRows = [
-                            { label: ui.settlementUnlocked, pass: checks.settlementUnlocked },
-                            { label: ui.contractSelected,   pass: checks.contractSelected },
-                            { label: ui.positiveStake,      pass: checks.stakePositive },
-                            { label: ui.stakeWithinCapital, pass: checks.stakeWithinCash },
-                            { label: ui.oddsValid,          pass: checks.oddsValid },
-                            { label: ui.payoutValid,        pass: checks.payoutValid },
-                          ];
                           return (
-                            <div className="border border-gray-200 rounded-md overflow-hidden">
-                              <div className="bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200">
+                            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                              <div className="bg-gray-50 px-3.5 py-2 flex items-center justify-between border-b border-gray-200">
                                 <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider">{ui.settlementStatus}</div>
-                                <div className={`text-[9px] font-black uppercase ${v.canSettle ? "text-emerald-600" : "text-gray-400"}`}>
+                                <div className={`text-[9px] font-black uppercase ${v.canSettle ? "text-emerald-600" : "text-red-500"}`}>
                                   {v.canSettle ? ui.ready : ui.locked}
                                 </div>
                               </div>
-                              <div className="px-3 pt-2 pb-1">
-                                <div className="text-[10px] text-gray-500 leading-relaxed mb-2">{v.reason}</div>
-                                <div className="space-y-1">
-                                  {checkRows.map((row) => (
-                                    <div key={row.label} className="flex items-center justify-between">
-                                      <span className="text-[9px] text-gray-500">{row.label}</span>
-                                      <span className={`text-[9px] font-black ${row.pass ? "text-emerald-600" : "text-gray-300"}`}>
-                                        {row.pass ? ui.ready : ui.locked}
-                                      </span>
-                                    </div>
-                                  ))}
+                              <div className="p-3.5">
+                                <div className="text-[10px] text-gray-500 leading-snug font-bold">
+                                  ⚠️ {v.reason}
+                                </div>
+                                <div className="mt-3 bg-red-50 border border-red-100 rounded-lg p-2.5 text-[9px] text-red-700 font-bold leading-normal">
+                                  🚨 실제 결과 정산은 전선 방어 결과를 즉시 결산합니다.<br />
+                                  실패 시 참전 지원 기금은 전액 소실되며, 전선 붕괴(게임 오버)로 이어져 강제 작전 재기동을 해야 할 위험이 있으니 주의하십시오!
                                 </div>
                               </div>
-                              <div className="px-3 pt-2 pb-1">
+                              
+                              {/* E. Action Buttons */}
+                              <div className="px-3.5 pb-2.5 space-y-2">
                                 <button
                                   onClick={runDefenseContractDryRun}
                                   disabled={!v.canSettle}
-                                  className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
+                                  className={`w-full py-2.5 rounded-lg font-black text-xs uppercase tracking-wider transition-colors border ${
                                     v.canSettle
-                                      ? "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
-                                      : "bg-gray-100 text-gray-300 cursor-not-allowed"
+                                      ? "bg-white border-emerald-200 text-emerald-800 hover:bg-emerald-50 cursor-pointer"
+                                      : "bg-gray-100 border-transparent text-gray-300 cursor-not-allowed"
                                   }`}
                                 >
-                                  {ui.runDryRun}
+                                  🔍 {ui.runDryRun}
                                 </button>
-                              </div>
-                              <div className="px-3 pb-3">
                                 <button
                                   onClick={v.canSettle ? () => setShowSettlementConfirm(true) : undefined}
                                   disabled={!v.canSettle}
-                                  className={`w-full py-2 rounded-md font-black text-xs uppercase tracking-wider transition-colors ${
+                                  className={`w-full py-2.5 rounded-lg font-black text-xs uppercase tracking-wider transition-colors shadow-sm ${
                                     v.canSettle
                                       ? "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
                                       : "bg-gray-100 text-gray-400 cursor-not-allowed"
                                   }`}
                                 >
-                                  {v.canSettle ? ui.settleContract : ui.realSettlementLocked}
+                                  ⚡ {v.canSettle ? ui.settleContract : ui.realSettlementLocked}
                                 </button>
                               </div>
                             </div>
@@ -6229,55 +6230,55 @@
                           const dr = gameState.investment.lastContractDryRun;
                           const ts = new Date(toFiniteNumber(dr.createdAt, Date.now())).toLocaleTimeString();
                           return (
-                            <div className="border border-emerald-200 rounded-md overflow-hidden">
-                              <div className="bg-emerald-50 px-3 py-2 flex items-center justify-between border-b border-emerald-200">
+                            <div className="border border-emerald-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                              <div className="bg-emerald-50 px-3.5 py-2 flex items-center justify-between border-b border-emerald-200">
                                 <div className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">{ui.dryRunResult}</div>
-                                <div className="text-[9px] text-emerald-500">{ts}</div>
+                                <div className="text-[9px] text-emerald-500 font-bold">{ts}</div>
                               </div>
-                              <div className="px-3 py-2 space-y-1">
+                              <div className="p-3.5 space-y-2 text-[11px]">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[9px] text-gray-500">{ui.contract}</span>
-                                  <span className="text-[9px] font-black text-gray-700 truncate max-w-[55%] text-right">{dr.contractName}</span>
+                                  <span className="text-gray-500">{ui.contract}</span>
+                                  <span className="font-black text-gray-700 truncate max-w-[55%] text-right">{dr.contractName}</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] text-gray-500">{ui.outcome}</span>
-                                  <span className={`text-[9px] font-black uppercase ${dr.wouldWin ? "text-emerald-600" : "text-red-500"}`}>
-                                    {dr.wouldWin ? ui.wouldWin : ui.wouldLose}
+                                <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
+                                  <span className="text-gray-500">{ui.outcome}</span>
+                                  <span className={`font-black uppercase px-1.5 py-0.5 rounded text-[10px] ${dr.wouldWin ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"}`}>
+                                    {dr.wouldWin ? "예측 성공 / 생존" : "예측 실패 / 사망"}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] text-gray-500">{ui.successChance}</span>
-                                  <span className="text-[9px] font-black text-gray-700">{toFiniteNumber(dr.successChance, 0)}%</span>
+                                <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
+                                  <span className="text-gray-500">{ui.successChance}</span>
+                                  <span className="font-black text-gray-700">{toFiniteNumber(dr.successChance, 0)}%</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] text-gray-500">{ui.projectedPayout}</span>
-                                  <span className="text-[9px] font-black text-gray-700">x{toFiniteNumber(dr.projectedPayout, 1).toFixed(2)}</span>
+                                <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
+                                  <span className="text-gray-500">{ui.projectedPayout}</span>
+                                  <span className="font-black text-gray-700">x{toFiniteNumber(dr.projectedPayout, 1).toFixed(2)}</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] text-gray-500">{ui.netPreview}</span>
-                                  <span className={`text-[9px] font-black ${toFiniteNumber(dr.netPreview, 0) >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                                <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
+                                  <span className="text-gray-500">{ui.netPreview}</span>
+                                  <span className={`font-black ${toFiniteNumber(dr.netPreview, 0) >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                                     {toFiniteNumber(dr.netPreview, 0) >= 0 ? "+" : ""}{formatMoney(toFiniteNumber(dr.netPreview, 0))}
                                   </span>
                                 </div>
-                              </div>
-                              <div className="px-3 pb-2">
-                                <div className="text-[9px] text-emerald-500 italic">{ui.dryRunNoMove}</div>
+                                <div className="text-[10px] text-emerald-600 italic bg-emerald-50 p-2 rounded-lg text-center mt-2 border border-emerald-100 font-bold">
+                                  💡 {ui.dryRunNoMove}
+                                </div>
                               </div>
                             </div>
                           );
                         })()}
                       </div>
                     ) : (
-                      <div className="py-4 text-center">
-                        <div className="text-sm font-black text-gray-400">{ui.noContractSelected}</div>
-                        <div className="text-[10px] font-bold text-gray-400 mt-1">
-                          {ui.selectContractHint}
+                      /* F. Empty State */
+                      <div className="py-8 text-center bg-gray-50 border border-gray-200 border-dashed rounded-xl p-5">
+                        <div className="text-2xl mb-2">🛡️</div>
+                        <div className="text-xs font-black text-gray-700">참전 생존 예측 카드를 먼저 선택하십시오</div>
+                        <div className="text-[10px] font-bold text-gray-400 mt-1 max-w-[180px] mx-auto leading-relaxed">
+                          상단에서 활성화된 전선 작전 카드를 선택하면 예측 배팅 슬립 패널이 활성화됩니다.
                         </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* {ui.preview} history ??no real settlement */}
+                  </div>                  {/* {ui.preview} history ??no real settlement */}
                   {(() => {
                     const history = Array.isArray(gameState.investment.contractHistory)
                       ? gameState.investment.contractHistory

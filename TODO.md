@@ -84,7 +84,7 @@
   - [x] **UX Redesign Spec**: Create a detailed prediction interface specification document (`HEROS_FATE_UX_REDESIGN_SPEC.md`) (Phase J-2A).
   - [x] **Label & Copy Cleanup**: Update visible text fields in `UI_TEXT.ko` (Phase J-2B).
   - [x] **Survival Prediction Card Layout**: Reframe standard cards into vertical prediction units (Phase J-2C).
-  - [ ] **Bet Slip Simplification**: Configure clean inputs and risk warnings (Phase J-2D).
+  - [x] **Bet Slip Simplification**: Configure clean inputs and risk warnings (Phase J-2D).
   - [ ] **Fate Log Polish**: Upgrade history log with green/red outcome cards (Phase J-2E).
   - [ ] **1:1 Duel Model Proposal**: Define combat and weapon system integration schemas (Phase J-2F).
 - [ ] **Weapon Enhancement Redesign Spec**: Spec out the full 1~30 ladder, level drop/break rates, materials output, and inventory UI (Phase J-3).

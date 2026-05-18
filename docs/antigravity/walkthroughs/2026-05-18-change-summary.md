@@ -140,3 +140,21 @@ Each prediction card now presents data in a clean, high-impact vertical block:
 - **Save Integrity**: Zero modifications to state schema or local storage keys.
 - **Controls Fidelity**: Preserves original `buyInvestmentAsset`, `buyMaxInvestmentAsset`, `sellInvestmentAsset`, `sellAllInvestmentAsset`, and `selectDefenseContract` hooks perfectly.
 
+---
+
+## 🧾 6. Phase J-2D: Bet Slip Simplification (Complete)
+
+We have successfully executed Phase J-2D by refactoring the abstract financial trading slip into a highly immersive **Prediction Bet Slip / Confirmation Panel** inside [index.html](file:///c:/Users/ryan/dev/money-game/index.html).
+
+### 🧾 A. Bet Slip Visual Structure
+The redesigned bet slip organizes the tactical action into a simplified vertical layout:
+1. **Selected Prediction Summary**: Displays the active contract name, its success probability, the expected multiplier, and frames the prediction choice (**영웅 생존 / 방어 성공**) alongside explicit red warnings for failure consequences (**영웅 사망 / 방어 실패 / 게임오버 위험**).
+2. **Stake Input Area**: Fully redesigned with a tactical prefix currency symbol (`₩`), clear displays of available available capital (`CASH`), and quick fraction buttons (`25%`, `50%`, `최대 기금`). Clamping and validation code rules are fully preserved.
+3. **Probability & Reward Grid**: Displays a balanced layout for the **지원 기금액** (Stake) and **예상 획득 자금** (Projected Payout) directly in high-visibility stats cards.
+4. **Simulation & Analysis**: Features expandable, clean summaries of the **사전 모의 작전 결과 분석** (Dry Run preview, success rates, expected base outcomes, confidence tiers, and signal logs).
+5. **Action Buttons**: Cleanly divides the execution sequence:
+   - `🔍 모의 작전 (가상 결과)`
+   - `⚡ 결과 정산 (실제 계약 정산)`
+   - Locked button statuses and the warning prompt confirmation modal have been perfectly preserved to prevent unauthorized operations before Phase Stage 100/Dorothy proposta.
+6. **Empty State**: Displays an elegant, centered prompt when no cards are active, encouraging players to click and select from the fronts above.
+
