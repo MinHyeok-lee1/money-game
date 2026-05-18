@@ -82,7 +82,7 @@
 - [x] **Korean Naming & Navigation Cleanup**: Apply Korean localization naming pivot across GNB headers and main app panels (Phase J-1).
 - [ ] **Hero's Fate UX Simplification** (Phase J-2):
   - [x] **UX Redesign Spec**: Create a detailed prediction interface specification document (`HEROS_FATE_UX_REDESIGN_SPEC.md`) (Phase J-2A).
-  - [ ] **Label & Copy Cleanup**: Update visible text fields in `UI_TEXT.ko` (Phase J-2B).
+  - [x] **Label & Copy Cleanup**: Update visible text fields in `UI_TEXT.ko` (Phase J-2B).
   - [ ] **Survival Prediction Card Layout**: Reframe standard cards into vertical prediction units (Phase J-2C).
   - [ ] **Bet Slip Simplification**: Configure clean inputs and risk warnings (Phase J-2D).
   - [ ] **Fate Log Polish**: Upgrade history log with green/red outcome cards (Phase J-2E).

@@ -45,4 +45,74 @@ The core game has been successfully transitioned to the confirmed product identi
 - **Zero Save State Mutations**: Checked that `localStorage` key `moneyGameUniverseStateV1` and internal JS variables are completely unchanged.
 - **Formula Integrity**: Verified that no gameplay formulas, HP scaling curves, or betting settlement odds code blocks were modified.
 - **Static SEO Files**: Confirmed that all deploy-ready configuration files remain fully active in the repository.
-- **No Temporary Scripts**: No temporary patch scripts or disposable helper files were created or left in the workspace.
+- **No Temporary Scripts**: A temporary CRLF-safe helper script `patch_index.py` was created to perform precise replacements, and was successfully removed immediately after run execution.
+
+---
+
+## 🌌 4. Phase J-2B: Hero's Fate Label & Copy Cleanup (Complete)
+
+We have successfully executed Phase J-2B by applying a comprehensive, copy-only rebrand of the `히어로즈 페이트` (Hero's Fate) tab inside [index.html](file:///c:/Users/ryan/dev/money-game/index.html) (lines 3646–3734).
+
+### ✍️ A. Localization Terms Mapping (`UI_TEXT.ko`)
+All visible player-facing strings were pivoted from stock/investment terminology to immersive, high-tension frontline military forecasting:
+- `warChest` (작전 기금 $\rightarrow$ **지원 기금**)
+- `contractValue` (계약 가치 $\rightarrow$ **작전 규모**)
+- `totalCapital` (총 자본 $\rightarrow$ **총 작전 자본**)
+- `contractCapital` (작전 자본 $\rightarrow$ **작전 자본**)
+- `betSlip` (예측 배팅 슬립 $\rightarrow$ **예측 배팅 슬립**)
+- `stakeAmount` (전쟁 기금 예측 배팅 $\rightarrow$ **작전 투입 기금 배팅**)
+- `projectedWin` (예측 성공 시 정산 수익 $\rightarrow$ **예측 성공 시 예상 배당금**)
+- `settlementPreview` (정산 시뮬레이션 $\rightarrow$ **모의 작전 분석 (시뮬레이션)**)
+- `successChance` (방어 성공률 $\rightarrow$ **생존 및 성공 확률**)
+- `outcome` (예측 결과 $\rightarrow$ **작전 예측 결과**)
+- `projectedGain` / `projectedLoss` (예상 수입/손실 $\rightarrow$ **예측 성공/실패 시 수급/손실 CASH**)
+- `confidence` (레이더 정밀도 $\rightarrow$ **전술 레이더 정밀도**)
+- `signalAnalysis` (전선 신호 분석 $\rightarrow$ **전방 전술 신호 분석**)
+- `savePreviewToHistory` (미리보기를 기록에 저장 $\rightarrow$ **분석 결과를 운명 기록에 저장**)
+- `settlementStatus` (정산 승인 상태 $\rightarrow$ **작전 결과 정산 승인 상태**)
+- `settlementUnlocked` (정산 게이트 오픈 $\rightarrow$ **정산 게이트 개방 완료**)
+- `contractSelected` (작전 계약 수락 $\rightarrow$ **참전 전선 선택 완료**)
+- `positiveStake` (스테이크 > 0 $\rightarrow$ **투입 기금 > 0**)
+- `stakeWithinCapital` (스테이크 <= 자본 $\rightarrow$ **투입 기금 <= 보유 자본**)
+- `oddsValid` (배당률 연동 상태 양호 $\rightarrow$ **전선 배당 배수 동기화 완료**)
+- `payoutValid` (수익 배수 연동 상태 양호 $\rightarrow$ **예상 정산 배수 정합성 확인**)
+- `runDryRun` (드라이런 시뮬레이션 기동 $\rightarrow$ **모의 작전 시뮬레이션 기동 (Dry Run)**)
+- `settleContract` (작전 정산 승인 (실제) $\rightarrow$ **⚡ 전선 결과 정산**)
+- `realSettlementLocked` (도로시 수락 필요 $\rightarrow$ **⚠️ 실제 작전 불가 (도로시 제안 수락 필요)**)
+- `dryRunResult` (시뮬레이션 정산 결과 $\rightarrow$ **모의 작전 정산 결과**)
+- `contract` (방어 계약 $\rightarrow$ **생존 예측 전선**)
+- `wouldWin` (생존 성공 (승리) $\rightarrow$ **생존 성공 / 방어 성공**)
+- `wouldLose` (부대 전멸 (실패) $\rightarrow$ **영웅 사망 / 방어 실패**)
+- `netPreview` (예상 순익 $\rightarrow$ **순 예상 배당금**)
+- `dryRunNoMove` (가상 시뮬레이션 안내 $\rightarrow$ **모의 작전(Dry Run)이며 실제 전선 작전 자금은 이전되지 않습니다.**)
+- `noContractSelected` (선택된 방어 계약 없음 $\rightarrow$ **참전할 예측 전선이 선택되지 않았습니다.**)
+- `selectContractHint` (계약 선택 힌트 $\rightarrow$ **아래 전선 작전 카드를 선택하여 예측 배팅 슬립을 활성화하십시오.**)
+- `previewHistory` (시뮬레이션 내역 $\rightarrow$ **모의 작전 분석 내역**)
+- `previewOnlyNotSettled` (가상 테스트 $\rightarrow$ **모의 분석 (미정산)**)
+- `noPreviewHistory` (가상 내역 없음 $\rightarrow$ **저장된 모의 작전 분석 기록이 없습니다.**)
+- `settlementHistory` (실제 작전 정산 기록 $\rightarrow$ **운명 기록 (실제 작전 정산 로그)**)
+- `noSettlementHistory` (실제 내역 없음 $\rightarrow$ **정산된 실제 운명 기록이 없습니다.**)
+- `contractPreview` (계약 조건 분석 $\rightarrow$ **전선 작전 조건 분석**)
+- `previewUsesLiveRules` (전선 실시간 데이터 기준 $\rightarrow$ **실시간 전술 데이터 기준 조건 분석**)
+- `defenseOdds` (아군 생존 확률 $\rightarrow$ **아군 생존 및 성공 확률**)
+- `projectedPayout` (성공 배당률 $\rightarrow$ **작전 성공 배당률 (배수)**)
+- `riskTier` (전선 위험도 $\rightarrow$ **전선 리스크 위험도**)
+- `linkedRpgSignal` (Frontline Command 연동 $\rightarrow$ **전선 지휘부(Command) 연동 신호**)
+- `positionsHeld` (체결 구역 수 $\rightarrow$ **확보 전선 구역**)
+- `stakeValue` (구역 총 가치 $\rightarrow$ **구역 총 작전 가치**)
+- `entryRate` (평균 확보 단가 $\rightarrow$ **평균 전선 확보 단가**)
+- `selectedForBetSlip` (선택됨 $\rightarrow$ **예측 슬립에 등록됨**)
+- `selectContract` (계약 수락 $\rightarrow$ **작전 수락**)
+
+### 🎁 B. Explanatory Context for Future Systems (`investmentIntro`)
+The introductory text `investmentIntro` has been updated to include clear upcoming concepts:
+> `"전방 영웅들의 운명을 예측하고 참전할 독립 작전 자본입니다. (※ 결전의 사선: 1:1 결투 예측 및 예측 성공 시 영웅력/서사력 성장 시스템은 향후 확장 예정입니다.)"`
+
+### 📖 C. Strategic Wiki Rebrand
+The SEO / Strategic Wiki section under `SEO_TAB_CONTENT.ko.investment` has been completely rewritten to use the rebranded vocabulary (e.g., `참전 기금`, `운명 예측`, `결과 정산`), while preserving key internal code names (`betSlip`, `contractHistory`, `dry-run`) to maintain developer clarity and assure players of system stability.
+
+### 🛡️ D. Implementation Integrity
+- **Save State Safety**: No variables inside the `gameState` structure were modified. The save engine mapped to `"moneyGameUniverseStateV1"` is completely intact.
+- **Combat Math Safety**: Checked that `calculateDefenseContractSuccessChance` and real settlement resolution mechanics are left untouched.
+- **No Residual Helpers**: `patch_index.py` was fully removed after successful execution.
+
