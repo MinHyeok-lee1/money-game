@@ -101,7 +101,10 @@
         - [x] Phase J-3A-2: Status Wording Sanity Check passed <!-- id: 71 -->
         - [x] Phase J-3B: Current Smith & Shards Audit (docs/SMITH_AND_SHARDS_CODE_AUDIT.md complete) <!-- id: 72 -->
         - [x] Phase J-3B-1: Code Audit Accuracy and Guardrail QA passed <!-- id: 78 -->
-        - [x] Phase J-3C: Smith & Shards Copy Cleanup (localize naming safely) <!-- id: 73 -->
+        - [x] Phase J-3C: Smith & Shards Copy Cleanup (localize naming safely) <!-- id: 73 -->
+        - [x] Phase J-3C-1: Smith & Shards False Feature and UX Consistency QA passed <!-- id: 79 -->
+        - [x] Phase J-3C-2: Smith & Shards Weapon Fantasy and Dopamine Loop Audit (docs/SMITH_AND_SHARDS_DOPAMINE_LOOP_SPEC.md complete) <!-- id: 80 -->
+        - [x] Phase J-3C-3: Smith & Shards Weapon Progression Tempo and Prestige Curve Audit (docs/SMITH_AND_SHARDS_PRESTIGE_CURVE_SPEC.md complete) <!-- id: 81 -->
         - [ ] Phase J-3D: Weapon Ladder Design Data Spec (odds & costs spec) <!-- id: 74 -->
         - [ ] Phase J-3E: Inventory UI Reframe (cards and grid layout mock) <!-- id: 75 -->
         - [ ] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->

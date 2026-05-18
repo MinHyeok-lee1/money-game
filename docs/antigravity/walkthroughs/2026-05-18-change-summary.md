@@ -292,8 +292,55 @@ We have successfully executed Phase J-3C (Smith & Shards Copy Cleanup) by refact
    - `Equip First` $\rightarrow$ `"첫 무기 장착 (Deploy)"`
    - `Unequip` $\rightarrow$ `"장착 해제 (Recall)"`
 5. **Notice Banner Addition**: Inserted a premium, subtle, non-interactive banner at the bottom of the tab content container:
-   - *“⚒️ [안내] 현재 버전에서는 전쟁 대장간 무기 제련(강화) 및 장원 대원 무기 배치(장착)만 지원됩니다. 향후 무기 파괴, 파편 회수, 암시장 판매 시스템이 추가될 예정입니다.”*
+   - *“⚒️ [안내] 현재 버전에서는 전쟁 대장간 무기 제련(강화) 및 보유 대원 무기 장착만 지원됩니다. 향후 무기 파괴, 파편 회수, 암시장 판매 시스템이 추가될 예정입니다.”*
 6. **Technical State Segregation**: Left all underlying state variables (`gacha`, `enhancement`, `weaponLevels`, `weaponMastery`, `getEnhanceCost`, `getEnhanceChance`) pristine to maintain full save file and mechanical integrity. No game logic was altered.
+
+---
+
+## ⚒️ 15. Phase J-3C-1: Smith & Shards False Feature and UX Consistency QA (Complete)
+
+We have successfully executed Phase J-3C-1 (Smith & Shards False Feature and UX Consistency QA) by performing a comprehensive audit and refinement of the player-facing Korean text across all active and future module tabs in [index.html](file:///c:/Users/ryan/dev/money-game/index.html).
+
+### ⚒️ A. Key Audit Adjustments & Guardrails Patched
+1. **Fantasy Terminology Decoupling**: Replaced all occurrences of the fantasy-oriented term `"소환" (Summon)` with the supply-oriented, battlefield-themed phrase `"보급 호출" (Supply Call / Supply Request)`. This ensures that players do not confuse weapon supply calls with defense tower unit recruitment.
+2. **Grid Placement Collision Avoidance**: Softened the notice banner phrasing to read `"보유 대원 무기 장착만 지원됩니다"` instead of `"배치(장착)"` to prevent any confusion with active unit tactical grid placement.
+3. **Immersive Narrative Alignment**:
+   - `drawCost` $\rightarrow$ `"보급 호출 비용"`
+   - `draw1` / `draw10` $\rightarrow$ `"보급 호출 (1회)"` / `"보급 호출 (10회)"`
+   - `lastPull` / `recentPulls` $\rightarrow$ `"최근 보급 획득"` / `"최근 보급 내역"`
+   - `entrySupportDesc` / `dividendsGachaHint` $\rightarrow$ Updated to use `"전선 보급 호출"` and explicitly clarify the separate funding loops (DIV for Supply Calls, CASH for Anvil strikes).
+4. **Zero-Impact Verification**: Ran an exhaustive audit confirming that zero backend state keys or local storage signatures (`GAME_STATE_STORAGE_KEY`) were affected. The game state and mathematical formulas remain 100% untouched.
+
+---
+
+## ⚒️ 16. Phase J-3C-2: Smith & Shards Weapon Fantasy and Dopamine Loop Audit (Complete)
+
+We have successfully executed Phase J-3C-2 (Smith & Shards Weapon Fantasy and Dopamine Loop Audit) by creating the comprehensive design document [docs/SMITH_AND_SHARDS_DOPAMINE_LOOP_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_DOPAMINE_LOOP_SPEC.md).
+
+### ⚒️ A. Key Design Specifications Outlined
+1. **Weapon Identity Tiers (+1 ~ +30)**: Structured sequential titles (Recruit's Dull Blade up to Mythic Sovereign) that translate numbers into emotional, high-status active combat assets.
+2. **Dopamine Progression Curve**: Outlined how risk escalates as success chances decline, creating natural anticipation spikes (1-2s delay during anvil strikes) and strong sunk cost triggers.
+3. **Failure Psychology**: Defined circular shard conservation loops where weapon breaks at high enhancement levels yield generous quantities of 제련 파편 (Refined Shards), which can be recycled into success stabilizers or Epic gear boxes.
+4. **Low-Tier Weapon Relevance**: Mitigated inventory clutter by detailing sacrifice material loops (consuming duplicates to stabilize higher-tier success rates) and quick black market liquidations.
+5. **Synergy Engine Integration**: Designed cross-module flows linking Frontier Master (CASH source), Frontline Command (DIV source, global DPS check), and Hero's Fate (survivability contract scaling).
+6. **Core Safeguards**: Hard-gated rules preventing generic RPG power inflation, hidden odds, or spreadsheet-like UI designs.
+
+---
+
+## ⚒️ 17. Phase J-3C-3: Smith & Shards Weapon Progression Tempo and Prestige Curve Audit (Complete)
+
+We have successfully executed Phase J-3C-3 (Smith & Shards Weapon Progression Tempo and Prestige Curve Audit) by creating the comprehensive balance document [docs/SMITH_AND_SHARDS_PRESTIGE_CURVE_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_PRESTIGE_CURVE_SPEC.md).
+
+### ⚒️ A. Key Pacing Specifications Outlined
+1. **Progression Tempo Boundaries**: Estimated active/casual pacing parameters for reaching milestones from +1 to +30. Under normal conditions, +5 is achieved in 15-30m, +10 in 2-4h, +15 in 1-2 days, +20 in 5-7 days, +25 in 2-3 weeks, and +30 in 2-3 months of active grinding.
+2. **Prestige Overlays**: Structured high-tier cosmetic expectations, detailing visual glows (e.g. +15 crimson, +20 emerald, +25 lightning, +30 sunburst), global UI announcements, and prefix customization possibilities.
+3. **Failure Recovery Tempo**: Balanced time-to-recovery (TTR) targets, ensuring a broken +15 recovers to +10 within 30m, and a broken +20 recovers to +15 within 6h by leveraging shard conservation payouts.
+4. **Shard Hoarding Pressures**: Configured stabilizers, epic box purchasing, and passive "Forge Mastery" upgrade discounts to encourage strategic saving vs spending dilemmas.
+5. **Zone Boundaries**: Hard-gated Green (1-5 safe), Amber (6-10 downgrade only), Danger (11-20 breakage with shields), and Sovereign (21-30 no shields, maximum tension) zones.
+6. **Whale vs Grinder Balance**: Standardized all anvil upgrade odds across spender and grinder pipelines, ensuring that money can buy draws but cannot guarantee mythic sovereign upgrades without undergoing real threat of anvil shattering.
+
+
+
 
 
 
