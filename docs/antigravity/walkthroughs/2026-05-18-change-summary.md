@@ -114,5 +114,29 @@ The SEO / Strategic Wiki section under `SEO_TAB_CONTENT.ko.investment` has been 
 ### 🛡️ D. Implementation Integrity
 - **Save State Safety**: No variables inside the `gameState` structure were modified. The save engine mapped to `"moneyGameUniverseStateV1"` is completely intact.
 - **Combat Math Safety**: Checked that `calculateDefenseContractSuccessChance` and real settlement resolution mechanics are left untouched.
-- **No Residual Helpers**: `patch_index.py` was fully removed after successful execution.
+- **No Residual Helpers**: `patch_index.py`, `patch_qa.py`, `restore_j2b.py`, and `patch_layout.py` were fully removed after successful execution.
+
+---
+
+## 🎴 5. Phase J-2C: Survival Prediction Card Layout (Complete)
+
+We have successfully executed Phase J-2C by reorganizing the prediction cards in the `히어로즈 페이트` tab inside [index.html](file:///c:/Users/ryan/dev/money-game/index.html) into highly structured, thematic, and readable **Survival Prediction Cards**.
+
+### 📐 A. Vertical Card Structure
+Each prediction card now presents data in a clean, high-impact vertical block:
+1. **Scenario Header**: Displays the tactical name of the contract, its core type, and a colored risk badge (**안정**, **불안정**, or **붕괴 위기**) mapped from volatility tiers. It also shows the target **작전 규모** (CASH price) clearly in the upper right.
+2. **Frontline Matchup**: Shows the specific allied squad and enemy monster details, mapped dynamically to contract flavor metadata:
+   - *Vanguard Defense Fund*: `🛡️ 왕실 최정예 근위 스쿼드` vs `👾 강철의 차원 침략 괴수군`
+   - *Rising Squad Futures*: `⚡ 전술 아처 돌격 연대` vs `👹 오크 광전사 기습 돌격대`
+   - *Underground Raid Bond*: `🩸 그림자 사설 용병 연맹` vs `☠️ 침략 군단 보스 [철갑의 사신] 조우전`
+3. **Sparkline Chart**: Retained the high-fidelity SVG volatility sparkline indicating active tactical fluctuations.
+4. **Prediction Outcome Area**: An explicit box framing **영웅 생존 / 방어 성공** as the active prediction choice, warning players of the high-stakes failure consequence (**영웅 사망 / 방어 실패**), and clarifying that 1:1 duels are future expansions.
+5. **Probability/Reward Grid**: A 3-column tactical summary showing **아군 생존 및 성공 확률**, **작전 성공 배당률 (배수)**, and the real-time **전선 지휘부 (Command) 연동 신호** (current Stage and DPS).
+6. **Collapsible Position Panel**: Shows total **확보 전선 구역**, **구역 총 작전 가치**, **평균 전선 확보 단가**, and unrealized **수익** only when active shares are held (`asset.owned > 0`), keeping the card extremely clean.
+7. **Action Grid**: Integrates 2x2 compact action controls (**지원 / 최대 / 철수 / 전원철수**) and a prominent **이 예측 선택** (배팅 슬립 등록) primary button.
+
+### 🛡️ B. Preserved Technical Logic
+- **Odds & Multipliers**: Consumes exact pure helpers (`getDefenseContractOdds`, `getDefenseContractProjectedPayout`, etc.) without altering combat, leveling, or settlement equations.
+- **Save Integrity**: Zero modifications to state schema or local storage keys.
+- **Controls Fidelity**: Preserves original `buyInvestmentAsset`, `buyMaxInvestmentAsset`, `sellInvestmentAsset`, `sellAllInvestmentAsset`, and `selectDefenseContract` hooks perfectly.
 

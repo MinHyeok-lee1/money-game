@@ -91,7 +91,7 @@
     - [ ] Phase J-2: Hero's Fate UX Simplification <!-- id: 60 -->
         - [x] Phase J-2A: Hero's Fate UX Simplification Design Spec (HEROS_FATE_UX_REDESIGN_SPEC.md created) <!-- id: 64 -->
         - [x] Phase J-2B: Hero's Fate label/copy cleanup (UI_TEXT.ko copy-only cleanup applied) <!-- id: 65 -->
-        - [ ] Phase J-2C: Survival Prediction Card layout <!-- id: 66 -->
+        - [x] Phase J-2C: Survival Prediction Card layout <!-- id: 66 -->
         - [ ] Phase J-2D: Bet Slip simplification <!-- id: 67 -->
         - [ ] Phase J-2E: Fate Log / result history polish <!-- id: 68 -->
         - [ ] Phase J-2F: Future 1:1 Duel data model proposal <!-- id: 69 -->
