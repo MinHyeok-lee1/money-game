@@ -85,4 +85,11 @@
     - [x] Phase I-4F: Reaper Balance QA (pressure bounds, Stage 150 stacking, deferred milestones verified) <!-- id: 55 -->
     - [ ] Phase I-5: Infinite Mode Reaper Iteration <!-- id: 56 -->
     - [x] Phase I-5A: Infinite Mode Playability Snapshot / Manual QA Plan (checklist & test ranges defined) <!-- id: 57 -->
+- **Phase J: Product UX Reframe**
+    - [x] Phase J-0: Product UX Reframe Spec (PRODUCT_UX_REFRAME_PLAN.md created) <!-- id: 58 -->
+    - [x] Phase J-1: Korean Naming & Navigation Cleanup (Korean UI translations updated) <!-- id: 59 -->
+    - [ ] Phase J-2: Investment Tab UX Simplification (Dry contracts turned to Prediction Cards) <!-- id: 60 -->
+    - [ ] Phase J-3: Weapon Enhancement Redesign Spec (1~30 ladder & breakage spec drafted) <!-- id: 61 -->
+    - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
+    - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

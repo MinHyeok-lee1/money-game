@@ -76,6 +76,14 @@
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).
 - [ ] **Character Storylines**: Lore integration for characters and factions.
 - [ ] Boss rewards that connect back into the shared economy.
+## Phase J: Product UX Reframe
+
+- [x] **Product UX Reframe Spec**: Create comprehensive reset specification document (`PRODUCT_UX_REFRAME_PLAN.md`) detailing naming audit, module reframes, and specs roadmap (Phase J-0).
+- [x] **Korean Naming & Navigation Cleanup**: Apply Korean localization naming pivot across GNB headers and main app panels (Phase J-1).
+- [ ] **Investment Tab UX Simplification**: Reframe dry contract cards into immediate visual "Survival Prediction Cards" (Phase J-2).
+- [ ] **Weapon Enhancement Redesign Spec**: Spec out the full 1~30 ladder, level drop/break rates, materials output, and inventory UI (Phase J-3).
+- [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
+- [ ] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
 
 ## Phase 5: Prestige & Honor
 
