@@ -158,3 +158,48 @@ The redesigned bet slip organizes the tactical action into a simplified vertical
    - Locked button statuses and the warning prompt confirmation modal have been perfectly preserved to prevent unauthorized operations before Phase Stage 100/Dorothy proposta.
 6. **Empty State**: Displays an elegant, centered prompt when no cards are active, encouraging players to click and select from the fronts above.
 
+---
+
+## 📜 7. Phase J-2E: Fate Log / Result History Polish (Complete)
+
+We have successfully executed Phase J-2E by refactoring the abstract transaction ledger tables inside [index.html](file:///c:/Users/ryan/dev/money-game/index.html) into an immersive **운명 기록 (Fate Log / Result History)** card deck.
+
+### 📜 A. Unified Fate Log Layout
+The history section is refactored into two elegant, stacked card sections under a cohesive tactical header:
+1. **Header Block**: A clean section title `운명 기록 (전선 판단 기록)` paired with the thematic subtitle `생존 예측과 모의 작전 결과를 최근 순서로 확인합니다.`
+2. **실제 결과 정산 로그 (Real Outcomes)**:
+   - Compact cards displaying final tactical combat results.
+   - **Visual Distinctions**:
+     - 예측 성공 (Won): Emerald styling (`bg-emerald-50 bg-opacity-20 border-emerald-100`) and the status label `🛡️ 생존 성공`. It clearly shows profits in positive green text (e.g. `+₩900`).
+     - 예측 실패 (Lost): Red/danger styling (`bg-red-50 bg-opacity-10 border-red-100`) and the status label `💀 영웅 사망`. It clearly shows losses in red text.
+   - **Details Displayed**: Shows total 참전 지원금 (Stake), success probability, payout multiplier, and the exact completion timestamp.
+   - **Empty State**: Displays `아직 기록된 실제 결과 정산 내역이 없습니다.` when empty.
+3. **모의 작전 분석 내역 (Simulated Previews)**:
+   - Colored in clean cyber-blue (`bg-sky-50 bg-opacity-10 border-sky-100`) with a visual status label indicating `예측 성공`, `보합`, or `예측 실패` based on simulated outcome labels.
+   - Includes an explicit footer outlining future development priorities:
+     `💡 향후 모의 작전 예측 성공은 사령부 영웅력/서사력 성장과 직접 연결될 예정입니다.`
+   - **Empty State**: Displays `아직 기록된 모의 작전 분석 내역이 없습니다.` when empty.
+
+### 🛡️ B. Verification and Preservation Checklist
+- **No Mutated States**: State keys (`contractHistory`, `contractSettlementHistory`) and cap constraints are completely unchanged.
+- **Formulas Safety**: Success chances, dry-run simulated outcomes, and cash calculations run exactly the original state behaviors without modifications.
+- **Future Safeguards**: No mock statistics or variables (such as `heroMight` or `narrativeMomentum`) were introduced to the game state. All narrative hooks are strictly informational.
+- **JSX compilation**: The React markup is fully validated with perfectly balanced scopes, avoiding any runtime compiler issues.
+
+---
+
+## ⚔️ 8. Phase J-2F: Future 1:1 Duel Data Model Proposal (Complete)
+
+We have successfully executed Phase J-2F by authoring a comprehensive, future-proof design proposal in [HEROS_FATE_DUEL_MODEL_PROPOSAL.md](file:///c:/Users/ryan/dev/money-game/docs/HEROS_FATE_DUEL_MODEL_PROPOSAL.md) defining the future **결전의 사선 (The Duel of Fates)** prediction mechanics.
+
+### ⚔️ A. Key Proposal Elements
+The design proposal establishes clear guidelines for future integrations:
+1. **Core Purpose**: Align market-based forecasting directly with the defensive frontline hero fantasy, creating deep progression loops between modules.
+2. **Data Structure Concept**: Outlines a clean `DuelScenario` object model describing heroes, bosses, base survival rates, and two-sided payout structures (`survival` vs `death`) without breaking existing state properties.
+3. **Hero & Enemy Inputs**: Explains how weapon enhancement, tower tiers, wave stage progression, and Reaper pressure will dynamically adjust live tactical combat odds.
+4. **Prestige & Rewards**: Specs out the horizontal loop benefits of **영웅력 (Heroic Might)** and **서사력 (Narrative Momentum)**.
+5. **Formulas & Schema Safety**: Establishes strict mathematical guardrails (e.g. bounded probabilities, direct odds inversion) and save schema buffers to prevent future data corruption.
+
+### 📝 B. Integration and Documentation Updates
+- **UX Re-spec Reference**: Appended an explicit Tip box to [HEROS_FATE_UX_REDESIGN_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/HEROS_FATE_UX_REDESIGN_SPEC.md) pointing future developers to the complete duel proposal.
+- **Pristine State Maintenance**: Verified that zero changes were made to active script scopes, formulas, or save game states in `index.html`. All concepts remain strictly documentation-only.

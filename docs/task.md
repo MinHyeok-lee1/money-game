@@ -93,8 +93,8 @@
         - [x] Phase J-2B: Hero's Fate label/copy cleanup (UI_TEXT.ko copy-only cleanup applied) <!-- id: 65 -->
         - [x] Phase J-2C: Survival Prediction Card layout <!-- id: 66 -->
         - [x] Phase J-2D: Bet Slip simplification <!-- id: 67 -->
-        - [ ] Phase J-2E: Fate Log / result history polish <!-- id: 68 -->
-        - [ ] Phase J-2F: Future 1:1 Duel data model proposal <!-- id: 69 -->
+        - [x] Phase J-2E: Fate Log / result history polish <!-- id: 68 -->
+        - [x] Phase J-2F: Future 1:1 Duel data model proposal (docs/HEROS_FATE_DUEL_MODEL_PROPOSAL.md created) <!-- id: 69 -->
     - [ ] Phase J-3: Weapon Enhancement Redesign Spec (1~30 ladder & breakage spec drafted) <!-- id: 61 -->
     - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
     - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->

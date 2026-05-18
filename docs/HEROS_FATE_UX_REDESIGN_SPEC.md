@@ -102,6 +102,9 @@ As a future extension of the Hero's Fate system, the spec introduces **결전의
     3.  **Blacksmith Weapon Forge**: The level of the currently active forged weapon in *스미스 앤 셔드* adds physical multipliers to the hero's survival chance.
     4.  **Enemy Boss Threat Level**: Calculated based on the wave progression and Reaper intensity tiers.
 
+> [!TIP]
+> For a detailed blueprint of non-breaking data structures, commander fantasies, and reward mechanics, see the complete [HEROS_FATE_DUEL_MODEL_PROPOSAL.md](file:///c:/Users/ryan/dev/money-game/docs/HEROS_FATE_DUEL_MODEL_PROPOSAL.md).
+
 ---
 
 ## 🎁 6. Reward Reframe (Heroic Might & Narrative Momentum)
