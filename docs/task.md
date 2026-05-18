@@ -88,7 +88,13 @@
 - **Phase J: Product UX Reframe**
     - [x] Phase J-0: Product UX Reframe Spec (PRODUCT_UX_REFRAME_PLAN.md created) <!-- id: 58 -->
     - [x] Phase J-1: Korean Naming & Navigation Cleanup (Korean UI translations updated) <!-- id: 59 -->
-    - [ ] Phase J-2: Investment Tab UX Simplification (Dry contracts turned to Prediction Cards) <!-- id: 60 -->
+    - [ ] Phase J-2: Hero's Fate UX Simplification <!-- id: 60 -->
+        - [x] Phase J-2A: Hero's Fate UX Simplification Design Spec (HEROS_FATE_UX_REDESIGN_SPEC.md created) <!-- id: 64 -->
+        - [ ] Phase J-2B: Hero's Fate label/copy cleanup <!-- id: 65 -->
+        - [ ] Phase J-2C: Survival Prediction Card layout <!-- id: 66 -->
+        - [ ] Phase J-2D: Bet Slip simplification <!-- id: 67 -->
+        - [ ] Phase J-2E: Fate Log / result history polish <!-- id: 68 -->
+        - [ ] Phase J-2F: Future 1:1 Duel data model proposal <!-- id: 69 -->
     - [ ] Phase J-3: Weapon Enhancement Redesign Spec (1~30 ladder & breakage spec drafted) <!-- id: 61 -->
     - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
     - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->

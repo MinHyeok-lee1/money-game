@@ -105,7 +105,7 @@ We execute the Product UX Reset in a step-by-step, reviewable sequence to preven
 ```mermaid
 graph TD
     J0[Phase J-0: Reframe Spec] --> J1[Phase J-1: Korean Naming & Navigation Cleanup]
-    J1 --> J2[Phase J-2: Investment tab UX Simplification]
+    J1 --> J2[Phase J-2: Hero's Fate UX Simplification]
     J2 --> J3[Phase J-3: Weapon Enhancement Redesign Spec]
     J3 --> J4[Phase J-4: Defense tab UX Redesign Spec]
     J4 --> J5[Phase J-5: Implementation Pass]
@@ -116,9 +116,9 @@ graph TD
 *   **Deliverable**: Korean tab headers, warning screens, and main titles are fully localized around the "프론티어 마스터 / 히어로즈 페이트 / 스미스 앤 셔드 / 전선 지휘부" labels.
 *   **Status**: **Complete**
 
-### 📍 Phase J-2: Investment Tab UX Simplification
-*   **Scope**: Simplify the bidding/contracts cards. 
-*   **Deliverable**: Replace dry contract layouts with visual "Survival Prediction Cards." Add immediate, highly readable status displays showing predicted survival odds, potential payouts, and the warning that failure triggers **게임오버 (Game Over / Restart)**.
+### 📍 Phase J-2: Hero's Fate UX Simplification
+*   **Scope**: Simplify the prediction/contracts cards. 
+*   **Deliverable**: Reframe dry contract layouts into visual "Survival Prediction Cards" and separate into sub-phases J-2A to J-2F. Complete Phase J-2A design specification (`docs/HEROS_FATE_UX_REDESIGN_SPEC.md`).
 
 ### 📍 Phase J-3: Weapon Enhancement Redesign Spec
 *   **Scope**: Draft a comprehensive mechanical spec for the 1~30강 upgrade loop.

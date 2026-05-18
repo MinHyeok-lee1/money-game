@@ -80,7 +80,13 @@
 
 - [x] **Product UX Reframe Spec**: Create comprehensive reset specification document (`PRODUCT_UX_REFRAME_PLAN.md`) detailing naming audit, module reframes, and specs roadmap (Phase J-0).
 - [x] **Korean Naming & Navigation Cleanup**: Apply Korean localization naming pivot across GNB headers and main app panels (Phase J-1).
-- [ ] **Investment Tab UX Simplification**: Reframe dry contract cards into immediate visual "Survival Prediction Cards" (Phase J-2).
+- [ ] **Hero's Fate UX Simplification** (Phase J-2):
+  - [x] **UX Redesign Spec**: Create a detailed prediction interface specification document (`HEROS_FATE_UX_REDESIGN_SPEC.md`) (Phase J-2A).
+  - [ ] **Label & Copy Cleanup**: Update visible text fields in `UI_TEXT.ko` (Phase J-2B).
+  - [ ] **Survival Prediction Card Layout**: Reframe standard cards into vertical prediction units (Phase J-2C).
+  - [ ] **Bet Slip Simplification**: Configure clean inputs and risk warnings (Phase J-2D).
+  - [ ] **Fate Log Polish**: Upgrade history log with green/red outcome cards (Phase J-2E).
+  - [ ] **1:1 Duel Model Proposal**: Define combat and weapon system integration schemas (Phase J-2F).
 - [ ] **Weapon Enhancement Redesign Spec**: Spec out the full 1~30 ladder, level drop/break rates, materials output, and inventory UI (Phase J-3).
 - [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
 - [ ] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
