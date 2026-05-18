@@ -90,7 +90,7 @@
 - [ ] **Weapon Enhancement Redesign**: Complete forging loop reframe (Phase J-3)
   - [x] **Redesign Spec**: Draft core 1~30 ladder spec and shard loop guardrails (Phase J-3A, J-3A-1 & J-3A-2).
   - [x] **Current Audit**: Inspect existing codebase hooks and gacha inventory arrays (Phase J-3B & J-3B-1).
-  - [ ] **Copy & UI Cleanup**: Localize forge naming and anvil actions safely (Phase J-3C & J-3E).
+  - [ ] **Copy & UI Cleanup**: Localize forge naming and anvil actions safely (Phase J-3C complete, J-3E pending).
   - [ ] **Data & Schema Design**: Model success rates and migration profiles (Phase J-3D & J-3F).
   - [ ] **Blacksmith Prototype**: Integrate full failures, shards, and trades (Phase J-3G).
 - [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).

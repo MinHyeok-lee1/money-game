@@ -101,7 +101,7 @@
         - [x] Phase J-3A-2: Status Wording Sanity Check passed <!-- id: 71 -->
         - [x] Phase J-3B: Current Smith & Shards Audit (docs/SMITH_AND_SHARDS_CODE_AUDIT.md complete) <!-- id: 72 -->
         - [x] Phase J-3B-1: Code Audit Accuracy and Guardrail QA passed <!-- id: 78 -->
-        - [ ] Phase J-3C: Smith & Shards Copy Cleanup (localize naming safely) <!-- id: 73 -->
+        - [x] Phase J-3C: Smith & Shards Copy Cleanup (localize naming safely) <!-- id: 73 -->
         - [ ] Phase J-3D: Weapon Ladder Design Data Spec (odds & costs spec) <!-- id: 74 -->
         - [ ] Phase J-3E: Inventory UI Reframe (cards and grid layout mock) <!-- id: 75 -->
         - [ ] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->

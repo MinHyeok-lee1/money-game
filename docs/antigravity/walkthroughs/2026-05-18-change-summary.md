@@ -268,4 +268,32 @@ We have successfully executed Phase J-3B-1 (Smith & Shards Code Audit Accuracy a
 3. **Rigid J-3C Copy Rules**: Reinforced the localization cleanup scope to explicitly state that future developers must not globally replace `gacha` or `enhancement` where they are bound in javascript state keys, nor add terms implying active shards/breakage.
 4. **Pristine Logic Maintenance**: Verified that zero changes exist in `index.html` runtime structures, cost curves, or save files. All actions remain strictly documentation-only.
 
+---
+
+## ⚒️ 14. Phase J-3C: Smith & Shards Copy Cleanup (Complete)
+
+We have successfully executed Phase J-3C (Smith & Shards Copy Cleanup) by refactoring player-facing Korean strings and labels inside [index.html](file:///c:/Users/ryan/dev/money-game/index.html) to perfectly match the gritty battlefield forge fantasy.
+
+### ⚒️ A. Key Copy Transformations
+1. **Module & GNB Branding**: Refactored the generic "스미스 앤 셔드" tab header and containers to `"스미스 앤 셔드 (전쟁 대장간)"` in Korean UI.
+2. **Draw / Gacha Localizations**:
+   - `Claim Starter Weapon` $\rightarrow$ `"보급 병기 지원 (스타터 팩)"`
+   - `Draw Cost` $\rightarrow$ `"보급 소환 비용"`
+   - `Draw 1` / `Draw 10` $\rightarrow$ `"1회 소환"` / `"10회 소환"`
+   - `Last Pull` $\rightarrow$ `"최근 소환 획득"`
+   - `Recent Pulls` $\rightarrow$ `"최근 소환 내역"`
+   - Updated descriptive blocks to use `"용병/장비 소환"` instead of abstract 모집/가챠.
+3. **Refining & Anvil Actions**:
+   - `Enhance Button` $\rightarrow$ `"⚒️ 모루 타격"`
+   - `Cost` / `Chance` labels $\rightarrow$ `"제련 비용"` / `"제련 확률"`
+   - `Last Enhancement` $\rightarrow$ `"최근 모루 타격 결과"`
+4. **Inventory & Equipment**:
+   - `Inventory` $\rightarrow$ `"무기 보관고 (인벤토리)"`
+   - `Equip First` $\rightarrow$ `"첫 무기 장착 (Deploy)"`
+   - `Unequip` $\rightarrow$ `"장착 해제 (Recall)"`
+5. **Notice Banner Addition**: Inserted a premium, subtle, non-interactive banner at the bottom of the tab content container:
+   - *“⚒️ [안내] 현재 버전에서는 전쟁 대장간 무기 제련(강화) 및 장원 대원 무기 배치(장착)만 지원됩니다. 향후 무기 파괴, 파편 회수, 암시장 판매 시스템이 추가될 예정입니다.”*
+6. **Technical State Segregation**: Left all underlying state variables (`gacha`, `enhancement`, `weaponLevels`, `weaponMastery`, `getEnhanceCost`, `getEnhanceChance`) pristine to maintain full save file and mechanical integrity. No game logic was altered.
+
+
 
