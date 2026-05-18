@@ -203,3 +203,69 @@ The design proposal establishes clear guidelines for future integrations:
 ### 📝 B. Integration and Documentation Updates
 - **UX Re-spec Reference**: Appended an explicit Tip box to [HEROS_FATE_UX_REDESIGN_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/HEROS_FATE_UX_REDESIGN_SPEC.md) pointing future developers to the complete duel proposal.
 - **Pristine State Maintenance**: Verified that zero changes were made to active script scopes, formulas, or save game states in `index.html`. All concepts remain strictly documentation-only.
+
+---
+
+## ⚒️ 9. Phase J-3A: Weapon Enhancement Redesign Spec (Complete)
+
+We have successfully executed Phase J-3A (Weapon Enhancement Redesign Spec) by authoring the complete design-only specification document [SMITH_AND_SHARDS_REDESIGN_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_REDESIGN_SPEC.md).
+
+### ⚒️ A. Key Design Elements
+The new specification defines a comprehensive reframe of the forging module (**스미스 앤 셔드**):
+1. **Thematic Forging Fantasy**: Transits abstract "Gacha & Enhancement" tabs into a wartime blacksmith forge utilizing `모루 타격` (Anvil Strike) action flows.
+2. **1~30 Core Enhancement Ladder**: Organizes progression through six distinct visual and lore-based weapon tiers from basic iron tools to Excalibur-class Apocalyptic Mythic Weapons.
+3. **Setback & Shattering Failures**: Structures failure consequences safely (level preservation, degradation, reset checkpoints, and weapon shattering) matching the enhancement levels.
+4. **강화 파편 (Enhancement Shards) Loop**: Establishes a resource conservation loop where shattered weapons yield Common, Rare, and Mythic shards that players use as success rate boosters or sell for war CASH.
+5. **UI Target Layout**: Specs out distinct tactile panels (Forge Anvil, Weapon Inventory, Shard Storage, and result logs) for future implementation.
+
+---
+
+## 🛡️ 10. Phase J-3A-1: Smith & Shards Redesign Spec Guardrail QA (Complete)
+
+We have successfully executed Phase J-3A-1 (Smith & Shards Redesign Spec Guardrail QA) by auditing and patching the design specification document [SMITH_AND_SHARDS_REDESIGN_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_REDESIGN_SPEC.md) to implement extremely rigid safety boundaries.
+
+### 🛡️ A. Key Guardrail Adjustments
+1. **Formula and Probability Gating**: Embedded an explicit Warning banner explaining that all enhancement success/failure chances and breakage odds are design-only placeholders, and the active `index.html` equations remain the absolute source of truth.
+2. **Save Schema Isolations**: Added a hard requirement preventing the approval or addition of active shard/weapon object schemas inside the database to protect user local storage profiles.
+3. **Current Mapping Tentativeness**: Refactored mapping descriptions to designate existing technical hooks (`sortedEnhancementInventory`, `weaponMastery`) as candidate/tentative mappings subject to the J-3B audit.
+4. **Roadmap Hardening**: Strengthened downstream roadmap timelines (J-3B to J-3G) to be explicitly audit-first and prototype-only.
+5. **Tone and Casing Cleanups**: Replaced speculative naming (*"종말급 종적"*) with appropriate canon templates (*"종말급 신화 무기"*). All concepts remain strictly documentation-only.
+
+---
+
+## 🛡️ 11. Phase J-3A-2: Smith & Shards Status Wording Sanity Check (Complete)
+
+We have successfully executed Phase J-3A-2 (Smith & Shards Status Wording Sanity Check) by auditing and patching status descriptions in all tracking and roadmap files.
+
+### 🛡️ A. Key Status Clarifications
+1. **Explicit Roadmap Gating**: Checked off `Phase J-3A` (Redesign Spec), `Phase J-3A-1` (Guardrail QA), and `Phase J-3A-2` (Sanity Check) inside `docs/task.md` while adding unchecked entries (`[ ]`) for future phases `J-3B` through `J-3G`.
+2. **Phase Status Isolation**: Updated the `TODO.md` to cleanly separate the spec blueprint from downstream blacksmith prototypes.
+3. **Readme Preservation**: Hardened `README.md` focus bullet points to explicitly declare that the active weapon forging system is **pending backend implementation**.
+4. **Pristine Logic Maintenance**: Verified that zero changes exist in `index.html` runtime structures, cost maps, or save game migrations. All actions remain strictly documentation-only.
+
+---
+
+## 🔍 12. Phase J-3B: Current Smith & Shards Code Audit (Complete)
+
+We have successfully executed Phase J-3B (Current Smith & Shards Code Audit) by authoring the complete technical and structure audit document [SMITH_AND_SHARDS_CODE_AUDIT.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_CODE_AUDIT.md).
+
+### 🔍 A. Key Audit Conclusions
+1. **Pristine State Layout**: Confirmed that weapons are successfully stored as individual, traceable instances with unique IDs (`instanceId`) in `enhancement.inventory`.
+2. **Current Mapping Safety**: Confirmed that gacha drawings mutate RPG dividends, whereas weapon forging is funded by CASH.
+3. **Decoupled Equations**: Verified that cost maps (`500 * (level + 1)`) and success odds (`0.9 - level * 0.06`, clamped `30%` to `90%`) are clean, linear, and completely safe.
+4. **Localization Readiness**: Identified that the next step, **Phase J-3C (Copy Cleanup)**, is 100% safe to proceed for copy-only translations (e.g. *대장간*, *모루 타격*), while preserving all database keys.
+5. **Rigid Implementation Guardrails**: Confirmed that Phase J-3F (Schema Proposal) is strictly required before any persistent shards, catalog drops, or weapon failures are added.
+
+---
+
+## 🛡️ 13. Phase J-3B-1: Smith & Shards Code Audit Accuracy and Guardrail QA (Complete)
+
+We have successfully executed Phase J-3B-1 (Smith & Shards Code Audit Accuracy and Guardrail QA) by auditing and patching the newly created audit document [SMITH_AND_SHARDS_CODE_AUDIT.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_CODE_AUDIT.md).
+
+### 🛡️ A. Key Guardrail Adjustments in the Audit
+1. **Backlink Limits Clarification**: Clarified in Section 1 that while weapons have unique instance IDs, the weapon objects themselves do not contain any backlinks to characters (`equippedCharacterId` or similar), and any equipment status lookup must query characters directly.
+2. **Hard Gating on Safe UI Reframing**: Clarified that safe deployment in Phase J-3E inventory cards is strictly visual-only. Mock interactive sell buttons must not be shown. A disabled upcoming label may be shown only if clearly marked as future-only.
+3. **Rigid J-3C Copy Rules**: Reinforced the localization cleanup scope to explicitly state that future developers must not globally replace `gacha` or `enhancement` where they are bound in javascript state keys, nor add terms implying active shards/breakage.
+4. **Pristine Logic Maintenance**: Verified that zero changes exist in `index.html` runtime structures, cost curves, or save files. All actions remain strictly documentation-only.
+
+
