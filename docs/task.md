@@ -84,4 +84,5 @@
     - [x] Phase I-4E: Reaper Form Modifier Integration (bounded Stage 101+ pressure, final multiplier floor) <!-- id: 54 -->
     - [x] Phase I-4F: Reaper Balance QA (pressure bounds, Stage 150 stacking, deferred milestones verified) <!-- id: 55 -->
     - [ ] Phase I-5: Infinite Mode Reaper Iteration <!-- id: 56 -->
+    - [x] Phase I-5A: Infinite Mode Playability Snapshot / Manual QA Plan (checklist & test ranges defined) <!-- id: 57 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

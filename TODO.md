@@ -70,6 +70,7 @@
 - [x] **Reaper Form Modifier Integration**: Added bounded Stage 101+ Reaper pressure while preserving Stage 1-100 and existing systems (Phase I-4E).
 - [x] **Reaper Balance QA**: Reaper pressure bounds, Stage 150 stacking, deferred milestone behavior, and system boundaries verified (Phase I-4F).
 - [ ] **Infinite Mode Reaper Iteration**: Decide the next Reaper tuning, presentation, or form behavior step after playtest review (Phase I-5).
+- [x] **Infinite Mode Playability Snapshot / QA**: Define manual playability plan and test ranges for Infinite Mode & Reaper system (Phase I-5A).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.
 - [ ] **Mythic Authority Triggers**: Endgame characters with authority skills (Inflation, Market Crash, Monopoly).

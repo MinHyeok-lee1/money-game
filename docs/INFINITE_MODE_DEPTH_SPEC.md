@@ -205,7 +205,7 @@ Starting from Stage 101, regular waves mix in specialized monsters alongside sta
 | **Armor Wall** | Extremely high effective HP via damage reduction. Flat damage is absorbed. | **PEN** | Forces PEN investment. Players who dump everything into ATK hit a wall. |
 | **Phantom** | High evasion rate. Attacks frequently miss. | **ACC** | Forces ACC investment via Community-tier Real Estate specialization. |
 | **Regenerator** | Regenerates HP each tick. Must be killed quickly or it fully heals. | **SPD + DPS** | Forces SPD investment and raw throughput. Punishes slow, heavy-hit builds. |
-| **Berserker** | Enrage timer. Deals increasing "pressure damage" the longer it lives. | **SPD + ATK** | Forces burst speed. Creates urgency rather than passive idle waiting. |
+| **Berserker** | SPD tempo pressure. Deals reduced damage unless met with high player speed. | **SPD + ATK** | Forces speed and throughput investment. Creates urgency rather than passive idle waiting. |
 | **Shadow Wraith** | Volatile: randomly absorbs or reflects a portion of damage each tick. | **CRT + ATK** | Forces critical-hit builds that punch through unpredictable defenses. |
 | **Standard** | No special mechanic. Pure HP scaling as currently implemented. | **ATK (general)** | Baseline filler between specialized enemies. |
 
@@ -407,4 +407,5 @@ Phase I-5 should decide whether to continue with:
 - **Phase I-4D-1**: Reaper UI Smoke QA — COMPLETE
 - **Phase I-4E**: Reaper Form Modifier Integration — COMPLETE
 - **Phase I-4F**: Reaper Balance QA — COMPLETE
-- **Phase I-5**: Infinite Mode Reaper Iteration — NEXT
+- **Phase I-5A**: Infinite Mode Playability Snapshot / Manual QA Plan — COMPLETE
+- **Phase I-5**: Infinite Mode Reaper Iteration / Execution — NEXT
