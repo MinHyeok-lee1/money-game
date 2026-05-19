@@ -97,3 +97,20 @@ Today, we successfully executed **Phase J-4B: First-Time Player UX Rework**. We 
 - Refreshed current development status focus and upcoming milestones in `README.md`.
 - Safe-editing CRLF checked across all changed documentation files.
 
+---
+
+## 🧭 Phase J-4C: First-Click CTA Patch
+
+Today, we successfully executed and verified **Phase J-4C: First-Click CTA Patch**. We designed and injected four highly optimized, visually cohesive first-click tactical guidance blocks directly into each main tab of `index.html`.
+
+### 1. High-Fidelity Tactical Guidance Cards Injected
+Each block is styled to feel like a grim, tactical underground war room and answers the primary player question: *"What should I click first?"* in under 3 seconds:
+* **Frontier Master (후방 자원 확보)**: Replaced old blue hint box with the **Rearline Tactical Intervention Guide** (`bg-slate-950/90`, emerald border accent). Guides the commander to click `FRONT FIRE SUPPORT (TAP)` first to secure startup capital, then buy passive depot zones to grow war tax income.
+* **Hero's Fate (지하 전선 생존 예측)**: Injected the **Black-Market Fate Betting Guide** slip under the header grid. Directs the player to pick a contract card to open the tactical bet slip, set their stakes, and run a dry-run simulator to calculate hazard limits before settling.
+* **Smith & Shards (전쟁 대장간)**: Injected the **War Forge Refine Guide** slip above the active sandbox toggle. Instructs players to claim a free starter weapon or run supply gacha calls to fill the armory, then strike the anvil to upgrade and equip tactical gear.
+* **Frontline Command (최전선 지휘부)**: Injected the **Front Defense Command Guide** right above the combat controllers. Instructs commanders to click `START DEFENSE RUN` under run controls to deploy units, then train team parameters (ATK/SPD/PEN) with earned Dividends (DIV).
+
+### 2. Rigorous Verification & Non-Mutation Safety
+* **Zero Runtime Mutations**: PowerShell exact keyword query checks confirmed 100% preservation of all formulas, state keys, save mechanisms (`GAME_STATE_STORAGE_KEY`), and combat loops.
+* **Refined Status Sync**: Refreshed and locked `docs/task.md`, `TODO.md`, and `README.md`. Checked CRLF line endings for maximum safety.
+

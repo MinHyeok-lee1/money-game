@@ -5957,8 +5957,32 @@
 
               {activeTab === "landlord" ? (
                 <>
-                  <div className="w-full bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded-r-lg">
-                    <p className="text-xs font-bold text-blue-700">{ui.newPlayerHint}</p>
+                  {/* Phase J-4C: Frontier Master First-Click Guidance */}
+                  <div className="w-full bg-slate-950/90 border border-slate-800 p-3.5 mb-4 rounded-xl shadow-xl text-left">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-emerald-400 text-xs animate-pulse">📡</span>
+                      <span className="text-[10px] font-black text-emerald-400 tracking-wider uppercase">
+                        {language === "ko" ? "사령부 후방 작전 지휘 가이드" : "REARLINE TACTICAL INTERVENTION GUIDE"}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div>
+                        <span className="font-bold text-amber-500 mr-1.5">⚡ {language === "ko" ? "첫 행동:" : "Primary:"}</span>
+                        <span className="text-slate-100">
+                          {language === "ko" 
+                            ? "중앙의 [전선 화력 지원 (TAP)] 버튼을 타격하여 기초 전쟁 자금(CASH)을 즉각 확보하세요." 
+                            : "Click [FRONT FIRE SUPPORT (TAP)] in the center to secure initial wartime CASH."}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-500 mr-1.5">🎯 {language === "ko" ? "다음 목표:" : "Secondary:"}</span>
+                        <span className="text-slate-400">
+                          {language === "ko" 
+                            ? "확보한 자금으로 하단의 군수 기지 초소를 수복(점령)해 세금 수익 패시브 인컴을 구축하세요." 
+                            : "Use earned capital to reclaim/unlock supply sector outposts to build passive tax income."}
+                        </span>
+                      </div>
+                    </div>
                   </div>
               {/* ????욱룏????嶺뚮슣堉붹룇 ?筌???????????븐뻤??????쇨덧??*/}
               <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center rounded-lg mb-4 border-b-2 border-green-200">
@@ -6114,6 +6138,34 @@
                         <div className="text-lg font-black">
                           {formatMoney(totalNetWorth)}
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phase J-4C: Hero's Fate First-Click Guidance */}
+                  <div className="w-full bg-slate-950/90 border-b border-slate-800 p-3.5 shadow-md text-left animate-fade-in">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-amber-500 text-xs animate-pulse">🎰</span>
+                      <span className="text-[10px] font-black text-amber-500 tracking-wider uppercase">
+                        {language === "ko" ? "지하 전선 생존 예측 지휘 가이드" : "BLACK-MARKET FATE BETTING GUIDE"}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div>
+                        <span className="font-bold text-amber-500 mr-1.5">⚡ {language === "ko" ? "첫 행동:" : "Primary:"}</span>
+                        <span className="text-slate-100">
+                          {language === "ko" 
+                            ? "아래 전선 카드에서 하나를 선택하고 예측 배팅 슬립(Bet Slip)을 여세요." 
+                            : "Pick a front-line contract card below to open your Tactical Bet Slip."}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-500 mr-1.5">🎯 {language === "ko" ? "다음 목표:" : "Secondary:"}</span>
+                        <span className="text-slate-400">
+                          {language === "ko" 
+                            ? "참전 기금을 입력한 후, 모의 작전(Dry Run)으로 위험을 판단하고 정산을 결정하세요." 
+                            : "Set your stake, run a simulation (Dry-Run) to check hazards, then decide to settle."}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -6614,6 +6666,34 @@
                         <div className="text-lg font-black">
                           {formatDps(GACHA_DRAW_COST)}
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phase J-4C: Smith & Shards First-Click Guidance */}
+                  <div className="w-full bg-slate-950/90 border-b border-slate-800 p-3.5 shadow-md text-left">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-orange-400 text-xs animate-pulse">⚒️</span>
+                      <span className="text-[10px] font-black text-orange-400 tracking-wider uppercase">
+                        {language === "ko" ? "전쟁 대장간 제련 지휘 가이드" : "WAR FORGE REFINE GUIDE"}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div>
+                        <span className="font-bold text-orange-400 mr-1.5">⚡ {language === "ko" ? "첫 행동:" : "Primary:"}</span>
+                        <span className="text-slate-100">
+                          {language === "ko" 
+                            ? "기본 무기를 무상 보급받거나 보급 호출(Gacha)을 기동하여 무기를 무기고에 확보하세요." 
+                            : "Claim starter weapon or draw supply calls (Gacha) to fill your armory database."}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-500 mr-1.5">🎯 {language === "ko" ? "다음 목표:" : "Secondary:"}</span>
+                        <span className="text-slate-400">
+                          {language === "ko" 
+                            ? "무기를 선택해 모루 타격을 수행하고, 강화된 무기를 대원들에게 즉각 장착하여 화력을 배가하세요." 
+                            : "Select a weapon to strike the anvil, then equip reinforced gear onto deployed squads."}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -7702,6 +7782,34 @@
                         </span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Phase J-4C: Frontline Command First-Click Guidance */}
+                  <div className="w-full bg-slate-950/90 border-b border-slate-800 p-3.5 shadow-md text-left">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-emerald-400 text-xs animate-pulse">🌲</span>
+                      <span className="text-[10px] font-black text-emerald-400 tracking-wider uppercase">
+                        {language === "ko" ? "최전방 전선 지휘 가이드" : "FRONT DEFENSE COMMAND GUIDE"}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div>
+                        <span className="font-bold text-emerald-400 mr-1.5">⚡ {language === "ko" ? "첫 행동:" : "Primary:"}</span>
+                        <span className="text-slate-100">
+                          {language === "ko" 
+                            ? "전선 지휘 런 컨트롤에서 [전선 방어 작전 개시]를 클릭해 방어전을 시작하세요." 
+                            : "Click [START DEFENSE RUN] under run controls to begin active frontline defense."}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-500 mr-1.5">🎯 {language === "ko" ? "다음 목표:" : "Secondary:"}</span>
+                        <span className="text-slate-400">
+                          {language === "ko" 
+                            ? "수급한 전투 배당금(DIV)으로 전투 특성(ATK/SPD/PEN)을 훈련하여 전투력을 강화하세요." 
+                            : "Spend earned dividends (DIV) on RPG combat upgrades (ATK/SPD/PEN) to reinforce the front."}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-4">
