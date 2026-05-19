@@ -4818,6 +4818,9 @@
         const weaponInventory = enhancementInventory.filter(
           (item) => item.type === "weapon",
         );
+        const hasDangerZoneWeapon = weaponInventory.some(
+          (weapon) => !weapon.broken && toFiniteNumber(weapon.enhanceLevel, 0) >= ENHANCE_BREAKAGE_START,
+        );
         const firstAvailableWeapon = weaponInventory.find(
           (weapon) => !isWeaponEquipped(weapon.instanceId, ownedCharacters),
         );
@@ -7428,31 +7431,50 @@
                     </div>
                   </div>
 
-                  {/* Phase J-4C: Smith & Shards First-Click Guidance */}
+                  {/* Phase J-4G: Smith & Shards first-time forge guide and currency clarity */}
                   <div className="w-full bg-slate-950/90 border-b border-slate-800 p-3.5 shadow-md text-left">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-orange-400 text-xs animate-pulse">⚒️</span>
-                      <span className="text-[10px] font-black text-orange-400 tracking-wider uppercase">
-                        {language === "ko" ? "전쟁 대장간 제련 지휘 가이드" : "WAR FORGE REFINE GUIDE"}
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-orange-400 text-xs animate-pulse">⚒️</span>
+                        <span className="text-[10px] font-black text-orange-400 tracking-wider uppercase">
+                          {language === "ko" ? "첫 대장간 진입 가이드" : "FIRST FORGE GUIDE"}
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-black text-slate-500 uppercase">
+                        {language === "ko" ? "실전 제련" : "LIVE FORGE"}
                       </span>
                     </div>
-                    <div className="space-y-1 text-xs">
+                    <div className="space-y-1.5 text-xs">
                       <div>
-                        <span className="font-bold text-orange-400 mr-1.5">⚡ {language === "ko" ? "첫 행동:" : "Primary:"}</span>
+                        <span className="font-bold text-orange-400 mr-1.5">⚡ {language === "ko" ? "추천 첫 행동:" : "Recommended first action:"}</span>
                         <span className="text-slate-100">
                           {language === "ko" 
-                            ? "기본 무기를 무상 보급받거나 보급 호출(Gacha)을 기동하여 무기를 무기고에 확보하세요." 
-                            : "Claim starter weapon or draw supply calls (Gacha) to fill your armory database."}
+                            ? "무료 보급 무기를 받거나 Dividends로 보급 호출을 돌린 뒤, 무기 하나를 골라 Cash로 모루를 타격하세요."
+                            : "Claim the free starter weapon or spend Dividends on supply draws, then pick one weapon and strike the anvil with Cash."}
                         </span>
                       </div>
-                      <div>
-                        <span className="font-bold text-slate-500 mr-1.5">🎯 {language === "ko" ? "다음 목표:" : "Secondary:"}</span>
-                        <span className="text-slate-400">
-                          {language === "ko" 
-                            ? "무기를 선택해 모루 타격을 수행하고, 강화된 무기를 대원들에게 즉각 장착하여 화력을 배가하세요." 
-                            : "Select a weapon to strike the anvil, then equip reinforced gear onto deployed squads."}
-                        </span>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1">
+                        <div className="bg-slate-900 border border-slate-800 rounded-md p-2">
+                          <span className="font-black text-emerald-300">DIV</span>
+                          <span className="text-slate-300 ml-1">{language === "ko" ? "무기 보급 호출" : "draw weapons"}</span>
+                        </div>
+                        <div className="bg-slate-900 border border-slate-800 rounded-md p-2">
+                          <span className="font-black text-amber-300">CASH</span>
+                          <span className="text-slate-300 ml-1">{language === "ko" ? "모루 타격 / 제련" : "strike the anvil"}</span>
+                        </div>
+                        <div className="bg-slate-900 border border-slate-800 rounded-md p-2">
+                          <span className="font-black text-cyan-300">SHARDS</span>
+                          <span className="text-slate-300 ml-1">{language === "ko" ? "보정제 제작 / 파괴 복구" : "craft stabilizers / recover from breakage"}</span>
+                        </div>
                       </div>
+                      {hasDangerZoneWeapon && (
+                        <div className="bg-red-950/40 border border-red-700/50 rounded-md p-2 text-[10px] font-bold text-red-100 leading-relaxed">
+                          <span className="font-black text-red-300 uppercase mr-1">{language === "ko" ? "위험 구간:" : "Danger Zone:"}</span>
+                          {language === "ko"
+                            ? `+${ENHANCE_BREAKAGE_START} 이상 무기는 실패 시 파괴될 수 있습니다. 보정제는 파괴를 막고, 파괴된 무기는 Refined Shards로 회수됩니다.`
+                            : `Weapons at +${ENHANCE_BREAKAGE_START} or higher can break on failure. Stabilizers prevent breakage; shattered weapons return Refined Shards.`}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -7472,6 +7494,11 @@
                             {language === "ko" 
                               ? "모루 타격 연출, 파괴 위기 경고 모달, 제련 파편 환급 및 암시장 등 visual UX를 가상으로 직접 조작하고 체감할 수 있는 안전한 프로토타입 환경입니다."
                               : "Test localized clangs, dangerous warning alerts, and circular shard salvage cascades in a 100% safe sandbox."}
+                          </p>
+                          <p className="text-[10px] text-teal-200 mt-1 font-bold leading-relaxed">
+                            {language === "ko"
+                              ? "경계: 이 프로토타입은 저장되지 않습니다. 실제 무기, Cash, Dividends, Refined Shards는 일반 화면에서만 변합니다."
+                              : "Boundary: this prototype does not save. Real weapons, Cash, Dividends, and Refined Shards only change in the live app view."}
                           </p>
                         </div>
                         <button
@@ -8333,8 +8360,18 @@
                                 );
                               })
                             ) : (
-                              <div className="py-8 text-center font-bold text-gray-400">
-                                {language === "ko" ? "비어 있음" : "Empty"}
+                              <div className="py-8 text-center bg-slate-50 border border-dashed border-slate-300 rounded-lg px-4">
+                                <div className="text-sm font-black text-slate-700">
+                                  {language === "ko" ? "무기고가 비어 있습니다" : "Your armory is empty"}
+                                </div>
+                                <div className="mt-1 text-xs font-bold text-slate-500 leading-relaxed">
+                                  {language === "ko"
+                                    ? "먼저 무료 보급 무기를 받거나 Dividends로 보급 호출을 돌려 무기를 확보하세요. 무기가 생기면 여기서 Cash로 모루를 타격할 수 있습니다."
+                                    : "Claim the free starter weapon or spend Dividends on supply draws first. Once a weapon exists, this list becomes the live forge where Cash strikes the anvil."}
+                                </div>
+                                <div className="mt-2 text-[10px] font-black text-orange-600 uppercase">
+                                  {language === "ko" ? "추천: 보급 무기 수령 → 모루 타격 → 대원 장착" : "Recommended: claim weapon -> strike anvil -> equip squad"}
+                                </div>
                               </div>
                             )}
                           </div>
