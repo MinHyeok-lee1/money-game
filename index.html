@@ -4377,6 +4377,8 @@
         const [anvilRecoil, setAnvilRecoil] = useState(false);
         const [enhanceSuccessPulse, setEnhanceSuccessPulse] = useState(false);
         const [enhanceFailPulse, setEnhanceFailPulse] = useState(false);
+        const [prestigeAnnouncementToast, setPrestigeAnnouncementToast] = useState(null);
+        const prestigeAnnouncementTimeoutRef = useRef(null);
         const [waveAlert, setWaveAlert] = useState(null); // string or null
         const [forgeConfirmTarget, setForgeConfirmTarget] = useState(null); // J-3I: { instanceId, useStabilizer, itemName, level, breakPct, successPct, stabCount }
         const [tacticalLogFeed, setTacticalLogFeed] = useState([
@@ -5838,6 +5840,53 @@
           return null;
         };
 
+        const getForgePrestigeAnnouncement = (level, itemName) => {
+          const safeLevel = Math.floor(toFiniteNumber(level, 0));
+          if (![6, 8, 10].includes(safeLevel)) return null;
+          const safeName = itemName || (language === "ko" ? "무기" : "Weapon");
+          const copy = {
+            6: {
+              title: language === "ko" ? "위험 구간 진입" : "Danger Zone Entry",
+              body: language === "ko"
+                ? `${safeName} +6 달성. 이제 실패 시 파괴 위험이 열립니다. 보정제를 신중히 사용하세요.`
+                : `${safeName} reached +6. Future failures can now break the weapon, so stabilizers matter.`,
+              tone: "red",
+            },
+            8: {
+              title: language === "ko" ? "정예 제련 임계점" : "Elite Forge Threshold",
+              body: language === "ko"
+                ? `${safeName} +8 달성. 전선급 무기로 올라섰지만, 다음 타격부터 회복 비용도 커집니다.`
+                : `${safeName} reached +8. This is elite-grade power, but recovery risk is now expensive.`,
+              tone: "purple",
+            },
+            10: {
+              title: language === "ko" ? "소버린 프로토타입 한계" : "Sovereign Prototype Cap",
+              body: language === "ko"
+                ? `${safeName} +10 달성. 현재 제련 한계에 도달한 소버린급 무기입니다.`
+                : `${safeName} reached +10. This weapon has hit the current sovereign prototype cap.`,
+              tone: "amber",
+            },
+          };
+          return copy[safeLevel];
+        };
+
+        const showForgePrestigeAnnouncement = (level, itemName) => {
+          const announcement = getForgePrestigeAnnouncement(level, itemName);
+          if (!announcement) return;
+          setPrestigeAnnouncementToast({
+            ...announcement,
+            level,
+            id: Date.now(),
+          });
+          if (prestigeAnnouncementTimeoutRef.current) {
+            clearTimeout(prestigeAnnouncementTimeoutRef.current);
+          }
+          prestigeAnnouncementTimeoutRef.current = setTimeout(() => {
+            setPrestigeAnnouncementToast(null);
+            prestigeAnnouncementTimeoutRef.current = null;
+          }, 4500);
+        };
+
         const enhanceWeaponItem = (instanceId, useStabilizer = false) => {
           const item = gameState.enhancement.inventory.find(
             (candidate) => candidate.instanceId === instanceId,
@@ -5950,6 +5999,7 @@
                 };
               });
             } else if (success) {
+              const nextSuccessfulLevel = currentLevel + 1;
               setEnhanceSuccessPulse(true);
               setTimeout(() => setEnhanceSuccessPulse(false), 1000);
 
@@ -5958,12 +6008,14 @@
                 ...old
               ].slice(0, 10));
 
+              showForgePrestigeAnnouncement(nextSuccessfulLevel, item.name);
+
               updateGameState((prev) => {
                 const prevItem = prev.enhancement.inventory.find(
                   (candidate) => candidate.instanceId === instanceId,
                 );
                 if (!prevItem) return prev;
-                const nextLevel = currentLevel + 1;
+                const nextLevel = nextSuccessfulLevel;
                 const result = {
                   itemName: prevItem.name,
                   success: true,
@@ -7477,6 +7529,36 @@
                       )}
                     </div>
                   </div>
+
+                  {prestigeAnnouncementToast && (
+                    <div className={`mx-4 mt-3 rounded-lg border p-3 text-left shadow-md ${
+                      prestigeAnnouncementToast.tone === "amber"
+                        ? "bg-amber-950/90 border-amber-500/60 text-amber-50"
+                        : prestigeAnnouncementToast.tone === "purple"
+                          ? "bg-purple-950/90 border-purple-500/60 text-purple-50"
+                          : "bg-red-950/90 border-red-500/60 text-red-50"
+                    }`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[10px] font-black uppercase tracking-widest opacity-80">
+                            {language === "ko" ? "제련 이정표" : "Forge Milestone"} +{prestigeAnnouncementToast.level}
+                          </div>
+                          <div className="mt-0.5 text-sm font-black">
+                            {prestigeAnnouncementToast.title}
+                          </div>
+                          <div className="mt-1 text-xs font-bold leading-relaxed opacity-90">
+                            {prestigeAnnouncementToast.body}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setPrestigeAnnouncementToast(null)}
+                          className="shrink-0 rounded border border-white/20 px-2 py-1 text-[10px] font-black uppercase text-white/80 hover:bg-white/10"
+                        >
+                          {language === "ko" ? "닫기" : "Close"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="bg-gray-50 p-4 space-y-4">
                     {/* Visual Interactive Sandbox Prototype Switcher */}

@@ -123,5 +123,6 @@
         - [x] Phase J-4E-1: Cross-System War Cohesion Runtime QA (Telemetry localization and runtime verification completed) <!-- id: 90 -->
         - [x] Phase J-4F: Product UX Stabilization Smoke Test (all tabs, formulas, timers, persistence verified PASS) <!-- id: 91 -->
         - [x] Phase J-4G: First-Time Forge Onboarding / Empty-State Pass (Smith & Shards guide, currency clarity, and sandbox boundary copy) <!-- id: 94 -->
-    - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
+    - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations in progress) <!-- id: 63 -->
+        - [x] Phase J-5A: Prestige Announcement Toast (+6/+8/+10 forge milestone banner, no schema change) <!-- id: 95 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
