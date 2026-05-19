@@ -5809,6 +5809,31 @@
           return Math.max(5, Math.floor(base * rarityMult));
         };
 
+        // J-3H: Prestige tier — derived from enhanceLevel, no persistence needed
+        const getPrestigeTier = (level) => {
+          const l = Math.floor(toFiniteNumber(level, 0));
+          if (l <= 0) return { tier: "base", label: "", borderClass: "border-gray-200", bgClass: "bg-gray-50", textClass: "text-gray-500" };
+          if (l <= 3) return { tier: "green", label: "", borderClass: "border-emerald-200", bgClass: "bg-emerald-50/50", textClass: "text-emerald-600" };
+          if (l <= 5) return { tier: "safe", label: language === "ko" ? "안전" : "SAFE", borderClass: "border-emerald-300", bgClass: "bg-emerald-50", textClass: "text-emerald-700" };
+          if (l <= 7) return { tier: "amber", label: language === "ko" ? "주의" : "CAUTION", borderClass: "border-amber-300", bgClass: "bg-amber-50/60", textClass: "text-amber-600" };
+          if (l <= 9) return { tier: "danger", label: language === "ko" ? "위험" : "DANGER", borderClass: "border-red-300", bgClass: "bg-red-50/50", textClass: "text-red-600" };
+          return { tier: "sovereign", label: language === "ko" ? "군주" : "SOVEREIGN", borderClass: "border-red-400", bgClass: "bg-red-50/70", textClass: "text-red-700" };
+        };
+
+        // J-3H: Compact weapon epithet — derived from existing fields, no persistence
+        const getWeaponEpithet = (item) => {
+          if (!item || item.type !== "weapon") return null;
+          const survivals = Math.floor(toFiniteNumber(item.breakSurvivalCount, 0));
+          const level = Math.floor(toFiniteNumber(item.enhanceLevel, 0));
+          if (level >= MAX_ENHANCE_LEVEL) return language === "ko" ? "전선의 전설" : "Frontline Legend";
+          if (survivals >= 5) return language === "ko" ? "불멸의" : "Undying";
+          if (survivals >= 3) return language === "ko" ? "잿더미에서 돌아온" : "Ashen";
+          if (survivals >= 1) return language === "ko" ? "흉터의" : "Scarred";
+          if (level >= 8) return language === "ko" ? "전선 정예" : "Elite";
+          if (level >= 6) return language === "ko" ? "숙련된" : "Tempered";
+          return null;
+        };
+
         const enhanceWeaponItem = (instanceId, useStabilizer = false) => {
           const item = gameState.enhancement.inventory.find(
             (candidate) => candidate.instanceId === instanceId,
@@ -7267,9 +7292,16 @@
                       </div>
                       <div className="bg-black/20 rounded-md p-2">
                         <div className="text-green-200 text-[9px] font-black uppercase">
-                          {language === "ko" ? "파괴 횟수" : "Breaks"}
+                          {language === "ko" ? "⚒️ 전적" : "⚒️ Record"}
                         </div>
-                        <div className="text-sm font-black">{toFiniteNumber(gameState.enhancement.forgeStats?.totalBreakages, 0)}</div>
+                        <div className="text-[10px] font-black leading-tight">
+                          <span className="text-emerald-300">{toFiniteNumber(gameState.enhancement.forgeStats?.totalSuccesses, 0)}</span>
+                          <span className="text-green-200/50">/</span>
+                          <span className="text-red-300">{toFiniteNumber(gameState.enhancement.forgeStats?.totalFailures, 0)}</span>
+                          {toFiniteNumber(gameState.enhancement.forgeStats?.totalBreakages, 0) > 0 && (
+                            <span className="text-red-400"> 💥{toFiniteNumber(gameState.enhancement.forgeStats?.totalBreakages, 0)}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -7713,34 +7745,71 @@
                           )}
                         </div>
 
-                        <div className="bg-white border border-gray-200 rounded-lg p-4">
+                        <div className={`border rounded-lg p-4 ${
+                          lastEnhancementResult?.broken ? "bg-red-50 border-red-200"
+                          : lastEnhancementResult?.success ? "bg-emerald-50 border-emerald-200"
+                          : lastEnhancementResult ? "bg-amber-50 border-amber-200"
+                          : "bg-white border-gray-200"
+                        }`}>
                           <div className="text-xs font-bold text-gray-400 uppercase">
                             {ui.lastEnhancement}
                           </div>
                           {lastEnhancementResult ? (
-                            <div className="mt-2 flex items-center justify-between gap-3">
-                              <div>
-                                <div className="font-black text-gray-800">
-                                  {lastEnhancementResult.itemName}
-                                </div>
-                                <div
-                                  className={`text-xs font-bold uppercase ${lastEnhancementResult.broken ? "text-red-700" : lastEnhancementResult.success ? "text-emerald-600" : "text-red-600"}`}
-                                >
-                                  {lastEnhancementResult.broken
-                                    ? (language === "ko" ? "💥 파괴됨" : "💥 BROKEN")
-                                    : lastEnhancementResult.success
-                                      ? (language === "ko" ? "성공" : "Success")
-                                      : (language === "ko" ? "실패" : "Failed")}
-                                </div>
-                                {lastEnhancementResult.broken && lastEnhancementResult.salvageShards > 0 && (
-                                  <div className="text-[10px] font-bold text-cyan-600">
-                                    💎 +{lastEnhancementResult.salvageShards} {language === "ko" ? "파편 회수" : "shards salvaged"}
+                            <div className="mt-2 space-y-2">
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="font-black text-gray-800">
+                                    {lastEnhancementResult.itemName}
                                   </div>
-                                )}
+                                  <div
+                                    className={`text-xs font-bold uppercase ${lastEnhancementResult.broken ? "text-red-700" : lastEnhancementResult.success ? "text-emerald-600" : "text-amber-600"}`}
+                                  >
+                                    {lastEnhancementResult.broken
+                                      ? (language === "ko" ? "💥 파괴됨" : "💥 BROKEN")
+                                      : lastEnhancementResult.success
+                                        ? (language === "ko" ? "⚡ 제련 성공" : "⚡ Success")
+                                        : (language === "ko" ? "⚠️ 제련 실패" : "⚠️ Failed")}
+                                  </div>
+                                </div>
+                                <div className={`text-xl font-black ${lastEnhancementResult.broken ? "text-red-400" : lastEnhancementResult.success ? "text-emerald-600" : "text-amber-600"}`}>
+                                  +{lastEnhancementResult.level}
+                                </div>
                               </div>
-                              <div className="font-black text-gray-700">
-                                +{lastEnhancementResult.level}
-                              </div>
+                              {/* J-3H: Emotional recovery / encouragement feedback */}
+                              {lastEnhancementResult.broken && lastEnhancementResult.salvageShards > 0 && (
+                                <div className="bg-cyan-50 border border-cyan-200 rounded-md p-2 space-y-1">
+                                  <div className="text-xs font-black text-cyan-700">
+                                    💎 +{lastEnhancementResult.salvageShards} {language === "ko" ? "제련 파편 회수 완료" : "Refined Shards salvaged"}
+                                  </div>
+                                  <div className="text-[10px] font-bold text-cyan-600 leading-relaxed">
+                                    {language === "ko"
+                                      ? "파편은 보정제 제작에 사용됩니다. 다음 도전에서 보정제를 장착하면 파괴를 완전히 방지할 수 있습니다."
+                                      : "Shards fuel stabilizer crafting. Equip a stabilizer on your next attempt to fully prevent breakage."}
+                                  </div>
+                                </div>
+                              )}
+                              {!lastEnhancementResult.success && !lastEnhancementResult.broken && (
+                                <div className="text-[10px] font-bold text-amber-600 leading-relaxed">
+                                  {lastEnhancementResult.level >= ENHANCE_BREAKAGE_START
+                                    ? (language === "ko"
+                                      ? "⚠️ 무기가 파괴 위험을 무사히 통과했습니다. 보정제 사용을 권장합니다."
+                                      : "⚠️ Your weapon survived a break roll. Consider using a stabilizer.")
+                                    : (language === "ko"
+                                      ? "실패는 성공의 어머니. 모루 타격을 다시 수행하십시오."
+                                      : "Failure fuels mastery. Strike the anvil again.")}
+                                </div>
+                              )}
+                              {lastEnhancementResult.success && (
+                                <div className="text-[10px] font-bold text-emerald-600 leading-relaxed">
+                                  {lastEnhancementResult.level >= ENHANCE_BREAKAGE_START
+                                    ? (language === "ko"
+                                      ? "위험 구간에서의 성공! 이 무기는 전선의 생존자입니다."
+                                      : "Success in the danger zone! This weapon is a survivor.")
+                                    : (language === "ko"
+                                      ? "제련 완료. 다음 단계를 향해 전진하십시오."
+                                      : "Refinement complete. Push forward to the next level.")}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <div className="mt-2 font-bold text-gray-400">-</div>
@@ -7852,11 +7921,20 @@
                                         {character.rarityLabel} /
                                         {character.definition.faction}
                                       </div>
-                                      <div className="text-xs font-bold text-gray-500">
-                                        {ui.weapon}:{" "}
+                                      <div className="text-xs font-bold text-gray-500 flex items-center gap-1 flex-wrap">
+                                        <span>{ui.weapon}:{" "}
                                         {character.equippedWeapon
                                           ? `${character.equippedWeapon.name} +${character.equippedWeapon.enhanceLevel}`
                                           : ui.none}
+                                        </span>
+                                        {character.equippedWeapon && character.equippedWeapon.enhanceLevel >= ENHANCE_BREAKAGE_START && (
+                                          <span className={`text-[8px] font-black uppercase px-1 py-0 rounded ${getPrestigeTier(character.equippedWeapon.enhanceLevel).textClass} bg-white/60`}>
+                                            {getPrestigeTier(character.equippedWeapon.enhanceLevel).label}
+                                          </span>
+                                        )}
+                                        {character.equippedWeapon && character.equippedWeapon.broken === true && (
+                                          <span className="text-[8px] font-black text-red-500">💥</span>
+                                        )}
                                       </div>
                                       <div className="text-[10px] font-bold text-gray-400 mt-0.5">
                                         {language === "ko" ? "선호 무기: " : "Pref: "}
@@ -7983,16 +8061,44 @@
                                 const breakPct = Math.round(breakChance * 100);
                                 const canEnhance = item.type === "weapon" && !isBroken && item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel);
                                 const stabCount = toFiniteNumber(gameState.enhancement.stabilizers, 0);
+                                const prestige = item.type === "weapon" ? getPrestigeTier(item.enhanceLevel) : null;
+                                const epithet = !isBroken ? getWeaponEpithet(item) : null;
+                                const isEquipped = item.type === "weapon" && isWeaponEquipped(item.instanceId, ownedCharacters);
                                 return (
                                 <div
                                   key={item.instanceId}
-                                  className={`rounded-md p-3 space-y-2 ${isBroken ? "bg-red-50 border border-red-200" : "bg-gray-50"}`}
+                                  className={`rounded-md p-3 space-y-2 border transition-colors ${
+                                    isBroken ? "bg-red-50 border-red-300"
+                                    : prestige ? `${prestige.bgClass} ${prestige.borderClass}`
+                                    : "bg-gray-50 border-gray-200"
+                                  }`}
                                 >
+                                  {/* J-3H: Danger zone warning strip */}
+                                  {item.type === "weapon" && !isBroken && breakPct > 0 && (
+                                    <div className="flex items-center gap-1.5 bg-red-900/10 border border-red-200 rounded px-2 py-1">
+                                      <span className="text-[9px] font-black text-red-600 uppercase tracking-wider animate-pulse">⚠️</span>
+                                      <span className="text-[9px] font-black text-red-600 uppercase tracking-wider">
+                                        {language === "ko" ? `위험 구간 — 파괴 확률 ${breakPct}%` : `DANGER ZONE — ${breakPct}% BREAK RISK`}
+                                      </span>
+                                      {stabCount > 0 && (
+                                        <span className="text-[8px] font-bold text-cyan-600 ml-auto">
+                                          {language === "ko" ? "🛡️ 보정제 권장" : "🛡️ Stabilizer rec."}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
                                   <div className="flex items-center justify-between gap-3">
                                     <div className="min-w-0 flex-1">
+                                      {/* J-3H: Epithet prefix */}
+                                      {epithet && (
+                                        <div className="text-[9px] font-black text-amber-600 uppercase tracking-wider mb-0.5 truncate">
+                                          {epithet}
+                                        </div>
+                                      )}
                                       <div className="font-bold text-gray-800 flex items-center gap-1 flex-wrap">
-                                        {isLocked && <span className="text-[10px]">🔒</span>}
+                                        {isLocked && <span className="text-[10px]" title={language === "ko" ? "잠금 — 보호 중" : "Locked — Protected"}>🔒</span>}
                                         {isBroken && <span className="text-[10px]">💥</span>}
+                                        {isEquipped && !isBroken && <span className="text-[9px] bg-emerald-600 text-white px-1 py-0 rounded font-black leading-tight">E</span>}
                                         <span className={`truncate ${isBroken ? "line-through text-gray-400" : ""}`}>
                                           {item.name}
                                           {item.type === "weapon" && ` +${item.enhanceLevel}`}
@@ -8002,8 +8108,15 @@
                                         <span className={`text-xs font-bold uppercase ${isBroken ? "text-red-500" : rarityTextClass(item.rarity)}`}>
                                           {isBroken ? (language === "ko" ? "파괴됨" : "BROKEN") : `${item.rarity} ${item.type}`}
                                         </span>
+                                        {/* J-3H: Prestige tier badge */}
+                                        {prestige && prestige.label && !isBroken && (
+                                          <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${prestige.textClass} bg-white/60 border ${prestige.borderClass}`}>
+                                            {prestige.label}
+                                          </span>
+                                        )}
+                                        {/* Break survival badge — upgraded with narrative */}
                                         {item.type === "weapon" && toFiniteNumber(item.breakSurvivalCount, 0) > 0 && !isBroken && (
-                                          <span className="text-[9px] font-bold text-amber-600">
+                                          <span className="text-[9px] font-bold text-amber-600" title={language === "ko" ? `파괴 위기 ${item.breakSurvivalCount}회 생존` : `Survived ${item.breakSurvivalCount} break rolls`}>
                                             🛡️×{item.breakSurvivalCount}
                                           </span>
                                         )}
@@ -8017,35 +8130,33 @@
                                   </div>
                                   {item.type === "weapon" && !isBroken && (
                                     <div className="space-y-1.5">
-                                      {/* Cost / Chance / Breakage risk row */}
+                                      {/* Cost / Chance row */}
                                       <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 gap-2">
                                         <span>{language === "ko" ? "비용" : "Cost"}: {formatMoney(getEnhanceCost(item.enhanceLevel))}</span>
                                         <span>{language === "ko" ? "확률" : "Chance"}: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%</span>
-                                        {breakPct > 0 && (
-                                          <span className="text-red-500 font-black">⚠️ {language === "ko" ? "파괴" : "Break"}: {breakPct}%</span>
-                                        )}
                                       </div>
                                       {/* Action buttons row */}
                                       <div className="flex items-center gap-1.5 flex-wrap">
                                         <button
                                           onClick={() => enhanceWeaponItem(item.instanceId, false)}
                                           disabled={!canEnhance}
-                                          className={`rounded-md px-3 py-1 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                          className={`rounded-md px-3 py-1.5 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                                         >
                                           {language === "ko" ? "⚒️ 모루 타격" : "⚒️ Enhance"}
                                         </button>
                                         {canEnhance && stabCount > 0 && breakPct > 0 && (
                                           <button
                                             onClick={() => enhanceWeaponItem(item.instanceId, true)}
-                                            className="rounded-md px-2 py-1 text-[10px] font-black bg-cyan-700 text-white transition-colors"
+                                            className="rounded-md px-2 py-1.5 text-[10px] font-black bg-cyan-700 text-white transition-colors border border-cyan-500"
                                             title={language === "ko" ? "보정제 사용 (파괴 방지 + 성공률 +3%)" : "Use Stabilizer (break protection + 3% success)"}
                                           >
-                                            🛡️ {language === "ko" ? "보정 타격" : "Stab."}
+                                            🛡️ {language === "ko" ? "보정 타격" : "Stab."} ({stabCount})
                                           </button>
                                         )}
                                         <button
                                           onClick={() => toggleWeaponLock(item.instanceId)}
-                                          className="rounded px-1.5 py-1 text-[10px] font-bold bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors"
+                                          className={`rounded px-1.5 py-1 text-[10px] font-bold transition-colors ${isLocked ? "bg-amber-100 text-amber-700 border border-amber-300" : "bg-gray-200 text-gray-500 hover:bg-gray-300"}`}
+                                          title={isLocked ? (language === "ko" ? "잠금 해제" : "Unlock") : (language === "ko" ? "잠금 설정" : "Lock")}
                                         >
                                           {isLocked ? "🔒" : "🔓"}
                                         </button>
@@ -8053,16 +8164,23 @@
                                     </div>
                                   )}
                                   {item.type === "weapon" && isBroken && (
-                                    <div className="flex items-center justify-between gap-2">
-                                      <span className="text-[10px] font-bold text-red-500">
-                                        {language === "ko" ? "무기가 산산조각 났습니다. 잔해를 정리하십시오." : "Weapon shattered. Dismiss wreckage."}
-                                      </span>
-                                      <button
-                                        onClick={() => salvageBrokenWeapon(item.instanceId)}
-                                        className="rounded-md px-2 py-1 text-[10px] font-black bg-gray-700 text-white hover:bg-gray-600 transition-colors flex-shrink-0"
-                                      >
-                                        {language === "ko" ? "잔해 정리" : "Dismiss"}
-                                      </button>
+                                    <div className="space-y-1.5">
+                                      <div className="text-[10px] font-bold text-red-500 leading-relaxed">
+                                        {language === "ko"
+                                          ? "무기가 산산조각 났습니다. 파편은 이미 회수되었습니다."
+                                          : "Weapon shattered. Shards already salvaged."}
+                                      </div>
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className="text-[9px] font-bold text-gray-400">
+                                          {language === "ko" ? "잔해를 정리하고 다음 무기에 집중하십시오." : "Dismiss wreckage and focus on your next weapon."}
+                                        </span>
+                                        <button
+                                          onClick={() => salvageBrokenWeapon(item.instanceId)}
+                                          className="rounded-md px-2.5 py-1 text-[10px] font-black bg-gray-700 text-white hover:bg-gray-600 transition-colors flex-shrink-0"
+                                        >
+                                          {language === "ko" ? "🗑️ 잔해 정리" : "🗑️ Dismiss"}
+                                        </button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -8076,20 +8194,38 @@
                           </div>
                         </div>
 
-                        {/* J-3G: Salvage History */}
+                        {/* J-3G/J-3H: Salvage History with recovery progress */}
                         {Array.isArray(gameState.enhancement.salvageHistory) && gameState.enhancement.salvageHistory.length > 0 && (
                           <div className="bg-white border border-gray-200 rounded-lg p-4">
-                            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                              {language === "ko" ? "💎 파편 회수 기록" : "💎 Salvage History"}
-                            </h2>
+                            <div className="flex items-center justify-between mb-2">
+                              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                {language === "ko" ? "💎 파편 회수 기록" : "💎 Salvage History"}
+                              </h2>
+                              <span className="text-[9px] font-black text-cyan-600">
+                                {language === "ko" ? "총 회수" : "Total"}: 💎{toFiniteNumber(gameState.enhancement.forgeStats?.totalShardsEarned, 0)}
+                              </span>
+                            </div>
                             <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
                               {[...gameState.enhancement.salvageHistory].reverse().map((entry) => (
-                                <div key={entry.id} className="flex items-center justify-between text-[10px] font-bold py-1 border-b border-gray-100">
-                                  <span className="text-gray-600 truncate">{entry.weaponName} +{entry.weaponLevel}</span>
+                                <div key={entry.id} className="flex items-center justify-between text-[10px] font-bold py-1 border-b border-gray-100 gap-2">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className={`text-[8px] font-black uppercase px-1 py-0 rounded ${rarityTextClass(entry.weaponRarity)} bg-gray-100`}>
+                                      {entry.weaponRarity ? String(entry.weaponRarity).slice(0, 4) : "?"}
+                                    </span>
+                                    <span className="text-gray-600 truncate">{entry.weaponName} +{entry.weaponLevel}</span>
+                                  </div>
                                   <span className="text-cyan-600 flex-shrink-0">💎 +{entry.refinedShardsAwarded}</span>
                                 </div>
                               ))}
                             </div>
+                            {/* J-3H: Recovery progress hint */}
+                            {toFiniteNumber(gameState.enhancement.refinedShards, 0) > 0 && toFiniteNumber(gameState.enhancement.refinedShards, 0) < STABILIZER_CRAFT_COST && (
+                              <div className="mt-2 text-[9px] font-bold text-gray-400 text-center">
+                                {language === "ko"
+                                  ? `보정제 제작까지 💎 ${STABILIZER_CRAFT_COST - toFiniteNumber(gameState.enhancement.refinedShards, 0)} 파편 추가 필요`
+                                  : `💎 ${STABILIZER_CRAFT_COST - toFiniteNumber(gameState.enhancement.refinedShards, 0)} more shards to craft a stabilizer`}
+                              </div>
+                            )}
                           </div>
                         )}
 
