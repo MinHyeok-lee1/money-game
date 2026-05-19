@@ -92,6 +92,22 @@
         z-index: 50;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       }
+      .animate-anvil-shake {
+        animation: anvil-shake-kf 0.1s infinite;
+      }
+      @keyframes anvil-shake-kf {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(0px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(2px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(2px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+      }
     </style>
   </head>
   <body class="flex flex-col items-center min-h-screen">
@@ -4234,6 +4250,22 @@
         );
         const [clicks, setClicks] = useState([]);
         const [rewardPopups, setRewardPopups] = useState([]);
+
+        // Phase J-4D: Transient Tactical Feedback States (Non-Persistent)
+        const [isArtilleryFlashing, setIsArtilleryFlashing] = useState(false);
+        const [rotatingTacticalMsg, setRotatingTacticalMsg] = useState("");
+        const [betWarningPulse, setBetWarningPulse] = useState(false);
+        const [lastBetResultToast, setLastBetResultToast] = useState(null); // { status: "success" | "loss", text: "" }
+        const [anvilShake, setAnvilShake] = useState(false);
+        const [anvilRecoil, setAnvilRecoil] = useState(false);
+        const [enhanceSuccessPulse, setEnhanceSuccessPulse] = useState(false);
+        const [enhanceFailPulse, setEnhanceFailPulse] = useState(false);
+        const [waveAlert, setWaveAlert] = useState(null); // string or null
+        const [tacticalLogFeed, setTacticalLogFeed] = useState([
+          "📡 후방 사령부 통신 온라인.",
+          "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
+        ]);
+
         const [sandboxState, setSandboxState] = useState({
           showSandbox: true,
           shardsCount: 1540,
@@ -4811,7 +4843,25 @@
           if (activeTab !== "rpg" || runState.isActive !== true) return;
 
           const timer = setInterval(() => {
-            updateGameState((prev) => applyCombatTick(prev, 1));
+            updateGameState((prev) => {
+              const nextState = applyCombatTick(prev, 1);
+              
+              // Trigger heavy radar flash and write tactical terminal messages
+              setWaveAlert(true);
+              setTimeout(() => setWaveAlert(false), 250);
+
+              const events = [
+                `🚨 적 개체 접근 중 - 방어막 충격 감지! (누적 격퇴: ${nextState.rpg?.defeatedMonsters || 0})`,
+                `📡 최전방 화력 지원 분대 격전 중! 대상 잔여 체력: ${nextState.rpg?.monsterHp || 0}`,
+                "💥 아군 원격 포격 지원 포탄 분대 투하 완료",
+                "👥 대원들 최선 전선 사수 대형 및 재장전 개시",
+                "🔋 방어망 에너지 쉴드 긴급 충전 순차 기동 중"
+              ];
+              const newMsg = events[Math.floor(Math.random() * events.length)];
+              setTacticalLogFeed((old) => [newMsg, ...old].slice(0, 10));
+
+              return nextState;
+            });
           }, 1000);
           return () => clearInterval(timer);
         }, [activeTab, runState.isActive]);
@@ -4829,6 +4879,21 @@
               totalEarned: prev.landlord.totalEarned + gain,
             },
           }));
+
+          // Trigger Phase J-4D Artillery feedback effects
+          setIsArtilleryFlashing(true);
+          setTimeout(() => setIsArtilleryFlashing(false), 120);
+
+          const tacticalMsgs = [
+            "🔥 포격 개시! 전선 화력 지원",
+            "💣 군수 거점 돌파 시도",
+            "💰 사령부 전쟁 세금 징수",
+            "📦 후방 보급 라인 기동",
+            "⚡ 화력 지원 부대 급파",
+            "📡 최전방 전술 신호 연결"
+          ];
+          setRotatingTacticalMsg(tacticalMsgs[Math.floor(Math.random() * tacticalMsgs.length)]);
+
           const rect = e.currentTarget.getBoundingClientRect();
           const newClick = {
             id: Date.now(),
@@ -5213,18 +5278,35 @@
         };
 
         const settleDefenseContract = () => {
+          const entry = createDefenseContractSettlementResult(
+            gameState,
+            investmentAssets,
+            gameState.rpg?.highestStage || 0,
+            totalTeamDps,
+          );
+          if (!entry) return;
+
+          const success = entry.wouldWin;
+          setLastBetResultToast({
+            status: success ? "success" : "loss",
+            text: success 
+              ? (language === "ko" ? "🔥 작전 성공: 최전선 방어 완료! 자산 증식 확인." : "🔥 MISSION SUCCESS: FRONT DEFEND SECURED! CAPITAL GAINS REALIZED.")
+              : (language === "ko" ? "🚨 전선 붕괴: 부대 손실 및 전원 몰살 발생!" : "🚨 SECTOR CRASHED: SQUAD WASTED AND CAPITAL LIQUIDATED!")
+          });
+          setTimeout(() => setLastBetResultToast(null), 4000);
+
           setGameState((prev) => {
-            const entry = createDefenseContractSettlementResult(
+            const entryResult = createDefenseContractSettlementResult(
               prev,
               investmentAssets,
               prev.rpg?.highestStage || 0,
               totalTeamDps,
             );
-            if (!entry) return prev;
+            if (!entryResult) return prev;
             const currentCapital = toFiniteNumber(prev.investment.capital, 0);
-            const capitalAfterDeduct = currentCapital - entry.stake;
-            const capitalFinal = entry.wouldWin
-              ? capitalAfterDeduct + entry.stake * entry.projectedPayout
+            const capitalAfterDeduct = currentCapital - entryResult.stake;
+            const capitalFinal = entryResult.wouldWin
+              ? capitalAfterDeduct + entryResult.stake * entryResult.projectedPayout
               : capitalAfterDeduct;
             const existing = Array.isArray(prev.investment.contractSettlementHistory)
               ? prev.investment.contractSettlementHistory
@@ -5239,20 +5321,20 @@
                   ...prev.investment.betSlip,
                   stake: 0,
                 },
-                contractSettlementHistory: [...existing, entry].slice(-10),
+                contractSettlementHistory: [...existing, entryResult].slice(-10),
               },
             };
 
-            if (!entry.wouldWin) {
+            if (!entryResult.wouldWin) {
               return {
                 ...nextState,
                 meta: {
                   ...prev.meta,
                   gameOver: {
                     reason: "defense_contract_failure",
-                    contractName: entry.contractName,
-                    stake: entry.stake,
-                    odds: entry.odds,
+                    contractName: entryResult.contractName,
+                    stake: entryResult.stake,
+                    odds: entryResult.odds,
                     timestamp: Date.now(),
                   }
                 }
@@ -5540,62 +5622,83 @@
         };
 
         const enhanceWeaponItem = (instanceId) => {
-          updateGameState((prev) => {
-            const item = prev.enhancement.inventory.find(
-              (candidate) => candidate.instanceId === instanceId,
-            );
-            if (!item || item.type !== "weapon") return prev;
+          const item = gameState.enhancement.inventory.find(
+            (candidate) => candidate.instanceId === instanceId,
+          );
+          if (!item || item.type !== "weapon") return;
 
-            const currentLevel = clampNumber(
-              Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
-              0,
-              MAX_ENHANCE_LEVEL,
-              0,
-            );
-            if (currentLevel >= MAX_ENHANCE_LEVEL) return prev;
+          const currentLevel = clampNumber(
+            Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
+            0,
+            MAX_ENHANCE_LEVEL,
+            0,
+          );
+          if (currentLevel >= MAX_ENHANCE_LEVEL) return;
 
-            const cost = getEnhanceCost(currentLevel);
-            if (prev.wallet.cash < cost) return prev;
+          const cost = getEnhanceCost(currentLevel);
+          if (cash < cost) return;
+
+          // Trigger Phase J-4D forge physical recoil anticipation shakes
+          setAnvilShake(true);
+          setAnvilRecoil(true);
+
+          setTimeout(() => {
+            setAnvilShake(false);
+            setAnvilRecoil(false);
 
             const success = Math.random() < getEnhanceChance(currentLevel);
-            const nextLevel = success ? currentLevel + 1 : currentLevel;
-            const result = {
-              itemName: item.name,
-              success,
-              level: nextLevel,
-            };
-            const weaponType = getWeaponType(item);
-            const nextWeaponLevels = { ...(prev.enhancement.weaponLevels || {}) };
-            const nextWeaponMastery = { ...(prev.enhancement.weaponMastery || {}) };
-            if (weaponType) {
-              const previousSavedLevel = Math.max(
-                0,
-                Math.floor(toFiniteNumber(nextWeaponLevels[weaponType], 0)),
-              );
-              const highestLevel = Math.max(previousSavedLevel, nextLevel);
-              nextWeaponLevels[weaponType] = highestLevel;
-              nextWeaponMastery[weaponType] = Math.min(2, 1 + highestLevel * 0.05);
+            if (success) {
+              setEnhanceSuccessPulse(true);
+              setTimeout(() => setEnhanceSuccessPulse(false), 1000);
+            } else {
+              setEnhanceFailPulse(true);
+              setTimeout(() => setEnhanceFailPulse(false), 1000);
             }
 
-            return {
-              ...prev,
-              wallet: {
-                ...prev.wallet,
-                cash: prev.wallet.cash - cost,
-              },
-              enhancement: {
-                ...prev.enhancement,
-                weaponLevels: nextWeaponLevels,
-                weaponMastery: nextWeaponMastery,
-                inventory: prev.enhancement.inventory.map((candidate) =>
-                  candidate.instanceId === instanceId
-                    ? { ...candidate, enhanceLevel: nextLevel }
-                    : candidate,
-                ),
-                lastEnhancementResult: result,
-              },
-            };
-          });
+            updateGameState((prev) => {
+              const prevItem = prev.enhancement.inventory.find(
+                (candidate) => candidate.instanceId === instanceId,
+              );
+              if (!prevItem) return prev;
+              const nextLevel = success ? currentLevel + 1 : currentLevel;
+              const result = {
+                itemName: prevItem.name,
+                success,
+                level: nextLevel,
+              };
+              const weaponType = getWeaponType(prevItem);
+              const nextWeaponLevels = { ...(prev.enhancement.weaponLevels || {}) };
+              const nextWeaponMastery = { ...(prev.enhancement.weaponMastery || {}) };
+              if (weaponType) {
+                const previousSavedLevel = Math.max(
+                  0,
+                  Math.floor(toFiniteNumber(nextWeaponLevels[weaponType], 0)),
+                );
+                const highestLevel = Math.max(previousSavedLevel, nextLevel);
+                nextWeaponLevels[weaponType] = highestLevel;
+                nextWeaponMastery[weaponType] = Math.min(2, 1 + highestLevel * 0.05);
+              }
+
+              return {
+                ...prev,
+                wallet: {
+                  ...prev.wallet,
+                  cash: prev.wallet.cash - cost,
+                },
+                enhancement: {
+                  ...prev.enhancement,
+                  weaponLevels: nextWeaponLevels,
+                  weaponMastery: nextWeaponMastery,
+                  inventory: prev.enhancement.inventory.map((candidate) =>
+                    candidate.instanceId === instanceId
+                      ? { ...candidate, enhanceLevel: nextLevel }
+                      : candidate,
+                  ),
+                  lastEnhancementResult: result,
+                },
+              };
+            });
+          }, 450);
         };
 
         const equipWeaponToCharacter = (characterInstanceId, weaponInstanceId) => {
@@ -6014,15 +6117,32 @@
                 </div>
 
                 <div
-                  className="h-64 flex items-center justify-center relative cursor-pointer select-none bg-green-50 overflow-hidden"
+                  className={`h-64 flex items-center justify-center relative cursor-pointer select-none overflow-hidden transition-all duration-75 ${
+                    isArtilleryFlashing 
+                      ? "bg-red-950/90 border-2 border-red-500 scale-95 shadow-[0_0_15px_rgba(239,68,68,0.5)]" 
+                      : "bg-slate-950/90 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/60"
+                  }`}
                   onClick={handleMainClick}
                 >
-                  <div className="text-[100px] font-bold text-green-600 drop-shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-100">
-                    TAP!
+                  {/* Phase J-4D: Tactical grid scan lines overlay */}
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
+                  
+                  {/* Flashing radial radar shockwave */}
+                  <div className={`absolute inset-0 bg-[radial-gradient(circle,rgba(239,68,68,0.15)_0%,transparent_70%)] pointer-events-none transition-opacity duration-75 ${isArtilleryFlashing ? "opacity-100 scale-125" : "opacity-0 scale-100"}`}></div>
+
+                  {/* Dynamic Tactical Operations Ticker overlay */}
+                  {rotatingTacticalMsg && (
+                    <div className="absolute top-4 left-4 bg-slate-900/95 border border-slate-800 text-slate-100 font-bold px-2 py-0.5 rounded text-[9px] tracking-widest uppercase animate-pulse shadow-md z-10">
+                      📡 {rotatingTacticalMsg}
+                    </div>
+                  )}
+
+                  <div className={`text-[90px] font-black tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] select-none pointer-events-none transition-all duration-100 ${isArtilleryFlashing ? "text-red-500 scale-90" : "text-emerald-500"}`}>
+                    FIRE
                   </div>
-                  <div className="absolute bottom-4 text-green-700/60 font-bold animate-pulse pointer-events-none text-sm">
-                    {t.tapToEarn} (+{formatMoney(clickPower * multiplier)}/
-                    {t.click})
+                  
+                  <div className="absolute bottom-4 text-emerald-400/60 font-black animate-pulse pointer-events-none text-[10px] tracking-widest uppercase">
+                    {language === "ko" ? "화력 지원 요청" : "REQUEST FIRE SUPPORT"} (+{formatMoney(clickPower * multiplier)})
                   </div>
                   {clicks.map((c) => (
                     <div
@@ -6169,6 +6289,33 @@
                       </div>
                     </div>
                   </div>
+
+                  {/* Phase J-4D: Tactical Battle Outcome Toast Alert */}
+                  {lastBetResultToast && (
+                    <div className={`p-4 mx-4 mt-4 rounded-lg border transition-all duration-300 animate-bounce flex items-center justify-between shadow-xl ${
+                      lastBetResultToast.status === "success" 
+                        ? "bg-emerald-950/95 border-emerald-500/50 text-emerald-400" 
+                        : "bg-red-950/95 border-red-500/50 text-red-400"
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{lastBetResultToast.status === "success" ? "🏆" : "🚨"}</span>
+                        <div className="text-left">
+                          <div className="text-[10px] font-black tracking-widest uppercase opacity-70">
+                            {lastBetResultToast.status === "success" ? "BATTLE OPERATIONAL SUCCESS" : "BATTLE DEFENSE FAILED"}
+                          </div>
+                          <div className="text-xs font-black mt-0.5 leading-snug">
+                            {lastBetResultToast.text}
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => setLastBetResultToast(null)} 
+                        className="text-[9px] font-black uppercase tracking-widest border border-slate-700 bg-slate-900/80 px-2 py-1 rounded hover:bg-slate-800 text-white ml-3"
+                      >
+                        CLOSE
+                      </button>
+                    </div>
+                  )}
 
                   {/* Lore panel */}
                   <div className="bg-emerald-50 border-b border-emerald-100 px-4 py-3">
@@ -6802,7 +6949,29 @@
 
 
                           return (
-                            <div className={`bg-gray-900 border border-teal-950 rounded-xl p-4 shadow-xl text-left space-y-4 ${sandboxState.isShaking ? "animate-bounce" : ""}`}>
+                            <div className={`bg-gray-900 rounded-xl p-4 shadow-xl text-left space-y-4 transition-all duration-100 relative overflow-hidden border ${
+                              anvilShake ? "animate-anvil-shake border-amber-500 bg-amber-950/10" :
+                              anvilRecoil ? "scale-95" :
+                              enhanceSuccessPulse ? "border-emerald-500 shadow-[0_0_25px_rgba(16,185,129,0.5)] bg-emerald-950/20" :
+                              enhanceFailPulse ? "border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.5)] bg-red-950/20" :
+                              "border-teal-950"
+                            } ${sandboxState.isShaking ? "animate-bounce" : ""}`}>
+                              {/* Phase J-4D: Forge Spark feedback overlays */}
+                              {anvilShake && (
+                                <div className="absolute inset-0 bg-amber-600/5 animate-pulse pointer-events-none z-10 flex items-center justify-center">
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-slate-950/95 border border-amber-500 px-2 py-0.5 rounded shadow-lg">⚒️ HEATING CORES... STRIKING ANVIL</span>
+                                </div>
+                              )}
+                              {enhanceSuccessPulse && (
+                                <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none z-10 flex items-center justify-center">
+                                  <span className="text-xs font-black uppercase tracking-widest text-emerald-400 bg-slate-950/95 border border-emerald-500 px-3 py-1 rounded shadow-lg animate-bounce">⚡ 제련 성공 (UPGRADE SUCCESS) ⚡</span>
+                                </div>
+                              )}
+                              {enhanceFailPulse && (
+                                <div className="absolute inset-0 bg-red-500/10 pointer-events-none z-10 flex items-center justify-center">
+                                  <span className="text-xs font-black uppercase tracking-widest text-red-400 bg-slate-950/95 border border-red-500 px-3 py-1 rounded shadow-lg animate-ping">⚠️ 위험: 제련 실패 (UPGRADE FAILED) ⚠️</span>
+                                </div>
+                              )}
                               {/* Dossier Header */}
                               <div className="border-b border-teal-950 pb-3 flex items-start justify-between gap-3">
                                 <div>
@@ -7672,7 +7841,13 @@
                       </div>
                     </div>
 
-                    <div className="mt-4 bg-black/40 rounded-lg p-4 border border-emerald-900/30 relative">
+                    <div className={`mt-4 rounded-lg p-4 border relative transition-all duration-100 ${
+                      waveAlert 
+                        ? "bg-red-950/20 border-red-500/80 shadow-[0_0_15px_rgba(239,68,68,0.3)] scale-98" 
+                        : "bg-black/40 border-emerald-900/30"
+                    }`}>
+                      {/* Phase J-4D: Radial alert shockwave */}
+                      <div className={`absolute inset-0 bg-[radial-gradient(circle,rgba(239,68,68,0.1)_0%,transparent_75%)] pointer-events-none transition-opacity duration-75 ${waveAlert ? "opacity-100" : "opacity-0"}`}></div>
                       {rewardPopups.map((p) => (
                         <div key={p.id} className="reward-popup">
                           +{formatDps(p.amount)} DIV
@@ -7813,6 +7988,25 @@
                   </div>
 
                   <div className="bg-gray-50 p-4 space-y-4">
+                    {/* Phase J-4D: Frontline Command scrolling military ticker log */}
+                    <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 shadow-lg text-left">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                          <span className="text-[10px] font-black text-red-500 tracking-widest uppercase">TACTICAL OPERATIONS FEED</span>
+                        </div>
+                        <span className="text-[8px] font-mono text-slate-500 uppercase">SYS_STATUS: ONLINE</span>
+                      </div>
+                      
+                      <div className="h-28 overflow-y-auto space-y-1.5 custom-scrollbar text-[10px] font-mono">
+                        {tacticalLogFeed.map((log, idx) => (
+                          <div key={idx} className={`flex items-start gap-2 py-0.5 border-b border-slate-900 last:border-b-0 ${idx === 0 ? "text-emerald-400 font-bold" : "text-slate-400"}`}>
+                            <span className="text-slate-600 shrink-0 select-none">[{new Date().toLocaleTimeString()}]</span>
+                            <span className="break-all">{log}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                       <div className="bg-gray-100 px-3 py-2 border-b border-gray-200">
                         <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">

@@ -68,7 +68,7 @@ Today, we also executed the comprehensive **Phase J-4A: Dark Frontier Unified UX
   - Cross-module color, typography, and button style alignment matrices.
   - Mobile ergonomics and thumb-reach zone optimizations.
   - First-time player friction points (shared cash allocation and brutal betting game-overs) with actionable solutions.
-
+ 
 ### 2. Wartime Immersion Property Realignment
 - **Action**: Discovered casual business titles (e.g. "Hotdog Stand", "Convenience Store", "Pizza Franchise") in `index.html`'s English translations that broke the militaristic commander fantasy.
 - **Polish**: Safely replaced all 10 English property names in `PROPERTIES_DATA.en` with immersive military depot equivalents (e.g. "Temporary Supply Depot", "Forward Outpost", "Field Supply Headquarters"), aligning perfectly with the Korean wartime terminology.
@@ -114,3 +114,27 @@ Each block is styled to feel like a grim, tactical underground war room and answ
 * **Zero Runtime Mutations**: PowerShell exact keyword query checks confirmed 100% preservation of all formulas, state keys, save mechanisms (`GAME_STATE_STORAGE_KEY`), and combat loops.
 * **Refined Status Sync**: Refreshed and locked `docs/task.md`, `TODO.md`, and `README.md`. Checked CRLF line endings for maximum safety.
 
+---
+
+## ⚡ Phase J-4D: Immediate Dopamine Feedback Pass
+
+Today, we successfully executed and verified **Phase J-4D: Immediate Dopamine Feedback Pass**. We designed and injected highly responsive, high-fidelity visual and tactile feedback systems directly into all four main modules in `index.html`.
+
+### 1. High-Fidelity Reactive Feedback Injected
+Each module now responds in real-time under a second to player actions, making interactions feel physical, rewarding, and dangerous:
+* **Frontier Master (🏢)**:
+  - Replaced the boring flat `TAP!` text on the main clicker button with a high-tech dark radar grid scan line overlay, glowing radial shockwaves, and a tactical operational message ticker.
+  - Clicking triggers rapid screen flash recoil overlays and cycles random militarized tickers (e.g. `"📡 ARTILLERY BATTERY 1 ACTIVE"`, `"💥 DEFENSE GRID OVERLOADED"`, `"📢 REQUESTING REINFORCEMENTS"`).
+* **Hero's Fate (📈)**:
+  - Intercepted the betting contract resolution to trigger immediate high-risk battle outcome alert banners (`🏆 BATTLE OPERATIONAL SUCCESS` / `🚨 BATTLE DEFENSE FAILED`) at the top of the interface.
+  - Outcome banners include high-contrast success emerald/fail red indicators, detailed dynamic profit/loss toasts, and close button thresholds.
+* **Smith & Shards (⚒️)**:
+  - Upgrading weapons now blocks instant completion to induce a heavy **450ms physical anticipation strike delay**.
+  - During the strike delay, the entire weapon detail card vibrates violently using a custom CSS keyframe shake (`.animate-anvil-shake`) and squeezes inward under physical recoil, followed by bright full-container glowing success emerald or failing red spark flash overlays.
+* **Frontline Command (🌲)**:
+  - During active frontline defense runs, each 1-second active combat tick now triggers a heavy screen shake recoil and red radial shockwave alert flash overlay across the battlefield arena card container.
+  - Implemented an interactive monospaced **Tactical Operations scrolling terminal feed** at the top of the RPG tab that writes real-time combat status logs (e.g. `🚨 적 개체 접근 중 - 방어막 충격 감지!`, `📡 최전방 화력 지원 분대 격전 중!`) on every active combat tick, complete with an active blinking green status pulse.
+
+### 2. Rigorous Non-Mutation Verification & Status Sync
+* **Zero Schema Mutations**: All animation states (artillery flashes, anvil recoil, betting outcome toasts, wave flash alert indicators, operations terminals) are managed strictly inside transient in-memory React states. No writes are made to local storage or the core save shape (`GAME_STATE_STORAGE_KEY`).
+* **Clean Status Logs**: Updated `docs/task.md`, `TODO.md`, and `README.md` to register Phase J-4D as 100% complete and fully verified.
