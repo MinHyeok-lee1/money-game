@@ -110,7 +110,7 @@
         - [x] Phase J-3E: Inventory UI Reframe (docs/SMITH_AND_SHARDS_INVENTORY_UX_SPEC.md complete) <!-- id: 75 -->
         - [x] Phase J-3E-1: Playable Weapon Loop Validation (docs/SMITH_AND_SHARDS_PLAYABLE_FLOW_VALIDATION.md complete) <!-- id: 83 -->
         - [x] Phase J-3E-2: Interactive Weapon Screen Mockup (implemented in index.html sandbox) <!-- id: 84 -->
-        - [ ] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->
+        - [x] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->
         - [ ] Phase J-3G: Breakage/Shards Prototype (anvil failures and shards recovery) <!-- id: 77 -->
     - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
         - [x] Phase J-4A: Dark Frontier Unified UX Pass (docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md complete) <!-- id: 85 -->
@@ -119,5 +119,6 @@
         - [x] Phase J-4D: Immediate Dopamine Feedback Pass (high-fidelity visual triggers and indicators live on all four modules) <!-- id: 88 -->
         - [x] Phase J-4E: Cross-System War Cohesion Pass (Global War status strip telemetry HUD + dynamic cohesion log transmitters) <!-- id: 89 -->
         - [x] Phase J-4E-1: Cross-System War Cohesion Runtime QA (Telemetry localization and runtime verification completed) <!-- id: 90 -->
+        - [x] Phase J-4F: Product UX Stabilization Smoke Test (all tabs, formulas, timers, persistence verified PASS) <!-- id: 91 -->
     - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
