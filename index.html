@@ -460,6 +460,11 @@
       const GACHA_DRAW_COST = 1000;
       const GACHA_RECENT_PULL_LIMIT = 10;
       const MAX_ENHANCE_LEVEL = 10;
+      const ENHANCE_SAFE_ZONE_MAX = 5;    // +1~5: no breakage possible
+      const ENHANCE_BREAKAGE_START = 6;   // +6+: breakage chance begins
+      const SALVAGE_HISTORY_CAP = 10;
+      const STABILIZER_SUCCESS_BONUS = 0.03; // +3% success
+      const STABILIZER_BREAK_PROTECTION = true; // prevents breakage on use
       const MAX_CHARACTER_LEVEL = 999;
       const MAX_CHARACTER_STARS = 10;
       const INVESTMENT_ASSETS = [
@@ -2160,6 +2165,16 @@
             starterWeaponGranted: false,
             weaponMastery: {},
             weaponLevels: {},
+            refinedShards: 0,
+            forgeStats: {
+              totalAttempts: 0,
+              totalSuccesses: 0,
+              totalFailures: 0,
+              totalBreakages: 0,
+              totalShardsEarned: 0,
+            },
+            salvageHistory: [],
+            stabilizers: 0,
           },
           rpg: {
             characters: [],
@@ -2269,6 +2284,9 @@
           rarity: definition.rarity,
           power: Math.max(0, toFiniteNumber(item.power, definition.power)),
           enhanceLevel,
+          broken: item.broken === true,
+          locked: item.locked === true,
+          breakSurvivalCount: Math.max(0, Math.floor(toFiniteNumber(item.breakSurvivalCount, 0))),
         };
       }
 
@@ -3325,8 +3343,32 @@
                       MAX_ENHANCE_LEVEL,
                       0,
                     ),
+                    broken: enhancement.lastEnhancementResult.broken === true,
+                    salvageShards: Math.max(0, toFiniteNumber(enhancement.lastEnhancementResult.salvageShards, 0)),
                   }
                 : null,
+            refinedShards: Math.max(0, toFiniteNumber(enhancement.refinedShards, 0)),
+            forgeStats: {
+              totalAttempts: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalAttempts, 0))),
+              totalSuccesses: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalSuccesses, 0))),
+              totalFailures: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalFailures, 0))),
+              totalBreakages: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalBreakages, 0))),
+              totalShardsEarned: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalShardsEarned, 0))),
+            },
+            salvageHistory: Array.isArray(enhancement.salvageHistory)
+              ? enhancement.salvageHistory
+                  .filter(
+                    (e) =>
+                      e &&
+                      typeof e.id === "string" &&
+                      typeof e.weaponName === "string" &&
+                      typeof e.weaponLevel === "number" &&
+                      typeof e.refinedShardsAwarded === "number" &&
+                      typeof e.createdAt === "number",
+                  )
+                  .slice(-SALVAGE_HISTORY_CAP)
+              : [],
+            stabilizers: Math.max(0, Math.floor(toFiniteNumber(enhancement.stabilizers, 0))),
           },
           rpg: {
             ...defaults.rpg,
@@ -5747,11 +5789,32 @@
           return clampNumber(0.9 - safeLevel * 0.06, 0.3, 0.9, 0.9);
         };
 
-        const enhanceWeaponItem = (instanceId) => {
+        // J-3G: Breakage chance — 0% in safe zone (+1~5), escalates from +6 onward
+        // At +6: ~2%, +7: ~4%, +8: ~7%, +9: ~11%, +10: ~15%
+        // Psychological: always survivable odds but feels dangerous
+        const getBreakageChance = (level) => {
+          const safeLevel = Math.floor(toFiniteNumber(level, 0));
+          if (safeLevel < ENHANCE_BREAKAGE_START) return 0;
+          const dangerSteps = safeLevel - ENHANCE_BREAKAGE_START + 1;
+          return clampNumber(dangerSteps * dangerSteps * 0.005 + dangerSteps * 0.015, 0, 0.25, 0);
+        };
+
+        // J-3G: Salvage payout — scales by enhancement level and rarity
+        const getSalvagePayout = (enhanceLevel, rarity) => {
+          const level = Math.max(0, Math.floor(toFiniteNumber(enhanceLevel, 0)));
+          const rarityMultipliers = { common: 1, uncommon: 1.2, rare: 1.5, epic: 2, legendary: 3, mythic: 5 };
+          const rarityMult = rarityMultipliers[String(rarity).toLowerCase()] || 1;
+          // Base: 10 shards + 15 per level, scaled by rarity
+          const base = 10 + level * 15;
+          return Math.max(5, Math.floor(base * rarityMult));
+        };
+
+        const enhanceWeaponItem = (instanceId, useStabilizer = false) => {
           const item = gameState.enhancement.inventory.find(
             (candidate) => candidate.instanceId === instanceId,
           );
           if (!item || item.type !== "weapon") return;
+          if (item.broken === true) return; // J-3G: broken weapons cannot be enhanced
 
           const currentLevel = clampNumber(
             Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
@@ -5764,6 +5827,9 @@
           const cost = getEnhanceCost(currentLevel);
           if (cash < cost) return;
 
+          // J-3G: stabilizer validation
+          const hasStabilizer = useStabilizer && toFiniteNumber(gameState.enhancement.stabilizers, 0) > 0;
+
           // Trigger Phase J-4D forge physical recoil anticipation shakes
           setAnvilShake(true);
           setAnvilRecoil(true);
@@ -5772,69 +5838,274 @@
             setAnvilShake(false);
             setAnvilRecoil(false);
 
-            const success = Math.random() < getEnhanceChance(currentLevel);
-            if (success) {
+            const successChance = getEnhanceChance(currentLevel) + (hasStabilizer ? STABILIZER_SUCCESS_BONUS : 0);
+            const success = Math.random() < successChance;
+
+            // J-3G: Breakage roll (only on failure, only past safe zone)
+            let didBreak = false;
+            if (!success && currentLevel >= ENHANCE_BREAKAGE_START) {
+              const breakChance = getBreakageChance(currentLevel);
+              // Stabilizer with break protection prevents breakage
+              if (hasStabilizer && STABILIZER_BREAK_PROTECTION) {
+                didBreak = false;
+              } else {
+                didBreak = Math.random() < breakChance;
+              }
+            }
+
+            if (didBreak) {
+              // J-3G: BREAKAGE — devastating visual + salvage
+              setEnhanceFailPulse(true);
+              setTimeout(() => setEnhanceFailPulse(false), 1500);
+
+              const salvageShards = getSalvagePayout(currentLevel, item.rarity);
+
+              setTacticalLogFeed((old) => [
+                `💥 [긴급: 병기 파괴] ${item.name} +${currentLevel} 제련 중 무기가 산산조각 났습니다! 파편 회수: 💎${salvageShards} (전선 잔해 수습 및 파편 분해 자동 완료)`,
+                ...old
+              ].slice(0, 10));
+
+              updateGameState((prev) => {
+                const prevItem = prev.enhancement.inventory.find(
+                  (candidate) => candidate.instanceId === instanceId,
+                );
+                if (!prevItem) return prev;
+
+                const salvageEntry = {
+                  id: `salvage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                  weaponName: prevItem.name,
+                  weaponLevel: currentLevel,
+                  weaponRarity: prevItem.rarity,
+                  refinedShardsAwarded: salvageShards,
+                  createdAt: Date.now(),
+                };
+
+                const prevForge = prev.enhancement.forgeStats || {};
+                const prevHistory = Array.isArray(prev.enhancement.salvageHistory)
+                  ? prev.enhancement.salvageHistory : [];
+
+                return {
+                  ...prev,
+                  wallet: {
+                    ...prev.wallet,
+                    cash: prev.wallet.cash - cost,
+                  },
+                  enhancement: {
+                    ...prev.enhancement,
+                    inventory: prev.enhancement.inventory.map((candidate) =>
+                      candidate.instanceId === instanceId
+                        ? { ...candidate, broken: true, enhanceLevel: currentLevel }
+                        : candidate,
+                    ),
+                    lastEnhancementResult: {
+                      itemName: prevItem.name,
+                      success: false,
+                      level: currentLevel,
+                      broken: true,
+                      salvageShards,
+                    },
+                    refinedShards: toFiniteNumber(prev.enhancement.refinedShards, 0) + salvageShards,
+                    forgeStats: {
+                      totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
+                      totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0),
+                      totalFailures: toFiniteNumber(prevForge.totalFailures, 0) + 1,
+                      totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0) + 1,
+                      totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0) + salvageShards,
+                    },
+                    salvageHistory: [...prevHistory, salvageEntry].slice(-SALVAGE_HISTORY_CAP),
+                    stabilizers: hasStabilizer
+                      ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
+                      : toFiniteNumber(prev.enhancement.stabilizers, 0),
+                  },
+                };
+              });
+            } else if (success) {
               setEnhanceSuccessPulse(true);
               setTimeout(() => setEnhanceSuccessPulse(false), 1000);
-              
+
               setTacticalLogFeed((old) => [
                 `⚒️ [병기 품질 상승] ${item.name} +${currentLevel + 1} 제련 성공! (전선 화력 강화 예상 및 대원 장착 효율 상승)`,
                 ...old
               ].slice(0, 10));
+
+              updateGameState((prev) => {
+                const prevItem = prev.enhancement.inventory.find(
+                  (candidate) => candidate.instanceId === instanceId,
+                );
+                if (!prevItem) return prev;
+                const nextLevel = currentLevel + 1;
+                const result = {
+                  itemName: prevItem.name,
+                  success: true,
+                  level: nextLevel,
+                  broken: false,
+                  salvageShards: 0,
+                };
+                const weaponType = getWeaponType(prevItem);
+                const nextWeaponLevels = { ...(prev.enhancement.weaponLevels || {}) };
+                const nextWeaponMastery = { ...(prev.enhancement.weaponMastery || {}) };
+                if (weaponType) {
+                  const previousSavedLevel = Math.max(
+                    0,
+                    Math.floor(toFiniteNumber(nextWeaponLevels[weaponType], 0)),
+                  );
+                  const highestLevel = Math.max(previousSavedLevel, nextLevel);
+                  nextWeaponLevels[weaponType] = highestLevel;
+                  nextWeaponMastery[weaponType] = Math.min(2, 1 + highestLevel * 0.05);
+                }
+
+                const prevForge = prev.enhancement.forgeStats || {};
+                // J-3G: increment breakSurvivalCount if breakage was possible
+                const wasInDanger = currentLevel >= ENHANCE_BREAKAGE_START;
+
+                return {
+                  ...prev,
+                  wallet: {
+                    ...prev.wallet,
+                    cash: prev.wallet.cash - cost,
+                  },
+                  enhancement: {
+                    ...prev.enhancement,
+                    weaponLevels: nextWeaponLevels,
+                    weaponMastery: nextWeaponMastery,
+                    inventory: prev.enhancement.inventory.map((candidate) =>
+                      candidate.instanceId === instanceId
+                        ? { ...candidate, enhanceLevel: nextLevel,
+                            breakSurvivalCount: wasInDanger
+                              ? toFiniteNumber(candidate.breakSurvivalCount, 0) + 1
+                              : toFiniteNumber(candidate.breakSurvivalCount, 0),
+                          }
+                        : candidate,
+                    ),
+                    lastEnhancementResult: result,
+                    forgeStats: {
+                      totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
+                      totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0) + 1,
+                      totalFailures: toFiniteNumber(prevForge.totalFailures, 0),
+                      totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0),
+                      totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0),
+                    },
+                    stabilizers: hasStabilizer
+                      ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
+                      : toFiniteNumber(prev.enhancement.stabilizers, 0),
+                  },
+                };
+              });
             } else {
+              // Failure without breakage
               setEnhanceFailPulse(true);
               setTimeout(() => setEnhanceFailPulse(false), 1000);
-              
+
+              // J-3G: survived breakage roll feedback
+              const wasInDanger = currentLevel >= ENHANCE_BREAKAGE_START;
+              const breakChanceDisplay = wasInDanger ? Math.round(getBreakageChance(currentLevel) * 100) : 0;
+
               setTacticalLogFeed((old) => [
-                `⚠️ [제련 안정성 충격 감지] ${item.name} +${currentLevel} 제련 실패! (병기 연마 품질 불안정 및 차기 화력 전력 대기)`,
+                wasInDanger
+                  ? `⚠️ [제련 실패 - 파괴 회피] ${item.name} +${currentLevel} 제련 실패! 파괴 위험 ${breakChanceDisplay}%를 무사히 통과 (병기 잔존)`
+                  : `⚠️ [제련 안정성 충격 감지] ${item.name} +${currentLevel} 제련 실패! (병기 연마 품질 불안정 및 차기 화력 전력 대기)`,
                 ...old
               ].slice(0, 10));
-            }
 
-            updateGameState((prev) => {
-              const prevItem = prev.enhancement.inventory.find(
-                (candidate) => candidate.instanceId === instanceId,
-              );
-              if (!prevItem) return prev;
-              const nextLevel = success ? currentLevel + 1 : currentLevel;
-              const result = {
-                itemName: prevItem.name,
-                success,
-                level: nextLevel,
-              };
-              const weaponType = getWeaponType(prevItem);
-              const nextWeaponLevels = { ...(prev.enhancement.weaponLevels || {}) };
-              const nextWeaponMastery = { ...(prev.enhancement.weaponMastery || {}) };
-              if (weaponType) {
-                const previousSavedLevel = Math.max(
-                  0,
-                  Math.floor(toFiniteNumber(nextWeaponLevels[weaponType], 0)),
+              updateGameState((prev) => {
+                const prevItem = prev.enhancement.inventory.find(
+                  (candidate) => candidate.instanceId === instanceId,
                 );
-                const highestLevel = Math.max(previousSavedLevel, nextLevel);
-                nextWeaponLevels[weaponType] = highestLevel;
-                nextWeaponMastery[weaponType] = Math.min(2, 1 + highestLevel * 0.05);
-              }
+                if (!prevItem) return prev;
+                const result = {
+                  itemName: prevItem.name,
+                  success: false,
+                  level: currentLevel,
+                  broken: false,
+                  salvageShards: 0,
+                };
+                const prevForge = prev.enhancement.forgeStats || {};
 
-              return {
-                ...prev,
-                wallet: {
-                  ...prev.wallet,
-                  cash: prev.wallet.cash - cost,
-                },
-                enhancement: {
-                  ...prev.enhancement,
-                  weaponLevels: nextWeaponLevels,
-                  weaponMastery: nextWeaponMastery,
-                  inventory: prev.enhancement.inventory.map((candidate) =>
-                    candidate.instanceId === instanceId
-                      ? { ...candidate, enhanceLevel: nextLevel }
-                      : candidate,
-                  ),
-                  lastEnhancementResult: result,
-                },
-              };
-            });
+                return {
+                  ...prev,
+                  wallet: {
+                    ...prev.wallet,
+                    cash: prev.wallet.cash - cost,
+                  },
+                  enhancement: {
+                    ...prev.enhancement,
+                    inventory: prev.enhancement.inventory.map((candidate) =>
+                      candidate.instanceId === instanceId
+                        ? { ...candidate,
+                            breakSurvivalCount: wasInDanger
+                              ? toFiniteNumber(candidate.breakSurvivalCount, 0) + 1
+                              : toFiniteNumber(candidate.breakSurvivalCount, 0),
+                          }
+                        : candidate,
+                    ),
+                    lastEnhancementResult: result,
+                    forgeStats: {
+                      totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
+                      totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0),
+                      totalFailures: toFiniteNumber(prevForge.totalFailures, 0) + 1,
+                      totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0),
+                      totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0),
+                    },
+                    stabilizers: hasStabilizer
+                      ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
+                      : toFiniteNumber(prev.enhancement.stabilizers, 0),
+                  },
+                };
+              });
+            }
           }, 450);
+        };
+
+        // J-3G: Salvage a broken weapon manually for additional confirmation
+        const salvageBrokenWeapon = (instanceId) => {
+          const item = gameState.enhancement.inventory.find(
+            (candidate) => candidate.instanceId === instanceId,
+          );
+          if (!item || item.broken !== true) return;
+
+          updateGameState((prev) => {
+            return {
+              ...prev,
+              enhancement: {
+                ...prev.enhancement,
+                inventory: prev.enhancement.inventory.filter(
+                  (candidate) => candidate.instanceId !== instanceId,
+                ),
+              },
+            };
+          });
+        };
+
+        // J-3G: Toggle weapon lock to prevent accidental destruction
+        const toggleWeaponLock = (instanceId) => {
+          updateGameState((prev) => {
+            return {
+              ...prev,
+              enhancement: {
+                ...prev.enhancement,
+                inventory: prev.enhancement.inventory.map((candidate) =>
+                  candidate.instanceId === instanceId
+                    ? { ...candidate, locked: candidate.locked !== true }
+                    : candidate,
+                ),
+              },
+            };
+          });
+        };
+
+        // J-3G: Purchase stabilizer with refined shards (cost: 50 shards each)
+        const STABILIZER_CRAFT_COST = 50;
+        const craftStabilizer = () => {
+          const shards = toFiniteNumber(gameState.enhancement.refinedShards, 0);
+          if (shards < STABILIZER_CRAFT_COST) return;
+          updateGameState((prev) => ({
+            ...prev,
+            enhancement: {
+              ...prev.enhancement,
+              refinedShards: toFiniteNumber(prev.enhancement.refinedShards, 0) - STABILIZER_CRAFT_COST,
+              stabilizers: toFiniteNumber(prev.enhancement.stabilizers, 0) + 1,
+            },
+          }));
         };
 
         const equipWeaponToCharacter = (characterInstanceId, weaponInstanceId) => {
@@ -5847,6 +6118,7 @@
                 item.instanceId === weaponInstanceId && item.type === "weapon",
             );
             if (!characterExists || !weapon) return prev;
+            if (weapon.broken === true) return prev; // J-3G: broken weapons cannot be equipped
 
             return {
               ...prev,
@@ -6971,6 +7243,35 @@
                         </div>
                       </div>
                     </div>
+                    {/* J-3G: Shard currency + Stabilizer row */}
+                    <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-green-200 text-[9px] font-black uppercase">
+                          {language === "ko" ? "💎 제련 파편" : "💎 Shards"}
+                        </div>
+                        <div className="text-sm font-black">{toFiniteNumber(gameState.enhancement.refinedShards, 0)}</div>
+                      </div>
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-green-200 text-[9px] font-black uppercase">
+                          {language === "ko" ? "🛡️ 보정제" : "🛡️ Stab."}
+                        </div>
+                        <div className="text-sm font-black flex items-center gap-1">
+                          {toFiniteNumber(gameState.enhancement.stabilizers, 0)}
+                          {toFiniteNumber(gameState.enhancement.refinedShards, 0) >= STABILIZER_CRAFT_COST && (
+                            <button
+                              onClick={craftStabilizer}
+                              className="text-[8px] bg-emerald-500/30 hover:bg-emerald-500/50 border border-emerald-400/40 text-emerald-200 px-1.5 py-0.5 rounded font-black"
+                            >+1</button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="bg-black/20 rounded-md p-2">
+                        <div className="text-green-200 text-[9px] font-black uppercase">
+                          {language === "ko" ? "파괴 횟수" : "Breaks"}
+                        </div>
+                        <div className="text-sm font-black">{toFiniteNumber(gameState.enhancement.forgeStats?.totalBreakages, 0)}</div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Phase J-4C: Smith & Shards First-Click Guidance */}
@@ -7423,12 +7724,19 @@
                                   {lastEnhancementResult.itemName}
                                 </div>
                                 <div
-                                  className={`text-xs font-bold uppercase ${lastEnhancementResult.success ? "text-emerald-600" : "text-red-600"}`}
+                                  className={`text-xs font-bold uppercase ${lastEnhancementResult.broken ? "text-red-700" : lastEnhancementResult.success ? "text-emerald-600" : "text-red-600"}`}
                                 >
-                                  {lastEnhancementResult.success
-                                    ? language === "ko" ? "성공" : "Success"
-                                    : language === "ko" ? "실패" : "Failed"}
+                                  {lastEnhancementResult.broken
+                                    ? (language === "ko" ? "💥 파괴됨" : "💥 BROKEN")
+                                    : lastEnhancementResult.success
+                                      ? (language === "ko" ? "성공" : "Success")
+                                      : (language === "ko" ? "실패" : "Failed")}
                                 </div>
+                                {lastEnhancementResult.broken && lastEnhancementResult.salvageShards > 0 && (
+                                  <div className="text-[10px] font-bold text-cyan-600">
+                                    💎 +{lastEnhancementResult.salvageShards} {language === "ko" ? "파편 회수" : "shards salvaged"}
+                                  </div>
+                                )}
                               </div>
                               <div className="font-black text-gray-700">
                                 +{lastEnhancementResult.level}
@@ -7666,51 +7974,100 @@
                               {enhancementInventory.length}
                             </div>
                           </div>
-                          <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-2">
+                          <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2">
                             {sortedEnhancementInventory.length > 0 ? (
-                              sortedEnhancementInventory.map((item) => (
+                              sortedEnhancementInventory.map((item) => {
+                                const isBroken = item.broken === true;
+                                const isLocked = item.locked === true;
+                                const breakChance = item.type === "weapon" ? getBreakageChance(item.enhanceLevel) : 0;
+                                const breakPct = Math.round(breakChance * 100);
+                                const canEnhance = item.type === "weapon" && !isBroken && item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel);
+                                const stabCount = toFiniteNumber(gameState.enhancement.stabilizers, 0);
+                                return (
                                 <div
                                   key={item.instanceId}
-                                  className="flex items-center justify-between gap-3 bg-gray-50 rounded-md p-3"
+                                  className={`rounded-md p-3 space-y-2 ${isBroken ? "bg-red-50 border border-red-200" : "bg-gray-50"}`}
                                 >
-                                  <div>
-                                    <div className="font-bold text-gray-800">
-                                      {item.name}
-                                      {item.type === "weapon" &&
-                                        ` +${item.enhanceLevel}`}
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
+                                      <div className="font-bold text-gray-800 flex items-center gap-1 flex-wrap">
+                                        {isLocked && <span className="text-[10px]">🔒</span>}
+                                        {isBroken && <span className="text-[10px]">💥</span>}
+                                        <span className={`truncate ${isBroken ? "line-through text-gray-400" : ""}`}>
+                                          {item.name}
+                                          {item.type === "weapon" && ` +${item.enhanceLevel}`}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className={`text-xs font-bold uppercase ${isBroken ? "text-red-500" : rarityTextClass(item.rarity)}`}>
+                                          {isBroken ? (language === "ko" ? "파괴됨" : "BROKEN") : `${item.rarity} ${item.type}`}
+                                        </span>
+                                        {item.type === "weapon" && toFiniteNumber(item.breakSurvivalCount, 0) > 0 && !isBroken && (
+                                          <span className="text-[9px] font-bold text-amber-600">
+                                            🛡️×{item.breakSurvivalCount}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
-                                    <div
-                                      className={`text-xs font-bold uppercase ${rarityTextClass(item.rarity)}`}
-                                    >
-                                      {item.rarity} {item.type}
+                                    <div className="text-right flex-shrink-0">
+                                      <div className="font-black text-gray-700">
+                                        {formatDps(item.power)}
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className="text-right">
-                                    <div className="font-black text-gray-700">
-                                      {formatDps(item.power)}
+                                  {item.type === "weapon" && !isBroken && (
+                                    <div className="space-y-1.5">
+                                      {/* Cost / Chance / Breakage risk row */}
+                                      <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 gap-2">
+                                        <span>{language === "ko" ? "비용" : "Cost"}: {formatMoney(getEnhanceCost(item.enhanceLevel))}</span>
+                                        <span>{language === "ko" ? "확률" : "Chance"}: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%</span>
+                                        {breakPct > 0 && (
+                                          <span className="text-red-500 font-black">⚠️ {language === "ko" ? "파괴" : "Break"}: {breakPct}%</span>
+                                        )}
+                                      </div>
+                                      {/* Action buttons row */}
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <button
+                                          onClick={() => enhanceWeaponItem(item.instanceId, false)}
+                                          disabled={!canEnhance}
+                                          className={`rounded-md px-3 py-1 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                        >
+                                          {language === "ko" ? "⚒️ 모루 타격" : "⚒️ Enhance"}
+                                        </button>
+                                        {canEnhance && stabCount > 0 && breakPct > 0 && (
+                                          <button
+                                            onClick={() => enhanceWeaponItem(item.instanceId, true)}
+                                            className="rounded-md px-2 py-1 text-[10px] font-black bg-cyan-700 text-white transition-colors"
+                                            title={language === "ko" ? "보정제 사용 (파괴 방지 + 성공률 +3%)" : "Use Stabilizer (break protection + 3% success)"}
+                                          >
+                                            🛡️ {language === "ko" ? "보정 타격" : "Stab."}
+                                          </button>
+                                        )}
+                                        <button
+                                          onClick={() => toggleWeaponLock(item.instanceId)}
+                                          className="rounded px-1.5 py-1 text-[10px] font-bold bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors"
+                                        >
+                                          {isLocked ? "🔒" : "🔓"}
+                                        </button>
+                                      </div>
                                     </div>
-                                    {item.type === "weapon" ? (
+                                  )}
+                                  {item.type === "weapon" && isBroken && (
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="text-[10px] font-bold text-red-500">
+                                        {language === "ko" ? "무기가 산산조각 났습니다. 잔해를 정리하십시오." : "Weapon shattered. Dismiss wreckage."}
+                                      </span>
                                       <button
-                                        onClick={() =>
-                                          enhanceWeaponItem(item.instanceId)
-                                        }
-                                        disabled={
-                                          item.enhanceLevel >= MAX_ENHANCE_LEVEL ||
-                                          cash < getEnhanceCost(item.enhanceLevel)
-                                        }
-                                        className={`mt-2 rounded-md px-3 py-1 text-xs font-black transition-colors ${item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel) ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                        onClick={() => salvageBrokenWeapon(item.instanceId)}
+                                        className="rounded-md px-2 py-1 text-[10px] font-black bg-gray-700 text-white hover:bg-gray-600 transition-colors flex-shrink-0"
                                       >
-                                        {language === "ko" ? "⚒️ 모루 타격" : "Enhance"}
+                                        {language === "ko" ? "잔해 정리" : "Dismiss"}
                                       </button>
-                                    ) : null}
-                                  </div>
-                                  {item.type === "weapon" ? (
-                                    <div className="col-span-2 text-xs font-bold text-gray-500">
-                                      {language === "ko" ? "제련 비용" : "Cost"}: {formatMoney(getEnhanceCost(item.enhanceLevel))} / {language === "ko" ? "제련 확률" : "Chance"}: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%
                                     </div>
-                                  ) : null}
+                                  )}
                                 </div>
-                              ))
+                                );
+                              })
                             ) : (
                               <div className="py-8 text-center font-bold text-gray-400">
                                 {language === "ko" ? "비어 있음" : "Empty"}
@@ -7719,11 +8076,28 @@
                           </div>
                         </div>
 
+                        {/* J-3G: Salvage History */}
+                        {Array.isArray(gameState.enhancement.salvageHistory) && gameState.enhancement.salvageHistory.length > 0 && (
+                          <div className="bg-white border border-gray-200 rounded-lg p-4">
+                            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                              {language === "ko" ? "💎 파편 회수 기록" : "💎 Salvage History"}
+                            </h2>
+                            <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
+                              {[...gameState.enhancement.salvageHistory].reverse().map((entry) => (
+                                <div key={entry.id} className="flex items-center justify-between text-[10px] font-bold py-1 border-b border-gray-100">
+                                  <span className="text-gray-600 truncate">{entry.weaponName} +{entry.weaponLevel}</span>
+                                  <span className="text-cyan-600 flex-shrink-0">💎 +{entry.refinedShardsAwarded}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
                           <p className="text-[11px] font-bold text-emerald-800 text-center leading-relaxed">
                             {language === "ko"
-                              ? "⚒️ [안내] 현재 버전에서는 전쟁 대장간 무기 제련(강화) 및 보유 대원 무기 장착만 지원됩니다. 향후 무기 파괴, 파편 회수, 암시장 판매 시스템이 추가될 예정입니다."
-                              : "⚒️ [Notice] Weapon smithing (refining) and character weapon deployment are supported. Breakage, shards recovery, and black market sale are scheduled in upcoming updates."}
+                              ? "⚒️ [안내] 무기 제련(강화), 보유 대원 무기 장착, 파괴/파편 회수, 보정제 제작을 지원합니다. 잠금(🔒)된 무기는 안전하게 보호됩니다."
+                              : "⚒️ [Notice] Weapon smithing, character deployment, breakage/shards salvage, and stabilizer crafting are supported. Locked (🔒) weapons are protected."}
                           </p>
                         </div>
                       </>

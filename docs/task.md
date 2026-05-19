@@ -111,7 +111,7 @@
         - [x] Phase J-3E-1: Playable Weapon Loop Validation (docs/SMITH_AND_SHARDS_PLAYABLE_FLOW_VALIDATION.md complete) <!-- id: 83 -->
         - [x] Phase J-3E-2: Interactive Weapon Screen Mockup (implemented in index.html sandbox) <!-- id: 84 -->
         - [x] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->
-        - [ ] Phase J-3G: Breakage/Shards Prototype (anvil failures and shards recovery) <!-- id: 77 -->
+        - [x] Phase J-3G: Breakage/Shards Prototype (anvil failures and shards recovery) <!-- id: 77 -->
     - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
         - [x] Phase J-4A: Dark Frontier Unified UX Pass (docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md complete) <!-- id: 85 -->
         - [x] Phase J-4B: First-Time Player UX Rework (docs/FIRST_TIME_PLAYER_UX_REWORK.md complete) <!-- id: 86 -->
