@@ -95,6 +95,7 @@
   - [x] **Data & Schema Design**: Model success rates and migration profiles (Phase J-3D complete, J-3F schema proposal complete). Phase J-3G (Breakage/Shards Prototype) remains pending implementation.
   - [x] **Blacksmith Prototype**: Breakage, salvage shards, stabilizer consumables, lock protection, forge stats (Phase J-3G foundation complete). Black Market trading deferred.
   - [x] **Prestige & Recovery UX**: Tier visuals, weapon epithets, danger zone strips, recovery encouragement, equipped badges, forge record display (Phase J-3H complete). No schema changes.
+  - [x] **Lock Confirmation & Bulk Salvage Safety**: Locked weapon hard-block, danger-zone confirmation modal, bulk broken weapon cleanup (Phase J-3I complete). No schema changes.
 - [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
   - [x] **Unified UX Audit**: Perform product-wide UX pass and write docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md (Phase J-4A complete).
   - [x] **First-Time Player UX Rework**: Analyze 3-minute onboarding window and write docs/FIRST_TIME_PLAYER_UX_REWORK.md (Phase J-4B complete).

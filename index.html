@@ -4378,6 +4378,7 @@
         const [enhanceSuccessPulse, setEnhanceSuccessPulse] = useState(false);
         const [enhanceFailPulse, setEnhanceFailPulse] = useState(false);
         const [waveAlert, setWaveAlert] = useState(null); // string or null
+        const [forgeConfirmTarget, setForgeConfirmTarget] = useState(null); // J-3I: { instanceId, useStabilizer, itemName, level, breakPct, successPct, stabCount }
         const [tacticalLogFeed, setTacticalLogFeed] = useState([
           "📡 후방 사령부 통신 온라인.",
           "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
@@ -5840,6 +5841,7 @@
           );
           if (!item || item.type !== "weapon") return;
           if (item.broken === true) return; // J-3G: broken weapons cannot be enhanced
+          if (item.locked === true) return; // J-3I: locked weapons cannot be enhanced — must unlock first
 
           const currentLevel = clampNumber(
             Math.floor(toFiniteNumber(item.enhanceLevel, 0)),
@@ -6131,6 +6133,56 @@
               stabilizers: toFiniteNumber(prev.enhancement.stabilizers, 0) + 1,
             },
           }));
+        };
+
+        // J-3I: Confirmation wrapper — danger-zone weapons route through modal
+        const requestEnhance = (instanceId, useStabilizer = false) => {
+          const item = gameState.enhancement.inventory.find(
+            (candidate) => candidate.instanceId === instanceId,
+          );
+          if (!item || item.type !== "weapon" || item.broken === true || item.locked === true) return;
+          const currentLevel = clampNumber(Math.floor(toFiniteNumber(item.enhanceLevel, 0)), 0, MAX_ENHANCE_LEVEL, 0);
+          if (currentLevel >= MAX_ENHANCE_LEVEL) return;
+          const breakPct = currentLevel >= ENHANCE_BREAKAGE_START ? Math.round(getBreakageChance(currentLevel) * 100) : 0;
+          if (breakPct > 0) {
+            // Danger zone — show confirmation modal
+            setForgeConfirmTarget({
+              instanceId,
+              useStabilizer,
+              itemName: item.name,
+              level: currentLevel,
+              breakPct,
+              successPct: Math.round((getEnhanceChance(currentLevel) + (useStabilizer ? STABILIZER_SUCCESS_BONUS : 0)) * 100),
+              stabCount: toFiniteNumber(gameState.enhancement.stabilizers, 0),
+            });
+          } else {
+            // Safe zone — enhance directly
+            enhanceWeaponItem(instanceId, useStabilizer);
+          }
+        };
+
+        // J-3I: Bulk salvage all broken unlocked weapons
+        const bulkSalvageBrokenWeapons = () => {
+          const brokenUnlocked = gameState.enhancement.inventory.filter(
+            (item) => item.broken === true && item.locked !== true,
+          );
+          if (brokenUnlocked.length === 0) return;
+          updateGameState((prev) => {
+            const brokenUnlockedIds = new Set(
+              prev.enhancement.inventory
+                .filter((item) => item.broken === true && item.locked !== true)
+                .map((item) => item.instanceId),
+            );
+            return {
+              ...prev,
+              enhancement: {
+                ...prev.enhancement,
+                inventory: prev.enhancement.inventory.filter(
+                  (item) => !brokenUnlockedIds.has(item.instanceId),
+                ),
+              },
+            };
+          });
         };
 
         const equipWeaponToCharacter = (characterInstanceId, weaponInstanceId) => {
@@ -6425,6 +6477,76 @@
                         className="w-full py-3 bg-transparent hover:bg-white/5 text-gray-500 font-bold text-xs rounded-xl transition-all uppercase tracking-widest active:scale-95"
                       >
                         {t.cancelButton}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* J-3I: Forge Danger Zone Confirmation Modal */}
+            {forgeConfirmTarget && (
+              <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-6">
+                <div className="w-full max-w-sm bg-gray-900 border-2 border-red-900/50 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-red-900/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30">
+                      <span className="text-3xl">⚠️</span>
+                    </div>
+
+                    <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">
+                      {language === "ko" ? "위험 구간 제련 확인" : "DANGER ZONE FORGE"}
+                    </h2>
+
+                    <div className="bg-red-950/40 border border-red-900/50 rounded-lg px-4 py-2 mb-6">
+                      <p className="text-red-400 text-[11px] font-black uppercase animate-pulse">
+                        {language === "ko" ? "무기가 파괴될 수 있습니다!" : "WEAPON MAY BE DESTROYED!"}
+                      </p>
+                    </div>
+
+                    <div className="w-full bg-black/40 rounded-xl p-4 mb-6 border border-white/5 space-y-3 text-left">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-gray-500 uppercase">{language === "ko" ? "무기" : "Weapon"}</span>
+                        <span className="text-white truncate ml-2">{forgeConfirmTarget.itemName} +{forgeConfirmTarget.level}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-gray-500 uppercase">{language === "ko" ? "성공 확률" : "Success"}</span>
+                        <span className="text-emerald-400 font-black">{forgeConfirmTarget.successPct}%</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-bold border-t border-white/5 pt-2">
+                        <span className="text-gray-500 uppercase">{language === "ko" ? "파괴 확률" : "Break Risk"}</span>
+                        <span className="text-red-400 font-black">{forgeConfirmTarget.breakPct}%</span>
+                      </div>
+                      {forgeConfirmTarget.useStabilizer && (
+                        <div className="flex justify-between items-center text-xs font-bold border-t border-cyan-900/30 pt-2">
+                          <span className="text-cyan-500 uppercase">{language === "ko" ? "🛡️ 보정제" : "🛡️ Stabilizer"}</span>
+                          <span className="text-cyan-400 font-black">{language === "ko" ? "파괴 방지 + 성공률 +3%" : "Break protection + 3% success"}</span>
+                        </div>
+                      )}
+                      {!forgeConfirmTarget.useStabilizer && forgeConfirmTarget.stabCount > 0 && (
+                        <div className="text-[9px] font-bold text-cyan-500 text-center pt-1">
+                          {language === "ko"
+                            ? `보정제 ${forgeConfirmTarget.stabCount}개 보유 중 — 보정 타격을 권장합니다.`
+                            : `${forgeConfirmTarget.stabCount} stabilizer(s) available — consider using one.`}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="w-full space-y-3">
+                      <button
+                        onClick={() => {
+                          const target = forgeConfirmTarget;
+                          setForgeConfirmTarget(null);
+                          enhanceWeaponItem(target.instanceId, target.useStabilizer);
+                        }}
+                        className="w-full py-4 bg-red-700 hover:bg-red-600 text-white font-black text-sm rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-red-900/20 active:scale-95"
+                      >
+                        {language === "ko" ? "⚒️ 제련 강행" : "⚒️ FORGE ANYWAY"}
+                      </button>
+                      <button
+                        onClick={() => setForgeConfirmTarget(null)}
+                        className="w-full py-3 bg-transparent hover:bg-white/5 text-gray-500 font-bold text-xs rounded-xl transition-all uppercase tracking-widest active:scale-95"
+                      >
+                        {language === "ko" ? "취소" : "Cancel"}
                       </button>
                     </div>
                   </div>
@@ -8048,8 +8170,22 @@
                             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                               {ui.inventory}
                             </h2>
-                            <div className="text-xs font-black text-gray-500">
-                              {enhancementInventory.length}
+                            <div className="flex items-center gap-2">
+                              {/* J-3I: Bulk salvage button for broken unlocked weapons */}
+                              {gameState.enhancement.inventory.filter(w => w.broken === true && w.locked !== true).length > 0 && (
+                                <button
+                                  onClick={bulkSalvageBrokenWeapons}
+                                  className="rounded px-2 py-0.5 text-[9px] font-black bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                                  title={language === "ko" ? "파괴된 무기 잔해 일괄 정리" : "Dismiss all broken weapon wreckage"}
+                                >
+                                  {language === "ko"
+                                    ? `🗑️ 잔해 일괄 정리 (${gameState.enhancement.inventory.filter(w => w.broken === true && w.locked !== true).length})`
+                                    : `🗑️ Bulk Dismiss (${gameState.enhancement.inventory.filter(w => w.broken === true && w.locked !== true).length})`}
+                                </button>
+                              )}
+                              <div className="text-xs font-black text-gray-500">
+                                {enhancementInventory.length}
+                              </div>
                             </div>
                           </div>
                           <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2">
@@ -8137,21 +8273,31 @@
                                       </div>
                                       {/* Action buttons row */}
                                       <div className="flex items-center gap-1.5 flex-wrap">
-                                        <button
-                                          onClick={() => enhanceWeaponItem(item.instanceId, false)}
-                                          disabled={!canEnhance}
-                                          className={`rounded-md px-3 py-1.5 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
-                                        >
-                                          {language === "ko" ? "⚒️ 모루 타격" : "⚒️ Enhance"}
-                                        </button>
-                                        {canEnhance && stabCount > 0 && breakPct > 0 && (
-                                          <button
-                                            onClick={() => enhanceWeaponItem(item.instanceId, true)}
-                                            className="rounded-md px-2 py-1.5 text-[10px] font-black bg-cyan-700 text-white transition-colors border border-cyan-500"
-                                            title={language === "ko" ? "보정제 사용 (파괴 방지 + 성공률 +3%)" : "Use Stabilizer (break protection + 3% success)"}
-                                          >
-                                            🛡️ {language === "ko" ? "보정 타격" : "Stab."} ({stabCount})
-                                          </button>
+                                        {isLocked ? (
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] font-black text-amber-600 uppercase tracking-wider">
+                                              {language === "ko" ? "🔒 잠금 상태 — 제련 불가. 잠금 해제 후 진행하십시오." : "🔒 Locked — Enhancement blocked. Unlock first."}
+                                            </span>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <button
+                                              onClick={() => requestEnhance(item.instanceId, false)}
+                                              disabled={!canEnhance}
+                                              className={`rounded-md px-3 py-1.5 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                            >
+                                              {language === "ko" ? "⚒️ 모루 타격" : "⚒️ Enhance"}
+                                            </button>
+                                            {canEnhance && stabCount > 0 && breakPct > 0 && (
+                                              <button
+                                                onClick={() => requestEnhance(item.instanceId, true)}
+                                                className="rounded-md px-2 py-1.5 text-[10px] font-black bg-cyan-700 text-white transition-colors border border-cyan-500"
+                                                title={language === "ko" ? "보정제 사용 (파괴 방지 + 성공률 +3%)" : "Use Stabilizer (break protection + 3% success)"}
+                                              >
+                                                🛡️ {language === "ko" ? "보정 타격" : "Stab."} ({stabCount})
+                                              </button>
+                                            )}
+                                          </>
                                         )}
                                         <button
                                           onClick={() => toggleWeaponLock(item.instanceId)}
