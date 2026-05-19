@@ -104,13 +104,14 @@
         - [x] Phase J-3C: Smith & Shards Copy Cleanup (localize naming safely) <!-- id: 73 -->
         - [x] Phase J-3C-1: Smith & Shards False Feature and UX Consistency QA passed <!-- id: 79 -->
         - [x] Phase J-3C-2: Smith & Shards Weapon Fantasy and Dopamine Loop Audit (docs/SMITH_AND_SHARDS_DOPAMINE_LOOP_SPEC.md complete) <!-- id: 80 -->
-        - [x] Phase J-3C-3: Smith & Shards Weapon Progression Tempo and Prestige Curve Audit (docs/SMITH_AND_SHARDS_PRESTIGE_CURVE_SPEC.md complete) <!-- id: 81 -->
-        - [x] Phase J-3D: Weapon Ladder Design Data Spec (docs/SMITH_AND_SHARDS_ECONOMY_MATRIX_SPEC.md complete) <!-- id: 74 -->
+        - [x] Phase J-3C-3: Smith & Shards Weapon Progression Tempo and Prestige Curve Audit (docs/SMITH_AND_SHARDS_PRESTIGE_CURVE_SPEC.md complete) <!-- id: 81 -->
+        - [x] Phase J-3D: Weapon Ladder Design Data Spec (docs/SMITH_AND_SHARDS_ECONOMY_MATRIX_SPEC.md complete) <!-- id: 74 -->
         - [x] Phase J-3E-0: Weapon Identity & Historical Artifact Specification (docs/WEAPON_IDENTITY_AND_ARTIFACT_SYSTEM_SPEC.md complete) <!-- id: 82 -->
-        - [x] Phase J-3E: Inventory UI Reframe (docs/SMITH_AND_SHARDS_INVENTORY_UX_SPEC.md complete) <!-- id: 75 -->
+        - [x] Phase J-3E: Inventory UI Reframe (docs/SMITH_AND_SHARDS_INVENTORY_UX_SPEC.md complete) <!-- id: 75 -->
         - [x] Phase J-3E-1: Playable Weapon Loop Validation (docs/SMITH_AND_SHARDS_PLAYABLE_FLOW_VALIDATION.md complete) <!-- id: 83 -->
-        - [ ] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->
-        - [ ] Phase J-3G: Breakage/Shards Prototype (anvil failures and shards recovery) <!-- id: 77 -->
-    - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
-    - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
-- **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
+        - [x] Phase J-3E-2: Interactive Weapon Screen Mockup (implemented in index.html sandbox) <!-- id: 84 -->
+        - [ ] Phase J-3F: Breakage/Shards Schema Proposal (database migrations spec) <!-- id: 76 -->
+        - [ ] Phase J-3G: Breakage/Shards Prototype (anvil failures and shards recovery) <!-- id: 77 -->
+    - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
+    - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
+- **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
