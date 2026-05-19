@@ -93,7 +93,8 @@
   - [x] **Copy & UI Cleanup**: Localize forge naming, anvil actions, and inventory visual reframes safely (Phase J-3C, J-3C-1, J-3E-0, J-3E, J-3E-1 & J-3E-2 complete).
   - [ ] **Data & Schema Design**: Model success rates and migration profiles (Phase J-3D complete, J-3F pending).
   - [ ] **Blacksmith Prototype**: Integrate full failures, shards, and trades (Phase J-3G).
-- [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
+- [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
+  - [x] **Unified UX Audit**: Perform product-wide UX pass and write docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md (Phase J-4A complete).
 - [ ] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
 
 ## Phase 5: Prestige & Honor

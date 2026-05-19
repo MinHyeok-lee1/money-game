@@ -54,3 +54,27 @@ We discovered a subtle React ReferenceError where standard JSX IIFE functions (`
 1. **Compilation Validation**: Confirmed zero syntax errors.
 2. **Local HTTP Server Verification**: Successfully loaded pages via `npx http-server` on port 8000.
 3. **Interactive Validation**: Confirmed that toggling, anvil strikes, warning modals, shard cascades, resets, and Black Market liquidations execute perfectly in local browser tests.
+
+---
+
+## 🌌 Phase J-4A: Dark Frontier Unified UX Pass
+
+Today, we also executed the comprehensive **Phase J-4A: Dark Frontier Unified UX Pass**. We conducted a detailed, high-fidelity consistency audit across the target modules (Frontier Master, Hero's Fate, Frontline Command) using the high-fidelity Smith & Shards as our quality benchmark.
+
+### 1. Comprehensive Consistency & UX Audit
+- **Deliverable**: Generated a high-fidelity audit report at [DARK_FRONTIER_UNIFIED_UX_AUDIT.md](file:///c:/Users/ryan/dev/money-game/docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md) covering:
+  - Product-wide split-personality UX verdict.
+  - Tactical analysis of Frontier Master, Hero's Fate, and Frontline Command gaps.
+  - Cross-module color, typography, and button style alignment matrices.
+  - Mobile ergonomics and thumb-reach zone optimizations.
+  - First-time player friction points (shared cash allocation and brutal betting game-overs) with actionable solutions.
+
+### 2. Wartime Immersion Property Realignment
+- **Action**: Discovered casual business titles (e.g. "Hotdog Stand", "Convenience Store", "Pizza Franchise") in `index.html`'s English translations that broke the militaristic commander fantasy.
+- **Polish**: Safely replaced all 10 English property names in `PROPERTIES_DATA.en` with immersive military depot equivalents (e.g. "Temporary Supply Depot", "Forward Outpost", "Field Supply Headquarters"), aligning perfectly with the Korean wartime terminology.
+- **Safety**: 100% presentation-only string changes with zero impact on gameplay formulas, state schemas, or persistence layers.
+
+### 3. Status Records Refreshed
+- Marked Phase `J-4A` as completed in `docs/task.md` and `TODO.md`.
+- Refreshed current development status focus and upcoming milestones in `README.md`.
+
