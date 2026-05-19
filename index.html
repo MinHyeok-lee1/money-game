@@ -4236,65 +4236,66 @@
         },
       };
 
-      const getWarStatusIndicators = (state) => {
+      const getWarStatusIndicators = (state, language) => {
         const currentStage = state.rpg?.currentStage || 1;
         const cash = state.wallet?.cash || 0;
         const propertiesCount = Object.keys(state.landlord?.properties || {}).length;
         const rebirths = state.landlord?.rebirthCount || 0;
+        const isKo = language === "ko";
 
         // Frontline Stability
-        let stability = "SECURE";
+        let stability = isKo ? "안정" : "SECURE";
         let stabilityColor = "text-emerald-400 font-bold";
         if (currentStage > 100) {
-          stability = "CRITICAL COLLAPSE";
+          stability = isKo ? "치명적 붕괴" : "CRITICAL COLLAPSE";
           stabilityColor = "text-red-500 animate-pulse font-black";
         } else if (currentStage > 50) {
-          stability = "UNSTABLE PRE-WARP";
+          stability = isKo ? "경보 (워프 전)" : "UNSTABLE PRE-WARP";
           stabilityColor = "text-amber-500 font-bold";
         } else if (currentStage > 10) {
-          stability = "ENGAGED";
+          stability = isKo ? "교전 진행 중" : "ENGAGED";
           stabilityColor = "text-yellow-400 font-bold";
         }
 
         // Logistics Status
-        let logistics = "CRITICAL DEPLETION";
+        let logistics = isKo ? "보급 부족 경보" : "CRITICAL DEPLETION";
         let logisticsColor = "text-red-400 animate-pulse font-bold";
         if (cash > 100000000) {
-          logistics = "SURPLUS OVERLOAD";
+          logistics = isKo ? "과잉 보급" : "SURPLUS OVERLOAD";
           logisticsColor = "text-emerald-400 font-black";
         } else if (cash > 1000000) {
-          logistics = "STABLE RESERVES";
+          logistics = isKo ? "예비물자 충분" : "STABLE RESERVES";
           logisticsColor = "text-green-400 font-bold";
         } else if (cash > 10000) {
-          logistics = "MARGINAL SUPPLY";
+          logistics = isKo ? "한계 공급" : "MARGINAL SUPPLY";
           logisticsColor = "text-yellow-400 font-bold";
         }
 
         // Command Prestige
         const prestigeLevel = 1 + rebirths + Math.floor(propertiesCount / 2);
-        let prestigeLabel = "REAR ADMIRAL";
+        let prestigeLabel = isKo ? "후방 지휘관" : "REAR ADMIRAL";
         if (prestigeLevel > 15) {
-          prestigeLabel = "SUPREME CHIEF";
+          prestigeLabel = isKo ? "최고 사령관" : "SUPREME CHIEF";
         } else if (prestigeLevel > 8) {
-          prestigeLabel = "FLEET COMMANDER";
+          prestigeLabel = isKo ? "전선 사령관" : "FLEET COMMANDER";
         } else if (prestigeLevel > 3) {
-          prestigeLabel = "FRONT BRIGADIER";
+          prestigeLabel = isKo ? "지상 여단장" : "FRONT BRIGADIER";
         }
 
         // Threat Level
-        let threat = "TIER I (MINIMAL)";
+        let threat = isKo ? "1등급 (경미)" : "TIER I (MINIMAL)";
         let threatColor = "text-gray-400 font-bold";
         if (currentStage > 150) {
-          threat = "TIER V (REAPER)";
+          threat = isKo ? "5등급 (리퍼)" : "TIER V (REAPER)";
           threatColor = "text-red-600 font-black animate-ping";
         } else if (currentStage > 100) {
-          threat = "TIER IV (HAZARD)";
+          threat = isKo ? "4등급 (위험)" : "TIER IV (HAZARD)";
           threatColor = "text-red-500 font-black animate-pulse";
         } else if (currentStage > 50) {
-          threat = "TIER III (HIGH)";
+          threat = isKo ? "3등급 (심각)" : "TIER III (HIGH)";
           threatColor = "text-orange-500 font-bold";
         } else if (currentStage > 10) {
-          threat = "TIER II (ELEVATED)";
+          threat = isKo ? "2등급 (주의)" : "TIER II (ELEVATED)";
           threatColor = "text-amber-400 font-bold";
         }
 
@@ -4597,7 +4598,7 @@
         const clickUpgradeCost = landlord.clickUpgradeCost;
         const rebirthCount = landlord.rebirthCount;
         const multiplier = landlord.multiplier;
-        const warStatus = getWarStatusIndicators(gameState);
+        const warStatus = getWarStatusIndicators(gameState, language);
         const properties = PROPERTIES_DATA[language].map((property) => {
           const savedProperty = landlord.properties.find(
             (item) => item.id === property.id,
@@ -6183,20 +6184,20 @@
                 {/* Phase J-4E: Global War Status Strip (Telemetry HUD) */}
                 <div className="bg-slate-950 border-t border-slate-900 px-3 py-2 text-[9px] font-mono grid grid-cols-4 gap-1.5 text-center text-slate-300">
                   <div className="flex flex-col">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "전선 안정도" : "FRONT STABILITY"}</span>
-                    <span className={warStatus.stabilityColor}>{warStatus.stability}</span>
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">{language === "ko" ? "전선 안정도" : "FRONT STABILITY"}</span>
+                    <span className={`${warStatus.stabilityColor} truncate`}>{warStatus.stability}</span>
                   </div>
                   <div className="flex flex-col border-l border-slate-900 pl-1.5">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "병참 상태" : "LOGISTICS STATUS"}</span>
-                    <span className={warStatus.logisticsColor}>{warStatus.logistics}</span>
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">{language === "ko" ? "병참 상태" : "LOGISTICS STATUS"}</span>
+                    <span className={`${warStatus.logisticsColor} truncate`}>{warStatus.logistics}</span>
                   </div>
                   <div className="flex flex-col border-l border-slate-900 pl-1.5">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "사령부 위신" : "HQ PRESTIGE"}</span>
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">{language === "ko" ? "사령부 위신" : "HQ PRESTIGE"}</span>
                     <span className="text-amber-400 font-bold tracking-tighter truncate">{warStatus.prestigeLabel} (LV.{warStatus.prestigeLevel})</span>
                   </div>
                   <div className="flex flex-col border-l border-slate-900 pl-1.5">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "위협 등급" : "THREAT LEVEL"}</span>
-                    <span className={warStatus.threatColor}>{warStatus.threat}</span>
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">{language === "ko" ? "위협 등급" : "THREAT LEVEL"}</span>
+                    <span className={`${warStatus.threatColor} truncate`}>{warStatus.threat}</span>
                   </div>
                 </div>
               </section>

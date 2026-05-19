@@ -118,5 +118,6 @@
         - [x] Phase J-4C: First-Click CTA Patch (first-click guidance injected to all four tabs) <!-- id: 87 -->
         - [x] Phase J-4D: Immediate Dopamine Feedback Pass (high-fidelity visual triggers and indicators live on all four modules) <!-- id: 88 -->
         - [x] Phase J-4E: Cross-System War Cohesion Pass (Global War status strip telemetry HUD + dynamic cohesion log transmitters) <!-- id: 89 -->
+        - [x] Phase J-4E-1: Cross-System War Cohesion Runtime QA (Telemetry localization and runtime verification completed) <!-- id: 90 -->
     - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
