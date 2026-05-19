@@ -114,5 +114,6 @@
         - [ ] Phase J-3G: Breakage/Shards Prototype (anvil failures and shards recovery) <!-- id: 77 -->
     - [ ] Phase J-4: Defense Tab UX Redesign Spec (RPG tab TD-style reframe spec drafted) <!-- id: 62 -->
         - [x] Phase J-4A: Dark Frontier Unified UX Pass (docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md complete) <!-- id: 85 -->
+        - [x] Phase J-4B: First-Time Player UX Rework (docs/FIRST_TIME_PLAYER_UX_REWORK.md complete) <!-- id: 86 -->
     - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations complete) <!-- id: 63 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

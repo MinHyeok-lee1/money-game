@@ -75,7 +75,7 @@
 - External Capital Leverage Foundation (Phase G-1) implemented, allowing wealth and rebirths to boost RPG combat stats after Stage 100 (Balance QA complete).
 
 **Current Focus & Next Steps:**
-1. **Phase J: Product UX Reframe** — Pivot core modules to "프론티어 마스터" (Frontier Master), prediction-betting "히어로즈 페이트" (Hero's Fate), "스미스 앤 셔드" (Smith & Shards), and "전선 지휘부" (Frontline Command). (Phase J-0 to J-3E-2 sandbox complete; Phase J-4A unified product UX audit complete).
+1. **Phase J: Product UX Reframe** — Pivot core modules to "프론티어 마스터" (Frontier Master), prediction-betting "히어로즈 페이트" (Hero's Fate), "스미스 앤 셔드" (Smith & Shards), and "전선 지휘부" (Frontline Command). (Phase J-0 to J-3E-2 sandbox complete; Phase J-4A unified UX audit and J-4B first-time player onboarding rework complete).
 2. Infinite Mode Depth — unified Reaper enemy model for Stage 101+ (Phase I-4F balance QA complete, Phase I-5A Playtest QA Plan defined, playtest review active).
 3. Mythic Authority Triggers — endgame characters with authority skills (Inflation, Market Crash, Monopoly).
 4. Prestige / Honor system — meta-progression across runs.

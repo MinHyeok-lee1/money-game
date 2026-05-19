@@ -78,3 +78,22 @@ Today, we also executed the comprehensive **Phase J-4A: Dark Frontier Unified UX
 - Marked Phase `J-4A` as completed in `docs/task.md` and `TODO.md`.
 - Refreshed current development status focus and upcoming milestones in `README.md`.
 
+---
+
+## 🎮 Phase J-4B: First-Time Player UX Rework
+
+Today, we successfully executed **Phase J-4B: First-Time Player UX Rework**. We conducted a detailed, high-fidelity first-time player experience audit targeting the critical first 3 minutes of gameplay.
+
+### 1. Comprehensive Onboarding Audit & Guide Spec
+- **Deliverable**: Generated the first-time player onboarding audit report at [FIRST_TIME_PLAYER_UX_REWORK.md](file:///c:/Users/ryan/dev/money-game/docs/FIRST_TIME_PLAYER_UX_REWORK.md) detailing:
+  - **Confusion Maps**: Highlighting cognitive friction from Shared Wallet Interdependence, Empty Frontline squad states, and Hero's Fate full-loss betting lethality.
+  - **First-Click Clarity Analysis**: Contrasting erroneous click flows with high-ROI paths for each module.
+  - **Onboarding Risks**: Information overload, invisible synergie indicators, and sandbox vs. production state disconnects.
+  - **Emotional Pacing**: Structured onboarding flow to ensure rapid emotional peaks and a strong sense of reward progression within 180 seconds.
+  - **Tactical Rework Blueprint**: Specifying the role, primary CTA, passive rewards, threat/risk warnings, and long-term targets of all modules under one unified front: **자본전선: 데드라인**.
+
+### 2. Status Records Synchronized
+- Marked Phase `J-4B` as completed in `docs/task.md` and `TODO.md`.
+- Refreshed current development status focus and upcoming milestones in `README.md`.
+- Safe-editing CRLF checked across all changed documentation files.
+

@@ -94,7 +94,8 @@
   - [ ] **Data & Schema Design**: Model success rates and migration profiles (Phase J-3D complete, J-3F pending).
   - [ ] **Blacksmith Prototype**: Integrate full failures, shards, and trades (Phase J-3G).
 - [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
-  - [x] **Unified UX Audit**: Perform product-wide UX pass and write docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md (Phase J-4A complete).
+  - [x] **Unified UX Audit**: Perform product-wide UX pass and write docs/DARK_FRONTIER_UNIFIED_UX_AUDIT.md (Phase J-4A complete).
+  - [x] **First-Time Player UX Rework**: Analyze 3-minute onboarding window and write docs/FIRST_TIME_PLAYER_UX_REWORK.md (Phase J-4B complete).
 - [ ] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
 
 ## Phase 5: Prestige & Honor
