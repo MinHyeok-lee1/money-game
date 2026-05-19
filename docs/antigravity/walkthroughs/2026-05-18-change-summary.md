@@ -339,6 +339,22 @@ We have successfully executed Phase J-3C-3 (Smith & Shards Weapon Progression Te
 5. **Zone Boundaries**: Hard-gated Green (1-5 safe), Amber (6-10 downgrade only), Danger (11-20 breakage with shields), and Sovereign (21-30 no shields, maximum tension) zones.
 6. **Whale vs Grinder Balance**: Standardized all anvil upgrade odds across spender and grinder pipelines, ensuring that money can buy draws but cannot guarantee mythic sovereign upgrades without undergoing real threat of anvil shattering.
 
+---
+
+## ⚒️ 18. Phase J-3D: Smith & Shards Weapon Economy Matrix Specification (Complete)
+
+We have successfully executed Phase J-3D (Smith & Shards Weapon Economy Matrix Specification) by creating the comprehensive balance document [docs/SMITH_AND_SHARDS_ECONOMY_MATRIX_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_ECONOMY_MATRIX_SPEC.md).
+
+### ⚒️ A. Key Economic Matrices Modelled
+1. **The Enhancement Ladder Matrix**: Hard-gated success rates, breakage rates, and rarity categories from +1 onboarding to +30 sovereign territory.
+2. **Closed Wartime Loop System**: Defined the closed-loop currency flows linking Real Estate income (CASH), RPG dividends (DIV), weapon supply crates, shard conversions, and Hero's Fate predictability scaling.
+3. **Destruction & Exponential Salvage**: Mapped catastrophic failure curves, specifying mathematical shard yield recovery equations scaling with high-tier weapon breaks to cushion losses.
+4. **Four-Tier Shard Classifications**: Categorized Basic Shards, Refined Shards (for Success Stabilizers), Mythic Shards (for Legendary boxes), and Sovereign Fragments (for custom title prestige).
+5. **Black Market & Liquidation parameters**: Outlined weapon cash outs, stabilizer crafting margins, and duplicate sacrifices.
+6. **Inventory Slot Scarcity**: Configured standard 50-slot inventory pressure gates, requiring Diamond expenditures to expand.
+7. **Whale vs Grinder Anvil Equalizer**: Hard-gated rules verifying Spenders are subject to the exact same upgrade success percentages as grinders, ensuring mythic sovereign items remain an earned badge of honor.
+
+
 
 
 
