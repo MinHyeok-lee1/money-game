@@ -7105,7 +7105,7 @@
                   {betPreview ? (
                     <div className="space-y-4">
                       {/* A. Selected Prediction Summary */}
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3.5">
+                      <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5">
                         <div className="text-[9px] font-black text-emerald-800 uppercase tracking-widest mb-1.5">선택한 전술적 예측</div>
                         <h3 className="font-black text-gray-900 text-sm">
                           {DEFENSE_CONTRACT_FLAVOR[betPreview.asset.id]?.displayName || betPreview.asset.name}
@@ -7120,7 +7120,7 @@
                             <div className="font-black text-emerald-800">{betPreview.odds}% / x{betPreview.payout.toFixed(2)}</div>
                           </div>
                         </div>
-                        <div className="mt-2.5 bg-white bg-opacity-60 rounded-md p-2 text-[10px] space-y-1 text-gray-600 leading-snug">
+                        <div className="mt-2.5 bg-slate-900 rounded-md p-2 text-[10px] space-y-1 text-slate-300 leading-snug border border-slate-800">
                           <div className="text-red-500 font-bold">• 실패 시: 영웅 사망 및 전선 지원 기금 전액 소실 위험</div>
                           <div>• 현재 지원: <span className="font-bold text-gray-700">생존 예측 중심</span></div>
                           <div className="text-gray-400 text-[9px]">• 영웅 사망 예측 및 1:1 결투 예측은 향후 확장 예정</div>
@@ -7128,7 +7128,7 @@
                       </div>
 
                       {/* B. Stake Input Area */}
-                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3.5">
+                      <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-3.5">
                         <div className="flex items-center justify-between mb-2">
                           <label className="text-[10px] font-black text-gray-700 uppercase">참전 지원 기금 설정</label>
                           <span className="text-[10px] font-bold text-gray-400">
@@ -7251,7 +7251,7 @@
                       {(() => {
                         const v = settlementValidation;
                         return (
-                          <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                          <div className="border border-slate-800 rounded-xl overflow-hidden shadow-2xl bg-slate-900 shadow-black/50">
                             <div className="bg-gray-50 px-3.5 py-2 flex items-center justify-between border-b border-gray-200">
                               <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider">{ui.settlementStatus}</div>
                               <div className={`text-[9px] font-black uppercase ${v.canSettle ? "text-emerald-600" : "text-red-500"}`}>
@@ -8344,9 +8344,9 @@
                               return (
                                 <div
                                   key={item.instanceId}
-                                  className={`rounded-md p-3 space-y-2 border transition-colors ${isBroken ? "bg-red-50 border-red-300"
-                                    : prestige ? `${prestige.bgClass} ${prestige.borderClass}`
-                                      : "bg-gray-50 border-gray-200"
+                                  className={`rounded-md p-3 space-y-2 border transition-all ${isBroken ? "bg-red-950/40 border-red-900/50 text-red-400"
+                                    : prestige ? `${prestige.bgClass} ${prestige.borderClass} text-slate-100`
+                                      : "bg-slate-950/40 border-slate-800 text-slate-200 hover:bg-slate-800/40"
                                     }`}
                                 >
                                   {/* J-3H: Danger zone warning strip */}
