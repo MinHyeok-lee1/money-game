@@ -138,3 +138,37 @@ Each module now responds in real-time under a second to player actions, making i
 ### 2. Rigorous Non-Mutation Verification & Status Sync
 * **Zero Schema Mutations**: All animation states (artillery flashes, anvil recoil, betting outcome toasts, wave flash alert indicators, operations terminals) are managed strictly inside transient in-memory React states. No writes are made to local storage or the core save shape (`GAME_STATE_STORAGE_KEY`).
 * **Clean Status Logs**: Updated `docs/task.md`, `TODO.md`, and `README.md` to register Phase J-4D as 100% complete and fully verified.
+
+---
+
+## 🌐 Phase J-4E: Cross-System War Cohesion Pass
+
+Today, we successfully executed and verified **Phase J-4E: Cross-System War Cohesion Pass**. We designed and injected lightweight cross-module cohesion triggers and indicators linking all four distinct gameplay tabs under a single collapsing frontline metaphor.
+
+### 1. Global War Status Strip (Telemetry HUD)
+- Injected a compact **Global War Status Strip** inside the GNB Wallet Header component, making it stick at the top of the UI on all tabs.
+- The strip displays dynamic derived telemetry metrics evaluated reactively from current `gameState`:
+  - **전선 안정도 (Frontline Stability)**: Linked to active RPG Stage (Secure / Engaged / Unstable / Critical Collapse).
+  - **병참 상태 (Logistics Status)**: Derived from core Cash capital (Critical Depletion / Marginal Supply / Stable Reserves / Surplus Overload).
+  - **사령부 위신 (Command Prestige)**: Determined by rebirth levels and outposts (Rear Admiral / Front Brigadier / Fleet Commander / Supreme Chief).
+  - **위협 등급 (Threat Level)**: Corresponds to active stage hazard limits (Tier I to Tier V Reaper Eclipse).
+
+### 2. Connected War Cohesion Logs Feed
+- We connected actions in the other three modules straight to the scrollable **Tactical Operations scrolling terminal** of Frontline Command using transient state transmitters:
+  - **Frontier Master outposts**: Purchasing rear outposts or upgrading artillery firing scale broadcasts stabilization telemetry:
+    - `📦 [병참선 안정화] {Zone Name} 구역 수복 완료! 전방 보급 물자 수송 정상화 개시 (전쟁 자금 확보)`
+    - `🔥 [전선 화력 지원 가능] 후방 포격 화력 배율 상향 완료! (전쟁 자금 확보)`
+  - **Hero's Fate bets**: Simulating dry runs or resolving real-stakes contracts sends morale/survival reports:
+    - `📡 [전선 생존 가능성 재평가] {Contract Name} 모의 시뮬레이션 개시 (사령부 위신 분석)`
+    - `📈 [사령부 위신 변동] 지하 계약 작전 성공! 전선 유지력 확보 및 사령부 위신 상승`
+    - `🚨 [부대 사기 영향] 지하 계약 전선 붕괴! 부대 사기 극도로 저하 및 추가 물자 보급 급무`
+  - **Smith & Shards upgrades**: Upgrading weapons in production or within the interactive sandbox prints firepower reinforcement signals:
+    - `⚒️ [병기 품질 상승] {Weapon Name} +{Level} 제련 성공! (전선 화력 강화 예상 및 대원 장착 효율 상승)`
+    - `⚠️ [제련 안정성 충격 감지] {Weapon Name} +{Level} 제련 실패! (병기 연마 품질 불안정 및 차기 화력 전력 대기)`
+- **Frontline Command updates**: Active combat tick status loops display clear cross-system resource dependencies (e.g. `[병기 강화 효과 대기]`, `[병참 지원 필요]`, `[사령부 자본 투입 권장]`).
+
+### 3. Absolute Non-Mutation & Safe Alignment Verified
+- Checked using exact string search queries:
+  - `GAME_STATE_STORAGE_KEY` and local storage schemas remain untouched.
+  - Zero modifications were introduced to core combat tick calculators, betting outcomes, gacha scales, or weapon upgrade chances.
+  - Zero temporary scripting files were left behind in the workspace.

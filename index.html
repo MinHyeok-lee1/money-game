@@ -4236,6 +4236,80 @@
         },
       };
 
+      const getWarStatusIndicators = (state) => {
+        const currentStage = state.rpg?.currentStage || 1;
+        const cash = state.wallet?.cash || 0;
+        const propertiesCount = Object.keys(state.landlord?.properties || {}).length;
+        const rebirths = state.landlord?.rebirthCount || 0;
+
+        // Frontline Stability
+        let stability = "SECURE";
+        let stabilityColor = "text-emerald-400 font-bold";
+        if (currentStage > 100) {
+          stability = "CRITICAL COLLAPSE";
+          stabilityColor = "text-red-500 animate-pulse font-black";
+        } else if (currentStage > 50) {
+          stability = "UNSTABLE PRE-WARP";
+          stabilityColor = "text-amber-500 font-bold";
+        } else if (currentStage > 10) {
+          stability = "ENGAGED";
+          stabilityColor = "text-yellow-400 font-bold";
+        }
+
+        // Logistics Status
+        let logistics = "CRITICAL DEPLETION";
+        let logisticsColor = "text-red-400 animate-pulse font-bold";
+        if (cash > 100000000) {
+          logistics = "SURPLUS OVERLOAD";
+          logisticsColor = "text-emerald-400 font-black";
+        } else if (cash > 1000000) {
+          logistics = "STABLE RESERVES";
+          logisticsColor = "text-green-400 font-bold";
+        } else if (cash > 10000) {
+          logistics = "MARGINAL SUPPLY";
+          logisticsColor = "text-yellow-400 font-bold";
+        }
+
+        // Command Prestige
+        const prestigeLevel = 1 + rebirths + Math.floor(propertiesCount / 2);
+        let prestigeLabel = "REAR ADMIRAL";
+        if (prestigeLevel > 15) {
+          prestigeLabel = "SUPREME CHIEF";
+        } else if (prestigeLevel > 8) {
+          prestigeLabel = "FLEET COMMANDER";
+        } else if (prestigeLevel > 3) {
+          prestigeLabel = "FRONT BRIGADIER";
+        }
+
+        // Threat Level
+        let threat = "TIER I (MINIMAL)";
+        let threatColor = "text-gray-400 font-bold";
+        if (currentStage > 150) {
+          threat = "TIER V (REAPER)";
+          threatColor = "text-red-600 font-black animate-ping";
+        } else if (currentStage > 100) {
+          threat = "TIER IV (HAZARD)";
+          threatColor = "text-red-500 font-black animate-pulse";
+        } else if (currentStage > 50) {
+          threat = "TIER III (HIGH)";
+          threatColor = "text-orange-500 font-bold";
+        } else if (currentStage > 10) {
+          threat = "TIER II (ELEVATED)";
+          threatColor = "text-amber-400 font-bold";
+        }
+
+        return {
+          stability,
+          stabilityColor,
+          logistics,
+          logisticsColor,
+          prestigeLabel,
+          prestigeLevel,
+          threat,
+          threatColor
+        };
+      };
+
       function GameApp() {
         // Language detection and initial state setup
         const userLang = (
@@ -4343,33 +4417,47 @@
           }));
           
           setTimeout(() => {
+            const activeW = sandboxState.weapons[sandboxState.selectedWeaponIndex];
+            if (activeW.level >= 11 && !sandboxState.showShatterModal) {
+              setSandboxState(prev => ({
+                ...prev,
+                isForging: false,
+                isShaking: false,
+                showShatterModal: true
+              }));
+              return;
+            }
+
+            const isSuccess = Math.random() * 100 < (activeW.successRate + (sandboxState.stabilizerActive ? 3 : 0));
+            if (isSuccess) {
+              setTacticalLogFeed((old) => [
+                `⚒️ [병기 품질 상승 - 모의] 모의 강화검 ${activeW.name} 제련 성공! (전선 화력 강화 예상)`,
+                ...old
+              ].slice(0, 10));
+            } else {
+              setTacticalLogFeed((old) => [
+                `⚠️ [제련 안정성 충격 감지 - 모의] 모의 강화검 ${activeW.name} 제련 실패! (병기 연마 품질 불안정)`,
+                ...old
+              ].slice(0, 10));
+            }
+
             setSandboxState(prev => {
-              const activeW = prev.weapons[prev.selectedWeaponIndex];
-              if (activeW.level >= 11 && !prev.showShatterModal) {
-                return { 
-                  ...prev, 
-                  isForging: false, 
-                  isShaking: false, 
-                  showShatterModal: true 
-                };
-              }
-              // Simulate normal forge results
-              const isSuccess = Math.random() * 100 < (activeW.successRate + (prev.stabilizerActive ? 3 : 0));
+              const innerW = prev.weapons[prev.selectedWeaponIndex];
               const updated = [...prev.weapons];
               if (isSuccess) {
                 updated[prev.selectedWeaponIndex] = {
-                  ...activeW,
-                  level: activeW.level + 1,
-                  power: Math.round(activeW.power * 1.15),
-                  scars: activeW.scars + 1,
-                  successRate: Math.max(3, activeW.successRate - 2),
-                  breakRate: Math.min(30, activeW.breakRate + 1)
+                  ...innerW,
+                  level: innerW.level + 1,
+                  power: Math.round(innerW.power * 1.15),
+                  scars: innerW.scars + 1,
+                  successRate: Math.max(3, innerW.successRate - 2),
+                  breakRate: Math.min(30, innerW.breakRate + 1)
                 };
               } else {
                 updated[prev.selectedWeaponIndex] = {
-                  ...activeW,
-                  scars: activeW.scars + 1,
-                  successRate: Math.min(90, activeW.successRate + 1)
+                  ...innerW,
+                  scars: innerW.scars + 1,
+                  successRate: Math.min(90, innerW.successRate + 1)
                 };
               }
               return { 
@@ -4509,6 +4597,7 @@
         const clickUpgradeCost = landlord.clickUpgradeCost;
         const rebirthCount = landlord.rebirthCount;
         const multiplier = landlord.multiplier;
+        const warStatus = getWarStatusIndicators(gameState);
         const properties = PROPERTIES_DATA[language].map((property) => {
           const savedProperty = landlord.properties.find(
             (item) => item.id === property.id,
@@ -4851,11 +4940,11 @@
               setTimeout(() => setWaveAlert(false), 250);
 
               const events = [
-                `🚨 적 개체 접근 중 - 방어막 충격 감지! (누적 격퇴: ${nextState.rpg?.defeatedMonsters || 0})`,
-                `📡 최전방 화력 지원 분대 격전 중! 대상 잔여 체력: ${nextState.rpg?.monsterHp || 0}`,
-                "💥 아군 원격 포격 지원 포탄 분대 투하 완료",
-                "👥 대원들 최선 전선 사수 대형 및 재장전 개시",
-                "🔋 방어망 에너지 쉴드 긴급 충전 순차 기동 중"
+                `🚨 [병기 강화 효과 대기] 적 개체 접근 중 - 방어막 충격 감지! (누적 격퇴: ${nextState.rpg?.defeatedMonsters || 0})`,
+                `📡 [병참 지원 필요] 최전방 화력 지원 분대 격전 중! 대상 잔여 체력: ${nextState.rpg?.monsterHp || 0}`,
+                "💥 [사령부 자본 투입 권장] 아군 원격 포격 지원 포탄 분대 투하 완료",
+                "👥 [병참 지원 필요] 대원들 최선 전선 사수 대형 및 재장전 개시",
+                "🔋 [병기 강화 효과 대기] 방어망 에너지 쉴드 긴급 충전 순차 기동 중"
               ];
               const newMsg = events[Math.floor(Math.random() * events.length)];
               setTacticalLogFeed((old) => [newMsg, ...old].slice(0, 10));
@@ -4885,12 +4974,12 @@
           setTimeout(() => setIsArtilleryFlashing(false), 120);
 
           const tacticalMsgs = [
-            "🔥 포격 개시! 전선 화력 지원",
-            "💣 군수 거점 돌파 시도",
-            "💰 사령부 전쟁 세금 징수",
-            "📦 후방 보급 라인 기동",
-            "⚡ 화력 지원 부대 급파",
-            "📡 최전방 전술 신호 연결"
+            "🔥 [전선 화력 지원 가능] 포격 개시! 전선 화력 지원",
+            "💣 [전쟁 자금 확보] 군수 거점 돌파 시도",
+            "💰 [병참선 안정화] 사령부 전쟁 세금 징수",
+            "📦 [병참선 안정화] 후방 보급 라인 기동",
+            "⚡ [전선 화력 지원 가능] 화력 지원 부대 급파",
+            "📡 [전선 화력 지원 가능] 최전방 전술 신호 연결"
           ];
           setRotatingTacticalMsg(tacticalMsgs[Math.floor(Math.random() * tacticalMsgs.length)]);
 
@@ -4929,6 +5018,12 @@
                 clickUpgradeCost: 50,
               },
             }));
+            
+            setTacticalLogFeed((old) => [
+              `🌟 [사령부 위신 변동] 사령관 영구 환생 작전 승인! 사령부 위신 대폭 상승 및 포격 지원 배율 영구 상향`,
+              ...old
+            ].slice(0, 10));
+
             alert(t.rebirthSuccess);
           }
         };
@@ -4971,6 +5066,13 @@
                 },
               };
             });
+
+            const baseProp = PROPERTIES_DATA[language].find((p) => p.id === id);
+            const name = baseProp ? baseProp.name : `Zone-${id}`;
+            setTacticalLogFeed((old) => [
+              `📦 [병참선 안정화] ${name} 구역 수복 완료! 전방 보급 물자 수송 정상화 개시 (전쟁 자금 확보)`,
+              ...old
+            ].slice(0, 10));
           }
         };
 
@@ -4997,6 +5099,11 @@
               },
             };
           });
+
+          setTacticalLogFeed((old) => [
+            `🔥 [전선 화력 지원 가능] 후방 포격 화력 배율 상향 완료! (전쟁 자금 확보)`,
+            ...old
+          ].slice(0, 10));
         };
 
         const buyInvestmentAsset = (id) => {
@@ -5267,6 +5374,12 @@
               totalTeamDps,
             );
             if (!result) return prev;
+
+            setTacticalLogFeed((old) => [
+              `📡 [전선 생존 가능성 재평가] ${result.contractName} 모의 시뮬레이션 개시: 성공률 ${result.odds}% 추정 (사령부 위신 분석)`,
+              ...old
+            ].slice(0, 10));
+
             return {
               ...prev,
               investment: {
@@ -5294,6 +5407,18 @@
               : (language === "ko" ? "🚨 전선 붕괴: 부대 손실 및 전원 몰살 발생!" : "🚨 SECTOR CRASHED: SQUAD WASTED AND CAPITAL LIQUIDATED!")
           });
           setTimeout(() => setLastBetResultToast(null), 4000);
+
+          if (success) {
+            setTacticalLogFeed((old) => [
+              `📈 [사령부 위신 변동] 지하 계약 작전 성공! 전선 유지력 확보 및 사령부 위신 상승`,
+              ...old
+            ].slice(0, 10));
+          } else {
+            setTacticalLogFeed((old) => [
+              `🚨 [부대 사기 영향] 지하 계약 전선 붕괴! 부대 사기 극도로 저하 및 추가 물자 보급 급무`,
+              ...old
+            ].slice(0, 10));
+          }
 
           setGameState((prev) => {
             const entryResult = createDefenseContractSettlementResult(
@@ -5650,9 +5775,19 @@
             if (success) {
               setEnhanceSuccessPulse(true);
               setTimeout(() => setEnhanceSuccessPulse(false), 1000);
+              
+              setTacticalLogFeed((old) => [
+                `⚒️ [병기 품질 상승] ${item.name} +${currentLevel + 1} 제련 성공! (전선 화력 강화 예상 및 대원 장착 효율 상승)`,
+                ...old
+              ].slice(0, 10));
             } else {
               setEnhanceFailPulse(true);
               setTimeout(() => setEnhanceFailPulse(false), 1000);
+              
+              setTacticalLogFeed((old) => [
+                `⚠️ [제련 안정성 충격 감지] ${item.name} +${currentLevel} 제련 실패! (병기 연마 품질 불안정 및 차기 화력 전력 대기)`,
+                ...old
+              ].slice(0, 10));
             }
 
             updateGameState((prev) => {
@@ -6042,6 +6177,26 @@
                     <div className="text-lg font-black text-emerald-700">
                       {headerSecondaryValue}
                     </div>
+                  </div>
+                </div>
+
+                {/* Phase J-4E: Global War Status Strip (Telemetry HUD) */}
+                <div className="bg-slate-950 border-t border-slate-900 px-3 py-2 text-[9px] font-mono grid grid-cols-4 gap-1.5 text-center text-slate-300">
+                  <div className="flex flex-col">
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "전선 안정도" : "FRONT STABILITY"}</span>
+                    <span className={warStatus.stabilityColor}>{warStatus.stability}</span>
+                  </div>
+                  <div className="flex flex-col border-l border-slate-900 pl-1.5">
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "병참 상태" : "LOGISTICS STATUS"}</span>
+                    <span className={warStatus.logisticsColor}>{warStatus.logistics}</span>
+                  </div>
+                  <div className="flex flex-col border-l border-slate-900 pl-1.5">
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "사령부 위신" : "HQ PRESTIGE"}</span>
+                    <span className="text-amber-400 font-bold tracking-tighter truncate">{warStatus.prestigeLabel} (LV.{warStatus.prestigeLevel})</span>
+                  </div>
+                  <div className="flex flex-col border-l border-slate-900 pl-1.5">
+                    <span className="text-slate-500 uppercase tracking-tighter text-[7px]">{language === "ko" ? "위협 등급" : "THREAT LEVEL"}</span>
+                    <span className={warStatus.threatColor}>{warStatus.threat}</span>
                   </div>
                 </div>
               </section>
