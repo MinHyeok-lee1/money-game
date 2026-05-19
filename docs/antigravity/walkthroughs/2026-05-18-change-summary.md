@@ -369,6 +369,21 @@ We have successfully executed Phase J-3E-0 (Weapon Identity & Historical Artifac
 6. **Black Market Storytelling**: Detailed relic auctions, illegal contraband materials, and desperate salvage options.
 7. **UX Dossier visual Layout**: Mocked up a high-fidelity artifact dossier layout featuring locks, active deployment indicators, and historical logs.
 
+---
+
+## ⚒️ 20. Phase J-3E: Smith & Shards Inventory UX Reframe (Complete)
+
+We have successfully executed Phase J-3E (Smith & Shards Inventory UX Reframe) by creating the comprehensive UX design document [docs/SMITH_AND_SHARDS_INVENTORY_UX_SPEC.md](file:///c:/Users/ryan/dev/money-game/docs/SMITH_AND_SHARDS_INVENTORY_UX_SPEC.md).
+
+### ⚒️ A. Key UX Systems Reframed
+1. **Intended Player UX Flow**: Outlined the emotional transition mapping Supply Calls to Armory Dossiers, anvil strikes, shattering triggers, and circular salvage shards recovery.
+2. **Main Inventory Armory Layout**: Designed the visual Armory Dossier Board containing slots expanders, rarity HSL color glow borders, and neon green active squad deployment marks.
+3. **Weapon Card Dossier UX**: Wireframed a high-fidelity visual card layout displaying title prefixes, detailed dossier history logs, lock states, and unstable hazard blinks.
+4. **Anvil Screen Flow**: Designed physical feedback animations including localized screen shakes, hammer strikes sound delays, golden stabilizer slot borders, and transparent success/break odds.
+5. **Catastrophic Destruction FX**: Modeled visual failure transitions using solid red warning colors, cracking overlays, klaxon sirens, and cyan shard crystallizing particle expansions.
+6. **Mobile-First UX Rules**: Hard-gated one-handed touch hierarchies placing primary strike buttons in the bottom $30\%$ viewport, scale-down text bounds, and swipeable inner logs.
+
+
 
 
 
