@@ -491,9 +491,9 @@
     const INVESTMENT_HISTORY_LIMIT = 30;
     const GACHA_DRAW_COST = 1000;
     const GACHA_RECENT_PULL_LIMIT = 10;
-    const MAX_ENHANCE_LEVEL = 10;
-    const ENHANCE_SAFE_ZONE_MAX = 5;    // +1~5: no breakage possible
-    const ENHANCE_BREAKAGE_START = 6;   // +6+: breakage chance begins
+    const MAX_ENHANCE_LEVEL = 30;
+    const ENHANCE_SAFE_ZONE_MAX = 10;   // Safe Zone up to +10
+    const ENHANCE_BREAKAGE_START = 11;  // Breakage/Danger Zone starts at +11 (currentLevel >= 10)
     const SALVAGE_HISTORY_CAP = 10;
     const STABILIZER_SUCCESS_BONUS = 0.03; // +3% success
     const STABILIZER_BREAK_PROTECTION = true; // prevents breakage on use
@@ -3375,13 +3375,13 @@
               typeof enhancement.lastEnhancementResult === "object"
               ? {
                 itemName: String(
-                  enhancement.lastEnhancementResult.itemName || "",
+                  enhancement.lastEnhancementResult.itemName ?? "",
                 ),
-                success: Boolean(enhancement.lastEnhancementResult.success),
+                success: Boolean(enhancement.lastEnhancementResult.success ?? false),
                 level: clampNumber(
                   Math.floor(
                     toFiniteNumber(
-                      enhancement.lastEnhancementResult.level,
+                      enhancement.lastEnhancementResult.level ?? 0,
                       0,
                     ),
                   ),
@@ -3390,13 +3390,11 @@
                   0,
                 ),
                 broken: enhancement.lastEnhancementResult.broken === true,
-                salvageShards: Math.max(0, toFiniteNumber(enhancement.lastEnhancementResult.salvageShards, 0)),
+                salvageShards: Math.max(0, toFiniteNumber(enhancement.lastEnhancementResult.salvageShards ?? 0, 0)),
                 prevLevel: clampNumber(
                   Math.floor(
                     toFiniteNumber(
-                      enhancement.lastEnhancementResult.prevLevel !== undefined
-                        ? enhancement.lastEnhancementResult.prevLevel
-                        : enhancement.lastEnhancementResult.level,
+                      enhancement.lastEnhancementResult.prevLevel ?? enhancement.lastEnhancementResult.level ?? 0,
                       0,
                     ),
                   ),
@@ -3408,17 +3406,17 @@
                   0,
                   Math.floor(
                     toFiniteNumber(
-                      enhancement.lastEnhancementResult.cost || 0,
+                      enhancement.lastEnhancementResult.cost ?? 0,
                       0,
                     ),
                   ),
                 ),
                 baseChance: toFiniteNumber(
-                  enhancement.lastEnhancementResult.baseChance || 0,
+                  enhancement.lastEnhancementResult.baseChance ?? 0,
                   0,
                 ),
                 breakChance: toFiniteNumber(
-                  enhancement.lastEnhancementResult.breakChance || 0,
+                  enhancement.lastEnhancementResult.breakChance ?? 0,
                   0,
                 ),
                 stabilizerUsed:
@@ -5873,14 +5871,15 @@
         return clampNumber(0.9 - safeLevel * 0.06, 0.3, 0.9, 0.9);
       };
 
-      // J-3G: Breakage chance — 0% in safe zone (+1~5), escalates from +6 onward
-      // At +6: ~2%, +7: ~4%, +8: ~7%, +9: ~11%, +10: ~15%
-      // Psychological: always survivable odds but feels dangerous
+      // J-5A: Breakage chance matching the Live Risk Ladder:
+      // safe zone (0 to 9): 0%
+      // high risk (10 to 19): 20%
+      // extreme risk (20 to 29): 70%
       const getBreakageChance = (level) => {
         const safeLevel = Math.floor(toFiniteNumber(level, 0));
-        if (safeLevel < ENHANCE_BREAKAGE_START) return 0;
-        const dangerSteps = safeLevel - ENHANCE_BREAKAGE_START + 1;
-        return clampNumber(dangerSteps * dangerSteps * 0.005 + dangerSteps * 0.015, 0, 0.25, 0);
+        if (safeLevel < 10) return 0;
+        if (safeLevel < 20) return 0.2;
+        return 0.7;
       };
 
       // J-3G: Salvage payout — scales by enhancement level and rarity
@@ -5998,96 +5997,13 @@
           const successChance = getEnhanceChance(currentLevel) + (hasStabilizer ? STABILIZER_SUCCESS_BONUS : 0);
           const success = Math.random() < successChance;
 
-          // J-3G: Breakage roll (only on failure, only past safe zone)
-          let didBreak = false;
-          if (!success && currentLevel >= ENHANCE_BREAKAGE_START) {
-            const breakChance = getBreakageChance(currentLevel);
-            // Stabilizer with break protection prevents breakage
-            if (hasStabilizer && STABILIZER_BREAK_PROTECTION) {
-              didBreak = false;
-            } else {
-              didBreak = Math.random() < breakChance;
-            }
-          }
-
-          if (didBreak) {
-            // J-3G: BREAKAGE — devastating visual + salvage
-            setEnhanceFailPulse(true);
-            setTimeout(() => setEnhanceFailPulse(false), 1500);
-
-            const salvageShards = getSalvagePayout(currentLevel, item.rarity);
-
-            setTacticalLogFeed((old) => [
-              `💥 [긴급: 병기 파괴] ${item.name} +${currentLevel} 제련 중 무기가 산산조각 났습니다! 파편 회수: 💎${salvageShards} (전선 잔해 수습 및 파편 분해 자동 완료)`,
-              ...old
-            ].slice(0, 10));
-
-            updateGameState((prev) => {
-              const prevItem = prev.enhancement.inventory.find(
-                (candidate) => candidate.instanceId === instanceId,
-              );
-              if (!prevItem) return prev;
-
-              const salvageEntry = {
-                id: `salvage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                weaponName: prevItem.name,
-                weaponLevel: currentLevel,
-                weaponRarity: prevItem.rarity,
-                refinedShardsAwarded: salvageShards,
-                createdAt: Date.now(),
-              };
-
-              const prevForge = prev.enhancement.forgeStats || {};
-              const prevHistory = Array.isArray(prev.enhancement.salvageHistory)
-                ? prev.enhancement.salvageHistory : [];
-
-              return {
-                ...prev,
-                wallet: {
-                  ...prev.wallet,
-                  cash: prev.wallet.cash - cost,
-                },
-                enhancement: {
-                  ...prev.enhancement,
-                  inventory: prev.enhancement.inventory.map((candidate) =>
-                    candidate.instanceId === instanceId
-                      ? { ...candidate, broken: true, enhanceLevel: currentLevel }
-                      : candidate,
-                  ),
-                  lastEnhancementResult: {
-                    itemName: prevItem.name,
-                    success: false,
-                    level: currentLevel,
-                    broken: true,
-                    salvageShards,
-                    prevLevel: currentLevel,
-                    cost,
-                    baseChance: getEnhanceChance(currentLevel),
-                    breakChance: currentLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(currentLevel) : 0,
-                    stabilizerUsed: hasStabilizer,
-                  },
-                  refinedShards: toFiniteNumber(prev.enhancement.refinedShards, 0) + salvageShards,
-                  forgeStats: {
-                    totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
-                    totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0),
-                    totalFailures: toFiniteNumber(prevForge.totalFailures, 0) + 1,
-                    totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0) + 1,
-                    totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0) + salvageShards,
-                  },
-                  salvageHistory: [...prevHistory, salvageEntry].slice(-SALVAGE_HISTORY_CAP),
-                  stabilizers: hasStabilizer
-                    ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
-                    : toFiniteNumber(prev.enhancement.stabilizers, 0),
-                },
-              };
-            });
-          } else if (success) {
+          if (success) {
             const nextSuccessfulLevel = currentLevel + 1;
             setEnhanceSuccessPulse(true);
             setTimeout(() => setEnhanceSuccessPulse(false), 1000);
 
             setTacticalLogFeed((old) => [
-              `⚒️ [병기 품질 상승] ${item.name} +${currentLevel + 1} 제련 성공! (전선 화력 강화 예상 및 대원 장착 효율 상승)`,
+              `⚒️ [병기 품질 상승] ${item.name} +${nextSuccessfulLevel} 제련 성공! (전선 화력 강화 예상 및 대원 장착 효율 상승)`,
               ...old
             ].slice(0, 10));
 
@@ -6108,7 +6024,7 @@
                 prevLevel: currentLevel,
                 cost,
                 baseChance: getEnhanceChance(currentLevel),
-                breakChance: currentLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(currentLevel) : 0,
+                breakChance: currentLevel >= 20 ? 0.7 : currentLevel >= 10 ? 0.2 : 0,
                 stabilizerUsed: hasStabilizer,
               };
               const weaponType = getWeaponType(prevItem);
@@ -6125,8 +6041,7 @@
               }
 
               const prevForge = prev.enhancement.forgeStats || {};
-              // J-3G: increment breakSurvivalCount if breakage was possible
-              const wasInDanger = currentLevel >= ENHANCE_BREAKAGE_START;
+              const wasInDanger = currentLevel >= 10;
 
               return {
                 ...prev,
@@ -6163,72 +6078,173 @@
               };
             });
           } else {
-            // Failure without breakage
-            setEnhanceFailPulse(true);
-            setTimeout(() => setEnhanceFailPulse(false), 1000);
+            // Failure Path
+            const isSafeZone = currentLevel < 10;
+            const isHighRisk = currentLevel >= 10 && currentLevel < 20;
+            const isExtremeRisk = currentLevel >= 20;
 
-            // J-3G: survived breakage roll feedback
-            const wasInDanger = currentLevel >= ENHANCE_BREAKAGE_START;
-            const breakChanceDisplay = wasInDanger ? Math.round(getBreakageChance(currentLevel) * 100) : 0;
+            let didShatter = false;
+            let stabilizerShielded = false;
 
-            setTacticalLogFeed((old) => [
-              wasInDanger
-                ? `⚠️ [제련 실패 - 파괴 회피] ${item.name} +${currentLevel} 제련 실패! 파괴 위험 ${breakChanceDisplay}%를 무사히 통과 (병기 잔존)`
-                : `⚠️ [제련 안정성 충격 감지] ${item.name} +${currentLevel} 제련 실패! (병기 연마 품질 불안정 및 차기 화력 전력 대기)`,
-              ...old
-            ].slice(0, 10));
+            if (isHighRisk || isExtremeRisk) {
+              const shatterChance = isExtremeRisk ? 0.70 : 0.20;
+              if (hasStabilizer) {
+                stabilizerShielded = true;
+              } else {
+                didShatter = Math.random() < shatterChance;
+              }
+            }
 
-            updateGameState((prev) => {
-              const prevItem = prev.enhancement.inventory.find(
-                (candidate) => candidate.instanceId === instanceId,
-              );
-              if (!prevItem) return prev;
-              const result = {
-                itemName: prevItem.name,
-                success: false,
-                level: currentLevel,
-                broken: false,
-                salvageShards: 0,
-                prevLevel: currentLevel,
-                cost,
-                baseChance: getEnhanceChance(currentLevel),
-                breakChance: currentLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(currentLevel) : 0,
-                stabilizerUsed: hasStabilizer,
-              };
-              const prevForge = prev.enhancement.forgeStats || {};
+            if (didShatter) {
+              // SHATTERED
+              setEnhanceFailPulse(true);
+              setTimeout(() => setEnhanceFailPulse(false), 1500);
 
-              return {
-                ...prev,
-                wallet: {
-                  ...prev.wallet,
-                  cash: prev.wallet.cash - cost,
-                },
-                enhancement: {
-                  ...prev.enhancement,
-                  inventory: prev.enhancement.inventory.map((candidate) =>
-                    candidate.instanceId === instanceId
-                      ? {
-                        ...candidate,
-                        breakSurvivalCount: wasInDanger
-                          ? toFiniteNumber(candidate.breakSurvivalCount, 0) + 1
-                          : toFiniteNumber(candidate.breakSurvivalCount, 0),
-                      }
-                      : candidate,
-                  ),
-                  lastEnhancementResult: result,
-                  forgeStats: {
-                    totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
-                    totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0),
-                    totalFailures: toFiniteNumber(prevForge.totalFailures, 0) + 1,
-                    totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0),
-                    totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0),
+              const salvageShards = currentLevel * 10;
+
+              setTacticalLogFeed((old) => [
+                `💥 [긴급: 병기 파괴] ${item.name} +${currentLevel} 제련 중 무기가 산산조각 났습니다! 파편 회수: 💎${salvageShards} (전선 잔해 수습 및 파편 분해 자동 완료)`,
+                ...old
+              ].slice(0, 10));
+
+              updateGameState((prev) => {
+                const prevItem = prev.enhancement.inventory.find(
+                  (candidate) => candidate.instanceId === instanceId,
+                );
+                if (!prevItem) return prev;
+
+                const salvageEntry = {
+                  id: `salvage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                  weaponName: prevItem.name,
+                  weaponLevel: currentLevel,
+                  weaponRarity: prevItem.rarity,
+                  refinedShardsAwarded: salvageShards,
+                  createdAt: Date.now(),
+                };
+
+                const prevForge = prev.enhancement.forgeStats || {};
+                const prevHistory = Array.isArray(prev.enhancement.salvageHistory)
+                  ? prev.enhancement.salvageHistory : [];
+
+                return {
+                  ...prev,
+                  wallet: {
+                    ...prev.wallet,
+                    cash: prev.wallet.cash - cost,
                   },
-                  stabilizers: hasStabilizer
-                    ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
-                    : toFiniteNumber(prev.enhancement.stabilizers, 0),
-                },
-              };
-            });
+                  rpg: {
+                    ...prev.rpg,
+                    characters: prev.rpg.characters.map((character) =>
+                      character.equippedWeaponInstanceId === instanceId
+                        ? { ...character, equippedWeaponInstanceId: null }
+                        : character,
+                    ),
+                  },
+                  enhancement: {
+                    ...prev.enhancement,
+                    inventory: prev.enhancement.inventory.filter(
+                      (candidate) => candidate.instanceId !== instanceId,
+                    ),
+                    lastEnhancementResult: {
+                      itemName: prevItem.name,
+                      success: false,
+                      level: 0,
+                      broken: true,
+                      salvageShards,
+                      prevLevel: currentLevel,
+                      cost,
+                      baseChance: getEnhanceChance(currentLevel),
+                      breakChance: currentLevel >= 20 ? 0.7 : currentLevel >= 10 ? 0.2 : 0,
+                      stabilizerUsed: hasStabilizer,
+                    },
+                    refinedShards: toFiniteNumber(prev.enhancement.refinedShards, 0) + salvageShards,
+                    forgeStats: {
+                      totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
+                      totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0),
+                      totalFailures: toFiniteNumber(prevForge.totalFailures, 0) + 1,
+                      totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0) + 1,
+                      totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0) + salvageShards,
+                    },
+                    salvageHistory: [...prevHistory, salvageEntry].slice(-SALVAGE_HISTORY_CAP),
+                    stabilizers: hasStabilizer
+                      ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
+                      : toFiniteNumber(prev.enhancement.stabilizers, 0),
+                  },
+                };
+              });
+            } else {
+              // FAIL WITH DEGRADATION
+              const nextLevel = Math.max(0, currentLevel - 1);
+
+              setEnhanceFailPulse(true);
+              setTimeout(() => setEnhanceFailPulse(false), 1000);
+
+              const wasInDanger = currentLevel >= 10;
+              const breakChanceDisplay = wasInDanger ? (currentLevel >= 20 ? 70 : 20) : 0;
+
+              setTacticalLogFeed((old) => [
+                stabilizerShielded
+                  ? `🛡️ [제련 실패 - 보정제 발동] ${item.name} +${currentLevel} 제련 실패! 보정제로 파괴를 막고 등급이 +${nextLevel}로 하락했습니다.`
+                  : wasInDanger
+                    ? `⚠️ [제련 실패 - 파괴 회피] ${item.name} +${currentLevel} 제련 실패! 파괴 위험 ${breakChanceDisplay}%를 무사히 통과했으나 등급이 +${nextLevel}로 하락했습니다.`
+                    : `⚠️ [제련 안정성 충격 감지] ${item.name} +${currentLevel} 제련 실패! 등급이 +${nextLevel}로 하락했습니다.`,
+                ...old
+              ].slice(0, 10));
+
+              updateGameState((prev) => {
+                const prevItem = prev.enhancement.inventory.find(
+                  (candidate) => candidate.instanceId === instanceId,
+                );
+                if (!prevItem) return prev;
+
+                const result = {
+                  itemName: prevItem.name,
+                  success: false,
+                  level: nextLevel,
+                  broken: false,
+                  salvageShards: 0,
+                  prevLevel: currentLevel,
+                  cost,
+                  baseChance: getEnhanceChance(currentLevel),
+                  breakChance: currentLevel >= 20 ? 0.7 : currentLevel >= 10 ? 0.2 : 0,
+                  stabilizerUsed: hasStabilizer || stabilizerShielded,
+                };
+                const prevForge = prev.enhancement.forgeStats || {};
+
+                return {
+                  ...prev,
+                  wallet: {
+                    ...prev.wallet,
+                    cash: prev.wallet.cash - cost,
+                  },
+                  enhancement: {
+                    ...prev.enhancement,
+                    inventory: prev.enhancement.inventory.map((candidate) =>
+                      candidate.instanceId === instanceId
+                        ? {
+                          ...candidate,
+                          enhanceLevel: nextLevel,
+                          breakSurvivalCount: wasInDanger
+                            ? toFiniteNumber(candidate.breakSurvivalCount, 0) + 1
+                            : toFiniteNumber(candidate.breakSurvivalCount, 0),
+                        }
+                        : candidate,
+                    ),
+                    lastEnhancementResult: result,
+                    forgeStats: {
+                      totalAttempts: toFiniteNumber(prevForge.totalAttempts, 0) + 1,
+                      totalSuccesses: toFiniteNumber(prevForge.totalSuccesses, 0),
+                      totalFailures: toFiniteNumber(prevForge.totalFailures, 0) + 1,
+                      totalBreakages: toFiniteNumber(prevForge.totalBreakages, 0),
+                      totalShardsEarned: toFiniteNumber(prevForge.totalShardsEarned, 0),
+                    },
+                    stabilizers: (hasStabilizer || stabilizerShielded)
+                      ? Math.max(0, toFiniteNumber(prev.enhancement.stabilizers, 0) - 1)
+                      : toFiniteNumber(prev.enhancement.stabilizers, 0),
+                  },
+                };
+              });
+            }
           }
         }, 450);
       };
@@ -6293,8 +6309,11 @@
         if (!item || item.type !== "weapon" || item.broken === true || item.locked === true) return;
         const currentLevel = clampNumber(Math.floor(toFiniteNumber(item.enhanceLevel, 0)), 0, MAX_ENHANCE_LEVEL, 0);
         if (currentLevel >= MAX_ENHANCE_LEVEL) return;
-        const breakPct = currentLevel >= ENHANCE_BREAKAGE_START ? Math.round(getBreakageChance(currentLevel) * 100) : 0;
-        if (breakPct > 0) {
+        
+        // Live risk ladder: danger zone is target level +11 and up (currentLevel >= 10)
+        const isDangerZone = currentLevel >= 10;
+        if (isDangerZone) {
+          const breakPct = currentLevel >= 20 ? 70 : 20;
           // Danger zone — show confirmation modal
           setForgeConfirmTarget({
             instanceId,
@@ -7647,7 +7666,7 @@
                 <div className="bg-gray-50 p-4 space-y-4">
                   {/* Visual Interactive Sandbox Prototype Switcher */}
                   <div className="bg-gradient-to-r from-teal-900 to-emerald-800 text-white rounded-lg p-4 shadow-md border border-teal-700">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <div className="text-xs font-black text-teal-300 uppercase tracking-widest flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
@@ -7669,7 +7688,7 @@
                       </div>
                       <button
                         onClick={() => setSandboxState(prev => ({ ...prev, showSandbox: !prev.showSandbox }))}
-                        className="bg-teal-500 hover:bg-teal-600 text-white text-xs font-black px-4 py-2.5 rounded-md shadow-sm transition-all whitespace-nowrap"
+                        className="bg-teal-500 hover:bg-teal-600 text-white text-xs font-black px-4 py-2.5 rounded-md shadow-sm transition-all sm:whitespace-nowrap w-full sm:w-auto text-center"
                       >
                         {sandboxState.showSandbox
                           ? (language === "ko" ? "일반 화면 보기" : "Show Live App")
@@ -8074,19 +8093,11 @@
                           )}
                         </div>
                         {lastEnhancementResult ? (() => {
-                          const prevLevel = lastEnhancementResult.prevLevel !== undefined
-                            ? lastEnhancementResult.prevLevel
-                            : (lastEnhancementResult.success ? lastEnhancementResult.level - 1 : lastEnhancementResult.level);
-                          const costVal = lastEnhancementResult.cost !== undefined
-                            ? lastEnhancementResult.cost
-                            : getEnhanceCost(prevLevel);
-                          const baseChanceVal = lastEnhancementResult.baseChance !== undefined
-                            ? lastEnhancementResult.baseChance
-                            : getEnhanceChance(prevLevel);
-                          const breakChanceVal = lastEnhancementResult.breakChance !== undefined
-                            ? lastEnhancementResult.breakChance
-                            : (prevLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(prevLevel) : 0);
-                          const stabilizerUsedVal = lastEnhancementResult.stabilizerUsed === true;
+                          const prevLevel = lastEnhancementResult.prevLevel ?? (lastEnhancementResult.success ? lastEnhancementResult.level - 1 : lastEnhancementResult.level);
+                          const costVal = lastEnhancementResult.cost ?? 0;
+                          const baseChanceVal = lastEnhancementResult.baseChance ?? 0;
+                          const breakChanceVal = lastEnhancementResult.breakChance ?? 0;
+                          const stabilizerUsedVal = lastEnhancementResult.stabilizerUsed ?? false;
 
                           return (
                             <div className="mt-2 space-y-3">

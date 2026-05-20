@@ -104,9 +104,10 @@
   - [x] **Cross-System War Cohesion Pass**: Integrated Global War Status Strip telemetry GNB strip and linked rear outposts, betting results, and anvil updates to frontline Operations log feeds (Phase J-4E complete).
   - [x] **Cross-System War Cohesion Runtime QA**: Audited handlers, verified localization labels, and confirmed non-mutation safety constraints (Phase J-4E-1 complete).
   - [x] **First-Time Forge Onboarding & Empty State**: Added compact Smith & Shards guidance, currency role explanations, empty armory copy, danger-zone warning, and live forge vs sandbox boundary copy (Phase J-4G complete).
-- [ ] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
+- [x] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
   - [x] **Prestige Announcement Toast**: Added transient +6/+8/+10 forge milestone banner for successful weapon enhancement only (Phase J-5A complete). No schema changes.
   - [x] **Forge Result Recap Polish**: Added high-fidelity tactical recap metrics grid, dynamic advice cue, and live-linked fields (Phase J-5B complete).
+  - [x] **Regression QA, Mobile Readability & Live Breakage Backend**: Implemented 1-30 live risk ladder, stabilizer consumption, auto-deletion on shatter, shard deposit, salvage history, and mobile layout fixes (Phase J-5C complete).
 
 ## Phase 5: Prestige & Honor
 
