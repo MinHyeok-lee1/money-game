@@ -147,3 +147,17 @@
         - [x] Phase J-5C: Smith & Shards — Regression QA, Mobile Readability Pass & Live Breakage Backend Engine (Completed) <!-- id: 97 -->
         - [x] Phase J-5D: Live Forge Risk Ladder Balance QA & Prepare Infinite Reaper Shift (Completed) <!-- id: 98 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
+
+## Phase K-3: Reaper Run Objective & Reward Loop UX
+- [x] Phase K-3A: Research & Design Specification <!-- id: 117 -->
+- [x] Phase K-3B: Implement getNextReaperMilestone, getReaperRunObjective, getReaperRewardLoopHint <!-- id: 118 -->
+- [x] Phase K-3C: Implement Reaper Run Objective Panel in RPG tab <!-- id: 119 -->
+- [x] Phase K-3D: Integration & UI Verification <!-- id: 120 -->
+
+## Phase L-1: Black Market Economy Scaffolding
+- [x] Phase L-1A: Research & Design Specification <!-- id: 121 -->
+- [x] Phase L-1B: Expand save state schema & GACHA_ITEMS weapon blueprints <!-- id: 122 -->
+- [x] Phase L-1C: Implement convertShardsToTokens conversion helper <!-- id: 123 -->
+- [x] Phase L-1D: Implement Weapon Trait Placeholder UI inside Smith & Shards card <!-- id: 124 -->
+- [x] Phase L-1E: End-to-End Regression & Compatibility QA <!-- id: 125 -->
+

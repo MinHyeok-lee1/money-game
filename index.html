@@ -937,6 +937,7 @@
         weaponType: "dagger",
         rarity: "Normal",
         power: 12,
+        mods: [],
       },
       {
         id: "market-scout",
@@ -953,6 +954,7 @@
         weaponType: "blade",
         rarity: "Rare",
         power: 34,
+        mods: [],
       },
       {
         id: "coin-oracle",
@@ -969,6 +971,7 @@
         weaponType: "axe",
         rarity: "Epic",
         power: 86,
+        mods: [],
       },
       {
         id: "tycoon-hero",
@@ -993,6 +996,7 @@
         weaponType: "hammer",
         rarity: "Unique",
         power: 160,
+        mods: [],
       },
       {
         id: "mythic-ledger",
@@ -1001,6 +1005,7 @@
         weaponType: "ledger",
         rarity: "Mythic",
         power: 420,
+        mods: [],
       },
       {
         id: "deed-sovereign",
@@ -2180,6 +2185,7 @@
           cash: 0,
           diamonds: 0,
           honorPoints: 0,
+          blackMarketTokens: 0,
         },
         landlord: {
           properties: PROPERTIES_DATA[language].map((property) => ({
@@ -2333,6 +2339,7 @@
         broken: item.broken === true,
         locked: item.locked === true,
         breakSurvivalCount: Math.max(0, Math.floor(toFiniteNumber(item.breakSurvivalCount, 0))),
+        mods: definition.type === "weapon" ? (Array.isArray(item?.mods) ? item.mods : []) : undefined,
       };
     }
 
@@ -2358,6 +2365,7 @@
             .toString(36)
             .slice(2, 8)}`,
           enhanceLevel: 0,
+          mods: [],
         },
         0,
       );
@@ -2822,6 +2830,72 @@
       }
       return maxLvl;
     }
+
+    function getNextReaperMilestone(stage, language = "en") {
+      const cleanStage = toFiniteNumber(stage, 0);
+      const milestones = [
+        { targetStage: 150, labelKo: "철벽 감시자의 관문", labelEn: "Iron Sentinel Gate", isPreview: false },
+        { targetStage: 200, labelKo: "미공개 임계점", labelEn: "Locked Threshold", isPreview: true },
+        { targetStage: 300, labelKo: "미공개 임계점", labelEn: "Locked Threshold", isPreview: true },
+        { targetStage: 500, labelKo: "미공개 임계점", labelEn: "Locked Threshold", isPreview: true },
+        { targetStage: 1000, labelKo: "미공개 임계점", labelEn: "Locked Threshold", isPreview: true },
+      ];
+      if (cleanStage <= 0) {
+        return { targetStage: 150, label: language === "ko" ? "철벽 감시자의 관문" : "Iron Sentinel Gate", isPreview: false };
+      }
+      for (const m of milestones) {
+        if (cleanStage < m.targetStage) {
+          return {
+            targetStage: m.targetStage,
+            label: language === "ko" ? m.labelKo : m.labelEn,
+            isPreview: m.isPreview
+          };
+        }
+      }
+      const last = milestones[milestones.length - 1];
+      return {
+        targetStage: last.targetStage,
+        label: language === "ko" ? last.labelKo : last.labelEn,
+        isPreview: true
+      };
+    }
+
+    function getReaperRunObjective(stage, language = "en") {
+      const cleanStage = toFiniteNumber(stage, 0);
+      if (cleanStage < 101) {
+        return language === "ko" ? "무한 리퍼 모드에 진입하여 생존하십시오." : "Enter Infinite Reaper Mode and survive.";
+      }
+      if (cleanStage < 150) {
+        return language === "ko" ? "Stage 150 Iron Sentinel까지 생존을 유지하십시오." : "Survive until the Stage 150 Iron Sentinel Gate.";
+      }
+      if (cleanStage === 150) {
+        return language === "ko" ? "현재 웨이브를 돌파하십시오. 철벽 감시자가 대기 중입니다." : "Break through the current wave. Iron Sentinel awaits.";
+      }
+      return language === "ko" ? "극한 구간을 돌파하여 다음 임계점을 확인하십시오." : "Break through the extreme sector and find the next threshold.";
+    }
+
+    function getReaperRewardLoopHint(stage, language = "en") {
+      const cleanStage = toFiniteNumber(stage, 0);
+      if (cleanStage < 101) {
+        return {
+          line1: language === "ko" ? "정제 파편을 모아 장비를 강화하십시오." : "Gather Refined Shards to enhance your equipment.",
+          line2: language === "ko" ? "더 높은 스테이지에서 새로운 위협이 기다립니다." : "New threats await at higher stages.",
+        };
+      }
+      if (cleanStage < 150) {
+        return {
+          line1: language === "ko" ? "생존 시 정제 파편이 누적됩니다." : "Survival accumulates Refined Shards.",
+          line2: language === "ko" ? "파편으로 무기를 강화하고 더 깊은 구간에 진입하십시오." : "Enhance weapons with shards to venture deeper.",
+        };
+      }
+      return {
+        line1: language === "ko" ? "고위험 스테이지 생존 시 파편 회수율이 증가합니다." : "Survival on high-risk stages yields more shards.",
+        line2: language === "ko" ? "안정제를 확보하여 고위험 벼리 시도를 보호하십시오." : "Acquire stabilizers to protect high-risk forge attempts.",
+      };
+    }
+    window.getNextReaperMilestone = getNextReaperMilestone;
+    window.getReaperRunObjective = getReaperRunObjective;
+    window.getReaperRewardLoopHint = getReaperRewardLoopHint;
 
     function getReaperReadinessStatus(state) {
       if (!state) return "PREVIEW_ONLY";
@@ -3318,6 +3392,7 @@
           ...defaults.wallet,
           ...(state?.wallet || {}),
           cash: Math.max(0, toFiniteNumber(state?.wallet?.cash, 0)),
+          blackMarketTokens: Math.max(0, Math.floor(toFiniteNumber(state?.wallet?.blackMarketTokens, 0))),
         },
         landlord: {
           ...defaults.landlord,
@@ -5700,6 +5775,7 @@
           instanceId: `${item.id}-${Date.now()}-${Math.random()
             .toString(36)
             .slice(2, 8)}`,
+          mods: item.type === "weapon" ? [] : undefined,
         };
       };
 
@@ -6418,6 +6494,41 @@
           },
         }));
       };
+
+      // L-1C: Convert refined shards to black market tokens (100 shards = 1 token)
+      const SHARD_TO_TOKEN_RATE = 100;
+      const convertShardsToTokens = (amount, stateArg = gameState) => {
+        const cleanAmount = Math.floor(toFiniteNumber(amount, 0));
+        if (cleanAmount <= 0) {
+          console.warn("convertShardsToTokens: Amount must be a positive integer.");
+          return;
+        }
+        const cost = cleanAmount * SHARD_TO_TOKEN_RATE;
+        const currentShards = toFiniteNumber(stateArg?.enhancement?.refinedShards, 0);
+        if (currentShards < cost) {
+          console.warn(`convertShardsToTokens: Insufficient refined shards. Required: ${cost}, Available: ${currentShards}`);
+          return;
+        }
+        updateGameState((prev) => {
+          const shards = toFiniteNumber(prev.enhancement?.refinedShards, 0);
+          if (shards < cost) {
+            console.warn("convertShardsToTokens: State changed before transaction.");
+            return prev;
+          }
+          return {
+            ...prev,
+            wallet: {
+              ...prev.wallet,
+              blackMarketTokens: toFiniteNumber(prev.wallet?.blackMarketTokens, 0) + cleanAmount,
+            },
+            enhancement: {
+              ...prev.enhancement,
+              refinedShards: shards - cost,
+            },
+          };
+        });
+      };
+      window.convertShardsToTokens = convertShardsToTokens;
 
       // J-3I: Confirmation wrapper — danger-zone weapons route through modal
       const requestEnhance = (instanceId, useStabilizer = false) => {
@@ -8789,6 +8900,22 @@
                                           {isLocked ? "🔒" : "🔓"}
                                         </button>
                                       </div>
+
+                                      {/* L-1D: Weapon Trait Placeholder UI */}
+                                      <div className="bg-zinc-950/80 border border-zinc-900/60 rounded p-1.5 mt-2">
+                                        <div className="text-[9px] font-black text-zinc-500 uppercase tracking-wider mb-0.5">
+                                          ⚙️ {language === "ko" ? "특수 전술 개조" : "Tactical Modifications Preset"}
+                                        </div>
+                                        <div className="text-[9px] font-bold text-zinc-400 leading-tight">
+                                          {(!item.mods || item.mods.length === 0) ? (
+                                            language === "ko"
+                                              ? "암시장 토큰을 확보하여 슬롯을 기동하십시오."
+                                              : "Secure Black Market Tokens to unlock modification presets."
+                                          ) : (
+                                            item.mods.join(", ")
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
                                   )}
                                   {item.type === "weapon" && isBroken && (
@@ -9422,6 +9549,73 @@
                       );
                     }
                     return null;
+                  })()}
+
+                  {/* Reaper Run Objective Panel */}
+                  {(() => {
+                    const stage = toFiniteNumber(gameState.rpg?.currentStage, 0);
+                    const normalEndingSeen = gameState.rpg?.normalEndingSeen === true;
+                    if (!normalEndingSeen || stage < 101) return null;
+
+                    const objective = getReaperRunObjective(stage, language);
+                    const milestone = getNextReaperMilestone(stage, language);
+                    const rewardHint = getReaperRewardLoopHint(stage, language);
+                    const bestWeaponLvl = getBestWeaponEnhanceLevel(gameState.enhancement?.inventory);
+
+                    let forgeSignal = "";
+                    if (bestWeaponLvl >= 30) {
+                      forgeSignal = language === "ko" ? "+30 무기 완성 시 최대 효율 달성." : "+30 weapon fully complete for max efficiency.";
+                    } else if (bestWeaponLvl >= 20) {
+                      forgeSignal = language === "ko" ? "+20 이상 무기 확보 시 Iron Sentinel 도전 가능." : "+20 or higher weapon allows challenging Iron Sentinel.";
+                    } else {
+                      forgeSignal = language === "ko" ? "+20 이상 무기 확보 권장 (현재 무기 수준 낮음)." : "Recommend reaching +20 or higher weapon (current tier is low).";
+                    }
+
+                    return (
+                      <div className="mt-3 bg-rose-950/20 border border-rose-900/50 rounded-lg p-3 text-left">
+                        <div className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2 flex items-center justify-between">
+                          <span>🎯 {language === "ko" ? "리퍼 전선 돌파 목표" : "Reaper Front Objective"}</span>
+                          <span className="text-[8px] bg-rose-900/50 text-rose-300 px-1 py-0.5 rounded font-bold uppercase">
+                            {language === "ko" ? "생존 작전" : "Survival Op"}
+                          </span>
+                        </div>
+                        
+                        {/* 1. CURRENT SURVIVAL OBJECTIVE */}
+                        <div className="mb-2 pb-2 border-b border-rose-950/25">
+                          <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "현재 생존 목표" : "Current Survival Objective"}</div>
+                          <div className="text-[10px] font-black text-slate-100 mt-0.5">
+                            {objective}
+                          </div>
+                        </div>
+                        
+                        {/* 2. NEXT MILESTONE TARGET */}
+                        <div className="mb-2 pb-2 border-b border-rose-950/25">
+                          <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "다음 목표 임계점" : "Next Milestone Target"}</div>
+                          <div className="flex items-center justify-between mt-0.5 gap-2">
+                            <span className="text-[10px] font-black text-amber-400">Stage {milestone.targetStage}</span>
+                            <span className={`text-[9px] ${milestone.isPreview ? "text-red-400/60 font-bold tracking-tight italic" : "text-slate-200 font-bold"}`}>
+                              {milestone.label} {milestone.isPreview && (language === "ko" ? " (잠금 프리뷰)" : " (Locked Preview)")}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* 3. REWARD LOOP EXPLANATION */}
+                        <div className="mb-2 pb-2 border-b border-rose-950/25 text-[9px] font-medium text-slate-300 leading-normal">
+                          <div className="text-[8px] font-bold text-gray-500 uppercase mb-0.5">{language === "ko" ? "보상 루프 안내" : "Reward Loop Explanation"}</div>
+                          <div>• {rewardHint.line1}</div>
+                          <div>• {rewardHint.line2}</div>
+                        </div>
+                        
+                        {/* 4. FORGE CONNECTION SIGNAL */}
+                        <div>
+                          <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "강화 연동 전술 신호" : "Forge Connection Signal"}</div>
+                          <div className="text-[9px] font-black text-cyan-400 mt-0.5 flex items-center gap-1.5">
+                            <span>⚒️</span>
+                            <span>{forgeSignal}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
                   })()}
                 </div>
 

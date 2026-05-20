@@ -1,38 +1,75 @@
-# Change Summary: Reaper Infinite Mode Implementation (Phase K-1 & I-5)
-**Date:** 2026-05-20
-**Phase:** K-1 + I-5 (Entry UX & Live Combat Scaling)
+# Walkthrough: Reaper Run Objective & Black Market Economy Scaffolding (Phase K-3 & L-1)
 
-This document outlines the engineering changes made to implement Phase K-1 & I-5 (Reaper Infinite Mode Entry UX Gate & Live Combat Scaling).
+All deliverables under Phase K-3 and Phase L-1 are fully implemented and verified. The RPG Infinite Mode progression is clear, and the Black Market scaffolding is safely integrated without save state version updates or legacy file incompatibility.
 
-## File Changes
+## Changes Made
 
-### [MODIFY] [index.html](file:///C:/Users/ryan/dev/money-game/index.html)
+### 1. Pure Stage-Driven Helper Functions
+Implemented and exposed to `window`:
+- `getNextReaperMilestone(stage, language)`: Returns the next target milestone (Stage 150, 200, 300, 500, 1000) with a locked/preview boolean indicator.
+- `getReaperRunObjective(stage, language)`: Returns localized one-line current wave survival objectives.
+- `getReaperRewardLoopHint(stage, language)`: Returns localized advice regarding shards and stabilizers.
 
-#### 1. Pure Helper Functions
-Added three pure helper functions:
-- `getBestWeaponEnhanceLevel(inventory)`: Finds the highest level of an unbroken weapon.
-- `getReaperReadinessStatus(state)`: Determines if the player is `READY`, `UNDERPREPARED`, `EXTREME_RISK`, or `PREVIEW_ONLY`.
-- `getReaperEntryRecommendation(state)`: Provides contextual localization-friendly advice.
+### 2. Reaper Run Objective Panel (RPG Tab)
+- Added the objective panel block directly below the Infinite Reaper entry controls.
+- Displayed:
+  - Localized current wave survival objective.
+  - Next milestone stage target with locked/preview styling if `isPreview`.
+  - Localized 2-line explanation of the Refined Shard/Stabilizer loop.
+  - Tactical Forge Connection Signal reflecting current blacksmith weapon level readiness.
 
-#### 2. Infinite Reaper Entry Panel
-- Inserted a React block in the Dorothy acknowledged area.
-- Pre-Dorothy proposal: renders a **LOCKED PREVIEW** panel detailing future requirements.
-- Post-Dorothy proposal: renders the full **INFINITE REAPER COMMAND** console detailing weapon tier, squad DPS, stabilizers/shards, and highest stage. Includes dynamic color coding and a CTA to enter Stage 101+ using 1 ticket.
+### 3. State Schema & Blueprint Expansion
+- **Default Game State**: Added `wallet.blackMarketTokens: 0` under `wallet`.
+- **Normalization**: Added safe loading parsing of `blackMarketTokens` inside `normalizeGameState`.
+- **GACHA_ITEMS static registry**: Added `mods: []` to all 5 weapon configurations.
+- **Factory Functions**: Appended `mods: []` inside `createStarterWeaponInstance` and `createPulledGachaItem`.
+- **Item Normalization**: Extended `normalizeGachaItem` to resolve `mods` to a clean array on weapons.
+- **Read Safe Guarding**: Verified legacy code references are protected via default fallback `item.mods ?? []`.
 
-#### 3. Scaling & Damage Compression
-- Embedded stage >= 101 checks in `applyCombatTick` to apply `damageCompressionModifier` dynamically:
-  - `IntensityTier = Math.floor((stage - 100) / 10) + 1`
-  - `DamageModifier = Math.max(0.45, 1 - IntensityTier * 0.025)`
-  - Confines the multiplier compounding with a boundary check (`Math.max(0.45, ...)`).
+### 4. Shard-to-Token Conversion Helper
+- Implemented `convertShardsToTokens(amount, stateArg)` to deduct Refined Shards (100:1 rate) and credit Black Market Tokens.
+- Embedded validation rules (non-negative, integer counts, sufficient shards). Exposes warning signals to developer console on validation failure. Exposes function on `window` for test integration.
 
-#### 4. Iron Sentinel Boss Mitigation (Stage 150)
-- Calculated dual mitigation for Stage 150: base mitigation `0.7` multiplied by Armor Wall penetration modifier `Math.max(0.625, 0.625 + pen * 0.375)`.
+### 5. Weapon Trait Placeholder UI (Smith & Shards Tab)
+- Injected a dark tactical container under active weapon cards.
+- Label: `⚙️ 특수 전술 개조 (Tactical Modifications Preset)`.
+- Content: displays locked state prompt if `item.mods.length === 0`. Fits beautifully within mobile screens without overflow issues.
 
-#### 5. Pulsing Crimson Stage indicator
-- Styled the active stage progress container with a pulsing rose layout if stage >= 101 to indicate active Reaper threat level.
+---
 
-## Verification & QA Boundary Check
+## Verification & Test Results
 
-- **Stage 1-100 Compatibility:** Evaluated all math changes; they are gated behind `stage >= 101` and therefore completely transparent to standard play.
-- **State Integrity:** All operations are pure state transitions; no database schema migrations are performed.
-- **Stability:** Gated CTA buttons are properly disabled under invalid configurations (e.g. 0 tickets or active runs), preventing infinite loop locks.
+### Automated Sandbox Tests
+Run via Node.js script:
+`node C:\Users\ryan\.gemini\antigravity\brain\8f72c005-caec-4701-8b99-563ec565a336\scratch\run_logic_tests.js`
+
+All tests PASSED:
+```
+Evaluating getNextReaperMilestone...
+Input: 0,en -> Result: { targetStage: 150, label: 'Iron Sentinel Gate', isPreview: false }
+Input: 120,ko -> Result: { targetStage: 150, label: '철벽 감시자의 관문', isPreview: false }
+Input: 150,en -> Result: { targetStage: 200, label: 'Locked Threshold', isPreview: true }
+getNextReaperMilestone: PASS
+
+Evaluating getReaperRunObjective...
+Input: 50,en -> Result: "Enter Infinite Reaper Mode and survive."
+Input: 120,ko -> Result: "Stage 150 Iron Sentinel까지 생존을 유지하십시오."
+getReaperRunObjective: PASS
+
+Evaluating getReaperRewardLoopHint...
+Input: 120,en -> Result: { line1: 'Survival accumulates Refined Shards.', line2: 'Enhance weapons with shards to venture deeper.' }
+getReaperRewardLoopHint: PASS
+
+Evaluating convertShardsToTokens...
+Test 1 (Success 1 token): PASS
+Test 2 (Insufficient shards): PASS
+Test 3 (Negative amount): PASS
+convertShardsToTokens: PASS
+
+ALL LOGIC TESTS PASSED SUCCESSFULLY!
+```
+
+### Manual Verification
+- Checked that loading legacy save files succeeds without state errors.
+- Verified RPG tab panel visibility gates correctly at stage >= 101.
+- Verified Smith & Shards card contains the new preset container.
