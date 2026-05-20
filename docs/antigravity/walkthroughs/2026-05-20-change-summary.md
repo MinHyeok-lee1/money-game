@@ -1,49 +1,38 @@
-# Phase J-5C & J-5A: Change Summary Walkthrough
+# Change Summary: Reaper Infinite Mode Implementation (Phase K-1 & I-5)
+**Date:** 2026-05-20
+**Phase:** K-1 + I-5 (Entry UX & Live Combat Scaling)
 
-This walkthrough details the precise code changes made to implement Phase J-5C (Regression QA / Mobile Layout) and Phase J-5A (Live Weapon Breakage & Shard Recovery Engine) in the **Money Game Universe** repository.
+This document outlines the engineering changes made to implement Phase K-1 & I-5 (Reaper Infinite Mode Entry UX Gate & Live Combat Scaling).
 
----
+## File Changes
 
-## Changes Made
+### [MODIFY] [index.html](file:///C:/Users/ryan/dev/money-game/index.html)
 
-### 1. `index.html` (Blacksmith Engine & Styling)
+#### 1. Pure Helper Functions
+Added three pure helper functions:
+- `getBestWeaponEnhanceLevel(inventory)`: Finds the highest level of an unbroken weapon.
+- `getReaperReadinessStatus(state)`: Determines if the player is `READY`, `UNDERPREPARED`, `EXTREME_RISK`, or `PREVIEW_ONLY`.
+- `getReaperEntryRecommendation(state)`: Provides contextual localization-friendly advice.
 
-- **Max Level Cap (`MAX_ENHANCE_LEVEL`)**:
-  - Increased `MAX_ENHANCE_LEVEL` from `10` to `30`.
-  - Adjusted safe zone/breakage start constants to match the risk ladder.
-- **Breakage Probabilities (`getBreakageChance`)**:
-  - Rewrote the breakage chance helper to align with the Live Risk Ladder:
-    - Return `0` (0%) for levels below 10.
-    - Return `0.2` (20%) for levels 10 to 19 (High Risk).
-    - Return `0.7` (70%) for levels 20 to 29 (Extreme Risk).
-- **Interactive Sandbox Switcher Styling**:
-  - Modified the sandbox switcher container's CSS classes to use a responsive flex direction (`flex flex-col sm:flex-row`).
-  - Added button scaling classes (`w-full sm:w-auto`) to avoid horizontal overflow on 360px viewports.
+#### 2. Infinite Reaper Entry Panel
+- Inserted a React block in the Dorothy acknowledged area.
+- Pre-Dorothy proposal: renders a **LOCKED PREVIEW** panel detailing future requirements.
+- Post-Dorothy proposal: renders the full **INFINITE REAPER COMMAND** console detailing weapon tier, squad DPS, stabilizers/shards, and highest stage. Includes dynamic color coding and a CTA to enter Stage 101+ using 1 ticket.
 
-### 2. Status Board and Project Lists
+#### 3. Scaling & Damage Compression
+- Embedded stage >= 101 checks in `applyCombatTick` to apply `damageCompressionModifier` dynamically:
+  - `IntensityTier = Math.floor((stage - 100) / 10) + 1`
+  - `DamageModifier = Math.max(0.45, 1 - IntensityTier * 0.025)`
+  - Confines the multiplier compounding with a boundary check (`Math.max(0.45, ...)`).
 
-- **`docs/task.md`**:
-  - Updated the checklist to mark Phase J-5 (and specifically J-5C) as `[x] Completed`.
-- **`TODO.md`**:
-  - Marked the incremental implementation passes (Phase J-5) and the J-5C workstream as complete.
+#### 4. Iron Sentinel Boss Mitigation (Stage 150)
+- Calculated dual mitigation for Stage 150: base mitigation `0.7` multiplied by Armor Wall penetration modifier `Math.max(0.625, 0.625 + pen * 0.375)`.
 
-### 3. Documentation
+#### 5. Pulsing Crimson Stage indicator
+- Styled the active stage progress container with a pulsing rose layout if stage >= 101 to indicate active Reaper threat level.
 
-- **`docs/antigravity/analysis/2026-05-20-j5c-j5a-regression-live-breakage-report.md`**:
-  - Created a detailed analysis report outlining the validation steps, edge-case protections (lock, bulk salvage), state normalizations, and live risk calculations.
+## Verification & QA Boundary Check
 
----
-
-## Verification Summary
-
-1. **Gating Logic**:
-   - Weapons under level 10 bypass breakage rolls entirely.
-   - Weapons at level 10-19 trigger a 20% shatter chance on failure, dropping level by 1 on survival.
-   - Weapons at level 20+ trigger a 70% shatter chance on failure.
-2. **Consumables & Protection**:
-   - Stabilizers grant the +3% success rate bonus and guarantee breakage bypass.
-   - Locked weapons bypass enhance execution checks and bulk salvage checks.
-3. **Recycling Flow**:
-   - Broken weapons decouple from characters, deposit Refined Shards, register in history, and delete themselves.
-4. **Mobile Layout**:
-   - Layout tested for text clipping or horizontal scaling overflows down to 360px wide viewports.
+- **Stage 1-100 Compatibility:** Evaluated all math changes; they are gated behind `stage >= 101` and therefore completely transparent to standard play.
+- **State Integrity:** All operations are pure state transitions; no database schema migrations are performed.
+- **Stability:** Gated CTA buttons are properly disabled under invalid configurations (e.g. 0 tickets or active runs), preventing infinite loop locks.

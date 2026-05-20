@@ -69,7 +69,9 @@
 - [x] **Reaper UI Smoke QA**: Stage 101+ Reaper panel gating, translations, archetype/boss panel compatibility, and no-combat-change boundaries verified (Phase I-4D-1).
 - [x] **Reaper Form Modifier Integration**: Added bounded Stage 101+ Reaper pressure while preserving Stage 1-100 and existing systems (Phase I-4E).
 - [x] **Reaper Balance QA**: Reaper pressure bounds, Stage 150 stacking, deferred milestone behavior, and system boundaries verified (Phase I-4F).
-- [ ] **Infinite Mode Reaper Iteration**: Decide the next Reaper tuning, presentation, or form behavior step after playtest review (Phase I-5).
+- [x] **Reaper Infinite Mode Implementation (Phase K-1 & I-5)**:
+  - [x] **PART 1: Entry UX & Requirement Gate (K-1)**: Add readiness badge (READY / UNDERPREPARED / EXTREME_RISK / PREVIEW_ONLY), signals, entry CTA, and pure helpers.
+  - [x] **PART 2: Live Combat Engine & Scaling (I-5)**: Apply 101+ damage compression, rotate specialized enemy archetypes, spawn Stage 150 Iron Sentinel boss with dual-mitigation.
 - [x] **Infinite Mode Playability Snapshot / QA**: Define manual playability plan and test ranges for Infinite Mode & Reaper system (Phase I-5A).
 - [x] **Hero's Fate Betting**: High-stakes Investment/RPG wagering. Tactical Signal integration is live; Phase E-3 Game Over / Restart foundation and Phase E-4 settlement confirmation implemented.
 - [ ] **52-Character Detailed Data Sheet**: Granular per-character stats and growth curves.

@@ -2682,8 +2682,9 @@
 
       if (safeStage === 150 && bossMilestone.stage === 150) {
         const pen = Math.max(0, toFiniteNumber(combatStats?.pen, 0));
+        const armorWallMod = Math.max(0.625, Math.min(1, 0.625 + pen * 0.375));
         return {
-          damageMultiplier: Math.max(0.55, Math.min(1, 0.55 + pen * 0.45)),
+          damageMultiplier: 0.7 * armorWallMod,
         };
       }
 
@@ -2806,6 +2807,76 @@
       if (stage > NORMAL_ENDING_STAGE) return "Infinite Mode / Harsher Scaling Active";
       if (isNormalEndingReached(rpgState)) return "Normal Ending Reached";
       return "Normal Arc";
+    }
+
+    function getBestWeaponEnhanceLevel(inventory) {
+      if (!Array.isArray(inventory)) return 0;
+      let maxLvl = 0;
+      for (const item of inventory) {
+        if (item && item.type === "weapon" && !item.broken) {
+          const lvl = Math.max(0, Math.floor(toFiniteNumber(item.enhanceLevel, 0)));
+          if (lvl > maxLvl) {
+            maxLvl = lvl;
+          }
+        }
+      }
+      return maxLvl;
+    }
+
+    function getReaperReadinessStatus(state) {
+      if (!state) return "PREVIEW_ONLY";
+      const normalEndingSeen = state.rpg?.normalEndingSeen === true;
+      if (!normalEndingSeen) return "PREVIEW_ONLY";
+
+      const bestWeaponLvl = getBestWeaponEnhanceLevel(state.enhancement?.inventory);
+      const totalDps = getRpgCombatStats(state).totalDps;
+      const stabilizers = Math.max(0, Math.floor(toFiniteNumber(state.enhancement?.stabilizers, 0)));
+      const refinedShards = Math.max(0, Math.floor(toFiniteNumber(state.enhancement?.refinedShards, 0)));
+      const squadSize = Array.isArray(state.rpg?.run?.activeUnits) ? state.rpg.run.activeUnits.length : 0;
+
+      const hasStabilizerReadiness = (stabilizers >= 1 || refinedShards >= 50);
+
+      if (squadSize === 0 || bestWeaponLvl < 10 || totalDps < 1e7) {
+        return "UNDERPREPARED";
+      } else if (bestWeaponLvl < 20 || !hasStabilizerReadiness || totalDps < 1e8) {
+        return "EXTREME_RISK";
+      } else {
+        return "READY";
+      }
+    }
+
+    function getReaperEntryRecommendation(state) {
+      if (!state) return "";
+      const lang = state.settings?.language || "en";
+      const normalEndingSeen = state.rpg?.normalEndingSeen === true;
+      if (!normalEndingSeen) {
+        return lang === "ko"
+          ? "도로시의 제안을 먼저 확인하십시오."
+          : "Acknowledge Dorothy's proposal first.";
+      }
+      const squadSize = Array.isArray(state.rpg?.run?.activeUnits) ? state.rpg.run.activeUnits.length : 0;
+      if (squadSize === 0) {
+        return lang === "ko"
+          ? "전투 대원을 편성하십시오."
+          : "Please form an active squad.";
+      }
+      const bestWeaponLvl = getBestWeaponEnhanceLevel(state.enhancement?.inventory);
+      if (bestWeaponLvl < 20) {
+        return lang === "ko"
+          ? "+20 이상 무기를 벼려 극한 구간을 대비하십시오."
+          : "Forge a +20 or higher weapon to prepare for the extreme zone.";
+      }
+      const stabilizers = Math.max(0, Math.floor(toFiniteNumber(state.enhancement?.stabilizers, 0)));
+      const refinedShards = Math.max(0, Math.floor(toFiniteNumber(state.enhancement?.refinedShards, 0)));
+      const hasStabilizerReadiness = (stabilizers >= 1 || refinedShards >= 50);
+      if (!hasStabilizerReadiness) {
+        return lang === "ko"
+          ? "안정제와 파편을 확보한 후 진입하십시오."
+          : "Secure stabilizers and shards before entering.";
+      }
+      return lang === "ko"
+        ? "현재 편성으로 101+ 생존 가능. 진입을 권장합니다."
+        : "Your current squad is viable for 101+. Entry is recommended.";
     }
 
     function getTeamBaseAtk(state) {
@@ -3060,7 +3131,14 @@
       const archetypeMultiplier = toFiniteNumber(modifier.damageMultiplier, 1);
       const bossDamageMultiplier = toFiniteNumber(bossModifier.damageMultiplier, 1);
       const reaperDamageMultiplier = toFiniteNumber(reaperModifier.damageMultiplier, 1);
-      const damageMultiplier = Math.max(0.45, Math.min(1, archetypeMultiplier * bossDamageMultiplier * reaperDamageMultiplier));
+
+      let baseDamageMultiplier = archetypeMultiplier * bossDamageMultiplier * reaperDamageMultiplier;
+      if (currentStage >= 101) {
+        const intensityTier = Math.floor((currentStage - 100) / 10) + 1;
+        const damageCompressionModifier = Math.max(0.45, 1 - intensityTier * 0.025);
+        baseDamageMultiplier *= damageCompressionModifier;
+      }
+      const damageMultiplier = Math.max(0.45, Math.min(1, baseDamageMultiplier));
       const damage = Math.max(0, toFiniteNumber(dps * deltaSeconds * damageMultiplier, 0));
       if (damage <= 0) return state;
 
@@ -5802,6 +5880,46 @@
                 isActive: true,
                 wave: 1,
                 stage: 1,
+                runId,
+              },
+            },
+          };
+        });
+      };
+
+      const enterReaperStage = () => {
+        updateGameState((prev) => {
+          if (prev.rpg.run?.isActive === true) return prev;
+          const tickets = Math.max(0, Math.floor(toFiniteNumber(prev.rpg.tickets, 0)));
+          if (tickets <= 0) return prev;
+          const starterIds = getStarterRunCharacterIds(prev.rpg);
+          const selectedIds = starterIds.slice(0, 5);
+          const activeUnits = ensureUniqueCharacterInstanceIds(
+            selectedIds
+              .map((characterId, index) => createRunCharacterUnit(characterId, index))
+              .filter(Boolean),
+          );
+          if (activeUnits.length === 0) return prev;
+          const startStage = Math.max(101, toFiniteNumber(prev.rpg.highestStage, 101));
+          const maxHp = getMonsterMaxHp(startStage);
+          const runId = `run-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+          return {
+            ...prev,
+            rpg: {
+              ...prev.rpg,
+              tickets: tickets - 1,
+              currentStage: startStage,
+              monsterHp: maxHp,
+              monsterMaxHp: maxHp,
+              defeatedMonsters: 0,
+              stageKills: 0,
+              lastRpgReward: 0,
+              run: {
+                ...prev.rpg.run,
+                activeUnits,
+                isActive: true,
+                wave: 1,
+                stage: startStage,
                 runId,
               },
             },
@@ -8777,19 +8895,33 @@
                         {formatDps(totalTeamDps)}
                       </div>
                     </div>
-                    <div className="bg-black/20 rounded-md p-2">
-                      <div className="text-green-100 text-[10px] font-black uppercase">
-                        {language === "ko"
-                          ? `스테이지 ${gameState.rpg?.currentStage || 1} 진행도`
-                          : `Stage ${gameState.rpg?.currentStage || 1} Progress`}
-                      </div>
-                      <div className="text-lg font-black leading-tight">
-                        {gameState.rpg?.stageKills || 0} /{" "}
-                        {getKillsRequiredForStage(
-                          gameState.rpg?.currentStage || 1,
-                        )}
-                      </div>
-                    </div>
+                    {(() => {
+                      const isReaperStage = (gameState.rpg?.currentStage || 1) >= 101;
+                      const cardClass = isReaperStage 
+                        ? "bg-rose-950/30 border border-rose-800/40 rounded-md p-2 animate-pulse"
+                        : "bg-black/20 rounded-md p-2";
+                      const labelClass = isReaperStage
+                        ? "text-rose-400 text-[10px] font-black uppercase tracking-wider"
+                        : "text-green-100 text-[10px] font-black uppercase";
+                      const textClass = isReaperStage
+                        ? "text-lg font-black leading-tight text-rose-100"
+                        : "text-lg font-black leading-tight";
+                      return (
+                        <div className={cardClass}>
+                          <div className={labelClass}>
+                            {language === "ko"
+                              ? `스테이지 ${gameState.rpg?.currentStage || 1} 진행도`
+                              : `Stage ${gameState.rpg?.currentStage || 1} Progress`}
+                          </div>
+                          <div className={textClass}>
+                            {gameState.rpg?.stageKills || 0} /{" "}
+                            {getKillsRequiredForStage(
+                              gameState.rpg?.currentStage || 1,
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {isInfiniteModeStage(gameState.rpg?.currentStage) && (
@@ -9131,18 +9263,166 @@
                       </div>
                     </div>
                   )}
-                  {isNormalEndingReached(gameState.rpg) && gameState.rpg?.normalEndingSeen && (
-                    <div className="mt-3 px-3 py-2 bg-gray-900/40 border border-gray-700/30 rounded-md text-center">
-                      <span className="text-gray-400 text-[9px] font-black uppercase tracking-widest block mb-1">
-                        {t.dorothyAcknowledged}
-                      </span>
-                      <div className="text-[9px] text-yellow-500/70 font-bold border-t border-gray-800/60 pt-1 mt-1">
-                        {language === "ko"
-                          ? "차기 단계 예고: RPG Phase 4 (Stage 101+ 리퍼 무한 모드 & 난이도 티어). 현재 확장된 +30 제련 무기의 강력한 DPS가 무한 전선 돌파에 필수적입니다."
-                          : "UPCOMING: RPG Phase 4 (Stage 101+ Reaper Infinite Mode & Intensity Tiers). The extended +30 weapon DPS will be critical to survive the infinite onslaught."}
-                      </div>
-                    </div>
-                  )}
+                  {/* Phase K-1: Infinite Reaper Entry Panel */}
+                  {(() => {
+                    const hasReachedNormal = isNormalEndingReached(gameState.rpg);
+                    const normalEndingSeen = gameState.rpg?.normalEndingSeen === true;
+                    
+                    if (!hasReachedNormal) {
+                      // Pre-Dorothy locked preview panel
+                      const highestStage = Math.max(0, toFiniteNumber(gameState.rpg?.highestStage, 0));
+                      return (
+                        <div className="mt-3 bg-slate-950/60 border border-slate-800/80 rounded-lg p-3 relative overflow-hidden">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black text-rose-500/60 uppercase tracking-widest flex items-center gap-1">
+                              💀 {language === "ko" ? "무한 리퍼 전선" : "INFINITE REAPER FRONT"}
+                            </span>
+                            <span className="bg-gray-950/80 border border-gray-700 text-gray-500 text-[8px] font-black uppercase px-1.5 py-0.5 rounded">
+                              {language === "ko" ? "잠김 프리뷰" : "LOCKED PREVIEW"}
+                            </span>
+                          </div>
+                          <p className="text-[9px] font-bold text-gray-500 mb-2 leading-relaxed">
+                            {language === "ko" 
+                              ? "스테이지 100 도달 후 도로시의 제안을 수락해야 무한 전선 게이트가 개방됩니다."
+                              : "Reach Stage 100 and accept Dorothy's proposal to open the infinite front gate."}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-[9px] font-bold text-gray-600 border-t border-slate-900 pt-2 mb-2">
+                            <div className="flex justify-between">
+                              <span>{language === "ko" ? "무기 등급" : "Weapon Lvl"}:</span>
+                              <span>? / +20</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>{language === "ko" ? "분대 화력" : "Squad DPS"}:</span>
+                              <span>? / 100M</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>{language === "ko" ? "안정제/파편" : "Stab/Shards"}:</span>
+                              <span>? / ?</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>{language === "ko" ? "최고 기록" : "Highest Stage"}:</span>
+                              <span>{highestStage} / 100</span>
+                            </div>
+                          </div>
+                          <button
+                            disabled
+                            className="w-full py-1.5 bg-gray-900 text-gray-600 font-black text-[10px] rounded uppercase tracking-wider cursor-not-allowed border border-gray-800 text-center"
+                          >
+                            {language === "ko" ? "진입 불가 (제안 미확인)" : "LOCKED (Acknowledge Dorothy First)"}
+                          </button>
+                        </div>
+                      );
+                    } else if (normalEndingSeen) {
+                      // Post-Dorothy full panel
+                      const bestWeaponLvl = getBestWeaponEnhanceLevel(gameState.enhancement?.inventory);
+                      const totalDps = getTotalTeamDps(gameState);
+                      const status = getReaperReadinessStatus(gameState);
+                      const recommendation = getReaperEntryRecommendation(gameState);
+                      
+                      const stabilizers = Math.max(0, Math.floor(toFiniteNumber(gameState.enhancement?.stabilizers, 0)));
+                      const refinedShards = Math.max(0, Math.floor(toFiniteNumber(gameState.enhancement?.refinedShards, 0)));
+                      const runState = gameState.rpg?.run || {};
+                      const runTickets = Math.max(0, Math.floor(toFiniteNumber(gameState.rpg?.tickets, 0)));
+                      const highestStage = Math.max(0, toFiniteNumber(gameState.rpg?.highestStage, 0));
+                      
+                      const hasStabilizerReadiness = (stabilizers >= 1 || refinedShards >= 50);
+
+                      // Badge configurations
+                      let badgeClass = "bg-gray-950/50 border border-gray-500 text-gray-400";
+                      let badgeText = status;
+                      if (status === "READY") {
+                        badgeClass = "bg-emerald-950/50 border border-emerald-500 text-emerald-400";
+                        badgeText = language === "ko" ? "작전 대기 완료" : "READY";
+                      } else if (status === "UNDERPREPARED") {
+                        badgeClass = "bg-red-950/50 border border-red-500 text-red-400 animate-pulse";
+                        badgeText = language === "ko" ? "준비 미흡" : "UNDERPREPARED";
+                      } else if (status === "EXTREME_RISK") {
+                        badgeClass = "bg-amber-950/50 border border-amber-500 text-amber-400";
+                        badgeText = language === "ko" ? "극도 위험" : "EXTREME RISK";
+                      }
+
+                      // Signals values styling
+                      const weaponColor = bestWeaponLvl >= 20 ? "text-emerald-400" : (bestWeaponLvl >= 10 ? "text-amber-400" : "text-red-400");
+                      const dpsColor = totalDps >= 1e8 ? "text-emerald-400" : (totalDps >= 1e7 ? "text-amber-400" : "text-red-400");
+                      const resourceColor = hasStabilizerReadiness ? "text-emerald-400" : "text-red-400";
+                      const stageColor = highestStage >= 100 ? "text-emerald-400" : "text-red-400";
+
+                      return (
+                        <div className="mt-3 bg-gradient-to-b from-slate-900/90 to-slate-950/95 border border-rose-950/40 rounded-lg p-3 shadow-lg relative overflow-hidden text-left">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-red-950/10 rounded-full blur-2xl pointer-events-none"></div>
+                          
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1">
+                              ⚠️ {language === "ko" ? "무한 리퍼 작전 통제" : "INFINITE REAPER COMMAND"}
+                            </span>
+                            <span className={`${badgeClass} text-[8px] font-black uppercase px-1.5 py-0.5 rounded tracking-wide`}>
+                              {badgeText}
+                            </span>
+                          </div>
+
+                          <p className="text-[9px] font-bold text-gray-400 mb-3 leading-relaxed border-b border-rose-950/20 pb-2">
+                            {language === "ko"
+                              ? "⚠️ 경고: Stage 101+ 전선은 리퍼가 지배하는 극한의 공간입니다. 몬스터가 5개 전술 속성(아머 웰, 재생 등)을 갖추어 끊임없이 강해집니다."
+                              : "⚠️ WARNING: Stage 101+ is controlled by the Reaper. Enemies gain specialized archetypes (Armor Wall, Regeneration, etc.) and scale compounding every 10 stages."}
+                          </p>
+
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-2 mb-3 bg-black/40 rounded p-2 border border-slate-900">
+                            <div>
+                              <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "무기 등급" : "Weapon Tier"}</div>
+                              <div className={`text-[10px] font-black ${weaponColor}`}>+{bestWeaponLvl} <span className="text-[8px] font-bold text-gray-500">/ +20</span></div>
+                            </div>
+                            <div>
+                              <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "분대 화력" : "Squad DPS"}</div>
+                              <div className={`text-[10px] font-black ${dpsColor}`}>{formatDps(totalDps)} <span className="text-[8px] font-bold text-gray-500">/ 100M</span></div>
+                            </div>
+                            <div>
+                              <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "안정제 및 파편" : "Stab. / Shards"}</div>
+                              <div className={`text-[10px] font-black ${resourceColor}`}>📦 {stabilizers} <span className="text-[8px] font-bold text-gray-500">({refinedShards}S)</span></div>
+                            </div>
+                            <div>
+                              <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "최고 기록" : "Highest Stage"}</div>
+                              <div className={`text-[10px] font-black ${stageColor}`}>Stage {highestStage} <span className="text-[8px] font-bold text-gray-500">/ 100</span></div>
+                            </div>
+                          </div>
+
+                          <div className="text-[9px] font-bold text-yellow-500/80 italic mb-3 bg-yellow-950/20 border border-yellow-800/10 px-2 py-1 rounded">
+                            📌 {recommendation}
+                          </div>
+
+                          {runState.isActive ? (
+                            <button
+                              disabled
+                              className="w-full py-2 bg-gray-900 border border-gray-800 text-gray-500 font-black text-xs rounded uppercase tracking-wider cursor-not-allowed text-center"
+                            >
+                              {language === "ko" ? "전투 작전 진행 중" : "COMBAT RUN ACTIVE"}
+                            </button>
+                          ) : runTickets <= 0 ? (
+                            <button
+                              disabled
+                              className="w-full py-2 bg-gray-900 border border-gray-800 text-red-400/60 font-black text-xs rounded uppercase tracking-wider cursor-not-allowed text-center"
+                            >
+                              ❌ {language === "ko" ? "작전 티켓 부족" : "NO TICKETS AVAILABLE"}
+                            </button>
+                          ) : (status === "READY" || status === "EXTREME_RISK") ? (
+                            <button
+                              onClick={enterReaperStage}
+                              className="w-full py-2 bg-gradient-to-r from-rose-800 to-rose-700 hover:from-rose-700 hover:to-rose-600 text-white font-black text-xs rounded uppercase tracking-wider shadow-lg shadow-rose-950/30 transition-all text-center border border-rose-600/30 hover:scale-[1.01] active:scale-95"
+                            >
+                              🔥 {language === "ko" ? "Stage 101+ 진입 (티켓 1 소모)" : "Enter Stage 101+ (Spend 1 Ticket)"}
+                            </button>
+                          ) : (
+                            <button
+                              disabled
+                              className="w-full py-2 bg-gray-950 border border-red-950/60 text-red-500/50 font-black text-xs rounded uppercase tracking-wider cursor-not-allowed text-center"
+                            >
+                              ⛔ {language === "ko" ? "진입 제한 (준비 부족)" : "RESTRICTED (Underprepared)"}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
 
                 {/* Phase J-4C: Frontline Command First-Click Guidance */}

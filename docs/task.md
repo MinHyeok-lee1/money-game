@@ -83,7 +83,17 @@
     - [x] Phase I-4D-1: Reaper UI Smoke QA (Stage gating, translations, existing panels, no combat changes verified) <!-- id: 53 -->
     - [x] Phase I-4E: Reaper Form Modifier Integration (bounded Stage 101+ pressure, final multiplier floor) <!-- id: 54 -->
     - [x] Phase I-4F: Reaper Balance QA (pressure bounds, Stage 150 stacking, deferred milestones verified) <!-- id: 55 -->
-    - [ ] Phase I-5: Infinite Mode Reaper Iteration <!-- id: 56 -->
+    - [x] Phase K-1 & I-5: Reaper Infinite Mode <!-- id: 56 -->
+        - [x] PART 1 — Entry UX & Requirement Gate (K-1) <!-- id: 99 -->
+            - [x] Pure helper functions: `getBestWeaponEnhanceLevel`, `getReaperReadinessStatus`, `getReaperEntryRecommendation` <!-- id: 100 -->
+            - [x] Infinite Reaper Entry Panel in Dorothy acknowledged area <!-- id: 101 -->
+            - [x] Entry CTA button (Stage 101+ Entry with ticket check) <!-- id: 102 -->
+            - [x] Gate every new code path behind stage >= 101 or normalEndingSeen check <!-- id: 103 -->
+        - [x] PART 2 — Live Combat Engine & Scaling (I-5) <!-- id: 104 -->
+            - [x] Math scaling logic & DamageModifier dynamic calculation <!-- id: 105 -->
+            - [x] Monster Archetype Rotations and tactical badges <!-- id: 106 -->
+            - [x] Stage 150 Boss: Iron Sentinel dual-mitigation layer <!-- id: 107 -->
+            - [x] Crimson stage UI indicator transformation <!-- id: 108 -->
     - [x] Phase I-5A: Infinite Mode Playability Snapshot / Manual QA Plan (checklist & test ranges defined) <!-- id: 57 -->
 - **Phase J: Product UX Reframe**
     - [x] Phase J-0: Product UX Reframe Spec (PRODUCT_UX_REFRAME_PLAN.md created) <!-- id: 58 -->
