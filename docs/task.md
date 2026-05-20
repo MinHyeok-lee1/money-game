@@ -169,3 +169,19 @@
 - [x] Phase L-2E: Part 2 - Convert workstation UI slot (minimal active terminal) <!-- id: 130 -->
 - [x] Phase L-2F: Part 2 - Logic Tests & E2E Validation <!-- id: 131 -->
 
+## Phase L-3: Weapon Mod Rolling Foundation
+- [x] Phase L-3A: rollWeaponModification handler (5 gates, immutable map, result object) <!-- id: 132 -->
+- [x] Phase L-3B: lastRollResult useState for recap feedback <!-- id: 133 -->
+- [x] Phase L-3C: Workstation UI — 6-state active terminal, all [PROTOTYPE] removed <!-- id: 134 -->
+- [x] Phase L-3D: Economy & eligibility safety verification (11/11 logic tests) <!-- id: 135 -->
+- [x] Phase L-3E: Docs, task.md, TODO.md updated <!-- id: 136 -->
+
+## Phase L-4: Weapon Mod Persistence & Display Polish
+- [x] Phase L-4A: WEAPON_MOD_POOL expanded to 5 entries (mod_acc_boost, mod_heavy_caliber) <!-- id: 137 -->
+- [x] Phase L-4B: getRpgCombatStats extended — atk/acc mod aggregation + mod atk multiplier bonus <!-- id: 138 -->
+- [x] Phase L-4C: GNB header token widget (grid-cols-5, amber glow, ?? 0 fallback) <!-- id: 139 -->
+- [x] Phase L-4D: Smith & Shards weapon card inline mod badge (amber, compact, broken-safe) <!-- id: 140 -->
+- [x] Phase L-4E: RPG squad panel mod badge next to equipped weapon line <!-- id: 141 -->
+- [x] Phase L-4F: RPG stat preview mod bonus line (isFinite-guarded, zero-state hidden) <!-- id: 142 -->
+- [x] Phase L-4G: All L-4 logic tests pass (pool, coverage, display safety) <!-- id: 143 -->
+

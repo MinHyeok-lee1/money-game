@@ -1018,10 +1018,11 @@
     ];
 
     // L-2: Static weapon modification pool — not persisted, read-only at integration time
+    // L-4: Expanded to 5 entries. All statBonus values use fractional scale (0.03 = 3%, 0.08 = 8%)
     const WEAPON_MOD_POOL = [
       {
         id: "mod_pen_boost",
-        name: { kr: "전술 철갑탄", en: "Armor PEN +15" },
+        name: { kr: "전술 철갑탄", en: "Armor PEN +15%" },
         statBonus: { pen: 0.15 },
       },
       {
@@ -1033,6 +1034,16 @@
         id: "mod_crit_vamp",
         name: { kr: "정밀 광학창", en: "Crit Chance +3%" },
         statBonus: { crt: 0.03 },
+      },
+      {
+        id: "mod_acc_boost",
+        name: { kr: "전술 조준경", en: "Accuracy +3%" },
+        statBonus: { acc: 0.03 },
+      },
+      {
+        id: "mod_heavy_caliber",
+        name: { kr: "대구경 약실", en: "Base ATK +8%" },
+        statBonus: { atk: 0.08 },
       },
     ];
 
@@ -3213,14 +3224,18 @@
         const weapon = getEquippedWeaponForCharacter(unit, inventory);
         const bonus = getWeaponModBonus(weapon);
         return {
+          atk: totals.atk + (isFinite(bonus.atk) ? bonus.atk : 0),
           pen: totals.pen + (isFinite(bonus.pen) ? bonus.pen : 0),
+          acc: totals.acc + (isFinite(bonus.acc) ? bonus.acc : 0),
           crt: totals.crt + (isFinite(bonus.crt) ? bonus.crt : 0),
           spd: totals.spd + (isFinite(bonus.spd) ? bonus.spd : 0),
         };
-      }, { pen: 0, crt: 0, spd: 0 });
+      }, { atk: 0, pen: 0, acc: 0, crt: 0, spd: 0 });
       // Average across squad size so a single modded weapon doesn't dominate a 5-unit squad
       const squadSize = Math.max(1, characters.length);
+      const modAtk = modBonusTotals.atk / squadSize;
       const modPen = modBonusTotals.pen / squadSize;
+      const modAcc = modBonusTotals.acc / squadSize;
       const modCrt = modBonusTotals.crt / squadSize;
       const modSpd = modBonusTotals.spd / squadSize;
 
@@ -3228,13 +3243,15 @@
       const currentStage = toFiniteNumber(state.rpg?.currentStage, 1);
       const pressureMult = (currentStage > 100) ? (1 + specialization.pressureBreaker) : 1;
 
+      // L-4: atk mod is a fractional multiplier bonus added to totalAtkMult
+      const modAtkMult = isFinite(modAtk) ? modAtk : 0;
       return {
-        atk: baseAtk * totalAtkMult * pressureMult,
+        atk: baseAtk * (totalAtkMult + modAtkMult) * pressureMult,
         spd: totalSpdMult + (isFinite(modSpd) ? modSpd : 0),
         pen: totalPen + (isFinite(modPen) ? modPen : 0),
-        acc: totalAcc,
+        acc: totalAcc + (isFinite(modAcc) ? modAcc : 0),
         crt: totalCrt + (isFinite(modCrt) ? modCrt : 0),
-        totalDps: baseAtk * totalAtkMult * (totalSpdMult + (isFinite(modSpd) ? modSpd : 0)) * pressureMult,
+        totalDps: baseAtk * (totalAtkMult + modAtkMult) * (totalSpdMult + (isFinite(modSpd) ? modSpd : 0)) * pressureMult,
       };
     }
 
@@ -4664,6 +4681,7 @@
       const prestigeAnnouncementTimeoutRef = useRef(null);
       const [waveAlert, setWaveAlert] = useState(null); // string or null
       const [forgeConfirmTarget, setForgeConfirmTarget] = useState(null); // J-3I: { instanceId, useStabilizer, itemName, level, breakPct, successPct, stabCount }
+      const [lastRollResult, setLastRollResult] = useState(null); // L-3: { instanceId, mod, tokenBalance } | null — cleared on next action
       const [tacticalLogFeed, setTacticalLogFeed] = useState([
         "📡 후방 사령부 통신 온라인.",
         "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
@@ -6585,6 +6603,59 @@
       };
       window.convertShardsToTokens = convertShardsToTokens;
 
+      // L-3: Roll or reroll a weapon modification — consumes 1 blackMarketToken, writes mods[0]
+      const rollWeaponModification = (weaponInstanceId) => {
+        // Gate 1: weapon exists
+        const item = (gameState.enhancement?.inventory ?? []).find(
+          (w) => w.instanceId === weaponInstanceId && w.type === "weapon",
+        );
+        if (!item) return { success: false, reason: "weapon_not_found" };
+        // Gate 2: not broken
+        if (item.broken === true) return { success: false, reason: "weapon_broken" };
+        // Gate 3: not locked
+        if (item.locked === true) return { success: false, reason: "weapon_locked" };
+        // Gate 4: has at least 1 token
+        const currentTokens = Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0));
+        if (!isFinite(currentTokens) || currentTokens < 1) return { success: false, reason: "insufficient_tokens" };
+        // Gate 5: mods array bounded — enforce 1-slot max (read-only check)
+        const currentMods = Array.isArray(item.mods) ? item.mods : [];
+        if (currentMods.length > 1) return { success: false, reason: "slot_overflow" };
+
+        // All gates pass — select mod
+        const poolLen = WEAPON_MOD_POOL.length;
+        const selectedMod = WEAPON_MOD_POOL[Math.floor(Math.random() * poolLen)];
+        if (!selectedMod) return { success: false, reason: "pool_empty" };
+
+        const newTokenBalance = currentTokens - 1; // validated >= 0 by gate 4
+        if (!isFinite(newTokenBalance) || newTokenBalance < 0) return { success: false, reason: "token_floor_violation" };
+
+        // Commit — immutable inventory.map(), then wallet deduction
+        updateGameState((prev) => {
+          const prevTokens = Math.floor(toFiniteNumber(prev.wallet?.blackMarketTokens, 0));
+          if (prevTokens < 1) return prev; // re-check inside transaction
+          return {
+            ...prev,
+            wallet: {
+              ...prev.wallet,
+              blackMarketTokens: prevTokens - 1,
+            },
+            enhancement: {
+              ...prev.enhancement,
+              inventory: (prev.enhancement?.inventory ?? []).map((w) =>
+                w.instanceId === weaponInstanceId
+                  ? { ...w, mods: [selectedMod] }
+                  : w,
+              ),
+            },
+          };
+        });
+
+        const result = { success: true, mod: selectedMod, tokenBalance: newTokenBalance };
+        setLastRollResult({ instanceId: weaponInstanceId, ...result });
+        return result;
+      };
+      window.rollWeaponModification = rollWeaponModification;
+
       // J-3I: Confirmation wrapper — danger-zone weapons route through modal
       const requestEnhance = (instanceId, useStabilizer = false) => {
         const item = gameState.enhancement.inventory.find(
@@ -7036,8 +7107,8 @@
                 {tabs.find((tab) => tab.id === activeTab)?.label}
               </div>
             </div>
-            {/* 흰색 배경(bg-white)과 밝은 테두리(divide-emerald-100)를 어둠으로 교체 */}
-            <div className="grid grid-cols-4 divide-x divide-slate-800">
+            {/* L-4: 5-column wallet HUD — Cash / Diamonds / Dividends / Secondary / Token */}
+            <div className="grid grid-cols-5 divide-x divide-slate-800">
               <div className="px-4 py-3 bg-slate-900/60">
                 <div className="text-[10px] font-black uppercase text-slate-500">
                   {ui.walletCash}
@@ -7069,6 +7140,15 @@
                 </div>
                 <div className="text-lg font-black text-emerald-700">
                   {headerSecondaryValue}
+                </div>
+              </div>
+              {/* L-4: Black Market Token widget */}
+              <div className="px-2 py-3 bg-zinc-950">
+                <div className="text-[9px] font-black uppercase text-amber-700/70 truncate">
+                  {language === "ko" ? "토큰" : "Token"}
+                </div>
+                <div className="text-base font-black text-amber-400 drop-shadow-[0_0_4px_rgba(245,158,11,0.3)] leading-tight">
+                  🪙 {Math.max(0, Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)))}
                 </div>
               </div>
             </div>
@@ -8900,6 +8980,24 @@
                                           </span>
                                         )}
                                       </div>
+                                      {/* L-4: Inline mod badge — glanceable, compact */}
+                                      {item.type === "weapon" && !isBroken && (() => {
+                                        const cardMod = (Array.isArray(item.mods) && item.mods.length > 0) ? item.mods[0] : null;
+                                        if (!cardMod) return null;
+                                        const modStatEntries = cardMod.statBonus ? Object.entries(cardMod.statBonus) : [];
+                                        return (
+                                          <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                                            <span className="text-[8px] font-black text-amber-400 bg-amber-950/40 border border-amber-800/40 rounded px-1 leading-tight flex-shrink-0">
+                                              ⚡ {language === "ko" ? cardMod.name?.kr : cardMod.name?.en}
+                                            </span>
+                                            {modStatEntries.map(([k, v]) => (
+                                              <span key={k} className="text-[7px] font-bold text-amber-500/70 leading-tight">
+                                                {k.toUpperCase()}+{isFinite(v) ? (v * 100).toFixed(0) : "?"}%
+                                              </span>
+                                            ))}
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
                                     <div className="text-right flex-shrink-0">
                                       <div className="font-black text-gray-700">
@@ -8956,63 +9054,136 @@
                                         </button>
                                       </div>
 
-                                      {/* L-2: Weapon Modification Workstation (minimal active terminal) */}
+                                      {/* L-3: Weapon Modification Workstation — full 6-state active terminal */}
                                       {(() => {
                                         const activeMod = (Array.isArray(item.mods) && item.mods.length > 0) ? item.mods[0] : null;
                                         const refinedShards = Math.max(0, Math.floor(toFiniteNumber(gameState.enhancement?.refinedShards, 0)));
                                         const bmt = Math.max(0, Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)));
-                                        const canConvert = refinedShards >= SHARD_TO_TOKEN_RATE;
+                                        const canConvert = refinedShards >= SHARD_TO_TOKEN_RATE && !isBroken;
+                                        const hasToken = bmt >= 1;
+                                        // Eligibility: can roll only if not broken, not locked, and has token
+                                        const canRoll = !isBroken && !isLocked && hasToken;
+                                        // Determine disabled reason for CTA
+                                        const rollDisabledReason = isBroken
+                                          ? (language === "ko" ? "파손 장비는 개조 불가" : "Broken — cannot modify")
+                                          : isLocked
+                                            ? (language === "ko" ? "잠긴 장비는 개조 불가" : "Locked — cannot modify")
+                                            : !hasToken
+                                              ? (language === "ko" ? "토큰 부족 — 파편을 전환하십시오" : "No tokens — convert shards first")
+                                              : null;
+                                        // Roll result recap — only shown for this specific weapon card
+                                        const recap = (lastRollResult?.instanceId === item.instanceId) ? lastRollResult : null;
                                         return (
-                                          <div className="bg-zinc-950/80 border border-zinc-800/60 rounded p-1.5 mt-2 space-y-1.5">
-                                            {/* Header */}
-                                            <div className="flex items-center justify-between">
-                                              <div className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
-                                                ⚙️ {language === "ko" ? "특수 전술 개조" : "Tactical Modifications"}
+                                          <div className="bg-zinc-950 border border-zinc-800/70 rounded p-2 mt-2 space-y-2">
+                                            {/* Header row: label + slot indicator + [BLACK MARKET] badge */}
+                                            <div className="flex items-center justify-between gap-1">
+                                              <div className="flex items-center gap-1">
+                                                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider">⚙️ {language === "ko" ? "전술 개조" : "Mod Workstation"}</span>
+                                                <span className="text-[8px] font-bold text-zinc-600 border border-zinc-700/50 rounded px-1 leading-tight">{language === "ko" ? "슬롯 [1/1]" : "[1/1]"}</span>
                                               </div>
-                                              <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-wide opacity-60">
-                                                {language === "ko" ? "[프로토타입]" : "[PROTOTYPE]"}
-                                              </div>
+                                              <span className="text-[7px] font-black text-amber-600/70 uppercase tracking-widest border border-amber-900/40 rounded px-1 leading-tight flex-shrink-0">[BLACK MARKET]</span>
                                             </div>
 
-                                            {/* Mod state */}
+                                            {/* Mod state display */}
                                             {activeMod ? (
-                                              <div className="space-y-0.5">
+                                              <div className="bg-zinc-900/60 rounded p-1.5 space-y-0.5">
                                                 <div className="text-[9px] font-black text-amber-400 leading-tight">
                                                   {language === "ko" ? activeMod.name?.kr : activeMod.name?.en}
                                                 </div>
                                                 {activeMod.statBonus && Object.entries(activeMod.statBonus).map(([key, val]) => (
-                                                  <div key={key} className="text-[8px] font-bold text-zinc-400 leading-tight">
+                                                  <div key={key} className="text-[8px] font-bold text-zinc-300 leading-tight">
                                                     {key.toUpperCase()}: +{isFinite(val) ? (val * 100).toFixed(0) : "?"}%
                                                   </div>
                                                 ))}
-                                                <div className="text-[8px] text-zinc-600 italic opacity-60 mt-0.5">
-                                                  {language === "ko" ? "[PROTOTYPE] 재개조 기능 준비 중" : "[PROTOTYPE] Reroll coming soon"}
-                                                </div>
                                               </div>
                                             ) : (
-                                              <div className="text-[9px] font-bold text-zinc-500 leading-tight">
-                                                {language === "ko"
-                                                  ? "[PROTOTYPE] 암시장 토큰 확보 후 슬롯 기동 가능"
-                                                  : "[PROTOTYPE] Secure Black Market Tokens to activate slot"}
+                                              <div className="bg-zinc-900/40 rounded p-1.5">
+                                                <div className="text-[9px] font-bold text-zinc-600 leading-tight">
+                                                  {language === "ko" ? "— 개조 슬롯 비어있음 —" : "— Mod slot empty —"}
+                                                </div>
                                               </div>
                                             )}
 
-                                            {/* Shard → Token conversion balance display */}
-                                            <div className="flex items-center justify-between gap-1 pt-0.5 border-t border-zinc-900/60">
-                                              <div className="text-[8px] font-bold text-zinc-500 leading-tight">
+                                            {/* Roll result recap — STATE 6: transient post-roll feedback */}
+                                            {recap && recap.success && (
+                                              <div className="bg-amber-950/30 border border-amber-800/40 rounded p-1.5 space-y-0.5">
+                                                <div className="text-[8px] font-black text-amber-300 uppercase tracking-wider">
+                                                  {language === "ko" ? "✅ 개조 완료" : "✅ Mod Applied"}
+                                                </div>
+                                                <div className="text-[9px] font-black text-amber-400">
+                                                  {language === "ko" ? recap.mod?.name?.kr : recap.mod?.name?.en}
+                                                </div>
+                                                {recap.mod?.statBonus && Object.entries(recap.mod.statBonus).map(([k, v]) => (
+                                                  <div key={k} className="text-[8px] text-zinc-300 font-bold">
+                                                    {k.toUpperCase()}: +{isFinite(v) ? (v * 100).toFixed(0) : "?"}%
+                                                  </div>
+                                                ))}
+                                                <div className="text-[8px] text-zinc-500">
+                                                  {language === "ko" ? `잔여 토큰: ${recap.tokenBalance}` : `Tokens left: ${recap.tokenBalance}`}
+                                                </div>
+                                                <button
+                                                  onClick={() => setLastRollResult(null)}
+                                                  className="text-[7px] text-zinc-600 hover:text-zinc-400 transition-colors mt-0.5"
+                                                >
+                                                  {language === "ko" ? "닫기" : "Dismiss"}
+                                                </button>
+                                              </div>
+                                            )}
+
+                                            {/* Primary CTA — Roll / Reroll */}
+                                            <div className="space-y-1">
+                                              <button
+                                                onClick={() => {
+                                                  if (!canRoll) return;
+                                                  setLastRollResult(null); // clear previous recap before new roll
+                                                  rollWeaponModification(item.instanceId);
+                                                }}
+                                                disabled={!canRoll}
+                                                className={`w-full rounded py-1.5 text-[10px] font-black uppercase tracking-wider transition-colors ${
+                                                  canRoll
+                                                    ? "bg-amber-700 text-amber-100 hover:bg-amber-600 border border-amber-500/50"
+                                                    : "bg-zinc-900/60 text-zinc-600 cursor-not-allowed border border-zinc-800/40 opacity-60"
+                                                }`}
+                                                title={rollDisabledReason ?? ""}
+                                              >
+                                                {activeMod
+                                                  ? (language === "ko" ? "특성 재벼림 (Reroll Trait)" : "Reroll Trait")
+                                                  : (language === "ko" ? "개조 가동 (Roll Passive Trait)" : "Roll Passive Trait")
+                                                }
+                                              </button>
+                                              {/* Cost line or disabled reason */}
+                                              {canRoll ? (
+                                                <div className="text-[8px] font-bold text-amber-600/70 text-center">
+                                                  {language === "ko" ? "1 암시장 토큰 소모" : "Costs 1 Black Market Token"}
+                                                </div>
+                                              ) : rollDisabledReason ? (
+                                                <div className="text-[8px] font-bold text-zinc-600 text-center leading-tight">
+                                                  {rollDisabledReason}
+                                                </div>
+                                              ) : null}
+                                            </div>
+
+                                            {/* Shard → Token conversion row */}
+                                            <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-zinc-800/50">
+                                              <div className="text-[8px] font-bold text-zinc-500 leading-tight min-w-0">
                                                 <span className="text-zinc-400">💎 {refinedShards}</span>
                                                 <span className="text-zinc-700 mx-0.5">→</span>
                                                 <span className="text-amber-500/80">🪙 {bmt}</span>
+                                                <span className="text-zinc-700 mx-0.5">·</span>
+                                                <span className="text-zinc-600">100:1</span>
                                               </div>
                                               <button
-                                                onClick={() => convertShardsToTokens(1)}
-                                                disabled={!canConvert || isLocked}
+                                                onClick={() => {
+                                                  setLastRollResult(null);
+                                                  convertShardsToTokens(1);
+                                                }}
+                                                disabled={!canConvert}
                                                 className={`rounded px-1.5 py-0.5 text-[8px] font-black transition-colors flex-shrink-0 ${
-                                                  canConvert && !isLocked
-                                                    ? "bg-amber-900/60 text-amber-300 hover:bg-amber-800/60 border border-amber-700/50"
-                                                    : "bg-zinc-900/40 text-zinc-600 cursor-not-allowed border border-zinc-800/30 opacity-50"
+                                                  canConvert
+                                                    ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-600/50"
+                                                    : "bg-zinc-900/40 text-zinc-600 cursor-not-allowed border border-zinc-800/30 opacity-40"
                                                 }`}
-                                                title={language === "ko" ? `파편 100개 → 토큰 1개 (현재 ${refinedShards}개 보유)` : `100 Shards → 1 Token (have ${refinedShards})`}
+                                                title={language === "ko" ? `100 파편 → 1 토큰 (현재 ${refinedShards}개)` : `100 Shards → 1 Token (have ${refinedShards})`}
                                               >
                                                 {language === "ko" ? "파편 전환" : "Convert"}
                                               </button>
@@ -9801,6 +9972,40 @@
                         <div className="text-sm font-black text-emerald-700">{(combatStats.crt * 100).toFixed(1)}%</div>
                         <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">{ui.includesRarityBonus}</div>
                       </div>
+                      {/* L-4: Mod bonus preview line — shows aggregate mod contribution, hidden when zero */}
+                      {(() => {
+                        const inv2 = Array.isArray(gameState.enhancement?.inventory) ? gameState.enhancement.inventory : [];
+                        const activeUnits2 = gameState.rpg?.run?.activeUnits || [];
+                        const squadSz = Math.max(1, activeUnits2.length);
+                        const aggBonus = activeUnits2.reduce((acc, unit) => {
+                          const w2 = getEquippedWeaponForCharacter(unit, inv2);
+                          const b2 = getWeaponModBonus(w2);
+                          return {
+                            atk: acc.atk + (isFinite(b2.atk) ? b2.atk : 0),
+                            pen: acc.pen + (isFinite(b2.pen) ? b2.pen : 0),
+                            acc: acc.acc + (isFinite(b2.acc) ? b2.acc : 0),
+                            crt: acc.crt + (isFinite(b2.crt) ? b2.crt : 0),
+                            spd: acc.spd + (isFinite(b2.spd) ? b2.spd : 0),
+                          };
+                        }, { atk: 0, pen: 0, acc: 0, crt: 0, spd: 0 });
+                        const parts = [];
+                        if (isFinite(aggBonus.pen) && aggBonus.pen > 0) parts.push(`PEN +${(aggBonus.pen / squadSz * 100).toFixed(0)}%`);
+                        if (isFinite(aggBonus.crt) && aggBonus.crt > 0) parts.push(`CRT +${(aggBonus.crt / squadSz * 100).toFixed(0)}%`);
+                        if (isFinite(aggBonus.spd) && aggBonus.spd > 0) parts.push(`SPD +${(aggBonus.spd / squadSz * 100).toFixed(0)}%`);
+                        if (isFinite(aggBonus.acc) && aggBonus.acc > 0) parts.push(`ACC +${(aggBonus.acc / squadSz * 100).toFixed(0)}%`);
+                        if (isFinite(aggBonus.atk) && aggBonus.atk > 0) parts.push(`ATK +${(aggBonus.atk / squadSz * 100).toFixed(0)}%`);
+                        if (parts.length === 0) return null;
+                        return (
+                          <div className="bg-gray-50 p-2 rounded border border-amber-200/60 col-span-2">
+                            <div className="text-[9px] font-black text-amber-700 uppercase">
+                              {language === "ko" ? "⚡ 개조 보너스" : "⚡ Mod Bonus"}
+                            </div>
+                            <div className="text-[9px] font-bold text-amber-600 leading-tight mt-0.5">
+                              {parts.join(" | ")}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   <section className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
@@ -9905,6 +10110,20 @@
                                     ? char.equippedWeapon.name
                                     : ui.noWeapon}
                                 </div>
+                                {/* L-4: Mod badge in squad card */}
+                                {(() => {
+                                  const squadMod = (Array.isArray(char.equippedWeapon?.mods) && char.equippedWeapon.mods.length > 0) ? char.equippedWeapon.mods[0] : null;
+                                  if (!squadMod) return null;
+                                  const firstEntry = squadMod.statBonus ? Object.entries(squadMod.statBonus)[0] : null;
+                                  const tag = firstEntry
+                                    ? `[${firstEntry[0].toUpperCase()} +${isFinite(firstEntry[1]) ? (firstEntry[1] * 100).toFixed(0) : "?"}%]`
+                                    : (language === "ko" ? squadMod.name?.kr : squadMod.name?.en);
+                                  return (
+                                    <div className="text-[9px] font-black text-amber-400 leading-tight mt-0.5">
+                                      ⚡ {tag}
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </div>
                             <div className="text-right">
