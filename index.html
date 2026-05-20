@@ -4778,28 +4778,28 @@
       const runTickets = Math.max(0, toFiniteNumber(gameState.rpg?.tickets, 0));
       const starterWeaponGranted =
         gameState.enhancement?.starterWeaponGranted === true;
-      const landlord = gameState.landlord;
-      const investmentHoldings = gameState.investment.holdings;
-      const enhancementInventory = gameState.enhancement.inventory;
-      const lastPulledItem = gameState.enhancement.lastPulledItem;
-      const recentPulls = gameState.enhancement.recentPulls;
+      const landlord = gameState.landlord || {};
+      const investmentHoldings = gameState.investment?.holdings || [];
+      const enhancementInventory = gameState.enhancement?.inventory || [];
+      const lastPulledItem = gameState.enhancement?.lastPulledItem || null;
+      const recentPulls = gameState.enhancement?.recentPulls || [];
       const lastEnhancementResult =
-        gameState.enhancement.lastEnhancementResult;
-      const ownedCharacters = gameState.rpg.characters;
-      const unlockedCharacterIds = Array.isArray(gameState.rpg.unlockedCharacterIds)
+        gameState.enhancement?.lastEnhancementResult || null;
+      const ownedCharacters = gameState.rpg?.characters || [];
+      const unlockedCharacterIds = Array.isArray(gameState.rpg?.unlockedCharacterIds)
         ? gameState.rpg.unlockedCharacterIds
         : [];
-      const runState = gameState.rpg.run || {};
+      const runState = gameState.rpg?.run || {};
       const runResultHistory = Array.isArray(runState.resultHistory)
         ? runState.resultHistory
         : [];
-      const clickPower = landlord.clickPower;
-      const clickUpgradeCost = landlord.clickUpgradeCost;
-      const rebirthCount = landlord.rebirthCount;
-      const multiplier = landlord.multiplier;
+      const clickPower = toFiniteNumber(landlord.clickPower, 10);
+      const clickUpgradeCost = toFiniteNumber(landlord.clickUpgradeCost, 50);
+      const rebirthCount = toFiniteNumber(landlord.rebirthCount, 0);
+      const multiplier = toFiniteNumber(landlord.multiplier, 1);
       const warStatus = getWarStatusIndicators(gameState, language);
       const properties = PROPERTIES_DATA[language].map((property) => {
-        const savedProperty = landlord.properties.find(
+        const savedProperty = (landlord.properties || []).find(
           (item) => item.id === property.id,
         );
         return {
@@ -6102,7 +6102,7 @@
         if (cash < cost) return;
 
         // J-3G: stabilizer validation
-        const hasStabilizer = useStabilizer && toFiniteNumber(gameState.enhancement.stabilizers, 0) > 0;
+        const hasStabilizer = useStabilizer && toFiniteNumber(gameState.enhancement?.stabilizers, 0) > 0;
 
         // Trigger Phase J-4D forge physical recoil anticipation shakes
         setAnvilShake(true);
@@ -7692,15 +7692,15 @@
                       <div className="text-green-200 text-[9px] font-black uppercase">
                         {language === "ko" ? "💎 제련 파편" : "💎 Shards"}
                       </div>
-                      <div className="text-sm font-black">{toFiniteNumber(gameState.enhancement.refinedShards, 0)}</div>
+                      <div className="text-sm font-black">{toFiniteNumber(gameState.enhancement?.refinedShards, 0)}</div>
                     </div>
                     <div className="bg-black/20 rounded-md p-2">
                       <div className="text-green-200 text-[9px] font-black uppercase">
                         {language === "ko" ? "🛡️ 보정제" : "🛡️ Stab."}
                       </div>
                       <div className="text-sm font-black flex items-center gap-1">
-                        {toFiniteNumber(gameState.enhancement.stabilizers, 0)}
-                        {toFiniteNumber(gameState.enhancement.refinedShards, 0) >= STABILIZER_CRAFT_COST && (
+                        {toFiniteNumber(gameState.enhancement?.stabilizers, 0)}
+                        {toFiniteNumber(gameState.enhancement?.refinedShards, 0) >= STABILIZER_CRAFT_COST && (
                           <button
                             onClick={craftStabilizer}
                             className="text-[8px] bg-emerald-500/30 hover:bg-emerald-500/50 border border-emerald-400/40 text-emerald-200 px-1.5 py-0.5 rounded font-black"
@@ -7713,11 +7713,11 @@
                         {language === "ko" ? "⚒️ 전적" : "⚒️ Record"}
                       </div>
                       <div className="text-[10px] font-black leading-tight">
-                        <span className="text-emerald-300">{toFiniteNumber(gameState.enhancement.forgeStats?.totalSuccesses, 0)}</span>
+                        <span className="text-emerald-300">{toFiniteNumber(gameState.enhancement?.forgeStats?.totalSuccesses, 0)}</span>
                         <span className="text-green-200/50">/</span>
-                        <span className="text-red-300">{toFiniteNumber(gameState.enhancement.forgeStats?.totalFailures, 0)}</span>
-                        {toFiniteNumber(gameState.enhancement.forgeStats?.totalBreakages, 0) > 0 && (
-                          <span className="text-red-400"> 💥{toFiniteNumber(gameState.enhancement.forgeStats?.totalBreakages, 0)}</span>
+                        <span className="text-red-300">{toFiniteNumber(gameState.enhancement?.forgeStats?.totalFailures, 0)}</span>
+                        {toFiniteNumber(gameState.enhancement?.forgeStats?.totalBreakages, 0) > 0 && (
+                          <span className="text-red-400"> 💥{toFiniteNumber(gameState.enhancement?.forgeStats?.totalBreakages, 0)}</span>
                         )}
                       </div>
                     </div>
@@ -8650,15 +8650,15 @@
                           </h2>
                           <div className="flex items-center gap-2">
                             {/* J-3I: Bulk salvage button for broken unlocked weapons */}
-                            {gameState.enhancement.inventory.filter(w => w.broken === true && w.locked !== true).length > 0 && (
+                            {enhancementInventory.filter(w => w.broken === true && w.locked !== true).length > 0 && (
                               <button
                                 onClick={bulkSalvageBrokenWeapons}
                                 className="rounded px-2 py-0.5 text-[9px] font-black bg-gray-700 text-white hover:bg-gray-600 transition-colors"
                                 title={language === "ko" ? "파괴된 무기 잔해 일괄 정리" : "Dismiss all broken weapon wreckage"}
                               >
                                 {language === "ko"
-                                  ? `🗑️ 잔해 일괄 정리 (${gameState.enhancement.inventory.filter(w => w.broken === true && w.locked !== true).length})`
-                                  : `🗑️ Bulk Dismiss (${gameState.enhancement.inventory.filter(w => w.broken === true && w.locked !== true).length})`}
+                                  ? `🗑️ 잔해 일괄 정리 (${enhancementInventory.filter(w => w.broken === true && w.locked !== true).length})`
+                                  : `🗑️ Bulk Dismiss (${enhancementInventory.filter(w => w.broken === true && w.locked !== true).length})`}
                               </button>
                             )}
                             <div className="text-xs font-black text-gray-500">
@@ -8674,7 +8674,7 @@
                               const breakChance = item.type === "weapon" ? getBreakageChance(item.enhanceLevel) : 0;
                               const breakPct = Math.round(breakChance * 100);
                               const canEnhance = item.type === "weapon" && !isBroken && item.enhanceLevel < MAX_ENHANCE_LEVEL && cash >= getEnhanceCost(item.enhanceLevel);
-                              const stabCount = toFiniteNumber(gameState.enhancement.stabilizers, 0);
+                              const stabCount = toFiniteNumber(gameState.enhancement?.stabilizers, 0);
                               const prestige = item.type === "weapon" ? getPrestigeTier(item.enhanceLevel) : null;
                               const epithet = !isBroken ? getWeaponEpithet(item) : null;
                               const isEquipped = item.type === "weapon" && isWeaponEquipped(item.instanceId, ownedCharacters);
@@ -8833,18 +8833,18 @@
                       </div>
 
                       {/* J-3G/J-3H: Salvage History with recovery progress */}
-                      {Array.isArray(gameState.enhancement.salvageHistory) && gameState.enhancement.salvageHistory.length > 0 && (
+                      {Array.isArray(gameState.enhancement?.salvageHistory) && gameState.enhancement?.salvageHistory.length > 0 && (
                         <div className="bg-white border border-gray-200 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                               {language === "ko" ? "💎 파편 회수 기록" : "💎 Salvage History"}
                             </h2>
                             <span className="text-[9px] font-black text-cyan-600">
-                              {language === "ko" ? "총 회수" : "Total"}: 💎{toFiniteNumber(gameState.enhancement.forgeStats?.totalShardsEarned, 0)}
+                              {language === "ko" ? "총 회수" : "Total"}: 💎{toFiniteNumber(gameState.enhancement?.forgeStats?.totalShardsEarned, 0)}
                             </span>
                           </div>
                           <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
-                            {[...gameState.enhancement.salvageHistory].reverse().map((entry) => (
+                            {[...(gameState.enhancement?.salvageHistory || [])].reverse().map((entry) => (
                               <div key={entry.id} className="flex items-center justify-between text-[10px] font-bold py-1 border-b border-gray-100 gap-2">
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   <span className={`text-[8px] font-black uppercase px-1 py-0 rounded ${rarityTextClass(entry.weaponRarity)} bg-gray-100`}>
@@ -8857,11 +8857,11 @@
                             ))}
                           </div>
                           {/* J-3H: Recovery progress hint */}
-                          {toFiniteNumber(gameState.enhancement.refinedShards, 0) > 0 && toFiniteNumber(gameState.enhancement.refinedShards, 0) < STABILIZER_CRAFT_COST && (
+                          {toFiniteNumber(gameState.enhancement?.refinedShards, 0) > 0 && toFiniteNumber(gameState.enhancement?.refinedShards, 0) < STABILIZER_CRAFT_COST && (
                             <div className="mt-2 text-[9px] font-bold text-gray-400 text-center">
                               {language === "ko"
-                                ? `보정제 제작까지 💎 ${STABILIZER_CRAFT_COST - toFiniteNumber(gameState.enhancement.refinedShards, 0)} 파편 추가 필요`
-                                : `💎 ${STABILIZER_CRAFT_COST - toFiniteNumber(gameState.enhancement.refinedShards, 0)} more shards to craft a stabilizer`}
+                                ? `보정제 제작까지 💎 ${STABILIZER_CRAFT_COST - toFiniteNumber(gameState.enhancement?.refinedShards, 0)} 파편 추가 필요`
+                                : `💎 ${STABILIZER_CRAFT_COST - toFiniteNumber(gameState.enhancement?.refinedShards, 0)} more shards to craft a stabilizer`}
                             </div>
                           )}
                         </div>

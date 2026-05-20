@@ -95,6 +95,14 @@
             - [x] Stage 150 Boss: Iron Sentinel dual-mitigation layer <!-- id: 107 -->
             - [x] Crimson stage UI indicator transformation <!-- id: 108 -->
     - [x] Phase I-5A: Infinite Mode Playability Snapshot / Manual QA Plan (checklist & test ranges defined) <!-- id: 57 -->
+    - [x] Phase K-2: Reaper Infinite Mode Regression QA & Stabilization <!-- id: 109 -->
+        - [x] Target 1: Infinite Mode Entry Gate Security audited <!-- id: 110 -->
+        - [x] Target 2: Stage 1–100 Neutrality & Progression Safety verified <!-- id: 111 -->
+        - [x] Target 3: Stage 101+ Combat Math Safety wrapped with toFiniteNumber and capped <!-- id: 112 -->
+        - [x] Target 4: Crimson UI Performance & Responsive Checks audited <!-- id: 113 -->
+        - [x] Target 5: Deep Save-State Resilience (Legacy Compatibility) implemented via optional chaining <!-- id: 114 -->
+        - [x] Target 6: Cross-Module State Sync Verification confirmed <!-- id: 115 -->
+        - [x] Target 7: Cross-Module Regression Isolation completed <!-- id: 116 -->
 - **Phase J: Product UX Reframe**
     - [x] Phase J-0: Product UX Reframe Spec (PRODUCT_UX_REFRAME_PLAN.md created) <!-- id: 58 -->
     - [x] Phase J-1: Korean Naming & Navigation Cleanup (Korean UI translations updated) <!-- id: 59 -->
