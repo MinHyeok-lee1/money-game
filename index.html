@@ -4734,6 +4734,8 @@
       const [waveAlert, setWaveAlert] = useState(null); // string or null
       const [forgeConfirmTarget, setForgeConfirmTarget] = useState(null); // J-3I: { instanceId, useStabilizer, itemName, level, breakPct, successPct, stabCount }
       const [lastRollResult, setLastRollResult] = useState(null); // L-3: { instanceId, mod, tokenBalance } | null — cleared on next action
+      const [showCodexForWeapon, setShowCodexForWeapon] = useState(null); // L-6: instanceId with codex open — local, not persisted
+      const [targetRoleSelection, setTargetRoleSelection] = useState({}); // L-6: { [instanceId]: role } — local, not persisted
       const [tacticalLogFeed, setTacticalLogFeed] = useState([
         "📡 후방 사령부 통신 온라인.",
         "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
@@ -6753,6 +6755,71 @@
         return result;
       };
       window.rollWeaponModification = rollWeaponModification;
+
+      // L-6: Targeted role mod roll — costs 3 tokens, filters pool by role, random within role
+      const VALID_TARGET_ROLES = new Set(["BREACH", "ASSAULT", "EXECUTION", "PRECISION", "HEAVY"]);
+      const TARGETED_ROLL_COST = 3;
+      const rollTargetedWeaponModification = (weaponInstanceId, targetRole) => {
+        // Gate 1: weapon exists
+        const tItem = (gameState.enhancement?.inventory ?? []).find(
+          (w) => w.instanceId === weaponInstanceId && w.type === "weapon",
+        );
+        if (!tItem) return { success: false, reason: "weapon_not_found" };
+        // Gate 2: not broken
+        if (tItem.broken === true) return { success: false, reason: "weapon_broken" };
+        // Gate 3: not locked
+        if (tItem.locked === true) return { success: false, reason: "weapon_locked" };
+        // Gate 4: has at least 3 tokens
+        const tCurrentTokens = Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0));
+        if (!isFinite(tCurrentTokens) || tCurrentTokens < TARGETED_ROLL_COST) return { success: false, reason: "insufficient_tokens" };
+        // Gate 5: targetRole is a valid role string
+        if (!VALID_TARGET_ROLES.has(targetRole)) return { success: false, reason: "invalid_role" };
+        // Gate 6: filtered pool has at least 1 entry
+        const rolePool = WEAPON_MOD_POOL.filter((m) => m.role === targetRole);
+        if (rolePool.length < 1) return { success: false, reason: "empty_role_pool" };
+
+        // Capture previous mod before overwrite — local only, not persisted
+        const tPreviousMod = (Array.isArray(tItem.mods) && tItem.mods.length > 0) ? tItem.mods[0] : null;
+
+        const tSelectedMod = rolePool[Math.floor(Math.random() * rolePool.length)];
+        if (!tSelectedMod) return { success: false, reason: "pool_select_failed" };
+
+        const tNewTokenBalance = tCurrentTokens - TARGETED_ROLL_COST;
+        if (!isFinite(tNewTokenBalance) || tNewTokenBalance < 0) return { success: false, reason: "token_floor_violation" };
+
+        // Commit — immutable inventory.map(), wallet deduction of exactly 3
+        updateGameState((prev) => {
+          const prevTokens = Math.floor(toFiniteNumber(prev.wallet?.blackMarketTokens, 0));
+          if (prevTokens < TARGETED_ROLL_COST) return prev; // re-check inside transaction
+          return {
+            ...prev,
+            wallet: {
+              ...prev.wallet,
+              blackMarketTokens: Math.max(0, prevTokens - TARGETED_ROLL_COST),
+            },
+            enhancement: {
+              ...prev.enhancement,
+              inventory: (prev.enhancement?.inventory ?? []).map((w) =>
+                w.instanceId === weaponInstanceId
+                  ? { ...w, mods: [tSelectedMod] }
+                  : w,
+              ),
+            },
+          };
+        });
+
+        const tResult = {
+          success: true,
+          mod: tSelectedMod,
+          previousMod: tPreviousMod,
+          tokenBalance: tNewTokenBalance,
+          isTargeted: true,
+          targetedRole: targetRole,
+        };
+        setLastRollResult({ instanceId: weaponInstanceId, ...tResult });
+        return tResult;
+      };
+      window.rollTargetedWeaponModification = rollTargetedWeaponModification;
 
       // J-3I: Confirmation wrapper — danger-zone weapons route through modal
       const requestEnhance = (instanceId, useStabilizer = false) => {
@@ -9249,15 +9316,19 @@
                                               return (
                                                 <div className="bg-amber-950/30 border border-amber-800/40 rounded p-1.5 space-y-0.5">
                                                   <div className={`text-[8px] font-black uppercase tracking-wider ${recapColor}`}>
-                                                    {isReroll
+                                                    {recap.isTargeted
                                                       ? (language === "ko"
-                                                          ? `전술 재개조 — ${recapGlyph} ${recapRole ?? ""} 모듈 교체`
-                                                          : `Tactical Remod — ${recapGlyph} ${recapRole ?? ""} Module Swapped`)
-                                                      : (language === "ko"
-                                                          ? `개조 완료 — ${recapGlyph} ${recapRole ?? ""} 전술 모듈 장착`
-                                                          : `Mod Applied — ${recapGlyph} ${recapRole ?? ""} Tactical Module Equipped`)}
+                                                          ? `지정 개조 완료 — [${recapRole ?? ""}] 모듈 장착`
+                                                          : `Targeted Mod Applied — [${recapRole ?? ""}] Equipped`)
+                                                      : isReroll
+                                                        ? (language === "ko"
+                                                            ? `전술 재개조 — ${recapGlyph} ${recapRole ?? ""} 모듈 교체`
+                                                            : `Tactical Remod — ${recapGlyph} ${recapRole ?? ""} Module Swapped`)
+                                                        : (language === "ko"
+                                                            ? `개조 완료 — ${recapGlyph} ${recapRole ?? ""} 전술 모듈 장착`
+                                                            : `Mod Applied — ${recapGlyph} ${recapRole ?? ""} Tactical Module Equipped`)}
                                                   </div>
-                                                  {isReroll ? (
+                                                  {isReroll && !recap.isTargeted ? (
                                                     <div className="text-[8px] text-zinc-400 leading-tight">
                                                       {language === "ko"
                                                         ? `이전: ${recap.previousMod?.name?.kr ?? "—"} → 현재: ${recap.mod?.name?.kr ?? "—"}`
@@ -9321,6 +9392,75 @@
                                               ) : null}
                                             </div>
 
+                                            {/* L-6: Targeted Role Override */}
+                                            {(() => {
+                                              const selectedRole = targetRoleSelection[item.instanceId] ?? null;
+                                              const canTargeted = !isBroken && !isLocked && bmt >= TARGETED_ROLL_COST && selectedRole !== null;
+                                              const targetedReason = isBroken
+                                                ? (language === "ko" ? "파손 장비" : "Broken weapon")
+                                                : isLocked
+                                                  ? (language === "ko" ? "잠긴 장비" : "Locked weapon")
+                                                  : bmt < TARGETED_ROLL_COST
+                                                    ? (language === "ko" ? `토큰 부족 (${TARGETED_ROLL_COST} 필요)` : `Need ${TARGETED_ROLL_COST} tokens`)
+                                                    : !selectedRole
+                                                      ? (language === "ko" ? "역할을 선택하십시오" : "Select a role first")
+                                                      : null;
+                                              return (
+                                                <div className="pt-1.5 border-t border-zinc-800/50 space-y-1.5">
+                                                  <div className="flex items-center justify-between gap-1">
+                                                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-wider">
+                                                      {language === "ko" ? "지정 개조" : "Targeted Override"}
+                                                    </span>
+                                                    <span className="text-[7px] font-bold text-amber-700/60">🪙 {TARGETED_ROLL_COST}</span>
+                                                  </div>
+                                                  {/* Role pills — 5 roles */}
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {WEAPON_MOD_POOL.map((pe) => {
+                                                      const isSelected = selectedRole === pe.role;
+                                                      return (
+                                                        <button
+                                                          key={pe.role}
+                                                          onClick={() => setTargetRoleSelection((prev) => ({
+                                                            ...prev,
+                                                            [item.instanceId]: isSelected ? null : pe.role,
+                                                          }))}
+                                                          className={`rounded px-1.5 py-0.5 text-[7px] font-black transition-colors flex items-center gap-0.5 flex-shrink-0 ${
+                                                            isSelected
+                                                              ? `${pe.roleColor} bg-zinc-700 border border-zinc-500`
+                                                              : "text-zinc-500 bg-zinc-900/60 border border-zinc-700/30 hover:text-zinc-300 hover:border-zinc-600"
+                                                          }`}
+                                                        >
+                                                          {pe.roleGlyph} {pe.role}
+                                                        </button>
+                                                      );
+                                                    })}
+                                                  </div>
+                                                  {/* Targeted roll CTA */}
+                                                  <button
+                                                    onClick={() => {
+                                                      if (!canTargeted || !selectedRole) return;
+                                                      setLastRollResult(null);
+                                                      rollTargetedWeaponModification(item.instanceId, selectedRole);
+                                                    }}
+                                                    disabled={!canTargeted}
+                                                    className={`w-full rounded py-1 text-[9px] font-black uppercase tracking-wider transition-colors ${
+                                                      canTargeted
+                                                        ? "bg-zinc-700 text-amber-300 hover:bg-zinc-600 border border-amber-700/40"
+                                                        : "bg-zinc-900/40 text-zinc-600 cursor-not-allowed border border-zinc-800/30 opacity-50"
+                                                    }`}
+                                                  >
+                                                    {language === "ko" ? "지정 벼림 (Roll Locked Role)" : "Roll Locked Role"}
+                                                  </button>
+                                                  {/* Cost comparison / disabled reason */}
+                                                  <div className="text-[7px] text-zinc-600 text-center leading-tight">
+                                                    {targetedReason
+                                                      ? targetedReason
+                                                      : (language === "ko" ? "무작위: 🪙 1 | 지정: 🪙 3" : "Random: 🪙 1 | Targeted: 🪙 3")}
+                                                  </div>
+                                                </div>
+                                              );
+                                            })()}
+
                                             {/* L-5B: Dual-action shard→token conversion block */}
                                             <div className="pt-1.5 border-t border-zinc-800/50 space-y-1.5">
                                               {/* Balance readout */}
@@ -9371,6 +9511,54 @@
                                                   </div>
                                                 </button>
                                               </div>
+                                              {/* L-5C: Soft advisory — display-only, no block */}
+                                              {bmt > 20 && (
+                                                <div className="text-[7px] font-bold text-amber-600/50 text-center pt-0.5">
+                                                  {language === "ko"
+                                                    ? "토큰 재고 충분. 전술 개조를 시도하십시오."
+                                                    : "Token stock sufficient. Attempt a tactical modification."}
+                                                </div>
+                                              )}
+                                            </div>
+
+                                            {/* L-6: Black Market Tactical Codex — collapsible, local state only */}
+                                            <div className="pt-1 border-t border-zinc-800/30">
+                                              <button
+                                                onClick={() => setShowCodexForWeapon((prev) => prev === item.instanceId ? null : item.instanceId)}
+                                                className="w-full flex items-center justify-between text-[7px] font-black text-zinc-600 hover:text-zinc-400 uppercase tracking-wider py-0.5 transition-colors"
+                                              >
+                                                <span>{language === "ko" ? "⚙ 전술 카탈로그" : "⚙ Tactical Codex"}</span>
+                                                <span>{showCodexForWeapon === item.instanceId ? "▲" : "▼"}</span>
+                                              </button>
+                                              {showCodexForWeapon === item.instanceId && (
+                                                <div className="mt-1 space-y-1">
+                                                  {WEAPON_MOD_POOL.map((ce) => {
+                                                    const ceStat = ce.statBonus ? Object.entries(ce.statBonus)[0] : null;
+                                                    const ceStatStr = ceStat
+                                                      ? `+${isFinite(ceStat[1]) ? (ceStat[1] * 100).toFixed(0) : "?"}% ${ceStat[0].toUpperCase()}`
+                                                      : "";
+                                                    return (
+                                                      <div key={ce.id} className="bg-zinc-900/50 rounded p-1">
+                                                        <div className="flex items-center gap-1 min-w-0">
+                                                          <span className={`text-[7px] font-black ${ce.roleColor} flex-shrink-0`}>
+                                                            {ce.roleGlyph} [{ce.role}]
+                                                          </span>
+                                                          <span className="text-[7px] font-bold text-amber-400/80 truncate">
+                                                            {language === "ko" ? ce.name.kr : ce.name.en}
+                                                          </span>
+                                                          <span className="text-[7px] text-zinc-500 flex-shrink-0 ml-auto pl-1">{ceStatStr}</span>
+                                                        </div>
+                                                        <div className="text-[6px] text-zinc-600 leading-tight mt-0.5">
+                                                          {language === "ko" ? ce.flavor.kr : ce.flavor.en}
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  })}
+                                                  <div className="text-[6px] text-zinc-700 text-center pt-0.5">
+                                                    {language === "ko" ? "현재 pool: 5종 전술 모듈 — 무작위 1종 지급" : "Pool: 5 modules — 1 selected at random"}
+                                                  </div>
+                                                </div>
+                                              )}
                                             </div>
                                           </div>
                                         );

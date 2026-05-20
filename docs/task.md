@@ -199,3 +199,19 @@
 - [x] Phase L-5B-2: Dual-action workbench conversion UI (single + bulk buttons, preview line, flex layout) <!-- id: 152 -->
 - [x] Phase L-5B-3: Infinite Mode shard payout scaling in applyCombatTick (stage >= 101, IntensityTier formula, all guards) <!-- id: 153 -->
 
+## Phase L-5C: Black Market Economy Pressure & Inflation QA
+- [x] Phase L-5C-1: Shard pacing documented per stage bracket (101–109, 120, 150, 200, 300+) <!-- id: 154 -->
+- [x] Phase L-5C-2: Token generation math verified — single and bulk paths, all floors ≥ 0 <!-- id: 155 -->
+- [x] Phase L-5C-3: Reroll spam test — functional update composition safe, no double-deduction <!-- id: 156 -->
+- [x] Phase L-5C-4: Inflation risk assessed — LOW (101–200) / MEDIUM (300+), acceptable <!-- id: 157 -->
+- [x] Phase L-5C-5: Token stockpile advisory added (bmt > 20, display-only) <!-- id: 158 -->
+- [x] Phase L-5C-6: Cross-module regression confirmed — all systems untouched <!-- id: 159 -->
+
+## Phase L-6: Targeted Role Mod & Black Market Codex Panel
+- [x] Phase L-6-1: VALID_TARGET_ROLES + TARGETED_ROLL_COST constants (component-scope) <!-- id: 160 -->
+- [x] Phase L-6-2: rollTargetedWeaponModification handler (6 gates, 3-token deduction, role filter, inventory.map) <!-- id: 161 -->
+- [x] Phase L-6-3: showCodexForWeapon + targetRoleSelection local useState added (not persisted) <!-- id: 162 -->
+- [x] Phase L-6-4: Targeted Role Override UI — role pills, 3-token CTA, 4 disabled states, cost comparison note <!-- id: 163 -->
+- [x] Phase L-6-5: Black Market Tactical Codex — toggle, 5-entry list, stats + flavor, collapsed by default <!-- id: 164 -->
+- [x] Phase L-6-6: Roll recap extended — isTargeted header variant + flavor sub-line <!-- id: 165 -->
+
