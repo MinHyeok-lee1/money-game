@@ -3391,6 +3391,38 @@
                 ),
                 broken: enhancement.lastEnhancementResult.broken === true,
                 salvageShards: Math.max(0, toFiniteNumber(enhancement.lastEnhancementResult.salvageShards, 0)),
+                prevLevel: clampNumber(
+                  Math.floor(
+                    toFiniteNumber(
+                      enhancement.lastEnhancementResult.prevLevel !== undefined
+                        ? enhancement.lastEnhancementResult.prevLevel
+                        : enhancement.lastEnhancementResult.level,
+                      0,
+                    ),
+                  ),
+                  0,
+                  MAX_ENHANCE_LEVEL,
+                  0,
+                ),
+                cost: Math.max(
+                  0,
+                  Math.floor(
+                    toFiniteNumber(
+                      enhancement.lastEnhancementResult.cost || 0,
+                      0,
+                    ),
+                  ),
+                ),
+                baseChance: toFiniteNumber(
+                  enhancement.lastEnhancementResult.baseChance || 0,
+                  0,
+                ),
+                breakChance: toFiniteNumber(
+                  enhancement.lastEnhancementResult.breakChance || 0,
+                  0,
+                ),
+                stabilizerUsed:
+                  enhancement.lastEnhancementResult.stabilizerUsed === true,
               }
               : null,
           refinedShards: Math.max(0, toFiniteNumber(enhancement.refinedShards, 0)),
@@ -6028,6 +6060,11 @@
                     level: currentLevel,
                     broken: true,
                     salvageShards,
+                    prevLevel: currentLevel,
+                    cost,
+                    baseChance: getEnhanceChance(currentLevel),
+                    breakChance: currentLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(currentLevel) : 0,
+                    stabilizerUsed: hasStabilizer,
                   },
                   refinedShards: toFiniteNumber(prev.enhancement.refinedShards, 0) + salvageShards,
                   forgeStats: {
@@ -6068,6 +6105,11 @@
                 level: nextLevel,
                 broken: false,
                 salvageShards: 0,
+                prevLevel: currentLevel,
+                cost,
+                baseChance: getEnhanceChance(currentLevel),
+                breakChance: currentLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(currentLevel) : 0,
+                stabilizerUsed: hasStabilizer,
               };
               const weaponType = getWeaponType(prevItem);
               const nextWeaponLevels = { ...(prev.enhancement.weaponLevels || {}) };
@@ -6147,6 +6189,11 @@
                 level: currentLevel,
                 broken: false,
                 salvageShards: 0,
+                prevLevel: currentLevel,
+                cost,
+                baseChance: getEnhanceChance(currentLevel),
+                breakChance: currentLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(currentLevel) : 0,
+                stabilizerUsed: hasStabilizer,
               };
               const prevForge = prev.enhancement.forgeStats || {};
 
@@ -8009,73 +8056,215 @@
                         )}
                       </div>
 
-                      <div className={`border rounded-lg p-4 ${lastEnhancementResult?.broken ? "bg-red-50 border-red-200"
-                        : lastEnhancementResult?.success ? "bg-emerald-50 border-emerald-200"
-                          : lastEnhancementResult ? "bg-amber-50 border-amber-200"
-                            : "bg-white border-gray-200"
-                        }`}>
-                        <div className="text-xs font-bold text-gray-400 uppercase">
-                          {ui.lastEnhancement}
+                      <div className={`border rounded-lg p-4 transition-all duration-300 ${
+                        lastEnhancementResult?.broken
+                          ? "bg-rose-950/40 border-rose-500/60 text-rose-500 animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.15)]"
+                          : lastEnhancementResult?.success
+                            ? "bg-slate-950/80 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                            : lastEnhancementResult
+                              ? "bg-slate-900/80 border-amber-500/40 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.05)]"
+                              : "bg-slate-950/30 border-slate-800 text-slate-500"
+                      }`}>
+                        <div className="text-xs font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-1 flex items-center justify-between">
+                          <span>{ui.lastEnhancement}</span>
+                          {lastEnhancementResult && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                              {language === "ko" ? "실시간 연동됨" : "LIVE LINK"}
+                            </span>
+                          )}
                         </div>
-                        {lastEnhancementResult ? (
-                          <div className="mt-2 space-y-2">
-                            <div className="flex items-center justify-between gap-3">
-                              <div>
-                                <div className="font-black text-gray-800">
-                                  {lastEnhancementResult.itemName}
+                        {lastEnhancementResult ? (() => {
+                          const prevLevel = lastEnhancementResult.prevLevel !== undefined
+                            ? lastEnhancementResult.prevLevel
+                            : (lastEnhancementResult.success ? lastEnhancementResult.level - 1 : lastEnhancementResult.level);
+                          const costVal = lastEnhancementResult.cost !== undefined
+                            ? lastEnhancementResult.cost
+                            : getEnhanceCost(prevLevel);
+                          const baseChanceVal = lastEnhancementResult.baseChance !== undefined
+                            ? lastEnhancementResult.baseChance
+                            : getEnhanceChance(prevLevel);
+                          const breakChanceVal = lastEnhancementResult.breakChance !== undefined
+                            ? lastEnhancementResult.breakChance
+                            : (prevLevel >= ENHANCE_BREAKAGE_START ? getBreakageChance(prevLevel) : 0);
+                          const stabilizerUsedVal = lastEnhancementResult.stabilizerUsed === true;
+
+                          return (
+                            <div className="mt-2 space-y-3">
+                              <div className="flex items-center justify-between gap-3 border-b border-slate-800/60 pb-2">
+                                <div>
+                                  <div className="font-black text-slate-100 text-sm">
+                                    {lastEnhancementResult.itemName}
+                                  </div>
+                                  <div
+                                    className={`text-xs font-black uppercase flex items-center gap-1 ${
+                                      lastEnhancementResult.broken
+                                        ? "text-rose-500"
+                                        : lastEnhancementResult.success
+                                          ? "text-emerald-400"
+                                          : "text-amber-300"
+                                    }`}
+                                  >
+                                    {lastEnhancementResult.broken
+                                      ? (language === "ko" ? "💥 파괴됨" : "💥 BROKEN")
+                                      : lastEnhancementResult.success
+                                        ? (language === "ko" ? "⚡ 제련 성공" : "⚡ Success")
+                                        : (language === "ko" ? "⚠️ 제련 실패 (보존)" : "⚠️ Failed (Safe)")}
+                                  </div>
                                 </div>
-                                <div
-                                  className={`text-xs font-bold uppercase ${lastEnhancementResult.broken ? "text-red-700" : lastEnhancementResult.success ? "text-emerald-600" : "text-amber-600"}`}
-                                >
-                                  {lastEnhancementResult.broken
-                                    ? (language === "ko" ? "💥 파괴됨" : "💥 BROKEN")
+                                <div className={`text-2xl font-black ${
+                                  lastEnhancementResult.broken
+                                    ? "text-rose-500"
                                     : lastEnhancementResult.success
-                                      ? (language === "ko" ? "⚡ 제련 성공" : "⚡ Success")
-                                      : (language === "ko" ? "⚠️ 제련 실패" : "⚠️ Failed")}
+                                      ? "text-emerald-400"
+                                      : "text-amber-300"
+                                }`}>
+                                  {lastEnhancementResult.broken ? "💥" : `+${lastEnhancementResult.level}`}
                                 </div>
                               </div>
-                              <div className={`text-xl font-black ${lastEnhancementResult.broken ? "text-red-400" : lastEnhancementResult.success ? "text-emerald-600" : "text-amber-600"}`}>
-                                +{lastEnhancementResult.level}
+
+                              {/* Structured Grid for Recap Metrics */}
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                {/* Level Shift */}
+                                <div className="flex flex-col justify-between p-2 rounded bg-slate-950/40 border border-slate-800/80">
+                                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                                    {language === "ko" ? "등급 변동" : "Level Shift"}
+                                  </span>
+                                  <div className="mt-1 font-black text-sm flex items-center gap-1.5 text-slate-100">
+                                    <span>+{prevLevel}</span>
+                                    <span className="text-slate-600">→</span>
+                                    {lastEnhancementResult.broken ? (
+                                      <span className="text-rose-500 font-extrabold uppercase">
+                                        {language === "ko" ? "파괴" : "SHATTER"}
+                                      </span>
+                                    ) : (
+                                      <span className={lastEnhancementResult.success ? "text-emerald-400" : "text-amber-400"}>
+                                        +{lastEnhancementResult.level}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Strike Cost */}
+                                <div className="flex flex-col justify-between p-2 rounded bg-slate-950/40 border border-slate-800/80">
+                                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                                    {language === "ko" ? "소모 비용" : "Cost Paid"}
+                                  </span>
+                                  <div className="mt-1 font-black text-sm text-slate-100">
+                                    {formatMoney(costVal)} Cash
+                                  </div>
+                                </div>
+
+                                {/* Chance vs Fate */}
+                                <div className="flex flex-col justify-between p-2 rounded bg-slate-950/40 border border-slate-800/80">
+                                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                                    {language === "ko" ? "확률 vs 결과" : "Chance vs Fate"}
+                                  </span>
+                                  <div className="mt-1 font-bold text-slate-100 flex items-center gap-1 flex-wrap">
+                                    <span>{Math.round(baseChanceVal * 100)}%</span>
+                                    {stabilizerUsedVal && <span className="text-[9px] text-cyan-400 font-black" title="+3% Boost">(+3% 🛡️)</span>}
+                                    <span className="text-slate-600 font-normal">|</span>
+                                    <span className={
+                                      lastEnhancementResult.broken
+                                        ? "text-rose-500 font-black"
+                                        : lastEnhancementResult.success
+                                          ? "text-emerald-400 font-black"
+                                          : "text-amber-300 font-black"
+                                    }>
+                                      {lastEnhancementResult.broken
+                                        ? (language === "ko" ? "파괴" : "BREAK")
+                                        : lastEnhancementResult.success
+                                          ? (language === "ko" ? "성공" : "SUCCESS")
+                                          : (language === "ko" ? "실패" : "FAIL")}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Breakage Risk */}
+                                <div className="flex flex-col justify-between p-2 rounded bg-slate-950/40 border border-slate-800/80">
+                                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                                    {language === "ko" ? "파괴 위험도" : "Breakage Risk"}
+                                  </span>
+                                  <div className="mt-1 font-bold text-slate-100">
+                                    {breakChanceVal > 0 ? (
+                                      <span className="text-rose-400 font-black">
+                                        {Math.round(breakChanceVal * 100)}%
+                                      </span>
+                                    ) : (
+                                      <span className="text-emerald-400 font-bold">
+                                        0% ({language === "ko" ? "안전" : "Safe"})
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Stabilizer Shield status badge */}
+                              <div className="flex items-center justify-between text-[10px] font-bold px-2 py-1 rounded bg-slate-950/20 border border-slate-800/50">
+                                <span className="text-slate-400">
+                                  {language === "ko" ? "보정제 실드 장착" : "Stabilizer Shield"}
+                                </span>
+                                {stabilizerUsedVal ? (
+                                  <span className="text-cyan-400 font-black flex items-center gap-1">
+                                    🛡️ {language === "ko" ? "활성화 (파괴방지 적용됨)" : "ACTIVE (BREAK SHIELDED)"}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-500">
+                                    ❌ {language === "ko" ? "미활성화 (파괴위험 노출)" : "INACTIVE (UNPROTECTED)"}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Shards salvaged (rendered only if weapon shattered) */}
+                              {lastEnhancementResult.broken && lastEnhancementResult.salvageShards > 0 && (
+                                <div className="bg-rose-950/30 border border-rose-500/40 rounded-md p-2 space-y-1 text-left">
+                                  <div className="text-xs font-black text-rose-400 flex items-center gap-1.5">
+                                    💎 +{lastEnhancementResult.salvageShards} {language === "ko" ? "제련 파편 수습 완료" : "Refined Shards Salvaged"}
+                                  </div>
+                                  <div className="text-[10px] font-bold text-rose-300 leading-relaxed">
+                                    {language === "ko"
+                                      ? "파괴된 무기에서 제련 파편을 안정적으로 회수했습니다. 파편을 합성해 다음 제련에서는 보정제(파괴 방지)를 사용하십시오."
+                                      : "Refined shards safely extracted from the residue. Craft stabilizers using shards to protect your next attempt."}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* J-5B: Dynamic Tactical Recommendation String */}
+                              <div className="text-[10px] font-black text-slate-400 bg-slate-950/50 border border-slate-800/60 rounded p-2 text-left leading-relaxed">
+                                <span className="text-amber-400 mr-1">💡 {language === "ko" ? "분석 권장사항:" : "TACTICAL CUE:"}</span>
+                                {lastEnhancementResult.broken ? (
+                                  language === "ko"
+                                    ? "무기가 산산조각 났지만 파편을 회수했습니다. 파편을 모아 보정제를 합성하고 다음 무기를 제련하십시오."
+                                    : "Weapon shattered. Salvage shards to craft a stabilizer, securing your next run."
+                                ) : lastEnhancementResult.success ? (
+                                  lastEnhancementResult.level >= ENHANCE_BREAKAGE_START ? (
+                                    language === "ko"
+                                      ? `+${lastEnhancementResult.level} 성공 완료! 다음 단계는 위험 구간(+${lastEnhancementResult.level + 1})입니다. 보정제 사용 후 타격하십시오.`
+                                      : `Success! Level +${lastEnhancementResult.level + 1} is a Danger Zone. Secure stabilizers before striking again.`
+                                  ) : (
+                                    language === "ko"
+                                      ? `성공 기록 누적. 다음 단계(+${lastEnhancementResult.level + 1})는 안전 영역입니다. 계속 모루를 타격하세요.`
+                                      : `Success. Level +${lastEnhancementResult.level + 1} is safe. Proceed with striking.`
+                                  )
+                                ) : (
+                                  prevLevel >= ENHANCE_BREAKAGE_START ? (
+                                    language === "ko"
+                                      ? "위험 구간에서 강화 수치가 보호되었습니다. 안전 강화를 위해 보정제 사용 후 재시도하십시오."
+                                      : "Enhancement level preserved in Danger Zone. Use a stabilizer for a safer retry."
+                                  ) : (
+                                    language === "ko"
+                                      ? "강화 실패로 등반 흐름이 끊겼습니다. 모루를 다시 타격하여 강화 마스터리에 도달하십시오."
+                                      : "Enhancement failed but level is safe. Strike again to accumulate weapon mastery."
+                                  )
+                                )}
                               </div>
                             </div>
-                            {/* J-3H: Emotional recovery / encouragement feedback */}
-                            {lastEnhancementResult.broken && lastEnhancementResult.salvageShards > 0 && (
-                              <div className="bg-cyan-50 border border-cyan-200 rounded-md p-2 space-y-1">
-                                <div className="text-xs font-black text-cyan-700">
-                                  💎 +{lastEnhancementResult.salvageShards} {language === "ko" ? "제련 파편 회수 완료" : "Refined Shards salvaged"}
-                                </div>
-                                <div className="text-[10px] font-bold text-cyan-600 leading-relaxed">
-                                  {language === "ko"
-                                    ? "파편은 보정제 제작에 사용됩니다. 다음 도전에서 보정제를 장착하면 파괴를 완전히 방지할 수 있습니다."
-                                    : "Shards fuel stabilizer crafting. Equip a stabilizer on your next attempt to fully prevent breakage."}
-                                </div>
-                              </div>
-                            )}
-                            {!lastEnhancementResult.success && !lastEnhancementResult.broken && (
-                              <div className="text-[10px] font-bold text-amber-600 leading-relaxed">
-                                {lastEnhancementResult.level >= ENHANCE_BREAKAGE_START
-                                  ? (language === "ko"
-                                    ? "⚠️ 무기가 파괴 위험을 무사히 통과했습니다. 보정제 사용을 권장합니다."
-                                    : "⚠️ Your weapon survived a break roll. Consider using a stabilizer.")
-                                  : (language === "ko"
-                                    ? "실패는 성공의 어머니. 모루 타격을 다시 수행하십시오."
-                                    : "Failure fuels mastery. Strike the anvil again.")}
-                              </div>
-                            )}
-                            {lastEnhancementResult.success && (
-                              <div className="text-[10px] font-bold text-emerald-600 leading-relaxed">
-                                {lastEnhancementResult.level >= ENHANCE_BREAKAGE_START
-                                  ? (language === "ko"
-                                    ? "위험 구간에서의 성공! 이 무기는 전선의 생존자입니다."
-                                    : "Success in the danger zone! This weapon is a survivor.")
-                                  : (language === "ko"
-                                    ? "제련 완료. 다음 단계를 향해 전진하십시오."
-                                    : "Refinement complete. Push forward to the next level.")}
-                              </div>
-                            )}
+                          );
+                        })() : (
+                          <div className="mt-2 text-xs font-bold text-slate-500 py-4 text-center">
+                            {language === "ko"
+                              ? "최근 모루 타격 기록이 없습니다. 무기 제련을 시작하십시오."
+                              : "No recent anvil strike records. Initiate weapon forge to review results."}
                           </div>
-                        ) : (
-                          <div className="mt-2 font-bold text-gray-400">-</div>
                         )}
                       </div>
 

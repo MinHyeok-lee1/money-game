@@ -125,4 +125,6 @@
         - [x] Phase J-4G: First-Time Forge Onboarding / Empty-State Pass (Smith & Shards guide, currency clarity, and sandbox boundary copy) <!-- id: 94 -->
     - [ ] Phase J-5: Incremental Implementation Pass (Incremental spec implementations in progress) <!-- id: 63 -->
         - [x] Phase J-5A: Prestige Announcement Toast (+6/+8/+10 forge milestone banner, no schema change) <!-- id: 95 -->
+        - [x] Phase J-5B: Forge Result Recap Polish (high-contrast tactical recap metrics grid, dynamic advice cue, live-linked fields) <!-- id: 96 -->
+        - [/] Phase J-5C: Smith & Shards — Regression QA, Mobile Readability Pass & Live Breakage Backend Engine (Plan submitted)
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.

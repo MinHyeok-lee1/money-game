@@ -106,6 +106,7 @@
   - [x] **First-Time Forge Onboarding & Empty State**: Added compact Smith & Shards guidance, currency role explanations, empty armory copy, danger-zone warning, and live forge vs sandbox boundary copy (Phase J-4G complete).
 - [ ] **Incremental Implementation Pass**: Phase in spec changes safely without breaking saves or combat formulas (Phase J-5).
   - [x] **Prestige Announcement Toast**: Added transient +6/+8/+10 forge milestone banner for successful weapon enhancement only (Phase J-5A complete). No schema changes.
+  - [x] **Forge Result Recap Polish**: Added high-fidelity tactical recap metrics grid, dynamic advice cue, and live-linked fields (Phase J-5B complete).
 
 ## Phase 5: Prestige & Honor
 
