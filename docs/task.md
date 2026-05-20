@@ -185,3 +185,17 @@
 - [x] Phase L-4F: RPG stat preview mod bonus line (isFinite-guarded, zero-state hidden) <!-- id: 142 -->
 - [x] Phase L-4G: All L-4 logic tests pass (pool, coverage, display safety) <!-- id: 143 -->
 
+## Phase L-5A: Tactical Mod Identity & Readability Pass
+- [x] Phase L-5A-1: role/roleColor/roleGlyph/flavor added to all 5 WEAPON_MOD_POOL entries <!-- id: 144 -->
+- [x] Phase L-5A-2: getModPoolEntry() lookup helper — display-only, not persisted <!-- id: 145 -->
+- [x] Phase L-5A-3: Smith & Shards weapon card badge updated (role tag + name + stat) <!-- id: 146 -->
+- [x] Phase L-5A-4: Workstation active mod readout updated (role tag + name + stat + flavor) <!-- id: 147 -->
+- [x] Phase L-5A-5: RPG squad card badge updated (role tag + name + stat) <!-- id: 148 -->
+- [x] Phase L-5A-6: previousMod captured as local var in rollWeaponModification before overwrite <!-- id: 149 -->
+- [x] Phase L-5A-7: Roll recap — first-roll vs reroll tactical narrative copy <!-- id: 150 -->
+
+## Phase L-5B: Bulk Shard Conversion & Reaper Scaling
+- [x] Phase L-5B-1: convertAllShardsToTokens handler (4-gate validation, Math.floor, no mutation on fail) <!-- id: 151 -->
+- [x] Phase L-5B-2: Dual-action workbench conversion UI (single + bulk buttons, preview line, flex layout) <!-- id: 152 -->
+- [x] Phase L-5B-3: Infinite Mode shard payout scaling in applyCombatTick (stage >= 101, IntensityTier formula, all guards) <!-- id: 153 -->
+
