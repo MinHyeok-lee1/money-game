@@ -108,6 +108,7 @@
   - [x] **Prestige Announcement Toast**: Added transient +6/+8/+10 forge milestone banner for successful weapon enhancement only (Phase J-5A complete). No schema changes.
   - [x] **Forge Result Recap Polish**: Added high-fidelity tactical recap metrics grid, dynamic advice cue, and live-linked fields (Phase J-5B complete).
   - [x] **Regression QA, Mobile Readability & Live Breakage Backend**: Implemented 1-30 live risk ladder, stabilizer consumption, auto-deletion on shatter, shard deposit, salvage history, and mobile layout fixes (Phase J-5C complete).
+- [x] **Live Forge Risk Ladder Balance QA & Prepare Infinite Reaper Shift**: Upgraded danger confirmation modal, integrated stabilizer alerts, shifted milestone toasts to +10/+20/+30, mapped dynamic scaled power display, and embedded Phase 4 Infinite Mode roadmap teaser (Phase J-5D complete).
 
 ## Phase 5: Prestige & Honor
 

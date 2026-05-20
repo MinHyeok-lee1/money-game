@@ -5893,14 +5893,14 @@
       };
 
       // J-3H: Prestige tier — derived from enhanceLevel, no persistence needed
+      // J-3H: Prestige tier — derived from enhanceLevel, no persistence needed
       const getPrestigeTier = (level) => {
         const l = Math.floor(toFiniteNumber(level, 0));
-        if (l <= 0) return { tier: "base", label: "", borderClass: "border-gray-200", bgClass: "bg-gray-50", textClass: "text-gray-500" };
-        if (l <= 3) return { tier: "green", label: "", borderClass: "border-emerald-200", bgClass: "bg-emerald-50/50", textClass: "text-emerald-600" };
-        if (l <= 5) return { tier: "safe", label: language === "ko" ? "안전" : "SAFE", borderClass: "border-emerald-300", bgClass: "bg-emerald-50", textClass: "text-emerald-700" };
-        if (l <= 7) return { tier: "amber", label: language === "ko" ? "주의" : "CAUTION", borderClass: "border-amber-300", bgClass: "bg-amber-50/60", textClass: "text-amber-600" };
-        if (l <= 9) return { tier: "danger", label: language === "ko" ? "위험" : "DANGER", borderClass: "border-red-300", bgClass: "bg-red-50/50", textClass: "text-red-600" };
-        return { tier: "sovereign", label: language === "ko" ? "군주" : "SOVEREIGN", borderClass: "border-red-400", bgClass: "bg-red-50/70", textClass: "text-red-700" };
+        if (l <= 0) return { tier: "base", label: "", borderClass: "border-gray-800", bgClass: "bg-slate-900/40", textClass: "text-gray-500" };
+        if (l <= 5) return { tier: "green", label: "", borderClass: "border-emerald-950", bgClass: "bg-slate-900/40", textClass: "text-emerald-600" };
+        if (l <= 10) return { tier: "safe", label: language === "ko" ? "안전" : "SAFE", borderClass: "border-emerald-500/30", bgClass: "bg-emerald-950/20", textClass: "text-emerald-900" };
+        if (l <= 20) return { tier: "high_risk", label: language === "ko" ? "고위험" : "HIGH RISK", borderClass: "border-amber-500/40", bgClass: "bg-amber-950/20", textClass: "text-amber-900" };
+        return { tier: "extreme_risk", label: language === "ko" ? "극도위험" : "EXTREME RISK", borderClass: "border-red-500/50", bgClass: "bg-red-950/25", textClass: "text-red-900" };
       };
 
       // J-3H: Compact weapon epithet — derived from existing fields, no persistence
@@ -5912,36 +5912,36 @@
         if (survivals >= 5) return language === "ko" ? "불멸의" : "Undying";
         if (survivals >= 3) return language === "ko" ? "잿더미에서 돌아온" : "Ashen";
         if (survivals >= 1) return language === "ko" ? "흉터의" : "Scarred";
-        if (level >= 8) return language === "ko" ? "전선 정예" : "Elite";
-        if (level >= 6) return language === "ko" ? "숙련된" : "Tempered";
+        if (level >= 20) return language === "ko" ? "전선 정예" : "Elite";
+        if (level >= 10) return language === "ko" ? "숙련된" : "Tempered";
         return null;
       };
 
       const getForgePrestigeAnnouncement = (level, itemName) => {
         const safeLevel = Math.floor(toFiniteNumber(level, 0));
-        if (![6, 8, 10].includes(safeLevel)) return null;
+        if (![10, 20, 30].includes(safeLevel)) return null;
         const safeName = itemName || (language === "ko" ? "무기" : "Weapon");
         const copy = {
-          6: {
-            title: language === "ko" ? "위험 구간 진입" : "Danger Zone Entry",
+          10: {
+            title: language === "ko" ? "🛡️ 안전지대 한계 돌파" : "🛡️ Safe Zone Limit Breached",
             body: language === "ko"
-              ? `${safeName} +6 달성. 이제 실패 시 파괴 위험이 열립니다. 보정제를 신중히 사용하세요.`
-              : `${safeName} reached +6. Future failures can now break the weapon, so stabilizers matter.`,
-            tone: "red",
+              ? `${safeName} +10 달성! 다음 제련부터 고위험 구간(파괴 확률 20%)에 돌입합니다.`
+              : `${safeName} reached +10! Future forge attempts enter the HIGH RISK zone (20% break risk).`,
+            tone: "amber",
           },
-          8: {
-            title: language === "ko" ? "정예 제련 임계점" : "Elite Forge Threshold",
+          20: {
+            title: language === "ko" ? "🚨 고위험 구간 한계 돌파" : "🚨 High Risk Limit Breached",
             body: language === "ko"
-              ? `${safeName} +8 달성. 전선급 무기로 올라섰지만, 다음 타격부터 회복 비용도 커집니다.`
-              : `${safeName} reached +8. This is elite-grade power, but recovery risk is now expensive.`,
+              ? `${safeName} +20 달성! 다음 제련부터 극도 위험 구간(파괴 확률 70%)에 돌입합니다.`
+              : `${safeName} reached +20! Future forge attempts enter the EXTREME RISK zone (70% break risk).`,
             tone: "purple",
           },
-          10: {
-            title: language === "ko" ? "소버린 프로토타입 한계" : "Sovereign Prototype Cap",
+          30: {
+            title: language === "ko" ? "👑 전선의 전설 완성" : "👑 Frontline Legend Completed",
             body: language === "ko"
-              ? `${safeName} +10 달성. 현재 제련 한계에 도달한 소버린급 무기입니다.`
-              : `${safeName} reached +10. This weapon has hit the current sovereign prototype cap.`,
-            tone: "amber",
+              ? `${safeName} +30 최대 제련 도달! 차원이 다른 전설적인 지배자의 힘을 손에 넣었습니다.`
+              : `${safeName} reached +30 max level! You hold the legendary power of an absolute master.`,
+            tone: "red",
           },
         };
         return copy[safeLevel];
@@ -6656,19 +6656,33 @@
           {/* J-3I: Forge Danger Zone Confirmation Modal */}
           {forgeConfirmTarget && (
             <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-6">
-              <div className="w-full max-w-sm bg-gray-900 border-2 border-red-900/50 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+              <div className={`w-full max-w-sm bg-gray-900 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300 border-2 ${
+                forgeConfirmTarget.breakPct >= 70
+                  ? "border-red-600 shadow-[0_0_25px_rgba(220,38,38,0.5)] animate-pulse"
+                  : "border-red-900/50"
+              }`}>
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-red-900/20 rounded-full flex items-center justify-center mb-6 border border-red-500/30">
-                    <span className="text-3xl">⚠️</span>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 border ${
+                    forgeConfirmTarget.breakPct >= 70
+                      ? "bg-red-950/40 border-red-500"
+                      : "bg-red-900/20 border-red-500/30"
+                  }`}>
+                    <span className="text-3xl">{forgeConfirmTarget.breakPct >= 70 ? "🚨" : "⚠️"}</span>
                   </div>
 
                   <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">
-                    {language === "ko" ? "위험 구간 제련 확인" : "DANGER ZONE FORGE"}
+                    {forgeConfirmTarget.breakPct >= 70
+                      ? (language === "ko" ? "극도 위험 제련 확인" : "EXTREME RISK FORGE")
+                      : (language === "ko" ? "위험 구간 제련 확인" : "DANGER ZONE FORGE")}
                   </h2>
 
-                  <div className="bg-red-950/40 border border-red-900/50 rounded-lg px-4 py-2 mb-6">
-                    <p className="text-red-400 text-[11px] font-black uppercase animate-pulse">
-                      {language === "ko" ? "무기가 파괴될 수 있습니다!" : "WEAPON MAY BE DESTROYED!"}
+                  <div className={`border rounded-lg px-4 py-2 mb-6 ${
+                    forgeConfirmTarget.breakPct >= 70 ? "bg-red-950/60 border-red-600 animate-bounce" : "bg-red-950/40 border-red-900/50"
+                  }`}>
+                    <p className="text-red-400 text-[11px] font-black uppercase tracking-wider">
+                      {forgeConfirmTarget.breakPct >= 70
+                        ? (language === "ko" ? "🚨 무기 영구 파괴 위험 70%! 🚨" : "🚨 70% CHANCE OF PERMANENT SHATTER! 🚨")
+                        : (language === "ko" ? "무기가 파괴될 수 있습니다!" : "WEAPON MAY BE DESTROYED!")}
                     </p>
                   </div>
 
@@ -6685,14 +6699,19 @@
                       <span className="text-gray-500 uppercase">{language === "ko" ? "파괴 확률" : "Break Risk"}</span>
                       <span className="text-red-400 font-black">{forgeConfirmTarget.breakPct}%</span>
                     </div>
-                    {forgeConfirmTarget.useStabilizer && (
+                    {forgeConfirmTarget.useStabilizer ? (
                       <div className="flex justify-between items-center text-xs font-bold border-t border-cyan-900/30 pt-2">
-                        <span className="text-cyan-500 uppercase">{language === "ko" ? "🛡️ 보정제" : "🛡️ Stabilizer"}</span>
+                        <span className="text-cyan-500 uppercase">{language === "ko" ? "🛡️ 보정제 적용" : "🛡️ Stabilizer Active"}</span>
                         <span className="text-cyan-400 font-black">{language === "ko" ? "파괴 방지 + 성공률 +3%" : "Break protection + 3% success"}</span>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center text-xs font-bold border-t border-red-950 pt-2">
+                        <span className="text-red-500 uppercase">{language === "ko" ? "⚠️ 보정제 미사용" : "⚠️ NO STABILIZER"}</span>
+                        <span className="text-red-400 font-black">{language === "ko" ? "파괴 방지 없음!" : "No Break Protection!"}</span>
                       </div>
                     )}
                     {!forgeConfirmTarget.useStabilizer && forgeConfirmTarget.stabCount > 0 && (
-                      <div className="text-[9px] font-bold text-cyan-500 text-center pt-1">
+                      <div className="text-[9px] font-bold text-cyan-500 text-center pt-1 border-t border-white/5 mt-1">
                         {language === "ko"
                           ? `보정제 ${forgeConfirmTarget.stabCount}개 보유 중 — 보정 타격을 권장합니다.`
                           : `${forgeConfirmTarget.stabCount} stabilizer(s) available — consider using one.`}
@@ -8600,8 +8619,13 @@
                                     </div>
                                     <div className="text-right flex-shrink-0">
                                       <div className="font-black text-gray-700">
-                                        {formatDps(item.power)}
+                                        {formatDps(Math.round(item.power * (1 + item.enhanceLevel * 0.05)))}
                                       </div>
+                                      {item.enhanceLevel > 0 && (
+                                        <div className="text-[9px] text-emerald-600 font-extrabold">
+                                          +{item.enhanceLevel * 5}% DPS
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   {item.type === "weapon" && !isBroken && (
@@ -9109,9 +9133,14 @@
                   )}
                   {isNormalEndingReached(gameState.rpg) && gameState.rpg?.normalEndingSeen && (
                     <div className="mt-3 px-3 py-2 bg-gray-900/40 border border-gray-700/30 rounded-md text-center">
-                      <span className="text-gray-400 text-[9px] font-black uppercase tracking-widest">
+                      <span className="text-gray-400 text-[9px] font-black uppercase tracking-widest block mb-1">
                         {t.dorothyAcknowledged}
                       </span>
+                      <div className="text-[9px] text-yellow-500/70 font-bold border-t border-gray-800/60 pt-1 mt-1">
+                        {language === "ko"
+                          ? "차기 단계 예고: RPG Phase 4 (Stage 101+ 리퍼 무한 모드 & 난이도 티어). 현재 확장된 +30 제련 무기의 강력한 DPS가 무한 전선 돌파에 필수적입니다."
+                          : "UPCOMING: RPG Phase 4 (Stage 101+ Reaper Infinite Mode & Intensity Tiers). The extended +30 weapon DPS will be critical to survive the infinite onslaught."}
+                      </div>
                     </div>
                   )}
                 </div>

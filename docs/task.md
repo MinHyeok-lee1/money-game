@@ -127,4 +127,5 @@
         - [x] Phase J-5A: Prestige Announcement Toast (+6/+8/+10 forge milestone banner, no schema change) <!-- id: 95 -->
         - [x] Phase J-5B: Forge Result Recap Polish (high-contrast tactical recap metrics grid, dynamic advice cue, live-linked fields) <!-- id: 96 -->
         - [x] Phase J-5C: Smith & Shards — Regression QA, Mobile Readability Pass & Live Breakage Backend Engine (Completed) <!-- id: 97 -->
+        - [x] Phase J-5D: Live Forge Risk Ladder Balance QA & Prepare Infinite Reaper Shift (Completed) <!-- id: 98 -->
 - **Detailed Spec**: See [INFINITE_MODE_DEPTH_SPEC.md](INFINITE_MODE_DEPTH_SPEC.md) for the design details.
