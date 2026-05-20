@@ -1,63 +1,82 @@
-# Implementation Plan: Black Market & Weapon Modification (Phase L-2)
+# Implementation Plan: Mod Milestone QA & Offline Shard Progression (Phase L-7A & M-1)
 
-This plan outlines the QA verification steps for the Black Market scaffolding (Part 1) and the technical specification for the Live Weapon Modification Engine and Workstation UI (Part 2).
+This plan specifies the technical execution details for Phase L-7A (Mod Milestone regression & safety hardening) and Phase M-1 (Offline passive shard calculations and performance optimization).
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - **Zero Schema Version Upgrade**: Weapon mods are stored in the existing `mods` array, and black market tokens are in `wallet.blackMarketTokens`. No new fields are added, maintaining 100% save file compatibility.
-> - **One Active Mod Slot**: As per the prototype design, only a single mod slot is active per weapon. Re-rolling replaces the existing mod.
-> - **Additive Stat Integration**: Weapon modification stat bonuses are cleanly integrated into the existing `getRpgCombatStats` formula without altering core mechanics.
+> - **No Schema Version Upgrade**: The state key remains `moneyGameUniverseStateV1` and schema is fully compatible. The claimed status (`modMilestoneClaimed`) persists correctly inside `enhancement`, and offline shard rewards are injected into `enhancement.refinedShards`.
+> - **Automatic Save on Load**: Upon loading a save file with accumulated offline time, rewards are calculated and written to `localStorage` immediately. This prevents exploits (e.g. force-closing browser to double-claim).
+> - **Compositing Layers for Pulse**: Override base pulse styles globally via CSS GPU layers to prevent micro-stuttering on mobile screens.
+
+## Open Questions
+
+> [!NOTE]
+> None. Requirements are fully specified and the scope is strictly aligned with the requested safety and progression fixes.
 
 ## Proposed Changes
 
-### Part 1: Scaffolding Regression & Economy Safety QA
+### Core Game Implementation
 
-#### [MODIFY] [index.html](file:///C:/Users/ryan/dev/money-game/index.html)
-- **`convertShardsToTokens` Input Validation**:
-  - Update `convertShardsToTokens` to strictly reject non-integer inputs using `!Number.isInteger(amount) || amount <= 0`.
-  - Validate against `NaN`, `Infinity`, decimals, negative numbers, and zeroes.
+#### [MODIFY] [index.html](file:///c:/Users/ryan/dev/money-game/index.html)
 
----
+- **GPU Animation Optimization**:
+  - Add CSS rule inside `<style>` block to optimize `.animate-pulse` and `.animate-pulse-optimized` using compositing layers:
+    ```css
+    .animate-pulse, .animate-pulse-optimized {
+      will-change: opacity, transform;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+    }
+    ```
+  - Apply `animate-pulse-optimized` to the stage progress container and tactical speed descriptions in the Infinite Mode combat panel.
 
-### Part 2: Live Weapon Modification Engine & Workstation UI
+- **`normalizeGameState` Enhancements**:
+  - Ensure `tempOfflineProgress` is explicitly copied inside the return value:
+    `tempOfflineProgress: state?.tempOfflineProgress || null,`
 
-#### [MODIFY] [index.html](file:///C:/Users/ryan/dev/money-game/index.html)
-- **`WEAPON_MOD_POOL` (Static Constant)**:
-  Define static non-persisted constant pool mapping to existing combat keys:
-  - `mod_pen_boost`: PEN flat +15 (`{ pen: 0.15 }`)
-  - `mod_atk_spd`: Atk Speed +5% (`{ spd: 0.05 }`)
-  - `mod_crit_vamp`: Crit Chance +3% (`{ crt: 0.03 }`)
+- **`loadGameState` Offline Progress Engine**:
+  - Integrate passive offline progression:
+    1. Parse `gameState.settings.lastSavedAt`.
+    2. If `offlineMinutes = Math.floor((Date.now() - savedTime) / 60000)` is 1 or more:
+       - Calculate Landlord current passive income.
+       - Calculate passive cash: `offlineCash = offlineMinutes * 60 * currentIncomePerSec`.
+       - If `stage >= 101`, calculate `IntensityTier = Math.floor((stage - 100) / 10) + 1`.
+       - Compute `shardsEarned = Math.floor(offlineMinutes * (2 + 2 * IntensityTier * 0.05))`.
+       - Validate results with `isFinite()` checks.
+       - Immutably update cash and refined shards.
+       - Write a temporary property `tempOfflineProgress` into the state.
+       - Save the modified state to `localStorage` immediately via `saveGameState`.
 
-- **`rollWeaponModification(weaponInstanceId)`**:
-  - Hard guards: `wallet.blackMarketTokens >= 1`, target weapon exists, is not locked, and is not broken.
-  - Deduct 1 `blackMarketTokens` from `wallet`.
-  - Overwrite `item.mods = [selectedMod]` (1 mod slot limit).
-  - Update state immutably.
+- **`checkModMilestoneReward` Hardening**:
+  - Enforce character/run active squad checks for weapon equipment.
+  - Apply double-barrier idempotency guards (checking before update and inside React set state).
+  - Enforce bounds validation for token additions.
 
-- **RPG Combat Tick Integration**:
-  - Update `getRpgCombatStats` to iterate through active characters.
-  - If a character has a weapon with an active mod, add the flat PEN bonus (`totalPen += mod.statBonus.pen`) and multiply percentage multipliers (`totalSpdMult *= (1 + mod.statBonus.spd)` and `totalCrt *= (1 + mod.statBonus.crt)`).
-  - Apply `isFinite()` guards on all added/multiplied stats.
-
-- **Workstation UI Conversion**:
-  - Convert placeholder in `Smith & Shards` tab to a functional block:
-    - **Empty state**: displays label and "벼림 가동 (Roll Passive Trait) (1 암시장 토큰 소모)".
-    - **Active state**: displays mod name in amber glow (`text-amber-400`), its stat bonuses, and a "재개조 (Reroll Trait) (1 암시장 토큰 소모)" button.
-    - **Conversion button**: adjacent to the workstation, displays shard/token balance and converts 100 refined shards to 1 token when clicked.
-    - Enforce active disabled states for locked weapons or low tokens.
+- **`GameApp` React Mount Lifecycle & UI Modal**:
+  - Define local state `const [offlineProgressData, setOfflineProgressData] = useState(null);`.
+  - Add mount `useEffect` to retrieve `tempOfflineProgress`, update local state, and remove the property from React `gameState`.
+  - Render a glassmorphic recap modal at the top of the viewport when `offlineProgressData` is present.
+  - Update `checkModMilestoneReward` trigger `useEffect` to include `gameState.rpg?.characters` in dependencies.
 
 ---
 
 ## Verification Plan
 
-### Automated / Logic Verification
-- Write logic unit tests inside `run_logic_tests.js` to assert:
-  - `convertShardsToTokens` correctly rejects all 6 invalid input types (NaN, Infinity, negative, decimal, 0, insufficient funds).
-  - `rollWeaponModification` properly validates locked/broken states, deducts exactly 1 token, and generates one valid mod.
-  - `getRpgCombatStats` incorporates weapon mods correctly, applies `isFinite` guards, and increases team DPS without crashing.
+### Automated / Code Validation
+- Audit the updated logic to verify:
+  - Exact token awards (+10 tokens) and safety against NaN/Infinity/negative.
+  - Zero token changes on failed checks.
+  - Correct stage boundary logic (>= 150) and equipped weapon check.
+  - Offline shard payout formulas match the spec.
 
 ### Manual Verification
-- **Save Compatibility**: Load legacy save file (with zero tokens/mods) and confirm no render warnings or crashes.
-- **Weapon Modification**: Forge a weapon, earn refined shards, convert them to tokens, and roll traits on the workstation.
-- **Mobile responsiveness**: Inspect layout rendering on 360px width viewport.
+- **Milestone Validation**:
+  - Test at Stage 149 with modded equipped weapon (verify no reward).
+  - Test at Stage 150 with modded unequipped weapon (verify no reward).
+  - Test at Stage 150 with modded equipped weapon (verify reward is awarded and Abyssal Executor badge turns active).
+  - Verify badge pulse works on click and does not award extra tokens.
+- **Offline Passive Calculations**:
+  - Simulate offline progress by manually editing the saved timestamp in localStorage, reloading the app, and verifying cash/shard accumulation in the High-Fidelity modal.
+- **Mobile performance**:
+  - Set browser viewport to 360px width and check rendering and animation smoothness of pulsing elements.

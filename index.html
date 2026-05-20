@@ -23,6 +23,13 @@
     crossorigin="anonymous"></script>
 
   <style>
+    /* GPU optimization for pulsing elements on mobile viewports */
+    .animate-pulse, .animate-pulse-optimized {
+      will-change: opacity, transform;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: #020617;
@@ -3775,6 +3782,7 @@
               ? state.settings.language
               : language,
         },
+        tempOfflineProgress: state?.tempOfflineProgress || null,
       };
     }
 
@@ -3835,6 +3843,86 @@
             language,
           );
           localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
+
+          // Calculate offline passive income and Refined Shards
+          const lastSavedAt = normalizedState.settings?.lastSavedAt;
+          if (lastSavedAt) {
+            const lastSavedTime = new Date(lastSavedAt).getTime();
+            if (isFinite(lastSavedTime) && lastSavedTime > 0) {
+              const diffMs = Date.now() - lastSavedTime;
+              const offlineMinutes = Math.floor(diffMs / 60000);
+              if (offlineMinutes >= 1) {
+                // Calculate Landlord current passive income
+                const landlordMultiplier = toFiniteNumber(normalizedState.landlord?.multiplier, 1);
+                const lang = normalizedState.settings?.language === "ko" ? "ko" : "en";
+                const initialProperties = (PROPERTIES_DATA[lang] || PROPERTIES_DATA.en).map((property) => {
+                  const savedProperty = (normalizedState.landlord?.properties || []).find(
+                    (item) => item.id === property.id,
+                  );
+                  return {
+                    ...property,
+                    count: toFiniteNumber(savedProperty?.count, 0),
+                  };
+                });
+                const currentIncomePerSec = initialProperties.reduce(
+                  (total, prop) => total + prop.baseIncome * prop.count,
+                  0,
+                ) * landlordMultiplier;
+
+                const offlineCash = offlineMinutes * 60 * currentIncomePerSec;
+                const finalOfflineCash = isFinite(offlineCash) && offlineCash > 0 ? Math.floor(offlineCash) : 0;
+
+                // Calculate shards earned in Infinite Mode (Stage >= 101)
+                const stage = normalizedState.rpg?.currentStage ?? normalizedState.rpg?.stage ?? 1;
+                let shardsEarned = 0;
+                if (stage >= 101) {
+                  const intensityTier = Math.floor((stage - 100) / 10) + 1;
+                  if (isFinite(intensityTier)) {
+                    shardsEarned = Math.floor(offlineMinutes * (2 + 2 * intensityTier * 0.05));
+                  }
+                }
+                if (!isFinite(shardsEarned) || shardsEarned < 0) {
+                  shardsEarned = 0;
+                }
+
+                if (finalOfflineCash > 0 || shardsEarned > 0) {
+                  const prevCash = toFiniteNumber(normalizedState.wallet?.cash, 0);
+                  const prevTotalEarned = toFiniteNumber(normalizedState.landlord?.totalEarned, 0);
+                  const prevShards = toFiniteNumber(normalizedState.enhancement?.refinedShards, 0);
+
+                  const nextCash = prevCash + finalOfflineCash;
+                  const nextTotalEarned = prevTotalEarned + finalOfflineCash;
+                  const nextShards = prevShards + shardsEarned;
+
+                  const updatedState = {
+                    ...normalizedState,
+                    wallet: {
+                      ...normalizedState.wallet,
+                      cash: isFinite(nextCash) ? nextCash : prevCash,
+                    },
+                    landlord: {
+                      ...normalizedState.landlord,
+                      totalEarned: isFinite(nextTotalEarned) ? nextTotalEarned : prevTotalEarned,
+                    },
+                    enhancement: {
+                      ...normalizedState.enhancement,
+                      refinedShards: isFinite(nextShards) ? nextShards : prevShards,
+                    },
+                    tempOfflineProgress: {
+                      minutes: offlineMinutes,
+                      cashEarned: finalOfflineCash,
+                      shardsEarned: shardsEarned
+                    }
+                  };
+
+                  // Save updated state to localStorage immediately (updates lastSavedAt timestamp)
+                  saveGameState(updatedState);
+                  return updatedState;
+                }
+              }
+            }
+          }
+
           return normalizedState;
         } catch (error) {
           console.warn("Unable to load saved Money Game state.", error);
@@ -4739,6 +4827,7 @@
       const [showCodexForWeapon, setShowCodexForWeapon] = useState(null); // L-6: instanceId with codex open — local, not persisted
       const [targetRoleSelection, setTargetRoleSelection] = useState({}); // L-6: { [instanceId]: role } — local, not persisted
       const [badgeFlash, setBadgeFlash] = useState({}); // L-7: { [instanceId]: boolean } — local, not persisted
+      const [offlineProgressData, setOfflineProgressData] = useState(null); // M-1: offline progress recap data
       const [tacticalLogFeed, setTacticalLogFeed] = useState([
         "📡 후방 사령부 통신 온라인.",
         "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
@@ -5251,9 +5340,20 @@
         );
       }, [gameState.settings?.language, userLang]);
 
-      useEffect(() => {
+       useEffect(() => {
         saveGameState(gameState);
       }, [gameState]);
+
+      useEffect(() => {
+        if (gameState.tempOfflineProgress) {
+          setOfflineProgressData(gameState.tempOfflineProgress);
+          updateGameState((prev) => {
+            const next = { ...prev };
+            delete next.tempOfflineProgress;
+            return next;
+          });
+        }
+      }, []);
 
       useEffect(() => {
         const currentDefeated = gameState.rpg?.defeatedMonsters || 0;
@@ -5372,6 +5472,7 @@
         gameState.rpg?.stage,
         gameState.enhancement?.modMilestoneClaimed,
         gameState.enhancement?.inventory,
+        gameState.rpg?.characters,
         language
       ]);
 
@@ -6843,14 +6944,38 @@
         }
 
         const stage = currentState.rpg?.currentStage ?? currentState.rpg?.stage ?? 0;
-        const hasModdedWeapon = Array.isArray(currentState.enhancement?.inventory) &&
-          currentState.enhancement.inventory.some(item => item.type === "weapon" && Array.isArray(item.mods) && item.mods.length > 0);
+        
+        // Find all weapon instance IDs equipped on any characters or run activeUnits
+        const equippedWeaponIds = new Set();
+        if (Array.isArray(currentState.rpg?.characters)) {
+          currentState.rpg.characters.forEach((char) => {
+            if (typeof char?.equippedWeaponInstanceId === "string" && char.equippedWeaponInstanceId) {
+              equippedWeaponIds.add(char.equippedWeaponInstanceId);
+            }
+          });
+        }
+        if (Array.isArray(currentState.rpg?.run?.activeUnits)) {
+          currentState.rpg.run.activeUnits.forEach((unit) => {
+            if (typeof unit?.equippedWeaponInstanceId === "string" && unit.equippedWeaponInstanceId) {
+              equippedWeaponIds.add(unit.equippedWeaponInstanceId);
+            }
+          });
+        }
+
+        const hasEquippedModdedWeapon = Array.isArray(currentState.enhancement?.inventory) &&
+          currentState.enhancement.inventory.some((item) => 
+            item.type === "weapon" && 
+            equippedWeaponIds.has(item.instanceId) && 
+            Array.isArray(item.mods) && 
+            item.mods.length > 0
+          );
+
         const unclaimed = currentState.enhancement?.modMilestoneClaimed === false;
 
-        if (stage >= 150 && hasModdedWeapon && unclaimed) {
+        if (stage >= 150 && hasEquippedModdedWeapon && unclaimed) {
           const currentTokens = toFiniteNumber(currentState.wallet?.blackMarketTokens, 0);
           const newBalance = Math.floor(currentTokens + 10);
-          if (!isFinite(newBalance)) {
+          if (!isFinite(newBalance) || newBalance < 0) {
             return { claimed: false, reason: "invalid_balance" };
           }
 
@@ -6860,7 +6985,7 @@
             }
             const innerTokens = toFiniteNumber(prev.wallet?.blackMarketTokens, 0);
             const innerNewBalance = Math.floor(innerTokens + 10);
-            if (!isFinite(innerNewBalance)) return prev;
+            if (!isFinite(innerNewBalance) || innerNewBalance < 0) return prev;
 
             return {
               ...prev,
@@ -6895,7 +7020,7 @@
 
         let failReason = "";
         if (stage < 150) failReason = "stage_insufficient";
-        else if (!hasModdedWeapon) failReason = "no_modded_weapon";
+        else if (!hasEquippedModdedWeapon) failReason = "no_equipped_modded_weapon";
         else if (!unclaimed) failReason = "already_claimed_or_invalid";
         else failReason = "conditions_not_met";
 
@@ -7142,6 +7267,81 @@
 
       return (
         <div className="w-full max-w-4xl flex flex-col items-center relative">
+          {offlineProgressData && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+              <div className="w-full max-w-md bg-zinc-950/80 border border-zinc-800 rounded-2xl p-6 shadow-2xl animate-in fade-in duration-300 relative overflow-hidden">
+                {/* Tactical grid background overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-20" />
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 border-b border-zinc-800/80 pb-4 mb-5">
+                    <div className="p-2 bg-emerald-950/40 rounded-lg border border-emerald-800/50">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">
+                        Tactical Summary
+                      </h3>
+                      <h2 className="text-xl font-black text-white tracking-tight leading-none">
+                        {language === "ko" ? "오프라인 누적 보고서" : "Offline Operations Report"}
+                      </h2>
+                    </div>
+                  </div>
+
+                  <p className="text-xs font-bold text-zinc-400 mb-5 leading-relaxed">
+                    {language === "ko"
+                      ? `후방 부대가 활성 전술 임무 및 소유 자산에서 발생한 잔여 자원을 확보했습니다. (${Math.floor(offlineProgressData.minutes / 60)}시간 ${offlineProgressData.minutes % 60}분 누적)`
+                      : `Logistics units successfully harvested residual assets while you were offline. (Accumulated for ${Math.floor(offlineProgressData.minutes / 60)}h ${offlineProgressData.minutes % 60}m)`}
+                  </p>
+
+                  <div className="bg-zinc-950/60 border border-zinc-800/60 rounded-xl p-4 mb-6 space-y-3">
+                    <div className="flex justify-between items-center text-xs font-bold text-zinc-400">
+                      <span>{language === "ko" ? "누적 작전 시간" : "Operation Elapsed"}</span>
+                      <span className="text-zinc-200">
+                        {Math.floor(offlineProgressData.minutes / 60)}h {offlineProgressData.minutes % 60}m
+                      </span>
+                    </div>
+
+                    <div className="h-[1px] bg-zinc-800/50 w-full" />
+
+                    {offlineProgressData.cashEarned > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-zinc-400">
+                          {language === "ko" ? "₩ 전쟁 자금 수득" : "₩ War Funds Earned"}
+                        </span>
+                        <span className="text-sm font-black text-emerald-400 font-mono">
+                          +₩{offlineProgressData.cashEarned.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+
+                    {offlineProgressData.shardsEarned > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-zinc-400">
+                          {language === "ko" ? "💎 정제된 파편 수득" : "💎 Refined Shards Acquired"}
+                        </span>
+                        <span className="text-sm font-black text-amber-400 font-mono">
+                          +{offlineProgressData.shardsEarned.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setOfflineProgressData(null)}
+                    className="w-full py-3 bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-400 font-black text-xs uppercase tracking-wider rounded-xl border border-emerald-800/60 transition-colors duration-200 active:scale-[0.98] select-none cursor-pointer"
+                  >
+                    {language === "ko" ? "보고서 접수" : "Acknowledge Report"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {gameState.meta?.gameOver && (
             <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-6">
               <div className="w-full max-w-sm bg-gray-900 border-2 border-red-900/50 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
@@ -9782,7 +9982,7 @@
                     {(() => {
                       const isReaperStage = (gameState.rpg?.currentStage || 1) >= 101;
                       const cardClass = isReaperStage 
-                        ? "bg-rose-950/30 border border-rose-800/40 rounded-md p-2 animate-pulse"
+                        ? "bg-rose-950/30 border border-rose-800/40 rounded-md p-2 animate-pulse-optimized"
                         : "bg-black/20 rounded-md p-2";
                       const labelClass = isReaperStage
                         ? "text-rose-400 text-[10px] font-black uppercase tracking-wider"
@@ -9810,7 +10010,7 @@
 
                   {isInfiniteModeStage(gameState.rpg?.currentStage) && (
                     <div className="mt-3 bg-red-950/40 border border-red-900/50 rounded-md p-2 flex items-center gap-2">
-                      <div className="animate-pulse">
+                      <div className="animate-pulse-optimized">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>

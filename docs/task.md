@@ -228,3 +228,15 @@
 - [x] Phase L-7C: Automatic milestone check trigger (combat loop integration / stage change useEffect hook) <!-- id: 173 -->
 - [x] Phase L-7D: Achievement Badge UI (pitch-black tactical theme, '🎖️ 심연의 집행자' badge, active click feedback, compact) <!-- id: 174 -->
 
+## Phase L-7A: Mod Milestone Hardening & Regression QA
+- [x] Target 1: Enforce weapon equipment verification on characters/activeUnits <!-- id: 175 -->
+- [x] Target 2: Double-barrier idempotency guard inside setGameState <!-- id: 176 -->
+- [x] Target 3: Token math safety verification with isFinite & floor bounds <!-- id: 177 -->
+
+## Phase M-1: End-Game UX & Offline Progress Rebalance
+- [x] Target 1: Integrate offline progression calculation on loadGameState <!-- id: 178 -->
+- [x] Target 2: Immutably add passive cash and Refined Shards for Stage 101+ using IntensityTier formula <!-- id: 179 -->
+- [x] Target 3: Render High-Fidelity glassmorphic Offline progress recap modal on mount <!-- id: 180 -->
+- [x] Target 4: Optimize mobile CSS pulse performance via compositing layers <!-- id: 181 -->
+
+
