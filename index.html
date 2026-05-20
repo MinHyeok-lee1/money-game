@@ -491,7 +491,7 @@
     const INVESTMENT_HISTORY_LIMIT = 30;
     const GACHA_DRAW_COST = 1000;
     const GACHA_RECENT_PULL_LIMIT = 10;
-    const MAX_ENHANCE_LEVEL = 30;
+    const MAX_ENHANCE_LEVEL = 10;
     const ENHANCE_SAFE_ZONE_MAX = 5;    // +1~5: no breakage possible
     const ENHANCE_BREAKAGE_START = 6;   // +6+: breakage chance begins
     const SALVAGE_HISTORY_CAP = 10;
@@ -2212,7 +2212,6 @@
           weaponMastery: {},
           weaponLevels: {},
           refinedShards: 0,
-          shards: 0,
           forgeStats: {
             totalAttempts: 0,
             totalSuccesses: 0,
@@ -3426,8 +3425,7 @@
                   enhancement.lastEnhancementResult.stabilizerUsed === true,
               }
               : null,
-          refinedShards: Math.max(0, toFiniteNumber(enhancement.refinedShards !== undefined ? enhancement.refinedShards : enhancement.shards, 0)),
-          shards: Math.max(0, toFiniteNumber(enhancement.shards !== undefined ? enhancement.shards : enhancement.refinedShards, 0)),
+          refinedShards: Math.max(0, toFiniteNumber(enhancement.refinedShards, 0)),
           forgeStats: {
             totalAttempts: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalAttempts, 0))),
             totalSuccesses: Math.max(0, Math.floor(toFiniteNumber(enhancement.forgeStats?.totalSuccesses, 0))),
@@ -5922,7 +5920,7 @@
 
       const getForgePrestigeAnnouncement = (level, itemName) => {
         const safeLevel = Math.floor(toFiniteNumber(level, 0));
-        if (![6, 8, 10, 20, 30].includes(safeLevel)) return null;
+        if (![6, 8, 10].includes(safeLevel)) return null;
         const safeName = itemName || (language === "ko" ? "무기" : "Weapon");
         const copy = {
           6: {
@@ -5940,25 +5938,11 @@
             tone: "purple",
           },
           10: {
-            title: language === "ko" ? "소버린 진입 성공" : "Sovereign Gate Passed",
+            title: language === "ko" ? "소버린 프로토타입 한계" : "Sovereign Prototype Cap",
             body: language === "ko"
-              ? `${safeName} +10 달성. 전설의 대장장이에 다다르기 위한 첫 이정표를 달성했습니다.`
-              : `${safeName} reached +10. Cleared the first threshold toward legend status.`,
+              ? `${safeName} +10 달성. 현재 제련 한계에 도달한 소버린급 무기입니다.`
+              : `${safeName} reached +10. This weapon has hit the current sovereign prototype cap.`,
             tone: "amber",
-          },
-          20: {
-            title: language === "ko" ? "신화급 초월 도달" : "Mythic Transcendence",
-            body: language === "ko"
-              ? `${safeName} +20 달성. 신화에 필적하는 궁극의 초월 무기입니다.`
-              : `${safeName} reached +20. This weapon achieved mythic transcendence.`,
-            tone: "purple",
-          },
-          30: {
-            title: language === "ko" ? "절대 군주성 합일" : "Sovereign Absolute Attunement",
-            body: language === "ko"
-              ? `${safeName} +30 달성. 절대 한계를 뚫고 도달한 우주의 지배자급 무기입니다.`
-              : `${safeName} reached +30. Breaking all limits to achieve absolute universe attunement.`,
-            tone: "red",
           },
         };
         return copy[safeLevel];
