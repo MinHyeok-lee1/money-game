@@ -1017,6 +1017,25 @@
       },
     ];
 
+    // L-2: Static weapon modification pool — not persisted, read-only at integration time
+    const WEAPON_MOD_POOL = [
+      {
+        id: "mod_pen_boost",
+        name: { kr: "전술 철갑탄", en: "Armor PEN +15" },
+        statBonus: { pen: 0.15 },
+      },
+      {
+        id: "mod_atk_spd",
+        name: { kr: "가속 가스관", en: "Atk Speed +5%" },
+        statBonus: { spd: 0.05 },
+      },
+      {
+        id: "mod_crit_vamp",
+        name: { kr: "정밀 광학창", en: "Crit Chance +3%" },
+        statBonus: { crt: 0.03 },
+      },
+    ];
+
     const CHARACTER_RARITY_BALANCE = {
       normal: { baseDpsRange: [8, 14], growthRateRange: [1.05, 1.08] },
       rare: { baseDpsRange: [22, 36], growthRateRange: [1.08, 1.11] },
@@ -3122,6 +3141,23 @@
       };
     }
 
+    // L-2: Pure helper — reads mods[0].statBonus safely, returns zero-object if empty
+    function getWeaponModBonus(weapon) {
+      const ZERO_BONUS = { atk: 0, pen: 0, acc: 0, crt: 0, spd: 0 };
+      if (!weapon) return ZERO_BONUS;
+      const mods = Array.isArray(weapon.mods) ? weapon.mods : [];
+      if (mods.length === 0) return ZERO_BONUS;
+      const raw = mods[0]?.statBonus;
+      if (!raw || typeof raw !== "object") return ZERO_BONUS;
+      return {
+        atk: isFinite(raw.atk) ? Number(raw.atk) : 0,
+        pen: isFinite(raw.pen) ? Number(raw.pen) : 0,
+        acc: isFinite(raw.acc) ? Number(raw.acc) : 0,
+        crt: isFinite(raw.crt) ? Number(raw.crt) : 0,
+        spd: isFinite(raw.spd) ? Number(raw.spd) : 0,
+      };
+    }
+
     function getRpgCombatStats(state) {
       const baseAtk = getTeamBaseAtk(state);
       const atkLevel = getRpgUpgradeLevel(state, "atkLevel");
@@ -3170,17 +3206,35 @@
       const totalPen = penEffect + (leverage.penBonus + specialization.penBonus) * 0.01;
       const totalAcc = accBase + specialization.accBonus;
 
+      // L-2: Additive weapon mod bonuses — aggregated across all equipped weapons in squad
+      // Pure read: getWeaponModBonus never mutates state
+      const inventory = Array.isArray(state.enhancement?.inventory) ? state.enhancement.inventory : [];
+      const modBonusTotals = characters.reduce((totals, unit) => {
+        const weapon = getEquippedWeaponForCharacter(unit, inventory);
+        const bonus = getWeaponModBonus(weapon);
+        return {
+          pen: totals.pen + (isFinite(bonus.pen) ? bonus.pen : 0),
+          crt: totals.crt + (isFinite(bonus.crt) ? bonus.crt : 0),
+          spd: totals.spd + (isFinite(bonus.spd) ? bonus.spd : 0),
+        };
+      }, { pen: 0, crt: 0, spd: 0 });
+      // Average across squad size so a single modded weapon doesn't dominate a 5-unit squad
+      const squadSize = Math.max(1, characters.length);
+      const modPen = modBonusTotals.pen / squadSize;
+      const modCrt = modBonusTotals.crt / squadSize;
+      const modSpd = modBonusTotals.spd / squadSize;
+
       // Pressure Breaker: DMG bonus applied against Stage 101+ enemies
       const currentStage = toFiniteNumber(state.rpg?.currentStage, 1);
       const pressureMult = (currentStage > 100) ? (1 + specialization.pressureBreaker) : 1;
 
       return {
         atk: baseAtk * totalAtkMult * pressureMult,
-        spd: totalSpdMult,
-        pen: totalPen,
+        spd: totalSpdMult + (isFinite(modSpd) ? modSpd : 0),
+        pen: totalPen + (isFinite(modPen) ? modPen : 0),
         acc: totalAcc,
-        crt: totalCrt,
-        totalDps: baseAtk * totalAtkMult * totalSpdMult * pressureMult,
+        crt: totalCrt + (isFinite(modCrt) ? modCrt : 0),
+        totalDps: baseAtk * totalAtkMult * (totalSpdMult + (isFinite(modSpd) ? modSpd : 0)) * pressureMult,
       };
     }
 
@@ -6498,11 +6552,12 @@
       // L-1C: Convert refined shards to black market tokens (100 shards = 1 token)
       const SHARD_TO_TOKEN_RATE = 100;
       const convertShardsToTokens = (amount, stateArg = gameState) => {
-        const cleanAmount = Math.floor(toFiniteNumber(amount, 0));
-        if (cleanAmount <= 0) {
-          console.warn("convertShardsToTokens: Amount must be a positive integer.");
+        // L-2 QA FIX: Explicit isFinite + isInteger guard — rejects NaN, Infinity, floats
+        if (!isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
+          console.warn("convertShardsToTokens: Amount must be a positive integer (got: " + amount + ").");
           return;
         }
+        const cleanAmount = amount; // already validated as positive integer above
         const cost = cleanAmount * SHARD_TO_TOKEN_RATE;
         const currentShards = toFiniteNumber(stateArg?.enhancement?.refinedShards, 0);
         if (currentShards < cost) {
@@ -8901,21 +8956,70 @@
                                         </button>
                                       </div>
 
-                                      {/* L-1D: Weapon Trait Placeholder UI */}
-                                      <div className="bg-zinc-950/80 border border-zinc-900/60 rounded p-1.5 mt-2">
-                                        <div className="text-[9px] font-black text-zinc-500 uppercase tracking-wider mb-0.5">
-                                          ⚙️ {language === "ko" ? "특수 전술 개조" : "Tactical Modifications Preset"}
-                                        </div>
-                                        <div className="text-[9px] font-bold text-zinc-400 leading-tight">
-                                          {(!item.mods || item.mods.length === 0) ? (
-                                            language === "ko"
-                                              ? "암시장 토큰을 확보하여 슬롯을 기동하십시오."
-                                              : "Secure Black Market Tokens to unlock modification presets."
-                                          ) : (
-                                            item.mods.join(", ")
-                                          )}
-                                        </div>
-                                      </div>
+                                      {/* L-2: Weapon Modification Workstation (minimal active terminal) */}
+                                      {(() => {
+                                        const activeMod = (Array.isArray(item.mods) && item.mods.length > 0) ? item.mods[0] : null;
+                                        const refinedShards = Math.max(0, Math.floor(toFiniteNumber(gameState.enhancement?.refinedShards, 0)));
+                                        const bmt = Math.max(0, Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)));
+                                        const canConvert = refinedShards >= SHARD_TO_TOKEN_RATE;
+                                        return (
+                                          <div className="bg-zinc-950/80 border border-zinc-800/60 rounded p-1.5 mt-2 space-y-1.5">
+                                            {/* Header */}
+                                            <div className="flex items-center justify-between">
+                                              <div className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+                                                ⚙️ {language === "ko" ? "특수 전술 개조" : "Tactical Modifications"}
+                                              </div>
+                                              <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-wide opacity-60">
+                                                {language === "ko" ? "[프로토타입]" : "[PROTOTYPE]"}
+                                              </div>
+                                            </div>
+
+                                            {/* Mod state */}
+                                            {activeMod ? (
+                                              <div className="space-y-0.5">
+                                                <div className="text-[9px] font-black text-amber-400 leading-tight">
+                                                  {language === "ko" ? activeMod.name?.kr : activeMod.name?.en}
+                                                </div>
+                                                {activeMod.statBonus && Object.entries(activeMod.statBonus).map(([key, val]) => (
+                                                  <div key={key} className="text-[8px] font-bold text-zinc-400 leading-tight">
+                                                    {key.toUpperCase()}: +{isFinite(val) ? (val * 100).toFixed(0) : "?"}%
+                                                  </div>
+                                                ))}
+                                                <div className="text-[8px] text-zinc-600 italic opacity-60 mt-0.5">
+                                                  {language === "ko" ? "[PROTOTYPE] 재개조 기능 준비 중" : "[PROTOTYPE] Reroll coming soon"}
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              <div className="text-[9px] font-bold text-zinc-500 leading-tight">
+                                                {language === "ko"
+                                                  ? "[PROTOTYPE] 암시장 토큰 확보 후 슬롯 기동 가능"
+                                                  : "[PROTOTYPE] Secure Black Market Tokens to activate slot"}
+                                              </div>
+                                            )}
+
+                                            {/* Shard → Token conversion balance display */}
+                                            <div className="flex items-center justify-between gap-1 pt-0.5 border-t border-zinc-900/60">
+                                              <div className="text-[8px] font-bold text-zinc-500 leading-tight">
+                                                <span className="text-zinc-400">💎 {refinedShards}</span>
+                                                <span className="text-zinc-700 mx-0.5">→</span>
+                                                <span className="text-amber-500/80">🪙 {bmt}</span>
+                                              </div>
+                                              <button
+                                                onClick={() => convertShardsToTokens(1)}
+                                                disabled={!canConvert || isLocked}
+                                                className={`rounded px-1.5 py-0.5 text-[8px] font-black transition-colors flex-shrink-0 ${
+                                                  canConvert && !isLocked
+                                                    ? "bg-amber-900/60 text-amber-300 hover:bg-amber-800/60 border border-amber-700/50"
+                                                    : "bg-zinc-900/40 text-zinc-600 cursor-not-allowed border border-zinc-800/30 opacity-50"
+                                                }`}
+                                                title={language === "ko" ? `파편 100개 → 토큰 1개 (현재 ${refinedShards}개 보유)` : `100 Shards → 1 Token (have ${refinedShards})`}
+                                              >
+                                                {language === "ko" ? "파편 전환" : "Convert"}
+                                              </button>
+                                            </div>
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
                                   )}
                                   {item.type === "weapon" && isBroken && (

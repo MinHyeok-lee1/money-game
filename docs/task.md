@@ -161,3 +161,11 @@
 - [x] Phase L-1D: Implement Weapon Trait Placeholder UI inside Smith & Shards card <!-- id: 124 -->
 - [x] Phase L-1E: End-to-End Regression & Compatibility QA <!-- id: 125 -->
 
+## Phase L-2: Black Market & Weapon Modification
+- [x] Phase L-2A: Part 1 - Scaffolding Regression & Economy Safety QA <!-- id: 126 -->
+- [x] Phase L-2B: Part 2 - Define WEAPON_MOD_POOL static constant <!-- id: 127 -->
+- [x] Phase L-2C: Part 2 - Implement getWeaponModBonus pure helper <!-- id: 128 -->
+- [x] Phase L-2D: Part 2 - Integrate mods into RPG combat stats additively <!-- id: 129 -->
+- [x] Phase L-2E: Part 2 - Convert workstation UI slot (minimal active terminal) <!-- id: 130 -->
+- [x] Phase L-2F: Part 2 - Logic Tests & E2E Validation <!-- id: 131 -->
+

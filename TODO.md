@@ -95,7 +95,7 @@
   - [x] **Current Audit**: Inspect existing codebase hooks and gacha inventory arrays (Phase J-3B & J-3B-1).
   - [x] **Copy & UI Cleanup**: Localize forge naming, anvil actions, and inventory visual reframes safely (Phase J-3C, J-3C-1, J-3E-0, J-3E, J-3E-1 & J-3E-2 complete).
   - [x] **Data & Schema Design**: Model success rates and migration profiles (Phase J-3D complete, J-3F schema proposal complete). Phase J-3G (Breakage/Shards Prototype) remains pending implementation.
-  - [x] **Blacksmith Prototype**: Breakage, salvage shards, stabilizer consumables, lock protection, forge stats (Phase J-3G foundation complete). Black Market trading deferred.
+  - [x] **Blacksmith Prototype**: Breakage, salvage shards, stabilizer consumables, lock protection, forge stats (Phase J-3G foundation complete). Black Market scaffolding complete (L-1). Weapon mod pool, mod bonus helper, and additive RPG integration live (L-2).
   - [x] **Prestige & Recovery UX**: Tier visuals, weapon epithets, danger zone strips, recovery encouragement, equipped badges, forge record display (Phase J-3H complete). No schema changes.
   - [x] **Lock Confirmation & Bulk Salvage Safety**: Locked weapon hard-block, danger-zone confirmation modal, bulk broken weapon cleanup (Phase J-3I complete). No schema changes.
 - [ ] **Defense Tab UX Redesign Spec**: Reframe the RPG tab around Random Tower Defense actions (Summon, Place, Evolve, Defend) (Phase J-4).
@@ -116,3 +116,11 @@
 
 - [ ] Universe reset that grants Honor Points.
 - [ ] Honor shop for permanent bonuses.
+
+## Phase K-3 / L-1 / L-2: Reaper Infinite Mode & Black Market
+
+- [x] **Reaper Run Objective & Reward Loop UX**: Implemented `getNextReaperMilestone`, `getReaperRunObjective`, `getReaperRewardLoopHint` pure helpers + Reaper Run Objective Panel in RPG tab (Phase K-3 complete).
+- [x] **Black Market Economy Scaffolding**: `wallet.blackMarketTokens`, `weapon.mods[]` schema, `normalizeGameState` fallbacks, `convertShardsToTokens` 100:1 helper, weapon card placeholder UI (Phase L-1 complete).
+- [x] **Economy Safety QA**: All 6 unsafe input types rejected by `convertShardsToTokens`. `isFinite`+`isInteger` guard added. `[object Object]` UI bug fixed. All cross-module systems verified untouched (Phase L-2 Part 1 complete).
+- [x] **Weapon Mod Foundation**: `WEAPON_MOD_POOL` (3 mods: PEN/SPD/CRT), `getWeaponModBonus` pure helper, additive integration into `getRpgCombatStats`, minimal workstation UI with `[PROTOTYPE]` signals and shard→token conversion display (Phase L-2 Part 2 complete).
+- [ ] **Weapon Mod Rolling**: `rollWeaponModification` handler with 1-token cost, locked/broken guards, immutable `mods = [selectedMod]` write, and live reroll CTA in workstation (Phase L-3, pending).
