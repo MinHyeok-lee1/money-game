@@ -1,75 +1,42 @@
-# Walkthrough: Reaper Run Objective & Black Market Economy Scaffolding (Phase K-3 & L-1)
+# Change Summary: Black Market Hardening & Milestone Rewards (Phase L-6A & L-7)
 
-All deliverables under Phase K-3 and Phase L-1 are fully implemented and verified. The RPG Infinite Mode progression is clear, and the Black Market scaffolding is safely integrated without save state version updates or legacy file incompatibility.
-
-## Changes Made
-
-### 1. Pure Stage-Driven Helper Functions
-Implemented and exposed to `window`:
-- `getNextReaperMilestone(stage, language)`: Returns the next target milestone (Stage 150, 200, 300, 500, 1000) with a locked/preview boolean indicator.
-- `getReaperRunObjective(stage, language)`: Returns localized one-line current wave survival objectives.
-- `getReaperRewardLoopHint(stage, language)`: Returns localized advice regarding shards and stabilizers.
-
-### 2. Reaper Run Objective Panel (RPG Tab)
-- Added the objective panel block directly below the Infinite Reaper entry controls.
-- Displayed:
-  - Localized current wave survival objective.
-  - Next milestone stage target with locked/preview styling if `isPreview`.
-  - Localized 2-line explanation of the Refined Shard/Stabilizer loop.
-  - Tactical Forge Connection Signal reflecting current blacksmith weapon level readiness.
-
-### 3. State Schema & Blueprint Expansion
-- **Default Game State**: Added `wallet.blackMarketTokens: 0` under `wallet`.
-- **Normalization**: Added safe loading parsing of `blackMarketTokens` inside `normalizeGameState`.
-- **GACHA_ITEMS static registry**: Added `mods: []` to all 5 weapon configurations.
-- **Factory Functions**: Appended `mods: []` inside `createStarterWeaponInstance` and `createPulledGachaItem`.
-- **Item Normalization**: Extended `normalizeGachaItem` to resolve `mods` to a clean array on weapons.
-- **Read Safe Guarding**: Verified legacy code references are protected via default fallback `item.mods ?? []`.
-
-### 4. Shard-to-Token Conversion Helper
-- Implemented `convertShardsToTokens(amount, stateArg)` to deduct Refined Shards (100:1 rate) and credit Black Market Tokens.
-- Embedded validation rules (non-negative, integer counts, sufficient shards). Exposes warning signals to developer console on validation failure. Exposes function on `window` for test integration.
-
-### 5. Weapon Trait Placeholder UI (Smith & Shards Tab)
-- Injected a dark tactical container under active weapon cards.
-- Label: `⚙️ 특수 전술 개조 (Tactical Modifications Preset)`.
-- Content: displays locked state prompt if `item.mods.length === 0`. Fits beautifully within mobile screens without overflow issues.
+- **Date**: 2026-05-20
+- **Author**: Antigravity (Systems Engineer)
+- **Status**: Complete
 
 ---
 
-## Verification & Test Results
+## 1. Targeted Roll & Codex QA + Bug Fix (Phase L-6A)
+- **Gate Testing**: Verified all 6 validation gates on `rollTargetedWeaponModification` to ensure exactly `0` tokens are deducted on fail paths.
+- **Reroll Display Bug Fix**: Fixed a regression at line 9331 where the previous/current mod names comparison was hidden for targeted rerolls because of the condition `isReroll && !recap.isTargeted`. Simplified this check to `isReroll` so that all mod replacements (random and targeted rerolls alike) correctly render the "Prev -> Now" names.
 
-### Automated Sandbox Tests
-Run via Node.js script:
-`node C:\Users\ryan\.gemini\antigravity\brain\8f72c005-caec-4701-8b99-563ec565a336\scratch\run_logic_tests.js`
+---
 
-All tests PASSED:
-```
-Evaluating getNextReaperMilestone...
-Input: 0,en -> Result: { targetStage: 150, label: 'Iron Sentinel Gate', isPreview: false }
-Input: 120,ko -> Result: { targetStage: 150, label: '철벽 감시자의 관문', isPreview: false }
-Input: 150,en -> Result: { targetStage: 200, label: 'Locked Threshold', isPreview: true }
-getNextReaperMilestone: PASS
+## 2. Mod Milestone Persistence & Rewards (Phase L-7)
 
-Evaluating getReaperRunObjective...
-Input: 50,en -> Result: "Enter Infinite Reaper Mode and survive."
-Input: 120,ko -> Result: "Stage 150 Iron Sentinel까지 생존을 유지하십시오."
-getReaperRunObjective: PASS
+### Schema Expansion & Parser
+- **Default State**: Added `modMilestoneClaimed: false` inside the default game state's `enhancement` object in `createDefaultGameState`.
+- **Normalization**: Added strict fallback in `normalizeGameState` (`modMilestoneClaimed: enhancement.modMilestoneClaimed === true ? true : false`) to ensure backward compatibility with older save files.
 
-Evaluating getReaperRewardLoopHint...
-Input: 120,en -> Result: { line1: 'Survival accumulates Refined Shards.', line2: 'Enhance weapons with shards to venture deeper.' }
-getReaperRewardLoopHint: PASS
+### Payout Handler & Hook
+- **Pure Handler**: Implemented `checkModMilestoneReward` to check if:
+  1. `gameState.rpg.stage` or `currentStage` is $\ge 150$.
+  2. Inventory has at least one weapon item with an active tactical mod.
+  3. `modMilestoneClaimed` is strictly `false`.
+- **Transaction Safety**: Performs double-check inside the React state transaction callback `updateGameState` to prevent race conditions or duplicate claiming. Awarded exactly `10` tokens with `Math.floor` and `isFinite` math safety checks.
+- **Toast Announcement**: Triggers the prestige toast `Abyssal Executor` / `심연의 집행자` with amber/golden tone on reward unlock.
+- **Hook Trigger**: Added a React `useEffect` hook to run `checkModMilestoneReward` automatically on Stage changes or when a modded weapon is acquired at Stage 150+.
 
-Evaluating convertShardsToTokens...
-Test 1 (Success 1 token): PASS
-Test 2 (Insufficient shards): PASS
-Test 3 (Negative amount): PASS
-convertShardsToTokens: PASS
+### Achievement Badge UI
+- **Placement**: Nested right below the Conversion CTA row in the Workstation panel inside the Smith & Shards card.
+- **Styling**: Pitch-black tactical theme fitting the game aesthetics.
+  - **Unearned**: Semi-transparent, dim text (`opacity-50`, `text-zinc-500`, no click action).
+  - **Claimed**: Glowing amber color (`text-amber-400`, `bg-amber-950/20`, `border-amber-800/80`, hand cursor).
+- **Interactive Click Feedback**: Clicking the claimed badge triggers a 500ms pulse animation (`scale-105 bg-amber-900/40 border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]`) managed by local React state.
+- **Mobile Responsive**: Scaled to compact `text-[8px]` with wrapping support to fit viewports down to 360px without breaking layout.
 
-ALL LOGIC TESTS PASSED SUCCESSFULLY!
-```
+---
 
-### Manual Verification
-- Checked that loading legacy save files succeeds without state errors.
-- Verified RPG tab panel visibility gates correctly at stage >= 101.
-- Verified Smith & Shards card contains the new preset container.
+## 3. Verification & Diffs
+All files modified are local to `index.html`. No external dependencies or packages were altered. Diffs show precise changes to states, handles, and UI components.
+No temporary patch scripts were left in the repository.

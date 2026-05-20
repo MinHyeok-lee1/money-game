@@ -2283,6 +2283,7 @@
           },
           salvageHistory: [],
           stabilizers: 0,
+          modMilestoneClaimed: false,
         },
         rpg: {
           characters: [],
@@ -3721,6 +3722,7 @@
               .slice(-SALVAGE_HISTORY_CAP)
             : [],
           stabilizers: Math.max(0, Math.floor(toFiniteNumber(enhancement.stabilizers, 0))),
+          modMilestoneClaimed: enhancement.modMilestoneClaimed === true ? true : false,
         },
         rpg: {
           ...defaults.rpg,
@@ -4736,6 +4738,7 @@
       const [lastRollResult, setLastRollResult] = useState(null); // L-3: { instanceId, mod, tokenBalance } | null — cleared on next action
       const [showCodexForWeapon, setShowCodexForWeapon] = useState(null); // L-6: instanceId with codex open — local, not persisted
       const [targetRoleSelection, setTargetRoleSelection] = useState({}); // L-6: { [instanceId]: role } — local, not persisted
+      const [badgeFlash, setBadgeFlash] = useState({}); // L-7: { [instanceId]: boolean } — local, not persisted
       const [tacticalLogFeed, setTacticalLogFeed] = useState([
         "📡 후방 사령부 통신 온라인.",
         "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
@@ -5358,6 +5361,19 @@
         }, 1000);
         return () => clearInterval(timer);
       }, [activeTab, runState.isActive]);
+
+      useEffect(() => {
+        const stage = gameState.rpg?.currentStage ?? gameState.rpg?.stage ?? 0;
+        if (stage >= 150 && gameState.enhancement?.modMilestoneClaimed === false) {
+          checkModMilestoneReward(gameState);
+        }
+      }, [
+        gameState.rpg?.currentStage,
+        gameState.rpg?.stage,
+        gameState.enhancement?.modMilestoneClaimed,
+        gameState.enhancement?.inventory,
+        language
+      ]);
 
       const handleMainClick = (e) => {
         const gain = clickPower * multiplier;
@@ -6820,6 +6836,72 @@
         return tResult;
       };
       window.rollTargetedWeaponModification = rollTargetedWeaponModification;
+
+      const checkModMilestoneReward = (currentState = gameState) => {
+        if (currentState.enhancement?.modMilestoneClaimed === true) {
+          return { claimed: false, reason: "already_claimed" };
+        }
+
+        const stage = currentState.rpg?.currentStage ?? currentState.rpg?.stage ?? 0;
+        const hasModdedWeapon = Array.isArray(currentState.enhancement?.inventory) &&
+          currentState.enhancement.inventory.some(item => item.type === "weapon" && Array.isArray(item.mods) && item.mods.length > 0);
+        const unclaimed = currentState.enhancement?.modMilestoneClaimed === false;
+
+        if (stage >= 150 && hasModdedWeapon && unclaimed) {
+          const currentTokens = toFiniteNumber(currentState.wallet?.blackMarketTokens, 0);
+          const newBalance = Math.floor(currentTokens + 10);
+          if (!isFinite(newBalance)) {
+            return { claimed: false, reason: "invalid_balance" };
+          }
+
+          updateGameState((prev) => {
+            if (prev.enhancement?.modMilestoneClaimed !== false) {
+              return prev;
+            }
+            const innerTokens = toFiniteNumber(prev.wallet?.blackMarketTokens, 0);
+            const innerNewBalance = Math.floor(innerTokens + 10);
+            if (!isFinite(innerNewBalance)) return prev;
+
+            return {
+              ...prev,
+              wallet: {
+                ...prev.wallet,
+                blackMarketTokens: innerNewBalance,
+              },
+              enhancement: {
+                ...prev.enhancement,
+                modMilestoneClaimed: true,
+              },
+            };
+          });
+
+          if (prestigeAnnouncementTimeoutRef.current) {
+            clearTimeout(prestigeAnnouncementTimeoutRef.current);
+          }
+          setPrestigeAnnouncementToast({
+            title: language === "ko" ? "심연의 집행자 (Abyssal Executor)" : "Abyssal Executor",
+            body: language === "ko" ? "✦ 심연의 집행자 달성 — 🪙 10 토큰 지급" : "✦ Abyssal Executor Achieved — 🪙 10 Tokens Awarded",
+            tone: "amber",
+            isMilestoneReward: true,
+            id: Date.now(),
+          });
+          prestigeAnnouncementTimeoutRef.current = setTimeout(() => {
+            setPrestigeAnnouncementToast(null);
+            prestigeAnnouncementTimeoutRef.current = null;
+          }, 4500);
+
+          return { claimed: true, tokensAwarded: 10 };
+        }
+
+        let failReason = "";
+        if (stage < 150) failReason = "stage_insufficient";
+        else if (!hasModdedWeapon) failReason = "no_modded_weapon";
+        else if (!unclaimed) failReason = "already_claimed_or_invalid";
+        else failReason = "conditions_not_met";
+
+        return { claimed: false, reason: failReason };
+      };
+      window.checkModMilestoneReward = checkModMilestoneReward;
 
       // J-3I: Confirmation wrapper — danger-zone weapons route through modal
       const requestEnhance = (instanceId, useStabilizer = false) => {
@@ -9328,7 +9410,7 @@
                                                             ? `개조 완료 — ${recapGlyph} ${recapRole ?? ""} 전술 모듈 장착`
                                                             : `Mod Applied — ${recapGlyph} ${recapRole ?? ""} Tactical Module Equipped`)}
                                                   </div>
-                                                  {isReroll && !recap.isTargeted ? (
+                                                  {isReroll ? (
                                                     <div className="text-[8px] text-zinc-400 leading-tight">
                                                       {language === "ko"
                                                         ? `이전: ${recap.previousMod?.name?.kr ?? "—"} → 현재: ${recap.mod?.name?.kr ?? "—"}`
@@ -9519,6 +9601,34 @@
                                                     : "Token stock sufficient. Attempt a tactical modification."}
                                                 </div>
                                               )}
+                                              {/* L-7: Mod Milestone UI Badge */}
+                                              {(() => {
+                                                const isClaimed = gameState.enhancement?.modMilestoneClaimed === true;
+                                                const isFlashing = !!badgeFlash[item.instanceId];
+                                                return (
+                                                  <div
+                                                    onClick={() => {
+                                                      if (!isClaimed) return;
+                                                      setBadgeFlash(prev => ({ ...prev, [item.instanceId]: true }));
+                                                      setTimeout(() => {
+                                                        setBadgeFlash(prev => ({ ...prev, [item.instanceId]: false }));
+                                                      }, 500);
+                                                    }}
+                                                    className={`mt-1 flex items-center justify-center gap-1 rounded border px-2 py-1 text-[8px] font-black tracking-wider transition-all duration-300 ${
+                                                      isClaimed
+                                                        ? `cursor-pointer text-amber-400 bg-amber-950/20 border-amber-800/80 ${isFlashing ? "scale-105 bg-amber-900/40 border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]" : ""}`
+                                                        : "text-zinc-500 border-zinc-800/50 bg-zinc-950/10 opacity-50 select-none cursor-default"
+                                                    }`}
+                                                    title={
+                                                      isClaimed
+                                                        ? (language === "ko" ? "심연의 집행자 업적 완료 (🪙 10 토큰 획득됨)" : "Abyssal Executor Achievement Unlocked (🪙 10 Tokens Claimed)")
+                                                        : (language === "ko" ? "Stage 150 도달 및 전술 개조 적용 시 해제" : "Unlocks at Stage 150 with a weapon mod equipped")
+                                                    }
+                                                  >
+                                                    🎖️ {language === "ko" ? "심연의 집행자" : "Abyssal Executor"}
+                                                  </div>
+                                                );
+                                              })()}
                                             </div>
 
                                             {/* L-6: Black Market Tactical Codex — collapsible, local state only */}

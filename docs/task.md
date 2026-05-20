@@ -215,3 +215,16 @@
 - [x] Phase L-6-5: Black Market Tactical Codex — toggle, 5-entry list, stats + flavor, collapsed by default <!-- id: 164 -->
 - [x] Phase L-6-6: Roll recap extended — isTargeted header variant + flavor sub-line <!-- id: 165 -->
 
+## Phase L-6A: Targeted Roll & Codex Regression QA
+- [x] Target 1: Gate Failure Paths (exactly 0 tokens deducted on failures) <!-- id: 166 -->
+- [x] Target 2: Token Deduction & Math (exactly 3 tokens, safe balance check, integer math) <!-- id: 167 -->
+- [x] Target 3: Roll Isolation & Codex (no state leaks, collapsibility, correct stats) <!-- id: 168 -->
+- [x] Target 4: Roll Recap Display (fixed reroll recap bug showing previous/current mod names) <!-- id: 169 -->
+- [x] Target 5: UI Layout Constraints (compact, mobile-resilient, localized, no misleading language) <!-- id: 170 -->
+
+## Phase L-7: Mod Milestone Persistence & Rewards
+- [x] Phase L-7A: modMilestoneClaimed schema expansion (createDefaultGameState & normalizeGameState fallback) <!-- id: 171 -->
+- [x] Phase L-7B: checkModMilestoneReward handler (idempotent reward logic, Stage 150+ gate, modded weapon gate, 10 tokens payout, toast) <!-- id: 172 -->
+- [x] Phase L-7C: Automatic milestone check trigger (combat loop integration / stage change useEffect hook) <!-- id: 173 -->
+- [x] Phase L-7D: Achievement Badge UI (pitch-black tactical theme, '🎖️ 심연의 집행자' badge, active click feedback, compact) <!-- id: 174 -->
+
