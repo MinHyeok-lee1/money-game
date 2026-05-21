@@ -239,4 +239,20 @@
 - [x] Target 3: Render High-Fidelity glassmorphic Offline progress recap modal on mount <!-- id: 180 -->
 - [x] Target 4: Optimize mobile CSS pulse performance via compositing layers <!-- id: 181 -->
 
+## Phase M-1A: Offline Exploit & Inflation QA
+- [x] Target 1: Validate timestamp safety (missing, invalid, future, huge elapsed times) <!-- id: 182 -->
+- [x] Target 2: Verify duplicate reward safety (rapid reopening, refresh test) <!-- id: 183 -->
+- [x] Target 3: Inflation pressure assessment (shard rates, token conversion pressure) <!-- id: 184 -->
+- [x] Target 4: Offline progress modal UX (mobile layout, non-overlapping modals) <!-- id: 185 -->
+- [x] Target 5: Economy integrity check (isFinite checks, non-negative floors, Stage <101 check) <!-- id: 186 -->
+- [x] Target 6: Cross-module regression isolation <!-- id: 187 -->
+
+## Phase N-1: Save Encryption & Export/Import
+- [x] Step 3: Implement save data obfuscation (Base64 serialization + 16-bit cyclic checksum) <!-- id: 188 -->
+- [x] Step 3: Implement load data parsing (backward compatibility for plain JSON, checksum verify, validation try/catch) <!-- id: 189 -->
+- [x] Step 4: Implement Export button (clipboard copy with fallback text area) <!-- id: 190 -->
+- [x] Step 4: Implement Import button & modal (validate input, normalize state, immediate save, cancel support) <!-- id: 191 -->
+- [x] Step 5: Scrub non-essential console.logs <!-- id: 192 -->
+
+
 

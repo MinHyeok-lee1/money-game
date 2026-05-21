@@ -495,6 +495,7 @@
     const GAME_STATE_VERSION = 1;
     const GAME_STATE_STORAGE_KEY = "moneyGameUniverseStateV1";
     const LEGACY_LANDLORD_STORAGE_KEY = "idleLandlordSaveV4";
+    const MAX_OFFLINE_SECONDS = 43200; // 12 hours (43200 seconds) cap on offline progress
     const INVESTMENT_HISTORY_LIMIT = 30;
     const GACHA_DRAW_COST = 1000;
     const GACHA_RECENT_PULL_LIMIT = 10;
@@ -3833,99 +3834,155 @@
       }
     }
 
+    function processOfflineProgress(normalizedState) {
+      const lastSavedAt = normalizedState.settings?.lastSavedAt;
+      if (lastSavedAt) {
+        const lastSavedTime = new Date(lastSavedAt).getTime();
+        if (isFinite(lastSavedTime) && lastSavedTime > 0) {
+          const elapsedSeconds = Math.max(0,
+            Math.min(
+              (Date.now() - lastSavedTime) / 1000,
+              MAX_OFFLINE_SECONDS
+            )
+          );
+          if (isFinite(elapsedSeconds) && elapsedSeconds >= 60) {
+            const offlineMinutes = Math.floor(elapsedSeconds / 60);
+            if (offlineMinutes >= 1) {
+              // Calculate Landlord current passive income
+              const landlordMultiplier = toFiniteNumber(normalizedState.landlord?.multiplier, 1);
+              const lang = normalizedState.settings?.language === "ko" ? "ko" : "en";
+              const initialProperties = (PROPERTIES_DATA[lang] || PROPERTIES_DATA.en).map((property) => {
+                const savedProperty = (normalizedState.landlord?.properties || []).find(
+                  (item) => item.id === property.id,
+                );
+                return {
+                  ...property,
+                  count: toFiniteNumber(savedProperty?.count, 0),
+                };
+              });
+              const currentIncomePerSec = initialProperties.reduce(
+                (total, prop) => total + prop.baseIncome * prop.count,
+                0,
+              ) * landlordMultiplier;
+
+              const currentIncomePerSecClean = isFinite(currentIncomePerSec) && currentIncomePerSec > 0 ? currentIncomePerSec : 0;
+              const offlineCash = offlineMinutes * 60 * currentIncomePerSecClean;
+              const finalOfflineCash = isFinite(offlineCash) && offlineCash > 0 ? Math.floor(offlineCash) : 0;
+
+              // Calculate shards earned in Infinite Mode (Stage >= 101)
+              const stage = normalizedState.rpg?.currentStage ?? normalizedState.rpg?.stage ?? 1;
+              let shardsEarned = 0;
+              if (stage >= 101) {
+                const intensityTier = Math.floor((stage - 100) / 10) + 1;
+                if (isFinite(intensityTier) && intensityTier > 0) {
+                  const baseRate = 2 + 2 * intensityTier * 0.05;
+                  const calculatedShards = offlineMinutes * baseRate;
+                  if (isFinite(calculatedShards) && calculatedShards > 0) {
+                    shardsEarned = Math.floor(calculatedShards);
+                  }
+                }
+              }
+              if (!isFinite(shardsEarned) || shardsEarned < 0) {
+                shardsEarned = 0;
+              }
+
+              if (finalOfflineCash > 0 || shardsEarned > 0) {
+                const prevCash = toFiniteNumber(normalizedState.wallet?.cash, 0);
+                const prevTotalEarned = toFiniteNumber(normalizedState.landlord?.totalEarned, 0);
+                const prevShards = toFiniteNumber(normalizedState.enhancement?.refinedShards, 0);
+
+                const nextCash = prevCash + finalOfflineCash;
+                const nextTotalEarned = prevTotalEarned + finalOfflineCash;
+                const nextShards = prevShards + shardsEarned;
+
+                const nowStr = new Date().toISOString();
+                const updatedState = {
+                  ...normalizedState,
+                  wallet: {
+                    ...normalizedState.wallet,
+                    cash: isFinite(nextCash) ? nextCash : prevCash,
+                  },
+                  landlord: {
+                    ...normalizedState.landlord,
+                    totalEarned: isFinite(nextTotalEarned) ? nextTotalEarned : prevTotalEarned,
+                  },
+                  enhancement: {
+                    ...normalizedState.enhancement,
+                    refinedShards: isFinite(nextShards) ? nextShards : prevShards,
+                  },
+                  settings: {
+                    ...normalizedState.settings,
+                    lastSavedAt: nowStr,
+                  },
+                  tempOfflineProgress: {
+                    minutes: offlineMinutes,
+                    cashEarned: finalOfflineCash,
+                    shardsEarned: shardsEarned
+                  }
+                };
+
+                // Save updated state to localStorage immediately
+                saveGameState(updatedState);
+                return updatedState;
+              }
+            }
+          }
+        }
+      }
+      return normalizedState;
+    }
+
     function loadGameState(language = "en") {
       const savedRaw = localStorage.getItem(GAME_STATE_STORAGE_KEY);
 
       if (savedRaw) {
         try {
-          const normalizedState = normalizeGameState(
-            JSON.parse(savedRaw),
-            language,
-          );
-          localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
+          const trimmedRaw = savedRaw.trim();
+          let parsedData = null;
 
-          // Calculate offline passive income and Refined Shards
-          const lastSavedAt = normalizedState.settings?.lastSavedAt;
-          if (lastSavedAt) {
-            const lastSavedTime = new Date(lastSavedAt).getTime();
-            if (isFinite(lastSavedTime) && lastSavedTime > 0) {
-              const diffMs = Date.now() - lastSavedTime;
-              const offlineMinutes = Math.floor(diffMs / 60000);
-              if (offlineMinutes >= 1) {
-                // Calculate Landlord current passive income
-                const landlordMultiplier = toFiniteNumber(normalizedState.landlord?.multiplier, 1);
-                const lang = normalizedState.settings?.language === "ko" ? "ko" : "en";
-                const initialProperties = (PROPERTIES_DATA[lang] || PROPERTIES_DATA.en).map((property) => {
-                  const savedProperty = (normalizedState.landlord?.properties || []).find(
-                    (item) => item.id === property.id,
-                  );
-                  return {
-                    ...property,
-                    count: toFiniteNumber(savedProperty?.count, 0),
-                  };
-                });
-                const currentIncomePerSec = initialProperties.reduce(
-                  (total, prop) => total + prop.baseIncome * prop.count,
-                  0,
-                ) * landlordMultiplier;
-
-                const offlineCash = offlineMinutes * 60 * currentIncomePerSec;
-                const finalOfflineCash = isFinite(offlineCash) && offlineCash > 0 ? Math.floor(offlineCash) : 0;
-
-                // Calculate shards earned in Infinite Mode (Stage >= 101)
-                const stage = normalizedState.rpg?.currentStage ?? normalizedState.rpg?.stage ?? 1;
-                let shardsEarned = 0;
-                if (stage >= 101) {
-                  const intensityTier = Math.floor((stage - 100) / 10) + 1;
-                  if (isFinite(intensityTier)) {
-                    shardsEarned = Math.floor(offlineMinutes * (2 + 2 * intensityTier * 0.05));
-                  }
-                }
-                if (!isFinite(shardsEarned) || shardsEarned < 0) {
-                  shardsEarned = 0;
-                }
-
-                if (finalOfflineCash > 0 || shardsEarned > 0) {
-                  const prevCash = toFiniteNumber(normalizedState.wallet?.cash, 0);
-                  const prevTotalEarned = toFiniteNumber(normalizedState.landlord?.totalEarned, 0);
-                  const prevShards = toFiniteNumber(normalizedState.enhancement?.refinedShards, 0);
-
-                  const nextCash = prevCash + finalOfflineCash;
-                  const nextTotalEarned = prevTotalEarned + finalOfflineCash;
-                  const nextShards = prevShards + shardsEarned;
-
-                  const updatedState = {
-                    ...normalizedState,
-                    wallet: {
-                      ...normalizedState.wallet,
-                      cash: isFinite(nextCash) ? nextCash : prevCash,
-                    },
-                    landlord: {
-                      ...normalizedState.landlord,
-                      totalEarned: isFinite(nextTotalEarned) ? nextTotalEarned : prevTotalEarned,
-                    },
-                    enhancement: {
-                      ...normalizedState.enhancement,
-                      refinedShards: isFinite(nextShards) ? nextShards : prevShards,
-                    },
-                    tempOfflineProgress: {
-                      minutes: offlineMinutes,
-                      cashEarned: finalOfflineCash,
-                      shardsEarned: shardsEarned
-                    }
-                  };
-
-                  // Save updated state to localStorage immediately (updates lastSavedAt timestamp)
-                  saveGameState(updatedState);
-                  return updatedState;
-                }
-              }
+          if (trimmedRaw.startsWith("{")) {
+            // Backward Compatibility: Plain JSON
+            parsedData = JSON.parse(trimmedRaw);
+            const normalizedState = normalizeGameState(parsedData, language);
+            localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
+            // Save immediately in the new encrypted format
+            saveGameState(normalizedState);
+            return processOfflineProgress(normalizedState);
+          } else {
+            // Encrypted Format: split at the last dot
+            const lastDotIndex = trimmedRaw.lastIndexOf(".");
+            if (lastDotIndex === -1) {
+              throw new Error("Missing checksum dot separator");
             }
-          }
+            const encodedPart = trimmedRaw.substring(0, lastDotIndex);
+            const checksumHex = trimmedRaw.substring(lastDotIndex + 1);
 
-          return normalizedState;
+            // Recompute checksum
+            let recomputedChecksum = encodedPart.split("").reduce(
+              (acc, c) => acc + c.charCodeAt(0), 0
+            ) % 65536;
+            if (!isFinite(recomputedChecksum)) {
+              recomputedChecksum = 0;
+            }
+
+            if (recomputedChecksum.toString(16).toLowerCase() !== checksumHex.toLowerCase()) {
+              console.warn("Save data tampered or corrupted (checksum mismatch)");
+              alert(language === "ko"
+                ? "저장 데이터가 손상되었습니다. 기본 상태로 초기화됩니다."
+                : "Save data is corrupted or tampered. Resetting to default state."
+              );
+              return createDefaultGameState(language);
+            }
+
+            const decodedJson = decodeURIComponent(escape(atob(encodedPart)));
+            parsedData = JSON.parse(decodedJson);
+            const normalizedState = normalizeGameState(parsedData, language);
+            localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
+            return processOfflineProgress(normalizedState);
+          }
         } catch (error) {
-          console.warn("Unable to load saved Money Game state.", error);
+          console.warn("Unable to load saved Money Game state, resetting.", error);
+          return migrateLegacyStateIfNeeded(language) || createDefaultGameState(language);
         }
       }
 
@@ -3935,18 +3992,32 @@
     }
 
     function saveGameState(state) {
-      const stateToSave = {
-        ...state,
-        version: GAME_STATE_VERSION,
-        settings: {
-          ...state.settings,
-          lastSavedAt: new Date().toISOString(),
-        },
-      };
-      localStorage.setItem(
-        GAME_STATE_STORAGE_KEY,
-        JSON.stringify(stateToSave),
-      );
+      try {
+        const stateToSave = {
+          ...state,
+          version: GAME_STATE_VERSION,
+          settings: {
+            ...state.settings,
+            lastSavedAt: new Date().toISOString(),
+          },
+        };
+        const json = JSON.stringify(stateToSave);
+        const encoded = btoa(unescape(encodeURIComponent(json)));
+        let checksum = encoded.split("").reduce(
+          (acc, c) => acc + c.charCodeAt(0), 0
+        ) % 65536;
+        if (!isFinite(checksum)) {
+          checksum = 0;
+        }
+
+        const saveString = encoded + "." + checksum.toString(16);
+        localStorage.setItem(
+          GAME_STATE_STORAGE_KEY,
+          saveString,
+        );
+      } catch (error) {
+        console.error("Unable to save Game State in encrypted format:", error);
+      }
     }
 
     // SEO content for search engine optimization
@@ -4828,6 +4899,11 @@
       const [targetRoleSelection, setTargetRoleSelection] = useState({}); // L-6: { [instanceId]: role } — local, not persisted
       const [badgeFlash, setBadgeFlash] = useState({}); // L-7: { [instanceId]: boolean } — local, not persisted
       const [offlineProgressData, setOfflineProgressData] = useState(null); // M-1: offline progress recap data
+      const [showImportModal, setShowImportModal] = useState(false);
+      const [importText, setImportText] = useState("");
+      const [importError, setImportError] = useState(null);
+      const [systemToast, setSystemToast] = useState(null);
+      const [exportFallbackString, setExportFallbackString] = useState("");
       const [tacticalLogFeed, setTacticalLogFeed] = useState([
         "📡 후방 사령부 통신 온라인.",
         "🌲 제1선 최전선 지휘부 방어 태세 유지 중."
@@ -5354,6 +5430,95 @@
           });
         }
       }, []);
+
+      const handleManualSave = () => {
+        saveGameState(gameState);
+        setSystemToast({
+          text: language === "ko" ? "게임 진행 상황이 저장되었습니다." : "Game progress saved successfully.",
+          tone: "success"
+        });
+        setTimeout(() => setSystemToast(null), 3000);
+      };
+
+      const handleExportSave = () => {
+        saveGameState(gameState);
+        const encodedString = localStorage.getItem(GAME_STATE_STORAGE_KEY) || "";
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(encodedString)
+            .then(() => {
+              setSystemToast({
+                text: language === "ko"
+                  ? "저장 데이터가 클립보드에 복사되었습니다."
+                  : "Save data copied to clipboard.",
+                tone: "success"
+              });
+              setTimeout(() => setSystemToast(null), 3000);
+            })
+            .catch((err) => {
+              console.warn("Clipboard write failed, showing manual copy", err);
+              setExportFallbackString(encodedString);
+            });
+        } else {
+          setExportFallbackString(encodedString);
+        }
+      };
+
+      const handleConfirmImport = () => {
+        const rawString = importText.trim();
+        if (!rawString) {
+          setImportError(language === "ko" ? "저장 데이터를 입력해주십시오." : "Please enter the save data.");
+          return;
+        }
+
+        try {
+          let parsedState = null;
+          if (rawString.startsWith("{")) {
+            parsedState = JSON.parse(rawString);
+          } else {
+            const lastDotIndex = rawString.lastIndexOf(".");
+            if (lastDotIndex === -1) {
+              throw new Error("Missing checksum identifier");
+            }
+            const encodedPart = rawString.substring(0, lastDotIndex);
+            const checksumHex = rawString.substring(lastDotIndex + 1);
+
+            let recomputedChecksum = encodedPart.split("").reduce(
+              (acc, c) => acc + c.charCodeAt(0), 0
+            ) % 65536;
+            if (!isFinite(recomputedChecksum)) {
+              recomputedChecksum = 0;
+            }
+
+            if (recomputedChecksum.toString(16).toLowerCase() !== checksumHex.toLowerCase()) {
+              throw new Error("Checksum mismatch");
+            }
+
+            const decodedJson = decodeURIComponent(escape(atob(encodedPart)));
+            parsedState = JSON.parse(decodedJson);
+          }
+
+          if (!parsedState || typeof parsedState !== "object") {
+            throw new Error("Invalid state structure");
+          }
+
+          const normalizedState = normalizeGameState(parsedState, language);
+          setGameState(normalizedState);
+          saveGameState(normalizedState);
+
+          setSystemToast({
+            text: language === "ko" ? "저장 데이터 복구 완료" : "Save data recovery complete",
+            tone: "success"
+          });
+          setTimeout(() => setSystemToast(null), 3000);
+
+          setShowImportModal(false);
+          setImportText("");
+          setImportError(null);
+        } catch (err) {
+          console.warn("Import validation failed", err);
+          setImportError(language === "ko" ? "유효하지 않은 저장 데이터입니다." : "Invalid save data string.");
+        }
+      };
 
       useEffect(() => {
         const currentDefeated = gameState.rpg?.defeatedMonsters || 0;
@@ -7267,9 +7432,92 @@
 
       return (
         <div className="w-full max-w-4xl flex flex-col items-center relative">
-          {offlineProgressData && (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-              <div className="w-full max-w-md bg-zinc-950/80 border border-zinc-800 rounded-2xl p-6 shadow-2xl animate-in fade-in duration-300 relative overflow-hidden">
+          {systemToast && (
+            <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[120] animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className={`px-4 py-2.5 rounded-xl border shadow-xl flex items-center gap-2 text-xs font-bold ${
+                systemToast.tone === "success"
+                  ? "bg-zinc-950/90 text-emerald-400 border-emerald-800/40 shadow-emerald-950/20 shadow-lg"
+                  : "bg-zinc-950/90 text-red-400 border-red-800/40 shadow-red-950/20 shadow-lg"
+              }`}>
+                <span>{systemToast.tone === "success" ? "🏆" : "🚨"}</span>
+                <span>{systemToast.text}</span>
+              </div>
+            </div>
+          )}
+
+          {showImportModal && (
+            <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-4" onClick={() => setShowImportModal(false)}>
+              <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                {/* Tactical grid background overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-20" />
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 border-b border-zinc-800 pb-4 mb-4">
+                    <div className="p-2 bg-amber-950/40 rounded-lg border border-amber-800/40">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">
+                        Data Recovery
+                      </h3>
+                      <h2 className="text-lg font-black text-white tracking-tight leading-none">
+                        {language === "ko" ? "저장 데이터 복구" : "Import Save Data"}
+                      </h2>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] font-bold text-zinc-400 mb-4 leading-relaxed">
+                    {language === "ko"
+                      ? "클립보드에서 추출한 백업 문자열을 입력하십시오. 복구 진행 시 현재 진행 데이터는 덮어씌워집니다."
+                      : "Paste your exported backup string below. This will overwrite your current progress."}
+                  </p>
+
+                  <textarea
+                    value={importText}
+                    onChange={(e) => {
+                      setImportText(e.target.value);
+                      setImportError(null);
+                    }}
+                    placeholder={language === "ko" ? "이곳에 저장 코드를 붙여넣으세요..." : "Paste save code here..."}
+                    className="w-full text-xs font-mono p-3 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 focus:border-amber-500 focus:outline-none rounded-xl h-36 resize-none text-zinc-100 placeholder-zinc-600 transition-all duration-200"
+                  />
+
+                  {importError && (
+                    <div className="mt-2.5 text-xs text-red-400 font-bold flex items-center gap-1.5 animate-pulse">
+                      <span>🚨</span>
+                      <span>{importError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2.5 mt-5">
+                    <button
+                      onClick={() => {
+                        setShowImportModal(false);
+                        setImportText("");
+                        setImportError(null);
+                      }}
+                      className="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-zinc-800 transition-colors cursor-pointer"
+                    >
+                      {language === "ko" ? "취소" : "Cancel"}
+                    </button>
+                    <button
+                      onClick={handleConfirmImport}
+                      className="flex-1 py-2.5 bg-amber-950/40 hover:bg-amber-900/40 text-amber-500 font-black text-xs uppercase tracking-wider rounded-xl border border-amber-800/60 shadow-[0_0_15px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all cursor-pointer"
+                    >
+                      {language === "ko" ? "복구 확인" : "Confirm Import"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {offlineProgressData && !gameState.meta?.gameOver && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4" onClick={(e) => { e.stopPropagation(); setOfflineProgressData(null); }}>
+              <div className="w-full max-w-md bg-zinc-950/80 border border-zinc-800 rounded-2xl p-6 shadow-2xl animate-in fade-in duration-300 relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 {/* Tactical grid background overlay */}
                 <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-20" />
                 <div className="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -7332,7 +7580,7 @@
                   </div>
 
                   <button
-                    onClick={() => setOfflineProgressData(null)}
+                    onClick={(e) => { e.stopPropagation(); setOfflineProgressData(null); }}
                     className="w-full py-3 bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-400 font-black text-xs uppercase tracking-wider rounded-xl border border-emerald-800/60 transition-colors duration-200 active:scale-[0.98] select-none cursor-pointer"
                   >
                     {language === "ko" ? "보고서 접수" : "Acknowledge Report"}
@@ -7784,21 +8032,58 @@
                   </div>
                 </div>
 
-                <section className="w-full bg-white shadow-sm rounded-xl mt-4 p-4 border border-emerald-100">
-                  <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                <section className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl mt-4 p-4 shadow-xl shadow-black/40 relative overflow-hidden text-left">
+                  <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">
                     {ui.saveData}
                   </h2>
                   <div className="grid grid-cols-3 gap-2">
-                    <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
-                      {ui.save}
+                    <button
+                      onClick={handleManualSave}
+                      className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-lg py-2 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      💾 {ui.save}
                     </button>
-                    <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
-                      {ui.export}
+                    <button
+                      onClick={handleExportSave}
+                      className="bg-zinc-900 hover:bg-zinc-800 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/30 rounded-lg py-2 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      📤 {language === "ko" ? "데이터 추출" : "Export Save"}
                     </button>
-                    <button className="bg-gray-100 text-gray-500 rounded-md py-2 text-xs font-bold cursor-not-allowed">
-                      {ui.import}
+                    <button
+                      onClick={() => {
+                        setImportText("");
+                        setImportError(null);
+                        setShowImportModal(true);
+                      }}
+                      className="bg-zinc-900 hover:bg-zinc-800 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/30 rounded-lg py-2 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      📥 {language === "ko" ? "데이터 복구" : "Import Save"}
                     </button>
                   </div>
+                  {exportFallbackString && (
+                    <div className="mt-3 p-3 bg-zinc-900 border border-zinc-800 rounded-lg">
+                      <p className="text-[10px] text-zinc-400 font-bold mb-1.5 uppercase">
+                        {language === "ko" ? "수동 복사 백업 코드:" : "Manual Copy Backup Code:"}
+                      </p>
+                      <textarea
+                        readOnly
+                        value={exportFallbackString}
+                        className="w-full text-[10px] font-mono p-2 bg-zinc-950 text-amber-500/90 border border-zinc-800 rounded h-16 focus:outline-none resize-none"
+                        onClick={(e) => e.target.select()}
+                      />
+                      <div className="flex justify-between items-center mt-1.5">
+                        <span className="text-[9px] text-zinc-500">
+                          {language === "ko" ? "텍스트 영역을 탭하여 전체 선택" : "Click inside to select all"}
+                        </span>
+                        <button
+                          onClick={() => setExportFallbackString("")}
+                          className="text-[9px] font-bold text-zinc-400 hover:text-white cursor-pointer"
+                        >
+                          {language === "ko" ? "닫기" : "Close"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </section>
               </>
             ) : activeTab === "investment" ? (
