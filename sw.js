@@ -1,45 +1,48 @@
-const CACHE_NAME = "capital-frontline-v" + Date.now();
-const STATIC_ASSETS = ["./index.html"];
+// Service Worker for Money Game Universe
+// Timestamped cache to bust stale builds
+const CACHE_NAME = `capital-frontline-${Date.now()}`;
+const STATIC_ASSETS = ['./index.html'];
 
-// Install: pre-cache index.html only
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Activate: remove stale caches
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME)
-            .map(k => caches.delete(k))
-      )
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+// Listen for skip waiting messages from the page
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode !== 'navigate') return;
+  event.respondWith(
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.match('./index.html').then((cached) => {
+        const networkFetch = fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              cache.put('./index.html', response.clone());
+            }
+            return response;
+          })
+          .catch(() => cached);
+        return cached || networkFetch;
+      })
     )
   );
-    self.clients.claim();
-    // Listen for messages to skip waiting (e.g., when a new version is available)
-    self.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'SKIP_WAITING') {
-        self.skipWaiting();
-      }
-    });
-});
-
-// Fetch: navigation requests served from cache
-// ALL other requests pass through — never intercept
-// localStorage, clipboard, or any dynamic operations
-self.addEventListener("fetch", (event) => {
-    if (event.request.mode === "navigate") {
-      event.respondWith(
-        caches.match("./index.html")
-          .then((cached) => cached || fetch(event.request))
-          .catch(() => new Response('<!doctype html><html><body><h1>Offline</h1><p>Please reconnect.</p></body></html>', { headers: { 'Content-Type': 'text/html' } }))
-      );
-      return;
-    }
-  // Non-navigation: fall through to network unchanged
 });
