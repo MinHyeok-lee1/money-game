@@ -1,48 +1,40 @@
 // Service Worker for Money Game Universe
-// Timestamped cache to bust stale builds
-const CACHE_NAME = `capital-frontline-${Date.now()}`;
-const STATIC_ASSETS = ['./index.html'];
+// Every deployment that changes index.html must bump CACHE_NAME manually.
+const CACHE_NAME = "capital-front-v1.0.0";
+const SHELL_URL = "./index.html";
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.add(SHELL_URL))
   );
+  // Activate the new SW immediately.
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) {
+            return caches.delete(name);
+          }
+        })
+      );
+    })
   );
-});
-
-// Listen for skip waiting messages from the page
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode !== 'navigate') return;
-  event.respondWith(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.match('./index.html').then((cached) => {
-        const networkFetch = fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              cache.put('./index.html', response.clone());
-            }
-            return response;
-          })
-          .catch(() => cached);
-        return cached || networkFetch;
-      })
-    )
-  );
+  const req = event.request;
+  // Only handle navigation requests (HTML pages).
+  if (req.mode === 'navigate' || (req.headers.get('Accept') && req.headers.get('Accept').includes('text/html')) ) {
+    event.respondWith(
+      fetch(req).catch(() => caches.match(SHELL_URL))
+    );
+  } else {
+    // For all other requests, fall back to network.
+    event.respondWith(fetch(req));
+  }
 });
