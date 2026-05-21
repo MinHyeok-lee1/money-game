@@ -4,6 +4,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#09090b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="자본전선">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="description"
     content="Capital Front: Deadline - Command war capital, forge weapons, and defend frontline waves in an apocalyptic defense game. 자본전선: 데드라인 - 전선 사수 방어전!" />
@@ -148,6 +154,39 @@
       100% {
         transform: translate(1px, -2px) rotate(-1deg);
       }
+    }
+
+    /* ── Native App Feel ── */
+
+    /* Remove tap flash on all elements */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    /* Prevent text selection on UI chrome */
+    body, div, span, p, h1, h2, h3, h4,
+    button, label, li, ul, nav {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Remove 300ms tap delay on interactive elements */
+    button, [role="button"], a {
+      touch-action: manipulation;
+    }
+
+    /* ── CRITICAL EXCEPTION ──
+       Import textarea MUST remain fully selectable
+       for paste and clipboard operations              */
+    textarea,
+    input[type="text"],
+    input[type="search"],
+    input[type="email"] {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+      -webkit-touch-callout: default !important;
+      touch-action: auto !important;
     }
   </style>
 </head>
@@ -3932,6 +3971,8 @@
       return normalizedState;
     }
 
+    let initialCorruptionDetected = false;
+
     function loadGameState(language = "en") {
       const savedRaw = localStorage.getItem(GAME_STATE_STORAGE_KEY);
 
@@ -3967,10 +4008,7 @@
 
             if (recomputedChecksum.toString(16).toLowerCase() !== checksumHex.toLowerCase()) {
               console.warn("Save data tampered or corrupted (checksum mismatch)");
-              alert(language === "ko"
-                ? "저장 데이터가 손상되었습니다. 기본 상태로 초기화됩니다."
-                : "Save data is corrupted or tampered. Resetting to default state."
-              );
+              initialCorruptionDetected = true;
               return createDefaultGameState(language);
             }
 
@@ -3982,7 +4020,12 @@
           }
         } catch (error) {
           console.warn("Unable to load saved Money Game state, resetting.", error);
-          return migrateLegacyStateIfNeeded(language) || createDefaultGameState(language);
+          const legacy = migrateLegacyStateIfNeeded(language);
+          if (legacy) {
+            return legacy;
+          }
+          initialCorruptionDetected = true;
+          return createDefaultGameState(language);
         }
       }
 
@@ -4899,6 +4942,11 @@
       const [targetRoleSelection, setTargetRoleSelection] = useState({}); // L-6: { [instanceId]: role } — local, not persisted
       const [badgeFlash, setBadgeFlash] = useState({}); // L-7: { [instanceId]: boolean } — local, not persisted
       const [offlineProgressData, setOfflineProgressData] = useState(null); // M-1: offline progress recap data
+      const [showCorruptionNotice, setShowCorruptionNotice] = useState(() => {
+        const val = initialCorruptionDetected;
+        initialCorruptionDetected = false;
+        return val;
+      });
       const [showImportModal, setShowImportModal] = useState(false);
       const [importText, setImportText] = useState("");
       const [importError, setImportError] = useState(null);
@@ -5448,8 +5496,8 @@
             .then(() => {
               setSystemToast({
                 text: language === "ko"
-                  ? "저장 데이터가 클립보드에 복사되었습니다."
-                  : "Save data copied to clipboard.",
+                  ? "저장 코드가 클립보드에 복사되었습니다. 안전한 곳에 보관하십시오."
+                  : "Save code copied to clipboard. Store it in a safe place.",
                 tone: "success"
               });
               setTimeout(() => setSystemToast(null), 3000);
@@ -5466,18 +5514,24 @@
       const handleConfirmImport = () => {
         const rawString = importText.trim();
         if (!rawString) {
-          setImportError(language === "ko" ? "저장 데이터를 입력해주십시오." : "Please enter the save data.");
+          setImportError(language === "ko" ? "저장 코드를 입력하십시오." : "Please enter the save code.");
           return;
         }
 
         try {
           let parsedState = null;
           if (rawString.startsWith("{")) {
-            parsedState = JSON.parse(rawString);
+            try {
+              parsedState = JSON.parse(rawString);
+            } catch (jsonErr) {
+              setImportError(language === "ko" ? "저장 코드를 해석할 수 없습니다. 코드가 완전한지 확인하십시오." : "Unable to parse save code. Ensure it is complete.");
+              return;
+            }
           } else {
             const lastDotIndex = rawString.lastIndexOf(".");
             if (lastDotIndex === -1) {
-              throw new Error("Missing checksum identifier");
+              setImportError(language === "ko" ? "저장 코드 형식이 올바르지 않습니다." : "Invalid save code format.");
+              return;
             }
             const encodedPart = rawString.substring(0, lastDotIndex);
             const checksumHex = rawString.substring(lastDotIndex + 1);
@@ -5490,23 +5544,49 @@
             }
 
             if (recomputedChecksum.toString(16).toLowerCase() !== checksumHex.toLowerCase()) {
-              throw new Error("Checksum mismatch");
+              setImportError(language === "ko" ? "저장 코드가 손상되었거나 변조되었습니다. 올바른 코드를 확인하십시오." : "Save code is corrupted or tampered. Please check the code.");
+              return;
             }
 
-            const decodedJson = decodeURIComponent(escape(atob(encodedPart)));
-            parsedState = JSON.parse(decodedJson);
+            let decodedJson = "";
+            try {
+              decodedJson = decodeURIComponent(escape(atob(encodedPart)));
+            } catch (b64Err) {
+              setImportError(language === "ko" ? "저장 코드 형식이 올바르지 않습니다." : "Invalid save code format.");
+              return;
+            }
+
+            try {
+              parsedState = JSON.parse(decodedJson);
+            } catch (jsonErr) {
+              setImportError(language === "ko" ? "저장 코드를 해석할 수 없습니다. 코드가 완전한지 확인하십시오." : "Unable to parse save code. Ensure it is complete.");
+              return;
+            }
           }
 
           if (!parsedState || typeof parsedState !== "object") {
-            throw new Error("Invalid state structure");
+            setImportError(language === "ko" ? "저장 데이터 구조가 인식되지 않습니다. 최신 버전의 코드인지 확인하십시오." : "Unrecognized save data structure. Check if it is the latest version.");
+            return;
           }
 
-          const normalizedState = normalizeGameState(parsedState, language);
+          let normalizedState = null;
+          try {
+            normalizedState = normalizeGameState(parsedState, language);
+          } catch (normErr) {
+            setImportError(language === "ko" ? "저장 데이터 구조가 인식되지 않습니다. 최신 버전의 코드인지 확인하십시오." : "Unrecognized save data structure. Check if it is the latest version.");
+            return;
+          }
+
+          if (!normalizedState || !normalizedState.wallet || typeof normalizedState.wallet.cash !== "number") {
+            setImportError(language === "ko" ? "저장 데이터 구조가 인식되지 않습니다. 최신 버전의 코드인지 확인하십시오." : "Unrecognized save data structure. Check if it is the latest version.");
+            return;
+          }
+
           setGameState(normalizedState);
           saveGameState(normalizedState);
 
           setSystemToast({
-            text: language === "ko" ? "저장 데이터 복구 완료" : "Save data recovery complete",
+            text: language === "ko" ? "저장 데이터 복구 완료. 진행 상황이 복원되었습니다." : "Save data recovery complete. Progress restored.",
             tone: "success"
           });
           setTimeout(() => setSystemToast(null), 3000);
@@ -5516,7 +5596,7 @@
           setImportError(null);
         } catch (err) {
           console.warn("Import validation failed", err);
-          setImportError(language === "ko" ? "유효하지 않은 저장 데이터입니다." : "Invalid save data string.");
+          setImportError(language === "ko" ? "저장 코드를 해석할 수 없습니다. 코드가 완전한지 확인하십시오." : "Unable to parse save code. Ensure it is complete.");
         }
       };
 
@@ -7445,8 +7525,52 @@
             </div>
           )}
 
+          {showCorruptionNotice && (
+            <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[115] flex items-center justify-center p-4">
+              <div className="w-full max-w-sm bg-zinc-950 border border-red-950 rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-20" />
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10 text-center">
+                  <div className="w-12 h-12 bg-red-950/40 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-800/40">
+                    <span className="text-xl">🚨</span>
+                  </div>
+
+                  <h3 className="text-[10px] font-black text-red-500 uppercase tracking-widest leading-none mb-1.5">
+                    Save File Error
+                  </h3>
+                  <h2 className="text-base font-black text-white tracking-tight leading-snug mb-3">
+                    저장 데이터 오류
+                  </h2>
+
+                  <p className="text-[11px] font-medium text-zinc-400 mb-5 leading-relaxed text-left">
+                    저장 파일을 불러올 수 없어 초기화되었습니다. 이전에 내보낸 저장 코드가 있다면 복구할 수 있습니다.
+                  </p>
+
+                  <div className="flex gap-2.5">
+                    <button
+                      onClick={() => setShowCorruptionNotice(false)}
+                      className="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-zinc-800 transition-colors cursor-pointer"
+                    >
+                      새로 시작
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowCorruptionNotice(false);
+                        setShowImportModal(true);
+                      }}
+                      className="flex-1 py-2.5 bg-red-950/40 hover:bg-red-900/40 text-red-400 font-black text-xs uppercase tracking-wider rounded-xl border border-red-800/60 transition-colors cursor-pointer"
+                    >
+                      데이터 복구
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showImportModal && (
-            <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-4" onClick={() => setShowImportModal(false)}>
+            <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-4" onClick={() => { setShowImportModal(false); setImportText(""); setImportError(null); }}>
               <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
                 {/* Tactical grid background overlay */}
                 <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-20" />
@@ -7460,11 +7584,11 @@
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">
+                      <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">
                         Data Recovery
                       </h3>
                       <h2 className="text-lg font-black text-white tracking-tight leading-none">
-                        {language === "ko" ? "저장 데이터 복구" : "Import Save Data"}
+                        {language === "ko" ? "데이터 복구 (저장 코드 붙여넣기)" : "Import Save Data"}
                       </h2>
                     </div>
                   </div>
@@ -7482,30 +7606,30 @@
                       setImportError(null);
                     }}
                     placeholder={language === "ko" ? "이곳에 저장 코드를 붙여넣으세요..." : "Paste save code here..."}
-                    className="w-full text-xs font-mono p-3 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 focus:border-amber-500 focus:outline-none rounded-xl h-36 resize-none text-zinc-100 placeholder-zinc-600 transition-all duration-200"
+                    className="w-full text-xs font-mono p-3 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 focus:border-amber-500 focus:outline-none rounded-xl min-h-[80px] h-36 resize-y text-zinc-100 placeholder-zinc-600 transition-all duration-200 select-text"
                   />
 
                   {importError && (
-                    <div className="mt-2.5 text-xs text-red-400 font-bold flex items-center gap-1.5 animate-pulse">
-                      <span>🚨</span>
-                      <span>{importError}</span>
+                    <div className="mt-2.5 text-xs text-red-400 font-bold flex items-start gap-1.5 animate-pulse select-none">
+                      <span className="shrink-0">🚨</span>
+                      <span className="line-clamp-2 leading-tight overflow-hidden text-left">{importError}</span>
                     </div>
                   )}
 
-                  <div className="flex gap-2.5 mt-5">
+                  <div className="flex flex-col sm:flex-row gap-2.5 mt-5">
                     <button
                       onClick={() => {
                         setShowImportModal(false);
                         setImportText("");
                         setImportError(null);
                       }}
-                      className="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-zinc-800 transition-colors cursor-pointer"
+                      className="w-full sm:flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-zinc-800 transition-colors cursor-pointer"
                     >
                       {language === "ko" ? "취소" : "Cancel"}
                     </button>
                     <button
                       onClick={handleConfirmImport}
-                      className="flex-1 py-2.5 bg-amber-950/40 hover:bg-amber-900/40 text-amber-500 font-black text-xs uppercase tracking-wider rounded-xl border border-amber-800/60 shadow-[0_0_15px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all cursor-pointer"
+                      className="w-full sm:flex-1 py-2.5 bg-amber-950/40 hover:bg-amber-900/40 text-amber-500 font-black text-xs uppercase tracking-wider rounded-xl border border-amber-800/60 shadow-[0_0_15px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all cursor-pointer"
                     >
                       {language === "ko" ? "복구 확인" : "Confirm Import"}
                     </button>
@@ -8036,30 +8160,37 @@
                   <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">
                     {ui.saveData}
                   </h2>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-2">
                     <button
                       onClick={handleManualSave}
-                      className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-lg py-2 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1"
+                      className="w-full bg-zinc-900 hover:bg-zinc-850 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-lg py-2.5 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      💾 {ui.save}
+                      💾 {language === "ko" ? "진행 상황 저장" : "Save Game Progress"}
                     </button>
-                    <button
-                      onClick={handleExportSave}
-                      className="bg-zinc-900 hover:bg-zinc-800 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/30 rounded-lg py-2 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      📤 {language === "ko" ? "데이터 추출" : "Export Save"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setImportText("");
-                        setImportError(null);
-                        setShowImportModal(true);
-                      }}
-                      className="bg-zinc-900 hover:bg-zinc-800 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/30 rounded-lg py-2 text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      📥 {language === "ko" ? "데이터 복구" : "Import Save"}
-                    </button>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <button
+                        onClick={handleExportSave}
+                        className="bg-zinc-900 hover:bg-zinc-850 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/30 rounded-lg py-2 text-[11px] sm:text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        📤 {language === "ko" ? "데이터 추출 (저장 코드 복사)" : "Export (Copy Save Code)"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setImportText("");
+                          setImportError(null);
+                          setShowImportModal(true);
+                        }}
+                        className="bg-zinc-900 hover:bg-zinc-850 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/30 rounded-lg py-2 text-[11px] sm:text-xs font-bold transition-all active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        📥 {language === "ko" ? "데이터 복구 (저장 코드 붙여넣기)" : "Import (Paste Save Code)"}
+                      </button>
+                    </div>
                   </div>
+                  <p className="text-[10px] text-zinc-500 font-medium mt-2.5 text-center leading-normal">
+                    {language === "ko"
+                      ? "저장 코드를 정기적으로 복사해두면 데이터를 보호할 수 있습니다."
+                      : "Backup your save code regularly to protect your progress."}
+                  </p>
                   {exportFallbackString && (
                     <div className="mt-3 p-3 bg-zinc-900 border border-zinc-800 rounded-lg">
                       <p className="text-[10px] text-zinc-400 font-bold mb-1.5 uppercase">
@@ -11191,6 +11322,20 @@
 
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(<GameApp />);
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./sw.js")
+          .then(reg =>
+            console.log("SW registered:", reg.scope)
+          )
+          .catch(err =>
+            console.warn("SW registration failed:", err)
+          );
+      });
+    }
   </script>
 </body>
 

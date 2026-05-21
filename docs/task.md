@@ -254,5 +254,22 @@
 - [x] Step 4: Implement Import button & modal (validate input, normalize state, immediate save, cancel support) <!-- id: 191 -->
 - [x] Step 5: Scrub non-essential console.logs <!-- id: 192 -->
 
+## Phase N-1B: Save Recovery & Corruption UX Pass
+- [x] Target 1: Remove native browser blocking `alert()` on load corruption detection <!-- id: 193 -->
+- [x] Target 2: Implement React-based corruption overlay notification with CTAs <!-- id: 194 -->
+- [x] Target 3: Implement 5 distinct, descriptive Korean import error messages <!-- id: 195 -->
+- [x] Target 4: Add descriptive Export/Import labels and backup reminder message <!-- id: 196 -->
+- [x] Target 5: Implement mobile-responsive Import modal (flexible width, stack buttons, line-cap errors) <!-- id: 197 -->
+- [x] Target 6: Ensure text areas support copy/paste action selectors <!-- id: 198 -->
+- [x] Target 7: Confirm silent migration of legacy plain JSON data <!-- id: 199 -->
+
+## Phase O-1: PWA Transformation & Native App Feel
+- [x] Target 1: Create web application manifest (`manifest.json`) in project root <!-- id: 200 -->
+- [x] Target 2: Create service worker (`sw.js`) to cache index.html for navigation mode only <!-- id: 201 -->
+- [x] Target 3: Inject manifest link, Apple-specific and Android theme-color meta tags into head <!-- id: 202 -->
+- [x] Target 4: Register the service worker at the end of the body in `index.html` <!-- id: 203 -->
+- [x] Target 5: Implement native app styling tweaks (remove tap-flash, disable selection, manipulator touch-action) <!-- id: 204 -->
+- [x] Target 6: Exception override to keep text-area selectable inside import modal <!-- id: 205 -->
+
 
 

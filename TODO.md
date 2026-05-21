@@ -10,7 +10,7 @@
 - [x] **Horizontal economy model:** `cash` is a cross-module booster; each module has its own entry currency (`investment.capital`, `dividends`, etc.). Vertical cash-gate dependency removed.
 - [x] **Integrated data schema:** wallet, landlord, investment, enhancement, RPG, and settings state are stored together.
 - [x] **Legacy save migration:** existing `idleLandlordSaveV4` data is migrated into Global Wallet and removed.
-- [ ] **Data portability:** add export/import support for saved data.
+- [x] **Data portability:** add export/import support for saved data.
 - [ ] **Cloud saves:** consider Firebase, Supabase, or another hosted save backend later.
 
 ## Phase 1: Idle Landlord
@@ -129,3 +129,18 @@
 - [x] **Bulk Shard Conversion & Reaper Scaling (L-5B)**: `convertAllShardsToTokens()` handler with 4-gate validation (≥100 shards, maxTokens≥1, isFinite+isInteger, underflow guard). Dual-action workbench UI (single + bulk buttons, preview estimate line, flex-col/row layout). Infinite Mode shard payout scaling injected into `applyCombatTick` for stage≥101 (IntensityTier formula, all isFinite guards, stage 1–100 path untouched).
 - [x] **Black Market Economy QA (L-5C)**: Shard pacing traced across all Infinite Mode stage brackets. Reroll spam test passed (functional updates compose correctly, no double-deduction). Inflation risk: LOW 101–200, MEDIUM 300+ (acceptable). Token stockpile advisory added (bmt > 20, display-only). All cross-module systems verified untouched.
 - [x] **Targeted Role Mod & Codex Panel (L-6)**: `rollTargetedWeaponModification()` handler (6-gate validation, exactly 3 tokens, role filter via `WEAPON_MOD_POOL.filter`, random within role, `isTargeted` recap flag). Role selector (5 pills, per-weapon local state). Targeted roll CTA (4 disabled states, cost comparison note). Black Market Tactical Codex panel (collapsible, 5-entry pool list with role/name/stat/flavor, collapsed by default). Recap extended with targeted variant header.
+
+## Phase N-1B & O-1: Save Recovery & PWA Launch
+
+- [x] **Save Recovery & Corruption UX Pass (N-1B)**:
+  - Removed browser blocking `alert()` on corruption detection.
+  - Implemented modular `initialCorruptionDetected` flag and interactive recovery notice modal overlay with option to trigger recovery or dismiss.
+  - Hardened import validations step-by-step with 5 distinct Korean error messages for empty, checksum, base64, JSON, and structural errors.
+  - Added descriptive Export/Import labels and a backup reminder footer.
+  - Redesigned the Import modal layout with responsive grid (stacking on mobile), capped error heights using `line-clamp-2`, and allowed textarea selections.
+  - Verified silent migration of plain legacy JSON save formats without triggering false corruption warnings.
+- [x] **PWA Transformation & Native App Feel (O-1)**:
+  - Created web application `manifest.json` with standalone display mode, orientation lock, metadata, and icon definitions.
+  - Created `sw.js` service worker pre-caching `./index.html` and serving cached assets for navigation mode requests without blocking localStorage or dynamic API operations.
+  - Injected manifest link and apple-mobile-web-app configuration meta tags to `<head>` and registered the service worker before closing the `<body>` of `index.html`.
+  - Added CSS rule tweaks for tap highlight removal, user-select restrictions, tap delay optimizations, and textarea selectable override exceptions.
