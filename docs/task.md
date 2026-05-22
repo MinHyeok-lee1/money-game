@@ -270,6 +270,8 @@
 - [x] Target 4: Register the service worker at the end of the body in `index.html` <!-- id: 203 -->
 - [x] Target 5: Implement native app styling tweaks (remove tap-flash, disable selection, manipulator touch-action) <!-- id: 204 -->
 - [x] Target 6: Exception override to keep text-area selectable inside import modal <!-- id: 205 -->
+- [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A -->
+- [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A -->
 
 
 

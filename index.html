@@ -188,6 +188,15 @@
       -webkit-touch-callout: default !important;
       touch-action: auto !important;
     }
+    /* Safe area insets for standalone */
+    #root,
+    [data-app-root],
+    .app-contain {
+      padding-top: env(safe-area-inset-top);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+    }
   </style>
 </head>
 
@@ -11028,7 +11037,7 @@
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
                         <span className="text-[10px] font-black text-red-500 tracking-widest uppercase">TACTICAL OPERATIONS FEED</span>
                       </div>
-                      <span className="text-[8px] font-mono text-slate-500 uppercase">SYS_STATUS: ONLINE</span>
+                      <span className="text-[8px] font-mono text-slate-500 uppercase">{(() => { if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); }); } return "SYS_STATUS: ONLINE"; })()}</span>
                     </div>
 
                     <div className="h-28 overflow-y-auto space-y-1.5 custom-scrollbar text-[10px] font-mono">
@@ -11326,14 +11335,7 @@
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("./sw.js")
-          .then(reg =>
-            console.log("SW registered:", reg.scope)
-          )
-          .catch(err =>
-            console.warn("SW registration failed:", err)
-          );
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
       });
     }
   </script>

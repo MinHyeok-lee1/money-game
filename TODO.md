@@ -144,3 +144,4 @@
   - Created `sw.js` service worker pre-caching `./index.html` and serving cached assets for navigation mode requests without blocking localStorage or dynamic API operations.
   - Injected manifest link and apple-mobile-web-app configuration meta tags to `<head>` and registered the service worker before closing the `<body>` of `index.html`.
   - Added CSS rule tweaks for tap highlight removal, user-select restrictions, tap delay optimizations, and textarea selectable override exceptions.
+- [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A_TODO -->
