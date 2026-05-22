@@ -387,3 +387,16 @@
 - [x] Verify P-3B salvage row preserved and untouched <!-- id: p3d_p3b_preserved -->
 - [x] Create danger-zone modal prestige audit analysis report <!-- id: p3d_analysis -->
 - [x] Create walkthrough summary <!-- id: p3d_walkthrough -->
+
+## Phase P-3E: Forge UX Cohesion Final Pass
+- [x] Audit full forge player journey: Guide Card → Threshold Education → Danger-Zone Modal → Forge Result → Salvage Recap → Prestige Toast <!-- id: p3e_audit -->
+- [x] Fix status label: "⚡ Success" → "⚡ FORGED" (case consistency with BROKEN) <!-- id: p3e_status_label -->
+- [x] Fix danger zone success cue: eliminate "Success!" tonal whiplash, reframe as tactical confirmation <!-- id: p3e_dz_success -->
+- [x] Fix safe zone success cue: replace flat system message with tactical forward cue <!-- id: p3e_sz_success -->
+- [x] Fix danger zone failure cue: replace passive verbose copy with direct strike-failed language <!-- id: p3e_dz_fail -->
+- [x] Fix safe zone failure cue: remove "weapon mastery" jargon, keep tactical brevity <!-- id: p3e_sz_fail -->
+- [x] Fix high-level salvage panel body: replace "residue" with "wreck" (more evocative, less generic) <!-- id: p3e_salvage_body -->
+- [x] Fix low-level break tactical cue: remove "token recovery" (currency confusion), replace with "small payout" <!-- id: p3e_token_fix -->
+- [x] Verify scope: no economy, schema, or PWA changes — all edits are display-only copy <!-- id: p3e_scope -->
+- [x] Create P-3E cohesion analysis report <!-- id: p3e_analysis -->
+- [x] Create P-3E walkthrough summary <!-- id: p3e_walkthrough -->

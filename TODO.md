@@ -217,3 +217,15 @@
 - [x] **Confirm Button**: "⚒️ ACCEPT THE RISK" (< 70% break) / "⚒️ FORGE UNDER PRESSURE" (>= 70% break). Replaces "FORGE ANYWAY" with deliberate informed commitment.
 - [x] **Scope Verified**: No economy, schema, or PWA changes. P-3B salvage row preserved.
 - [x] **Documentation**: Publish danger-zone modal prestige audit analysis report and walkthrough.
+
+## Phase P-3E: Forge UX Cohesion Final Pass
+
+- [x] **Status Label**: "⚡ Success" → "⚡ FORGED". Now uppercase, consistent with "💥 BROKEN".
+- [x] **Danger Zone Success Cue**: Eliminated tonal whiplash. "Success! Level +N is a Danger Zone…" → "Forged to +N. Level +N+1 enters the danger zone — stabilizer recommended."
+- [x] **Safe Zone Success Cue**: Replaced flat system message. "Success. Level +N is safe. Proceed with striking." → "Forged to +N. Safe zone — advance and strike again."
+- [x] **Danger Zone Failure Cue**: Replaced passive verbose copy. "Enhancement level preserved in Danger Zone. Use a stabilizer…" → "Strike failed — level held in the danger zone. Stabilizer recommended for the next attempt."
+- [x] **Safe Zone Failure Cue**: Removed "weapon mastery" jargon. "Enhancement failed but level is safe. Strike again to accumulate weapon mastery." → "Strike failed. Safe zone — level held. Strike again to advance."
+- [x] **High-Level Salvage Panel Body**: Removed "residue" generic language. "Shards salvaged from residue." → "Salvage secured from the wreck. Craft stabilizers for your next high-tier run."
+- [x] **Low-Level Break Tactical Cue**: Removed "token recovery" (currency confusion). → "Minimal salvage — low-level shatters return only a small payout. Reach +15 for meaningful recovery."
+- [x] **Scope Verified**: No economy, schema, or PWA changes. All 7 edits are display-only copy refinements.
+- [x] **Documentation**: Publish P-3E cohesion final pass analysis report and walkthrough.
