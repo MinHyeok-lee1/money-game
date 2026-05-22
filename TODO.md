@@ -206,3 +206,14 @@
 - [x] **Subtitle Layer**: Added `subtitle` field to `getForgePrestigeAnnouncement`. Rendered between title and body in toast JSX at `text-[11px] font-bold italic opacity-70` — visually subordinate to title, distinct from body.
 - [x] **Scope Verified**: No economy, no schema, no PWA changes. Subtitle is ephemeral display-only.
 - [x] **Documentation**: Publish milestone prestige audit analysis report and walkthrough.
+
+## Phase P-3D: Forge Danger-Zone Confirmation Modal Prestige Audit
+
+- [x] **3-Tier Title**: "DANGER ZONE FORGE" (level < 15) / "HIGH RISK OPERATION" (level 15–19) / "ELITE FORGE COMMITMENT" (level >= 20). Echoes P-3C Tempered → Elite → Legend hierarchy.
+- [x] **Modal Subtitle**: New `<p>` per tier — investment protection (< 15) / meaningful salvage reference (15–19) / scarcity signal (>= 20). `text-[10px] gray-400`, zero height impact concern.
+- [x] **Warning Banner**: Composed 3-tier copy — "DANGER ZONE — WEAPON AT RISK" / "HIGH EXPOSURE — SEVERE SHATTER RISK" / "ELITE ZONE — 70% SHATTER RISK". Removes double-siren panic copy.
+- [x] **Stabilizer Absent**: "⚠️ UNPROTECTED" + "Full exposure — no cover". Removes exclamation-mark tutorial copy.
+- [x] **Stabilizer Advisory**: "Protection protocol available — N stabilizer(s) in reserve." Matches task's target tactical tone example.
+- [x] **Confirm Button**: "⚒️ ACCEPT THE RISK" (< 70% break) / "⚒️ FORGE UNDER PRESSURE" (>= 70% break). Replaces "FORGE ANYWAY" with deliberate informed commitment.
+- [x] **Scope Verified**: No economy, schema, or PWA changes. P-3B salvage row preserved.
+- [x] **Documentation**: Publish danger-zone modal prestige audit analysis report and walkthrough.

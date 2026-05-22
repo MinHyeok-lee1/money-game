@@ -373,3 +373,17 @@
 - [x] Verify mobile readability and toast hierarchy <!-- id: p3c_mobile -->
 - [x] Create milestone prestige audit analysis report <!-- id: p3c_analysis -->
 - [x] Create walkthrough summary <!-- id: p3c_walkthrough -->
+
+## Phase P-3D: Forge Danger-Zone Confirmation Modal Prestige Audit
+- [x] Audit modal title, warning banner, stabilizer messaging, salvage row, confirm button tone <!-- id: p3d_audit -->
+- [x] Implement 3-tier title system (level < 15 / >= 15 / >= 20): DANGER ZONE FORGE / HIGH RISK OPERATION / ELITE FORGE COMMITMENT <!-- id: p3d_title -->
+- [x] Add modal subtitle paragraph per tier: investment / salvage / scarcity context <!-- id: p3d_subtitle -->
+- [x] Refine warning banner to composed 3-tier copy (DANGER ZONE / HIGH EXPOSURE / ELITE ZONE) <!-- id: p3d_banner -->
+- [x] Update stabilizer absent row: "UNPROTECTED" / "Full exposure — no cover" <!-- id: p3d_stab_absent -->
+- [x] Update stabilizer advisory: "Protection protocol available — N in reserve" <!-- id: p3d_stab_advisory -->
+- [x] Update confirm button: "ACCEPT THE RISK" (< 70%) / "FORGE UNDER PRESSURE" (>= 70%) <!-- id: p3d_button -->
+- [x] Verify no economy changes, no schema changes, no PWA changes <!-- id: p3d_scope -->
+- [x] Verify mobile height: subtitle adds ~22px net; fits iPhone SE and Moto G4 <!-- id: p3d_mobile -->
+- [x] Verify P-3B salvage row preserved and untouched <!-- id: p3d_p3b_preserved -->
+- [x] Create danger-zone modal prestige audit analysis report <!-- id: p3d_analysis -->
+- [x] Create walkthrough summary <!-- id: p3d_walkthrough -->

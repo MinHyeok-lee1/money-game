@@ -7891,19 +7891,30 @@
                     <span className="text-3xl">{forgeConfirmTarget.breakPct >= 70 ? "🚨" : "⚠️"}</span>
                   </div>
 
-                  <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">
-                    {forgeConfirmTarget.breakPct >= 70
-                      ? (language === "ko" ? "극도 위험 제련 확인" : "EXTREME RISK FORGE")
-                      : (language === "ko" ? "위험 구간 제련 확인" : "DANGER ZONE FORGE")}
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-1">
+                    {forgeConfirmTarget.level >= 20
+                      ? (language === "ko" ? "정예 제련 작전" : "ELITE FORGE COMMITMENT")
+                      : forgeConfirmTarget.level >= 15
+                        ? (language === "ko" ? "고위험 제련 작전" : "HIGH RISK OPERATION")
+                        : (language === "ko" ? "위험구간 제련 확인" : "DANGER ZONE FORGE")}
                   </h2>
+                  <p className="text-[10px] font-bold text-gray-400 tracking-wide mb-4 mt-0.5">
+                    {forgeConfirmTarget.level >= 20
+                      ? (language === "ko" ? "정예 구간. 극소수만 이 깊이에 도달합니다." : "Elite pressure. Few weapons reach this depth.")
+                      : forgeConfirmTarget.level >= 15
+                        ? (language === "ko" ? "고위험 구간. 파괴 시 의미 있는 파편을 회수합니다." : "Advanced risk. Meaningful salvage awaits if it falls.")
+                        : (language === "ko" ? "위험구간 진입. 투자를 보호하십시오." : "Danger zone active. Protect your investment.")}
+                  </p>
 
                   <div className={`border rounded-lg px-4 py-2 mb-6 ${
                     forgeConfirmTarget.breakPct >= 70 ? "bg-red-950/60 border-red-600 animate-bounce" : "bg-red-950/40 border-red-900/50"
                   }`}>
                     <p className="text-red-400 text-[11px] font-black uppercase tracking-wider">
-                      {forgeConfirmTarget.breakPct >= 70
-                        ? (language === "ko" ? "🚨 무기 영구 파괴 위험 70%! 🚨" : "🚨 70% CHANCE OF PERMANENT SHATTER! 🚨")
-                        : (language === "ko" ? "무기가 파괴될 수 있습니다!" : "WEAPON MAY BE DESTROYED!")}
+                      {forgeConfirmTarget.level >= 20
+                        ? (language === "ko" ? "🚨 정예 구간 — 파괴 위험 70%" : "🚨 ELITE ZONE — 70% SHATTER RISK")
+                        : forgeConfirmTarget.level >= 15
+                          ? (language === "ko" ? "⚠️ 고노출 — 무기 중대 위험" : "⚠️ HIGH EXPOSURE — SEVERE SHATTER RISK")
+                          : (language === "ko" ? "⚠️ 위험구간 — 무기 파괴 위험" : "⚠️ DANGER ZONE — WEAPON AT RISK")}
                     </p>
                   </div>
 
@@ -7927,15 +7938,15 @@
                       </div>
                     ) : (
                       <div className="flex justify-between items-center text-xs font-bold border-t border-red-950 pt-2">
-                        <span className="text-red-500 uppercase">{language === "ko" ? "⚠️ 보정제 미사용" : "⚠️ NO STABILIZER"}</span>
-                        <span className="text-red-400 font-black">{language === "ko" ? "파괴 방지 없음!" : "No Break Protection!"}</span>
+                        <span className="text-red-500 uppercase">{language === "ko" ? "⚠️ 보호 없음" : "⚠️ UNPROTECTED"}</span>
+                        <span className="text-red-400 font-black">{language === "ko" ? "완전 노출 — 방어 없음" : "Full exposure — no cover"}</span>
                       </div>
                     )}
                     {!forgeConfirmTarget.useStabilizer && forgeConfirmTarget.stabCount > 0 && (
                       <div className="text-[9px] font-bold text-cyan-500 text-center pt-1 border-t border-white/5 mt-1">
                         {language === "ko"
-                          ? `보정제 ${forgeConfirmTarget.stabCount}개 보유 중 — 보정 타격을 권장합니다.`
-                          : `${forgeConfirmTarget.stabCount} stabilizer(s) available — consider using one.`}
+                          ? `보호 프로토콜 가동 가능 — 보정제 ${forgeConfirmTarget.stabCount}개 보유.`
+                          : `Protection protocol available — ${forgeConfirmTarget.stabCount} stabilizer(s) in reserve.`}
                       </div>
                     )}
 
@@ -7962,7 +7973,9 @@
                       }}
                       className="w-full py-4 bg-red-700 hover:bg-red-600 text-white font-black text-sm rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-red-900/20 active:scale-95"
                     >
-                      {language === "ko" ? "⚒️ 제련 강행" : "⚒️ FORGE ANYWAY"}
+                      {forgeConfirmTarget.breakPct >= 70
+                        ? (language === "ko" ? "⚒️ 압박 속에서 제련" : "⚒️ FORGE UNDER PRESSURE")
+                        : (language === "ko" ? "⚒️ 위험 감수하고 제련" : "⚒️ ACCEPT THE RISK")}
                     </button>
                     <button
                       onClick={() => setForgeConfirmTarget(null)}
