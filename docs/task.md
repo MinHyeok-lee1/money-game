@@ -361,3 +361,15 @@
 - [x] Verify modal education row uses only existing forgeConfirmTarget.level (no new state) <!-- id: p3b_no_new_state -->
 - [x] Create threshold onboarding analysis report <!-- id: p3b_analysis -->
 - [x] Create walkthrough summary <!-- id: p3b_walkthrough -->
+
+## Phase P-3C: Forge Milestone Prestige Cue Audit
+- [x] Audit +10, +20, +30 milestone tone escalation and prestige coherence <!-- id: p3c_audit -->
+- [x] Refine +10 title to "Tempered" identity conferral; add danger/investment body copy <!-- id: p3c_10_copy -->
+- [x] Refine +20 title to "Elite Territory — Maximum Stakes"; add rarity-salvage economy link <!-- id: p3c_20_copy -->
+- [x] Refine +30 body to scarcity/legacy statement; add subtitle for journey acknowledgment <!-- id: p3c_30_copy -->
+- [x] Add subtitle field to all three milestone tiers (prestige tagline layer) <!-- id: p3c_subtitle_data -->
+- [x] Add subtitle render to milestone toast JSX (conditional, between title and body) <!-- id: p3c_subtitle_jsx -->
+- [x] Verify no economy changes, no schema changes, no PWA changes <!-- id: p3c_scope -->
+- [x] Verify mobile readability and toast hierarchy <!-- id: p3c_mobile -->
+- [x] Create milestone prestige audit analysis report <!-- id: p3c_analysis -->
+- [x] Create walkthrough summary <!-- id: p3c_walkthrough -->

@@ -6647,30 +6647,34 @@
         return null;
       };
 
+      // P-3C: Forge Milestone Prestige Cues — escalating danger, economy, and stabilizer education
       const getForgePrestigeAnnouncement = (level, itemName) => {
         const safeLevel = Math.floor(toFiniteNumber(level, 0));
         if (![10, 20, 30].includes(safeLevel)) return null;
-        const safeName = itemName || (language === "ko" ? "무기" : "Weapon");
+        const safeName = itemName || (language === "ko" ? "\ubb34\uae30" : "Weapon");
         const copy = {
           10: {
-            title: language === "ko" ? "🛡️ 안전지대 한계 돌파" : "🛡️ Safe Zone Limit Breached",
+            title: language === "ko" ? "\ud83d\udee1\ufe0f \ub2f4\uae08\uc9c8 \uc644\ub8cc \u2014 \uc704\ud5d8\uad6c\uac04 \ub3cc\uc785" : "\ud83d\udee1\ufe0f Tempered \u2014 Danger Zone Begins",
+            subtitle: language === "ko" ? "\ud30c\uad34 \uc704\ud5d8 \ud65c\uc131\ud654. \uc774\uc81c\ubd80\ud130 \ubaa8\ub4e0 \uc2dc\ub3c4\uac00 \ub3c4\ubc15\uc785\ub2c8\ub2e4." : "Break pressure is live. Every step forward costs.",
             body: language === "ko"
-              ? `${safeName} +10 달성! 다음 제련부터 고위험 구간(파괴 확률 20%)에 돌입합니다.`
-              : `${safeName} reached +10! Future forge attempts enter the HIGH RISK zone (20% break risk).`,
+              ? `${safeName} +10 \uc784\uacc4\uc810 \ub3cc\ud30c. \ud30c\uad34 \ud655\ub960 20% \ud65c\uc131\ud654. +15 \ub2ec\uc131 \uc2dc \uc758\ubbf8 \uc788\ub294 \ud30c\ud3b8 \ud68c\uc218 \uac1c\uc2dc. \ubcf4\uc815\uc81c\ub85c \ud22c\uc790\ub97c \ubcf4\ud638\ud558\uc2ed\uc2dc\uc624.`
+              : `${safeName} crossed +10. Break risk: 20% per attempt. Reach +15 for meaningful salvage. Stabilizers protect your investment from here on.`,
             tone: "amber",
           },
           20: {
-            title: language === "ko" ? "🚨 고위험 구간 한계 돌파" : "🚨 High Risk Limit Breached",
+            title: language === "ko" ? "\ud83d\udea8 \uc815\uc608 \uc81c\ub828 \uad6c\uac04 \u2014 \uc2e4\uc804 \uc704\ud5d8 \uac1c\uc2dc" : "\ud83d\udea8 Elite Territory \u2014 Maximum Stakes",
+            subtitle: language === "ko" ? "\ud30c\uad34 \ud655\ub960 70%. \ud76c\uadc0\ub3c4 \ube44\ub840 \ud30c\ud3b8\uc774 \uac78\ub824 \uc788\uc2b5\ub2c8\ub2e4." : "70% break risk. Rarity-scaled salvage on the line.",
             body: language === "ko"
-              ? `${safeName} +20 달성! 다음 제련부터 극도 위험 구간(파괴 확률 70%)에 돌입합니다.`
-              : `${safeName} reached +20! Future forge attempts enter the EXTREME RISK zone (70% break risk).`,
+              ? `${safeName} +20 \uc815\uc608 \uad6c\uac04 \ub3cc\uc785. \ud30c\uad34 \uc2dc \ud76c\uadc0\ub3c4 \ube44\ub840 \ud30c\ud3b8 \uc9c0\uae09 \u2014 \ub4f1\uae09\uc774 \ub192\uc744\uc218\ub85d \ud68c\uc218\ub7c9 \uc99d\uac00. \ubcf4\uc815\uc81c\ub294 \uc120\ud0dd\uc774 \uc544\ub2d9\ub2c8\ub2e4.`
+              : `${safeName} at +20 \u2014 elite forge territory. A shatter now returns rarity-scaled shards; higher rarity means greater recovery. Stabilizers are not optional.`,
             tone: "purple",
           },
           30: {
-            title: language === "ko" ? "👑 전선의 전설 완성" : "👑 Frontline Legend Completed",
+            title: language === "ko" ? "\ud83d\udc51 \uc804\uc120\uc758 \uc804\uc124 \ub2ec\uc131 \u2014 \uc8fc\uc778\uc5c6\ub294 \uc9c0\ubc30\uc790\uc758 \ubb34\uae30" : "\ud83d\udc51 Frontline Legend \u2014 Maximum Forge Achieved",
+            subtitle: language === "ko" ? "70% \ud30c\uad34 \uc555\ubc15 \uc18d\uc5d0\uc11c \ub2e8\ub828\ub428. \uc815\uc810\uc744 \uc7c1\ucde8\ud588\uc2b5\ub2c8\ub2e4." : "Forged through 70% break pressure. The pinnacle earned.",
             body: language === "ko"
-              ? `${safeName} +30 최대 제련 도달! 차원이 다른 전설적인 지배자의 힘을 손에 넣었습니다.`
-              : `${safeName} reached +30 max level! You hold the legendary power of an absolute master.`,
+              ? `${safeName} +30 \ucd5c\uace0 \ub4f1\uae09 \ub2ec\uc131. \uc774 \uc815\uc810\uc5d0 \uc624\ub978 \ubb34\uae30\ub294 \uadf9\uc18c\uc218. \uc5d8\ub9ac\ud2b8 \ud5cc\uc2e0\uc758 \uc601\uad6c\uc801 \uc99d\uac70.`
+              : `${safeName} at +30 \u2014 the highest tier achievable. Few weapons survive the climb to this summit. An indelible mark of elite commitment.`,
             tone: "red",
           },
         };
@@ -8965,6 +8969,11 @@
                         <div className="mt-0.5 text-sm font-black">
                           {prestigeAnnouncementToast.title}
                         </div>
+                        {prestigeAnnouncementToast.subtitle && (
+                          <div className="mt-0.5 text-[11px] font-bold italic opacity-70 leading-snug">
+                            {prestigeAnnouncementToast.subtitle}
+                          </div>
+                        )}
                         <div className="mt-1 text-xs font-bold leading-relaxed opacity-90">
                           {prestigeAnnouncementToast.body}
                         </div>

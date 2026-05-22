@@ -197,3 +197,12 @@
 - [x] **Bilingual**: Both EN and KO copy implemented for both surfaces.
 - [x] **Scope Verified**: No salvage math, Forge probability, stabilizer economy, or save schema changes.
 - [x] **Documentation**: Publish threshold onboarding analysis report, walkthrough, and sync task lists.
+
+## Phase P-3C: Forge Milestone Prestige Cue Audit
+
+- [x] **+10 Prestige Refinement**: Title changed to "🛡️ Tempered — Danger Zone Begins" (echoes weapon epithet). Subtitle "Break pressure is live. Every step forward costs." Body reframed as investment briefing. Stabilizers reframed as economic protection.
+- [x] **+20 Prestige Refinement**: Title changed to "🚨 Elite Territory — Maximum Stakes" (echoes weapon epithet, drops feature-announcement framing). Subtitle "70% break risk. Rarity-scaled salvage on the line." Body explicitly links higher rarity to greater recovery. "Not optional" replaces "essential."
+- [x] **+30 Prestige Refinement**: Title kept "👑 Frontline Legend — Maximum Forge Achieved." Subtitle "Forged through 70% break pressure. The pinnacle earned." Body adds scarcity signal ("Few weapons survive the climb") and legacy framing.
+- [x] **Subtitle Layer**: Added `subtitle` field to `getForgePrestigeAnnouncement`. Rendered between title and body in toast JSX at `text-[11px] font-bold italic opacity-70` — visually subordinate to title, distinct from body.
+- [x] **Scope Verified**: No economy, no schema, no PWA changes. Subtitle is ephemeral display-only.
+- [x] **Documentation**: Publish milestone prestige audit analysis report and walkthrough.
