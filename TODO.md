@@ -189,3 +189,11 @@
 - [x] **Tactical Cue Copy**: Differentiate J-5B broken-branch cue — "Minimal salvage" for prevLevel < 15, "Meaningful salvage recovered" for prevLevel >= 15.
 - [x] **Scope Verified**: No salvage math, Forge probability, stabilizer economy, or save schema changes.
 - [x] **Documentation**: Publish the UX differentiation analysis report, walkthrough, and sync task lists.
+
+## Phase P-3B: Forge Onboarding Tooltip & Threshold Education Pass
+
+- [x] **Confirmation Modal**: Added "Est. Salvage if Broken" row — amber for +15+ (meaningful recovery), slate for <+15 (minimal). No new state.
+- [x] **Forge Guide Card**: Appended "Salvage Structure" amber info card to hasDangerZoneWeapon block, explaining +14/+15 threshold with rarity scaling note.
+- [x] **Bilingual**: Both EN and KO copy implemented for both surfaces.
+- [x] **Scope Verified**: No salvage math, Forge probability, stabilizer economy, or save schema changes.
+- [x] **Documentation**: Publish threshold onboarding analysis report, walkthrough, and sync task lists.

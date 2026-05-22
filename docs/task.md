@@ -352,3 +352,12 @@
 - [x] Verify no salvage math changes, no schema changes, no PWA changes <!-- id: p3a_verify_scope -->
 - [x] Create UX differentiation analysis report <!-- id: p3a_analysis -->
 - [x] Create change walkthrough <!-- id: p3a_walkthrough -->
+
+## Phase P-3B: Forge Onboarding Tooltip & Threshold Education Pass
+- [x] Add salvage preview row to danger-zone confirmation modal (amber for >=+15, slate for <+15) <!-- id: p3b_modal_row -->
+- [x] Add Salvage Structure education card to Forge Guide hasDangerZoneWeapon block <!-- id: p3b_guide_card -->
+- [x] Verify both EN and KO branches present for all new copy <!-- id: p3b_bilingual -->
+- [x] Verify no save-schema changes, no economy changes, no PWA changes <!-- id: p3b_scope -->
+- [x] Verify modal education row uses only existing forgeConfirmTarget.level (no new state) <!-- id: p3b_no_new_state -->
+- [x] Create threshold onboarding analysis report <!-- id: p3b_analysis -->
+- [x] Create walkthrough summary <!-- id: p3b_walkthrough -->
