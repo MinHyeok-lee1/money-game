@@ -257,3 +257,13 @@
 - [x] **Modal Audit**: Primary/secondary hierarchy, KO overflow, danger/safe state distinction without color — all PASS, no changes needed.
 - [x] **Scope Verified**: No economy, schema, or PWA changes. All 8 edits are className-only.
 - [x] **Documentation**: Publish P-4B accessibility & contrast analysis report and walkthrough.
+
+## Phase P-4C: Forge UX Final Sign-Off & Series Close
+
+- [x] **End-to-End Audit**: Guide Card, Danger-Zone Modal, Result Recap, Milestone Toast, Weapon Card Actions — all PASS.
+- [x] **Tone Arc**: beginner curiosity → danger awareness → tactical investment → loss → recovery → prestige → legendary. No discontinuities.
+- [x] **Mobile / Accessibility**: All P-4B fixes confirmed live. No unreadable critical text. Touch targets acceptable.
+- [x] **Regression Guardrail**: All economy constants (`getEnhanceChance`, `getSalvagePayout`, `STABILIZER_SUCCESS_BONUS`, `ENHANCE_BREAKAGE_START`, `MAX_ENHANCE_LEVEL`), save schema, `sw.js`, and `manifest.json` verified unchanged across the entire P-3/P-4 series.
+- [x] **No Code Changes**: P-4C is docs and task board only.
+- [x] **Series Status: CLOSED** — 8 phases (P-3A → P-4C) complete. Deferred risks documented.
+- [x] **Documentation**: Publish P-4C final sign-off analysis report and walkthrough.

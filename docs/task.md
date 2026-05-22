@@ -431,3 +431,13 @@
 - [x] Verify scope: no economy, schema, or PWA changes <!-- id: p4b_scope -->
 - [x] Create P-4B accessibility analysis report <!-- id: p4b_analysis -->
 - [x] Create P-4B walkthrough summary <!-- id: p4b_walkthrough -->
+
+## Phase P-4C: Forge UX Final Sign-Off & Series Close
+- [x] End-to-end forge flow audit: Guide Card, Modal, Result Recap, Toast, Weapon Cards <!-- id: p4c_e2e -->
+- [x] Verify tone arc coherence: beginner orientation → legendary status <!-- id: p4c_tone -->
+- [x] Mobile/accessibility final check: all P-4B fixes confirmed live <!-- id: p4c_a11y -->
+- [x] Regression guardrail: confirm no economy, schema, or PWA changes in any P-3/P-4 phase <!-- id: p4c_regression -->
+- [x] Document remaining known risks and deferred items <!-- id: p4c_risks -->
+- [x] Series closure decision: CLOSED <!-- id: p4c_close -->
+- [x] Create P-4C final sign-off analysis report <!-- id: p4c_analysis -->
+- [x] Create P-4C walkthrough summary <!-- id: p4c_walkthrough -->
