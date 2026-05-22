@@ -400,3 +400,34 @@
 - [x] Verify scope: no economy, schema, or PWA changes — all edits are display-only copy <!-- id: p3e_scope -->
 - [x] Create P-3E cohesion analysis report <!-- id: p3e_analysis -->
 - [x] Create P-3E walkthrough summary <!-- id: p3e_walkthrough -->
+
+## Phase P-4A: Forge UX Visual Regression & Mobile Readability QA
+- [x] Audit Forge Guide Card: text density, +15 explanation readability, KO/EN overflow <!-- id: p4a_guide_card -->
+- [x] Audit Danger-Zone Modal: hierarchy, button fit, stabilizer clarity, mobile height <!-- id: p4a_modal -->
+- [x] Audit Forge Result Recap: status labels, salvage distinction, token confusion check <!-- id: p4a_recap -->
+- [x] Audit Milestone Toast: subtitle fit, dismiss timing, CTA clearance <!-- id: p4a_toast -->
+- [x] Cross-language QA: Unicode escape rendering, KO/EN tactical cue parity <!-- id: p4a_i18n -->
+- [x] Fix KO danger zone success cue: remove "성공 완료!" whiplash <!-- id: p4a_ko_dz_success -->
+- [x] Fix KO safe zone success cue: flat system report → tactical forward cue <!-- id: p4a_ko_sz_success -->
+- [x] Fix KO danger zone failure cue: passive voice → active "타격 실패" <!-- id: p4a_ko_dz_fail -->
+- [x] Fix KO safe zone failure cue: remove "강화 마스터리" jargon <!-- id: p4a_ko_sz_fail -->
+- [x] Verify scope: no economy, schema, or PWA changes <!-- id: p4a_scope -->
+- [x] Create P-4A visual regression QA analysis report <!-- id: p4a_analysis -->
+- [x] Create P-4A walkthrough summary <!-- id: p4a_walkthrough -->
+
+## Phase P-4B: Forge UX Accessibility & Contrast Pass
+- [x] Contrast audit: modal stats labels, salvage labels, toast subtitle, shatter/success panels <!-- id: p4b_contrast -->
+- [x] Fix modal stats labels text-gray-500 → text-gray-400 (4.38 → 7.9:1 contrast) <!-- id: p4b_gray_labels -->
+- [x] Fix minimal salvage label text-slate-500 → text-slate-400 (4.26 → 7.2:1 contrast) <!-- id: p4b_slate_label -->
+- [x] Small text audit: all text-[9px] occurrences in forge flow <!-- id: p4b_small_text -->
+- [x] Fix stabilizer advisory text-[9px] → text-[10px] (critical decision info) <!-- id: p4b_advisory_size -->
+- [x] Fix locked-state label text-[9px] → text-[10px] (action-blocking state info) <!-- id: p4b_lock_label_size -->
+- [x] Touch target audit: confirm, cancel, close, enhance, stabilizer, lock buttons <!-- id: p4b_touch_audit -->
+- [x] Fix toast Close button py-1 → py-1.5 (~22 → ~30px) <!-- id: p4b_close_btn -->
+- [x] Fix Enhance card button py-1.5 → py-2 (~28 → ~32px) <!-- id: p4b_enhance_btn -->
+- [x] Fix Stabilizer card button py-1.5 → py-2 (~28 → ~32px) <!-- id: p4b_stab_btn -->
+- [x] Fix Lock button py-1 → py-1.5 (~22 → ~30px) <!-- id: p4b_lock_btn -->
+- [x] Modal accessibility audit: hierarchy, KO overflow, state distinction without color <!-- id: p4b_modal -->
+- [x] Verify scope: no economy, schema, or PWA changes <!-- id: p4b_scope -->
+- [x] Create P-4B accessibility analysis report <!-- id: p4b_analysis -->
+- [x] Create P-4B walkthrough summary <!-- id: p4b_walkthrough -->

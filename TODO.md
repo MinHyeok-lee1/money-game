@@ -229,3 +229,31 @@
 - [x] **Low-Level Break Tactical Cue**: Removed "token recovery" (currency confusion). → "Minimal salvage — low-level shatters return only a small payout. Reach +15 for meaningful recovery."
 - [x] **Scope Verified**: No economy, schema, or PWA changes. All 7 edits are display-only copy refinements.
 - [x] **Documentation**: Publish P-3E cohesion final pass analysis report and walkthrough.
+
+## Phase P-4A: Forge UX Visual Regression & Mobile Readability QA
+
+- [x] **Guide Card**: Text density, +15 explanation, KO/EN overflow — all PASS. No changes needed.
+- [x] **Danger-Zone Modal**: Title/subtitle/warning hierarchy, button label fit, stabilizer copy, mobile height — all PASS. No changes needed.
+- [x] **Result Recap**: Status labels (CSS `uppercase` handles capitalization), salvage distinction, no "token recovery" confusion — all PASS. No changes needed.
+- [x] **Milestone Toast**: Subtitle fit, 4500ms timing, CTA clearance — all PASS. No changes needed.
+- [x] **Cross-Language QA Finding**: P-3E fixed EN tactical cues but left KO equivalents untouched. Four KO parity gaps fixed:
+  - DZ success: "성공 완료!" whiplash → "제련 완료" composed anchor
+  - SZ success: flat accumulation report → "안전 구간 — 계속 타격" forward cue
+  - DZ fail: passive "강화 수치가 보호되었습니다" → active "타격 실패 — 등급 유지"
+  - SZ fail: "강화 마스터리" jargon → direct advance cue
+- [x] **Scope Verified**: No economy, schema, or PWA changes. All 4 edits are display-only KO copy.
+- [x] **Documentation**: Publish P-4A visual regression QA analysis report and walkthrough.
+
+## Phase P-4B: Forge UX Accessibility & Contrast Pass
+
+- [x] **Contrast — Modal Labels**: `text-gray-500` → `text-gray-400` on "Weapon / Success / Break Risk" label spans (4.38 → 7.9:1, passes WCAG AAA).
+- [x] **Contrast — Minimal Salvage Label**: `text-slate-500` → `text-slate-400` on low-tier salvage row label (4.26 → 7.2:1). Visual hierarchy preserved via hue and amber-400 high-tier contrast.
+- [x] **Small Text — Stabilizer Advisory**: `text-[9px]` → `text-[10px]`. "Protection protocol available" is a critical pre-forge decision cue and must not be at 9px.
+- [x] **Small Text — Locked-State Label**: `text-[9px]` → `text-[10px]`. "🔒 Locked — Enhancement blocked" is action-blocking state information.
+- [x] **Touch Target — Toast Close Button**: `py-1` → `py-1.5` (~22 → ~30px). Dismiss button was below practical floor.
+- [x] **Touch Target — Enhance Card Button**: `py-1.5` → `py-2` (~28 → ~32px). Primary forge action in weapon card.
+- [x] **Touch Target — Stabilizer Card Button**: `py-1.5` → `py-2` (~28 → ~32px). Consistent with Enhance button.
+- [x] **Touch Target — Lock Button**: `py-1` → `py-1.5` (~22 → ~30px). Emoji-only button was the smallest target in the Forge UI.
+- [x] **Modal Audit**: Primary/secondary hierarchy, KO overflow, danger/safe state distinction without color — all PASS, no changes needed.
+- [x] **Scope Verified**: No economy, schema, or PWA changes. All 8 edits are className-only.
+- [x] **Documentation**: Publish P-4B accessibility & contrast analysis report and walkthrough.

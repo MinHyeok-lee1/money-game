@@ -7920,15 +7920,15 @@
 
                   <div className="w-full bg-black/40 rounded-xl p-4 mb-6 border border-white/5 space-y-3 text-left">
                     <div className="flex justify-between items-center text-xs font-bold">
-                      <span className="text-gray-500 uppercase">{language === "ko" ? "무기" : "Weapon"}</span>
+                      <span className="text-gray-400 uppercase">{language === "ko" ? "무기" : "Weapon"}</span>
                       <span className="text-white truncate ml-2">{forgeConfirmTarget.itemName} +{forgeConfirmTarget.level}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold">
-                      <span className="text-gray-500 uppercase">{language === "ko" ? "성공 확률" : "Success"}</span>
+                      <span className="text-gray-400 uppercase">{language === "ko" ? "성공 확률" : "Success"}</span>
                       <span className="text-emerald-400 font-black">{forgeConfirmTarget.successPct}%</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold border-t border-white/5 pt-2">
-                      <span className="text-gray-500 uppercase">{language === "ko" ? "파괴 확률" : "Break Risk"}</span>
+                      <span className="text-gray-400 uppercase">{language === "ko" ? "파괴 확률" : "Break Risk"}</span>
                       <span className="text-red-400 font-black">{forgeConfirmTarget.breakPct}%</span>
                     </div>
                     {forgeConfirmTarget.useStabilizer ? (
@@ -7943,7 +7943,7 @@
                       </div>
                     )}
                     {!forgeConfirmTarget.useStabilizer && forgeConfirmTarget.stabCount > 0 && (
-                      <div className="text-[9px] font-bold text-cyan-500 text-center pt-1 border-t border-white/5 mt-1">
+                      <div className="text-[10px] font-bold text-cyan-500 text-center pt-1 border-t border-white/5 mt-1">
                         {language === "ko"
                           ? `보호 프로토콜 가동 가능 — 보정제 ${forgeConfirmTarget.stabCount}개 보유.`
                           : `Protection protocol available — ${forgeConfirmTarget.stabCount} stabilizer(s) in reserve.`}
@@ -7958,7 +7958,7 @@
                      </div>
                    ) : (
                      <div className="flex justify-between items-center text-xs font-bold border-t border-white/5 pt-2">
-                       <span className="text-slate-500 uppercase">{language === "ko" ? "💎 파괴 시 회수 예상" : "💎 Est. Salvage if Broken"}</span>
+                       <span className="text-slate-400 uppercase">{language === "ko" ? "💎 파괴 시 회수 예상" : "💎 Est. Salvage if Broken"}</span>
                        <span className="text-slate-400 font-black">{language === "ko" ? "최소 회수 — +15 이상부터 본격적인 파편 보상" : "Minimal — reach +15 for real salvage"}</span>
                      </div>
                    )}
@@ -8993,7 +8993,7 @@
                       </div>
                       <button
                         onClick={() => setPrestigeAnnouncementToast(null)}
-                        className="shrink-0 rounded border border-white/20 px-2 py-1 text-[10px] font-black uppercase text-white/80 hover:bg-white/10"
+                        className="shrink-0 rounded border border-white/20 px-2 py-1.5 text-[10px] font-black uppercase text-white/80 hover:bg-white/10"
                       >
                         {language === "ko" ? "닫기" : "Close"}
                       </button>
@@ -9600,21 +9600,21 @@
                                 ) : lastEnhancementResult.success ? (
                                   lastEnhancementResult.level >= ENHANCE_BREAKAGE_START ? (
                                     language === "ko"
-                                      ? `+${lastEnhancementResult.level} 성공 완료! 다음 단계는 위험 구간(+${lastEnhancementResult.level + 1})입니다. 보정제 사용 후 타격하십시오.`
+                                      ? `+${lastEnhancementResult.level} 제련 완료. 다음 단계(+${lastEnhancementResult.level + 1})는 위험 구간 진입 — 보정제를 권장합니다.`
                                       : `Forged to +${lastEnhancementResult.level}. Level +${lastEnhancementResult.level + 1} enters the danger zone — stabilizer recommended.`
                                   ) : (
                                     language === "ko"
-                                      ? `성공 기록 누적. 다음 단계(+${lastEnhancementResult.level + 1})는 안전 영역입니다. 계속 모루를 타격하세요.`
+                                      ? `+${lastEnhancementResult.level} 제련 완료. 안전 구간 — 계속 타격하십시오.`
                                       : `Forged to +${lastEnhancementResult.level}. Safe zone — advance and strike again.`
                                   )
                                 ) : (
                                   prevLevel >= ENHANCE_BREAKAGE_START ? (
                                     language === "ko"
-                                      ? "위험 구간에서 강화 수치가 보호되었습니다. 안전 강화를 위해 보정제 사용 후 재시도하십시오."
+                                      ? "타격 실패 — 위험 구간에서 등급 유지. 다음 시도에 보정제를 권장합니다."
                                       : "Strike failed — level held in the danger zone. Stabilizer recommended for the next attempt."
                                   ) : (
                                     language === "ko"
-                                      ? "강화 실패로 등반 흐름이 끊겼습니다. 모루를 다시 타격하여 강화 마스터리에 도달하십시오."
+                                      ? "타격 실패. 안전 구간 — 등급 유지. 계속 타격하여 진행하십시오."
                                       : "Strike failed. Safe zone — level held. Strike again to advance."
                                   )
                                 )}
@@ -10001,7 +10001,7 @@
                                       <div className="flex items-center gap-1.5 flex-wrap">
                                         {isLocked ? (
                                           <div className="flex items-center gap-1.5">
-                                            <span className="text-[9px] font-black text-amber-600 uppercase tracking-wider">
+                                            <span className="text-[10px] font-black text-amber-600 uppercase tracking-wider">
                                               {language === "ko" ? "🔒 잠금 상태 — 제련 불가. 잠금 해제 후 진행하십시오." : "🔒 Locked — Enhancement blocked. Unlock first."}
                                             </span>
                                           </div>
@@ -10010,14 +10010,14 @@
                                             <button
                                               onClick={() => requestEnhance(item.instanceId, false)}
                                               disabled={!canEnhance}
-                                              className={`rounded-md px-3 py-1.5 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                                              className={`rounded-md px-3 py-2 text-xs font-black transition-colors ${canEnhance ? "bg-emerald-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                                             >
                                               {language === "ko" ? "⚒️ 모루 타격" : "⚒️ Enhance"}
                                             </button>
                                             {canEnhance && stabCount > 0 && breakPct > 0 && (
                                               <button
                                                 onClick={() => requestEnhance(item.instanceId, true)}
-                                                className="rounded-md px-2 py-1.5 text-[10px] font-black bg-cyan-700 text-white transition-colors border border-cyan-500"
+                                                className="rounded-md px-2 py-2 text-[10px] font-black bg-cyan-700 text-white transition-colors border border-cyan-500"
                                                 title={language === "ko" ? "보정제 사용 (파괴 방지 + 성공률 +3%)" : "Use Stabilizer (break protection + 3% success)"}
                                               >
                                                 🛡️ {language === "ko" ? "보정 타격" : "Stab."} ({stabCount})
@@ -10027,7 +10027,7 @@
                                         )}
                                         <button
                                           onClick={() => toggleWeaponLock(item.instanceId)}
-                                          className={`rounded px-1.5 py-1 text-[10px] font-bold transition-colors ${isLocked ? "bg-amber-100 text-amber-700 border border-amber-300" : "bg-gray-200 text-gray-500 hover:bg-gray-300"}`}
+                                          className={`rounded px-1.5 py-1.5 text-[10px] font-bold transition-colors ${isLocked ? "bg-amber-100 text-amber-700 border border-amber-300" : "bg-gray-200 text-gray-500 hover:bg-gray-300"}`}
                                           title={isLocked ? (language === "ko" ? "잠금 해제" : "Unlock") : (language === "ko" ? "잠금 설정" : "Lock")}
                                         >
                                           {isLocked ? "🔒" : "🔓"}
