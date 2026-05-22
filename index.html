@@ -3127,7 +3127,7 @@
       return ownedCharacterDetails.reduce((sum, char) => {
         const levelDps = getCharacterLevelDps(char);
         const weaponDps = char.equippedWeapon
-          ? toFiniteNumber(char.equippedWeapon.power, 0)
+          ? Math.round(toFiniteNumber(char.equippedWeapon.power, 0) * (1 + toFiniteNumber(char.equippedWeapon.enhanceLevel, 0) * 0.05))
           : 0;
         const factionMult = getFactionSynergyMultiplier(
           ownedFactionCounts[char.definition.faction] || 0,
@@ -5361,7 +5361,7 @@
           );
           const levelDps = getCharacterLevelDps(char);
           const weaponDps = equippedWeapon
-            ? toFiniteNumber(equippedWeapon.power, 0)
+            ? Math.round(toFiniteNumber(equippedWeapon.power, 0) * (1 + toFiniteNumber(equippedWeapon.enhanceLevel, 0) * 0.05))
             : 0;
           const synergyMultiplier = getPreferredWeaponSynergy(
             char,
@@ -6825,7 +6825,7 @@
               setEnhanceFailPulse(true);
               setTimeout(() => setEnhanceFailPulse(false), 1500);
 
-              const salvageShards = currentLevel * 10;
+              const salvageShards = getSalvagePayout(currentLevel, item.rarity);
 
               setTacticalLogFeed((old) => [
                 `💥 [긴급: 병기 파괴] ${item.name} +${currentLevel} 제련 중 무기가 산산조각 났습니다! 파편 회수: 💎${salvageShards} (전선 잔해 수습 및 파편 분해 자동 완료)`,

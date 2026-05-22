@@ -299,3 +299,17 @@
 - [x] Verify Defense Bankruptcy exploit safety and low-dividend loops <!-- id: p1b_defense_qa -->
 - [x] Verify Runtime Stability (no conditional hooks, no recursive normalize loops) <!-- id: p1b_stability_qa -->
 - [x] Generate Runtime QA & Exploit Audit report <!-- id: p1b_report -->
+
+## Phase P-2A: Progression Balance Baseline Audit
+- [x] Run baseline progression audits across early game, Forge, Defense runs, Black Market, Reaper/late-game, and UI readability <!-- id: p2a_audit -->
+- [x] Resolve weapon enhancement DPS combat scaling discrepancy <!-- id: p2a_combat_fix -->
+- [x] Generate Baseline Progression Balance Audit report <!-- id: p2a_report -->
+- [x] Generate walkthrough summary <!-- id: p2a_walkthrough -->
+
+## Phase P-2B: Progression Curve Tuning & Reward Pressure Audit
+- [x] Evaluate Forge reward pressure and align breakage shatter salvage payout to rarity-scaled helper <!-- id: p2b_forge_audit -->
+- [x] Evaluate RPG combat stage scaling, HP growth, and dividends pacing <!-- id: p2b_rpg_audit -->
+- [x] Evaluate Defense economy ticket costs, emergency starting, and contract pressure <!-- id: p2b_defense_audit -->
+- [x] Evaluate UI formatting, compact numbering readability, and milestone notifications <!-- id: p2b_ui_audit -->
+- [x] Generate Progression Curve Tuning & Reward Pressure Audit analysis report <!-- id: p2b_report -->
+- [x] Generate walkthrough summary <!-- id: p2b_walkthrough -->

@@ -145,5 +145,16 @@
   - Injected manifest link and apple-mobile-web-app configuration meta tags to `<head>` and registered the service worker before closing the `<body>` of `index.html`.
   - Added CSS rule tweaks for tap highlight removal, user-select restrictions, tap delay optimizations, and textarea selectable override exceptions.
 - [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A_TODO -->
--   [ x ]   O - 1 C   C o n t r o l l e d   S t a t i c   A s s e t   C a c h i n g  
- 
+- [x] O-1C Controlled Static Asset Caching
+
+## Phase P-2A: Progression Balance Baseline Audit
+
+- [x] **Progression Balance Baseline Audit**: Run comprehensive pacing audits for early game, Forge, Defense/RPG, Black Market, Reaper/late-game, and UI readability.
+- [x] **Weapon Enhancement Combat Sync**: Resolve the weapon enhancement DPS scaling bug in both live combat calculations (`getTeamBaseAtk`) and squad preview (`activeRunCharacterDetails`).
+- [x] **Documentation**: Publish the progression balance audit report, walkthrough, and task records.
+
+## Phase P-2B: Progression Curve Tuning & Reward Pressure Audit
+
+- [x] **Shatter Salvage Alignment**: Update the Forge failure path in `enhanceWeaponItem` to utilize the rarity-and-level scaled helper `getSalvagePayout(currentLevel, item.rarity)` instead of hardcoded `currentLevel * 10` shards.
+- [x] **Tuning & Audit Analysis**: Evaluate progression pacing across early-game properties, Forge risk tiers, RPG HP growth, Defense ticket costs, and UI feedback mechanisms.
+- [x] **Documentation**: Publish the progression curve tuning analysis report, change walkthrough, and sync task lists.
