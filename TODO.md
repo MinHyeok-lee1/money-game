@@ -158,3 +158,34 @@
 - [x] **Shatter Salvage Alignment**: Update the Forge failure path in `enhanceWeaponItem` to utilize the rarity-and-level scaled helper `getSalvagePayout(currentLevel, item.rarity)` instead of hardcoded `currentLevel * 10` shards.
 - [x] **Tuning & Audit Analysis**: Evaluate progression pacing across early-game properties, Forge risk tiers, RPG HP growth, Defense ticket costs, and UI feedback mechanisms.
 - [x] **Documentation**: Publish the progression curve tuning analysis report, change walkthrough, and sync task lists.
+
+## Phase P-2C: Forge Risk Economy Audit
+
+- [x] **Shard Inflation Audit**: Modeled shard yields at +10/+20/+30 across all rarities, verified passive combat income rates are non-inflationary.
+- [x] **Stabilizer Economy Audit**: Proved exponential stabilizer burn rates (S_L ≈ 2×S_{L-1}) eliminate genuine farming viability.
+- [x] **Safe-Forge Loop Identification**: Identified the Infinite Cash → Safe Zone (+0~+10) → intentional shatter exploit producing 160–800 shards per weapon at zero risk.
+- [x] **Documentation**: Publish the Forge risk economy audit report, walkthrough, and sync task lists.
+
+## Phase P-2D: Safe-Forge Exploit Fix & Verification
+
+- [x] **Exploit Fix**: Insert level gate in `getSalvagePayout` — weapons shattered below `+15` return a flat 5 shards, eliminating the cash→shard conversion loop.
+- [x] **Economy Verification**: Confirmed +15 and above salvage payouts (Common 235 → Mythic 2,300 at +30) are fully preserved with zero changes.
+- [x] **Runtime Verification**: No save-schema changes, no PWA changes, no new fields; single call site confirmed; sandbox Forge demo display-only and unaffected.
+- [x] **Documentation**: Publish the exploit fix analysis report, change walkthrough, and sync task lists.
+
+## Phase P-2E: Forge Economy Regression QA
+
+- [x] **Salvage Payout Matrix**: Verified all 5 rarities × 5 levels (+10, +14, +15, +20, +30). All sub-`+15` → 5 shards; all `+15`+ unchanged.
+- [x] **Edge Case Coverage**: NaN, negative, unknown rarity, boundary at `+14`/`+15` — all behave correctly.
+- [x] **Forge Recap & Modal UI**: Recap shows accurate gated values; confirmation modal never showed payout preview (no issue).
+- [x] **Stabilizer Economy**: Crafting pressure maintained; sub-`+15` shard yields insufficient to trivialize stabilizer scarcity.
+- [x] **Exploit Loops**: All cash→shatter farming loops confirmed dead; Mythic farming advantage eliminated.
+- [x] **Runtime & Save Safety**: No NaN payouts, no negative shard states, no schema changes, no recap mismatches.
+- [x] **Minor Finding**: Tactical cue copy doesn't differentiate gated vs. ungated shatters — accepted, logged for future UX pass.
+- [x] **Documentation**: Publish the regression QA analysis report, walkthrough, and sync task lists.
+## Phase P-3A: Salvage UX Differentiation Pass
+
+- [x] **Salvage Panel Copy**: Differentiate sub-text based on prevLevel < 15 gate — minimal copy for low-level shatters, meaningful-salvage copy for high-level shatters.
+- [x] **Tactical Cue Copy**: Differentiate J-5B broken-branch cue — "Minimal salvage" for prevLevel < 15, "Meaningful salvage recovered" for prevLevel >= 15.
+- [x] **Scope Verified**: No salvage math, Forge probability, stabilizer economy, or save schema changes.
+- [x] **Documentation**: Publish the UX differentiation analysis report, walkthrough, and sync task lists.

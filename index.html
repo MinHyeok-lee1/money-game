@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 
 <head>
@@ -6608,13 +6608,18 @@
       };
 
       // J-3G: Salvage payout — scales by enhancement level and rarity
+      // P-2D: Safe-Forge exploit gate: level < 15 shatters yield a flat nominal 5 shards
       const getSalvagePayout = (enhanceLevel, rarity) => {
         const level = Math.max(0, Math.floor(toFiniteNumber(enhanceLevel, 0)));
         const rarityMultipliers = { common: 1, uncommon: 1.2, rare: 1.5, epic: 2, legendary: 3, mythic: 5 };
         const rarityMult = rarityMultipliers[String(rarity).toLowerCase()] || 1;
         // Base: 10 shards + 15 per level, scaled by rarity
         const base = 10 + level * 15;
-        return Math.max(5, Math.floor(base * rarityMult));
+        const normalPayout = Math.floor(base * rarityMult);
+        if (level < 15) {
+          return 5;
+        }
+        return Math.max(5, normalPayout);
       };
 
       // J-3H: Prestige tier — derived from enhanceLevel, no persistence needed
@@ -9517,10 +9522,16 @@
                                   <div className="text-xs font-black text-rose-400 flex items-center gap-1.5">
                                     💎 +{lastEnhancementResult.salvageShards} {language === "ko" ? "제련 파편 수습 완료" : "Refined Shards Salvaged"}
                                   </div>
-                                  <div className="text-[10px] font-bold text-rose-300 leading-relaxed">
-                                    {language === "ko"
-                                      ? "파괴된 무기에서 제련 파편을 안정적으로 회수했습니다. 파편을 합성해 다음 제련에서는 보정제(파괴 방지)를 사용하십시오."
-                                      : "Refined shards safely extracted from the residue. Craft stabilizers using shards to protect your next attempt."}
+                                   <div className="text-[10px] font-bold text-rose-300 leading-relaxed">
+                                     {/* P-3A: Differentiated salvage panel copy */}
+                                     {prevLevel < 15
+                                       ? (language === "ko"
+                                         ? "+15 \ubbf8\ub9cc \ud30c\uad34\ub294 \ucd5c\uc18c \ud68c\uc218\ub9cc \uc9c0\uae09\ub429\ub2c8\ub2e4. +15 \uc774\uc0c1 \ub3c4\ub2ec \uc2dc \ubcf8\uaca9\uc801\uc778 \ud30c\ud3b8 \ud68c\uc218\uac00 \uc2dc\uc791\ub429\ub2c8\ub2e4."
+                                         : "Low-level shatters return minimal recovery. Push beyond +15 to unlock meaningful salvage.")
+                                       : (language === "ko"
+                                         ? "\ud30c\uad34\ub41c \ubb34\uae30\uc5d0\uc11c \ud30c\ud3b8\uc744 \ud68c\uc218\ud588\uc2b5\ub2c8\ub2e4. \ud30c\ud3b8\uc744 \ud569\uc131\ud574 \ub2e4\uc74c \uc81c\ub828\uc5d0\uc11c\ub294 \ubcf4\uc815\uc81c(\ud30c\uad34 \ubc29\uc9c0)\ub97c \uc0ac\uc6a9\ud558\uc2ed\uc2dc\uc624."
+                                         : "Shards salvaged from residue. Craft stabilizers to protect your next high-level run.")}
+                                   </div>
                                   </div>
                                 </div>
                               )}
@@ -9528,10 +9539,17 @@
                               {/* J-5B: Dynamic Tactical Recommendation String */}
                               <div className="text-[10px] font-black text-slate-400 bg-slate-950/50 border border-slate-800/60 rounded p-2 text-left leading-relaxed">
                                 <span className="text-amber-400 mr-1">💡 {language === "ko" ? "분석 권장사항:" : "TACTICAL CUE:"}</span>
-                                {lastEnhancementResult.broken ? (
-                                  language === "ko"
-                                    ? "무기가 산산조각 났지만 파편을 회수했습니다. 파편을 모아 보정제를 합성하고 다음 무기를 제련하십시오."
-                                    : "Weapon shattered. Salvage shards to craft a stabilizer, securing your next run."
+                                 {lastEnhancementResult.broken ? (
+                                   /* P-3A: Differentiated tactical cue - gated vs. ungated shatter */
+                                   prevLevel < 15 ? (
+                                     language === "ko"
+                                       ? "+15 \ubbf8\ub9cc \ud30c\uad34\ub294 \ucd5c\uc18c \ud30c\ud3b8\ub9cc \uc9c0\uae09\ub429\ub2c8\ub2e4. +15 \uc774\uc0c1 \uc704\ud5d8 \uad6c\uac04\uc5d0\uc11c \ud30c\uad34 \uc2dc \ubcf8\uaca9\uc801\uc778 \ud30c\ud3b8 \ud68c\uc218\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4."
+                                       : "Minimal salvage \u2014 low-level shatters only return token recovery. Reach +15 for meaningful salvage value."
+                                   ) : (
+                                     language === "ko"
+                                       ? "\ubb34\uae30\uac00 \ud30c\uad34\ub418\uc5c8\uc9c0\ub9cc \uc758\ubbf8 \uc788\ub294 \ud30c\ud3b8\uc744 \ud68c\uc218\ud588\uc2b5\ub2c8\ub2e4. \ud30c\ud3b8\uc744 \ubaa8\uc544 \ubcf4\uc815\uc81c\ub97c \ud569\uc131\ud558\uace0 \ub2e4\uc74c \uc81c\ub828\uc744 \uc900\ube44\ud558\uc2ed\uc2dc\uc624."
+                                       : "Weapon shattered. Meaningful salvage recovered \u2014 craft stabilizers to secure the next run."
+                                   )
                                 ) : lastEnhancementResult.success ? (
                                   lastEnhancementResult.level >= ENHANCE_BREAKAGE_START ? (
                                     language === "ko"

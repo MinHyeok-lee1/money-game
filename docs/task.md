@@ -313,3 +313,42 @@
 - [x] Evaluate UI formatting, compact numbering readability, and milestone notifications <!-- id: p2b_ui_audit -->
 - [x] Generate Progression Curve Tuning & Reward Pressure Audit analysis report <!-- id: p2b_report -->
 - [x] Generate walkthrough summary <!-- id: p2b_walkthrough -->
+
+## Phase P-2C: Forge Risk Economy Audit
+- [x] Audit late-game shard inflation and salvage scaling curves <!-- id: p2c_shard_audit -->
+- [x] Audit stabilizer crafting costs and expected burn rates <!-- id: p2c_stabilizer_audit -->
+- [x] Evaluate infinite safe-forge loops and cash-to-shard conversion risks <!-- id: p2c_loop_audit -->
+- [x] Evaluate Forge danger tension and no-stabilizer success curves <!-- id: p2c_tension_audit -->
+- [x] Analyze multi-currency economy interaction and sinks balance <!-- id: p2c_interaction_audit -->
+- [x] Create Forge Risk Economy Audit analysis report <!-- id: p2c_report -->
+- [x] Create walkthrough summary <!-- id: p2c_walkthrough -->
+
+## Phase P-2D: Safe-Forge Exploit Fix & Verification
+- [x] Implement `getSalvagePayout` level gate (level < 15 → 5 shards flat) in `index.html` <!-- id: p2d_gate_impl -->
+- [x] Verify safe-zone suicide forging (≤+14) is no longer profitable <!-- id: p2d_exploit_verify -->
+- [x] Verify late-game salvage (≥+15) payouts are fully preserved <!-- id: p2d_recovery_verify -->
+- [x] Verify Forge danger tension and psychological milestones unchanged <!-- id: p2d_tension_verify -->
+- [x] Verify no save-schema changes, no PWA file changes, no runtime regressions <!-- id: p2d_runtime_verify -->
+- [x] Create exploit fix analysis report <!-- id: p2d_analysis -->
+- [x] Create change walkthrough summary <!-- id: p2d_walkthrough -->
+- [x] Update docs/task.md and TODO.md <!-- id: p2d_docs -->
+
+## Phase P-2E: Forge Economy Regression QA
+- [x] Verify salvage payout matrix across all levels (+10, +14, +15, +20, +30) and all rarities <!-- id: p2e_payout_matrix -->
+- [x] Verify all edge cases (NaN, negative level, unknown rarity, gated boundary at +14/+15) <!-- id: p2e_edge_cases -->
+- [x] Verify Forge recap panel displays accurate gated and ungated salvage values <!-- id: p2e_recap_ui -->
+- [x] Verify Forge confirmation modal shows no incorrect payout preview <!-- id: p2e_modal_ui -->
+- [x] Verify salvage history log records correct gated values <!-- id: p2e_history_log -->
+- [x] Verify stabilizer economy pressure is maintained and not trivialized <!-- id: p2e_stabilizer_economy -->
+- [x] Verify all exploit loops confirmed dead (cash→+10→shatter, Mythic farming) <!-- id: p2e_exploit_loops -->
+- [x] Verify no NaN/Infinity payouts, no negative shard states <!-- id: p2e_nan_guard -->
+- [x] Verify no save-schema changes and no recap display mismatches <!-- id: p2e_runtime -->
+- [x] Create regression QA analysis report <!-- id: p2e_analysis -->
+- [x] Create walkthrough summary <!-- id: p2e_walkthrough -->
+## Phase P-3A: Salvage UX Differentiation Pass
+- [x] Differentiate salvage panel sub-text: prevLevel < 15 -> minimal copy; >= 15 -> meaningful copy <!-- id: p3a_panel_copy -->
+- [x] Differentiate tactical cue broken branch: prevLevel < 15 -> minimal cue; >= 15 -> meaningful cue <!-- id: p3a_tactical_cue -->
+- [x] Verify both EN and KO copy branches are correct for all 5 test levels (+10, +14, +15, +20, +30) <!-- id: p3a_verify_copy -->
+- [x] Verify no salvage math changes, no schema changes, no PWA changes <!-- id: p3a_verify_scope -->
+- [x] Create UX differentiation analysis report <!-- id: p3a_analysis -->
+- [x] Create change walkthrough <!-- id: p3a_walkthrough -->
