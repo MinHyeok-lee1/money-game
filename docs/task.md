@@ -441,3 +441,18 @@
 - [x] Series closure decision: CLOSED <!-- id: p4c_close -->
 - [x] Create P-4C final sign-off analysis report <!-- id: p4c_analysis -->
 - [x] Create P-4C walkthrough summary <!-- id: p4c_walkthrough -->
+
+## Phase P-5A: Forge Economy Telemetry Foundation — Local-Only Event Schema Plan
+- [x] Define storage envelope: `moneyGameForgeTelemetryV1` localStorage key, 150-event cap <!-- id: p5a_storage -->
+- [x] Design `forge_attempt` event: rarity, prevLevel, success, broken, stabilizerUsed, cost, salvage, dz <!-- id: p5a_forge_attempt -->
+- [x] Design `stab_action` event: action (craft|use), shardsAfter, atLevel <!-- id: p5a_stab_action -->
+- [x] Design `salvage` event: atLevel, rarity, payout, gated (prevLevel >= 15) <!-- id: p5a_salvage -->
+- [x] Design `milestone` event: level (10|15|20|30), rarity, stabUsed, attemptsHere <!-- id: p5a_milestone -->
+- [x] Document `emitForgeEvent` helper design (silent-fail, no React state side effects) <!-- id: p5a_helper -->
+- [x] Document integration points: enhanceWeaponItem (~line 6701), craftStabilizer (~line 7025) <!-- id: p5a_integration -->
+- [x] Privacy review: no user identity, no device info, no network calls, player-clearable <!-- id: p5a_privacy -->
+- [x] Document sample DevTools analysis queries for post-launch use <!-- id: p5a_queries -->
+- [x] Define rollout sub-phases: P-5A (plan) → P-5B (forge_attempt/salvage/milestone) → P-5C (stab_action) → P-5D (QA) <!-- id: p5a_rollout -->
+- [x] Confirm scope: no index.html changes in P-5A <!-- id: p5a_scope -->
+- [x] Create P-5A telemetry foundation plan document <!-- id: p5a_plan_doc -->
+- [x] Create P-5A forge telemetry event schema document <!-- id: p5a_schema_doc -->

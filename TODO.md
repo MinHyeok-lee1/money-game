@@ -267,3 +267,16 @@
 - [x] **No Code Changes**: P-4C is docs and task board only.
 - [x] **Series Status: CLOSED** — 8 phases (P-3A → P-4C) complete. Deferred risks documented.
 - [x] **Documentation**: Publish P-4C final sign-off analysis report and walkthrough.
+
+## Phase P-5A: Forge Economy Telemetry Foundation — Local-Only Event Schema Plan
+
+- [x] **Storage**: Separate localStorage key `moneyGameForgeTelemetryV1`. 150-event rolling cap (~30 KB max). Envelope fields: `schemaVersion`, `createdAt`, `updatedAt`, `events[]`. Zero impact on game save (`moneyGameUniverseStateV1`).
+- [x] **`forge_attempt` event**: Emitted on every `enhanceWeaponItem` call. Fields: `rarity`, `prevLevel`, `success`, `broken`, `stabilizerUsed`, `cost`, `salvage` (0 if not broken), `dz` (prevLevel >= 11). Covers the core forge funnel.
+- [x] **`stab_action` event**: Emitted from `craftStabilizer` (action: `"craft"`) and from `enhanceWeaponItem` when stab used (action: `"use"`). Fields: `action`, `shardsAfter`, `atLevel`. Tracks stabilizer economy lifecycle.
+- [x] **`salvage` event**: Co-emitted with `forge_attempt` on the break path. Fields: `atLevel`, `rarity`, `payout`, `gated` (prevLevel >= 15). Directly measures the +15 salvage gate behavioral threshold.
+- [x] **`milestone` event**: Emitted on success path when result level is 10, 15, 20, or 30. Fields: `level`, `rarity`, `stabUsed`, `attemptsHere` (in-memory retry counter). Measures prestige reach rates.
+- [x] **`emitForgeEvent` helper**: Standalone JS function, no React state, silent try/catch. Reads → mutates → writes the telemetry envelope. Not wired yet (implementation deferred to P-5B/P-5C).
+- [x] **Integration points defined**: `enhanceWeaponItem` (~line 6701) for forge/salvage/milestone/stab-use; `craftStabilizer` (~line 7025) for stab-craft.
+- [x] **Privacy guardrails**: No PII, no user ID, no device fingerprinting, no network calls. `ts` is `Date.now()` epoch only. Player-clearable via DevTools without affecting game save.
+- [x] **No Code Changes**: P-5A is planning/schema-design only. All index.html wiring deferred to P-5B (forge_attempt/salvage/milestone) and P-5C (stab_action).
+- [x] **Documentation**: Publish P-5A telemetry foundation plan and event schema analysis documents.
