@@ -271,11 +271,31 @@
 - [x] Target 5: Implement native app styling tweaks (remove tap-flash, disable selection, manipulator touch-action) <!-- id: 204 -->
 - [x] Target 6: Exception override to keep text-area selectable inside import modal <!-- id: 205 -->
 - [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A -->
-- [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A -->
 - [x] Phase O-1C: Controlled Static Asset Caching <!-- id: O1C -->
 
 
 
--   [ x ]   O - 1 B   P W A   U p d a t e   R e c o v e r y   &   C a c h e   R e g r e s s i o n   Q A  
- -   [ x ]   O - 1 C   C o n t r o l l e d   S t a t i c   A s s e t   C a c h i n g  
- 
+-   [ x ]   O - 1 B   P W A   U p d a t e   R e c o v e r y   &   C a c h e   R e g r e s s i o n   Q A  
+ -   [ x ]   O - 1 C   C o n t r o l l e d   S t a t i c   A s s e t   C a c h i n g  
+
+## Phase P-1: Zero-Day Hotfix
+- [x] Compact Number Formatting
+  - [x] Implement `formatCompactGlobal` at global scope
+  - [x] Refactor `formatDps` to use non-currency compact formatting
+  - [x] Update `formatCompact` React wrapper to route to global helper
+  - [x] Apply `formatCompact` for Cash, Shards, DPS, Upgrade costs, Forge costs, Reward summaries, and Tokens in UI
+- [x] Forge Initialization Recovery
+  - [x] Automatically grant a starter weapon (`iron-dagger` +0) when inventory is empty in `normalizeGameState`
+  - [x] Resolve React Hook violation in `getWarStatusIndicators`
+  - [x] Update `migrateLegacyStateIfNeeded` to normalize returned migrated states
+- [x] Defense Bankruptcy Soft-lock Prevention
+  - [x] Update `startDefenseRun` to cost 0 tickets when player has 0 tickets and <100 dividends
+  - [x] Update UI for Start Run button to allow and highlight free starts under bankruptcy
+
+## Phase P-1B: Runtime QA & Exploit Audit
+- [x] Verify Compact Formatting consistency <!-- id: p1b_compact_qa -->
+- [x] Fix Bet Slip Stake input currency prefix in index.html <!-- id: p1b_bet_slip_fix -->
+- [x] Verify Forge Recovery safety and claim starter weapon limits <!-- id: p1b_forge_qa -->
+- [x] Verify Defense Bankruptcy exploit safety and low-dividend loops <!-- id: p1b_defense_qa -->
+- [x] Verify Runtime Stability (no conditional hooks, no recursive normalize loops) <!-- id: p1b_stability_qa -->
+- [x] Generate Runtime QA & Exploit Audit report <!-- id: p1b_report -->

@@ -2384,17 +2384,34 @@
       return Number.isFinite(number) ? number : fallback;
     }
 
-    function formatDps(val) {
-      const n = toFiniteNumber(val, 0);
-      if (n <= 0) return "0";
-      if (n < 1000000) return Math.floor(n).toLocaleString();
-      if (n < 1e12) {
+    function formatCompactGlobal(val, isCurrency = true, currencyCode = "USD") {
+      const num = Number(val);
+      if (val === undefined || val === null || Number.isNaN(num)) {
+        return isCurrency ? (currencyCode === "KRW" ? "₩0" : "$0") : "0";
+      }
+      if (!Number.isFinite(num)) {
+        if (num === Infinity) return "∞";
+        if (num === -Infinity) return "-∞";
+        return isCurrency ? (currencyCode === "KRW" ? "₩0" : "$0") : "0";
+      }
+
+      if (isCurrency) {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: currencyCode,
+          notation: "compact",
+          maximumFractionDigits: 1,
+        }).format(num);
+      } else {
         return new Intl.NumberFormat("en-US", {
           notation: "compact",
-          maximumFractionDigits: 2,
-        }).format(n);
+          maximumFractionDigits: 1,
+        }).format(num);
       }
-      return n.toExponential(2);
+    }
+
+    function formatDps(val) {
+      return formatCompactGlobal(val, false);
     }
 
     function clampNumber(value, min, max, fallback = min) {
@@ -3476,11 +3493,19 @@
       const savedInventory = Array.isArray(enhancement.inventory)
         ? enhancement.inventory
         : [];
-      const normalizedInventory = ensureUniqueGachaInstanceIds(
+      let normalizedInventory = ensureUniqueGachaInstanceIds(
         savedInventory
           .map((item, index) => normalizeInventoryItem(item, index))
           .filter(Boolean),
       );
+      let starterWeaponGranted = enhancement.starterWeaponGranted === true;
+      if (normalizedInventory.length === 0) {
+        const starterWeapon = createStarterWeaponInstance();
+        if (starterWeapon) {
+          normalizedInventory = [starterWeapon];
+          starterWeaponGranted = true;
+        }
+      }
       const normalizedRecentPulls = ensureUniqueGachaInstanceIds(
         normalizeRecentPulls(enhancement.recentPulls),
       );
@@ -3694,7 +3719,7 @@
           ...enhancement,
           inventory: normalizedInventory,
           failStacks: toFiniteNumber(enhancement.failStacks, 0),
-          starterWeaponGranted: enhancement.starterWeaponGranted === true,
+          starterWeaponGranted: starterWeaponGranted,
           weaponLevels: normalizedWeaponLevels,
           weaponMastery: normalizedWeaponMastery,
           lastPulledItem:
@@ -3873,9 +3898,10 @@
           50,
         );
 
-        saveGameState(migrated);
+        const normalized = normalizeGameState(migrated, language);
+        saveGameState(normalized);
         localStorage.removeItem(LEGACY_LANDLORD_STORAGE_KEY);
-        return migrated;
+        return normalized;
       } catch (error) {
         console.warn("Unable to migrate legacy Idle Landlord state.", error);
         return null;
@@ -5424,9 +5450,9 @@
             : ui.walletDividends;
       const headerPrimaryValue =
         activeTab === "investment"
-          ? formatMoney(contractCapital)
+          ? formatCompact(contractCapital)
           : activeTab === "landlord"
-            ? `${formatMoney(incomePerSec)}/${t.sec}`
+            ? `${formatCompact(incomePerSec)}/${t.sec}`
             : formatDps(dividends);
       const headerSecondaryLabel =
         activeTab === "rpg" || activeTab === "enhancement"
@@ -6425,7 +6451,12 @@
         updateGameState((prev) => {
           if (prev.rpg.run?.isActive === true) return prev;
           const tickets = Math.max(0, Math.floor(toFiniteNumber(prev.rpg.tickets, 0)));
-          if (tickets <= 0) return prev;
+          const dividends = toFiniteNumber(prev.rpg.dividends, 0);
+          const ticketCost = getRunTicketCost();
+          const isBankrupt = tickets <= 0 && dividends < ticketCost;
+          
+          if (tickets <= 0 && !isBankrupt) return prev;
+
           const starterIds = getStarterRunCharacterIds(prev.rpg);
           const selectedIds = starterIds.slice(0, 5);
           const activeUnits = ensureUniqueCharacterInstanceIds(
@@ -6436,11 +6467,14 @@
           if (activeUnits.length === 0) return prev;
           const maxHp = getMonsterMaxHp(1);
           const runId = `run-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+          
+          const nextTickets = isBankrupt ? 0 : tickets - 1;
+          
           return {
             ...prev,
             rpg: {
               ...prev.rpg,
-              tickets: tickets - 1,
+              tickets: nextTickets,
               currentStage: 1,
               monsterHp: maxHp,
               monsterMaxHp: maxHp,
@@ -7482,13 +7516,8 @@
         return "text-gray-600";
       };
 
-      function formatMoney(val) {
-        return new Intl.NumberFormat(t.format, {
-          style: "currency",
-          currency: t.currency,
-          maximumFractionDigits: 0,
-        }).format(val);
-      }
+      const formatCompact = (val, isCurrency = true) =>
+        formatCompactGlobal(val, isCurrency, language === "ko" ? "KRW" : "USD");
 
       const defenseStabilityIndex = Math.round(
         Math.min(100, Math.max(0,
@@ -7692,10 +7721,10 @@
                     {offlineProgressData.cashEarned > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-zinc-400">
-                          {language === "ko" ? "₩ 전쟁 자금 수득" : "₩ War Funds Earned"}
+                          {language === "ko" ? "₩ 전쟁 자금 수득" : "$ War Funds Earned"}
                         </span>
                         <span className="text-sm font-black text-emerald-400 font-mono">
-                          +₩{offlineProgressData.cashEarned.toLocaleString()}
+                          +{formatCompact(offlineProgressData.cashEarned)}
                         </span>
                       </div>
                     )}
@@ -7706,7 +7735,7 @@
                           {language === "ko" ? "💎 정제된 파편 수득" : "💎 Refined Shards Acquired"}
                         </span>
                         <span className="text-sm font-black text-amber-400 font-mono">
-                          +{offlineProgressData.shardsEarned.toLocaleString()}
+                          +{formatCompact(offlineProgressData.shardsEarned, false)}
                         </span>
                       </div>
                     )}
@@ -7748,7 +7777,7 @@
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold">
                       <span className="text-gray-500 uppercase">{t.gameOverStake}</span>
-                      <span className="text-white font-black">{formatMoney(gameState.meta.gameOver.stake)}</span>
+                      <span className="text-white font-black">{formatCompact(gameState.meta.gameOver.stake)}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold">
                       <span className="text-gray-500 uppercase">{t.gameOverOdds}</span>
@@ -7802,7 +7831,7 @@
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold">
                       <span className="text-gray-500 uppercase">{ui.stakeAmount}</span>
-                      <span className="text-white font-black">{formatMoney(simulatedOutcome.stake)}</span>
+                      <span className="text-white font-black">{formatCompact(simulatedOutcome.stake)}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold">
                       <span className="text-gray-500 uppercase">{ui.successChance}</span>
@@ -7810,7 +7839,7 @@
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold border-t border-white/5 pt-2 mt-2">
                       <span className="text-gray-500 uppercase">{ui.projectedWin}</span>
-                      <span className="text-emerald-500 font-black">+{formatMoney(simulatedOutcome.stake * (simulatedOutcome.projectedPayout - 1))}</span>
+                      <span className="text-emerald-500 font-black">+{formatCompact(simulatedOutcome.stake * (simulatedOutcome.projectedPayout - 1))}</span>
                     </div>
                   </div>
 
@@ -7943,7 +7972,7 @@
                 </div>
                 {/* 칙칙한 초록색을 야간 투시경 광선 색상인 text-emerald-400으로 변경 */}
                 <div className="text-lg font-black text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.3)]">
-                  {formatMoney(cash)}
+                  {formatCompact(cash)}
                 </div>
               </div>
               <div className="px-4 py-3 bg-white">
@@ -7976,7 +8005,7 @@
                   {language === "ko" ? "토큰" : "Token"}
                 </div>
                 <div className="text-base font-black text-amber-400 drop-shadow-[0_0_4px_rgba(245,158,11,0.3)] leading-tight">
-                  🪙 {Math.max(0, Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)))}
+                  🪙 {formatCompact(Math.max(0, Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0))), false)}
                 </div>
               </div>
             </div>
@@ -8066,10 +8095,10 @@
                 <div className="w-full bg-slate-900 shadow-2xl rounded-2xl overflow-hidden border border-slate-800 flex flex-col h-[650px] shadow-black/40">
                   <div className="bg-gradient-to-r from-slate-950 to-slate-900 text-slate-100 p-6 text-center border-b border-slate-800">
                     <div className="text-4xl font-extrabold mb-1">
-                      {formatMoney(cash)}
+                      {formatCompact(cash)}
                     </div>
                     <div className="text-green-100 text-sm font-medium">
-                      +{formatMoney(incomePerSec)}/{t.sec}
+                      +{formatCompact(incomePerSec)}/{t.sec}
                     </div>
                   </div>
 
@@ -8098,7 +8127,7 @@
                     </div>
 
                     <div className="absolute bottom-4 text-emerald-400/60 font-black animate-pulse pointer-events-none text-[10px] tracking-widest uppercase">
-                      {language === "ko" ? "화력 지원 요청" : "REQUEST FIRE SUPPORT"} (+{formatMoney(clickPower * multiplier)})
+                      {language === "ko" ? "화력 지원 요청" : "REQUEST FIRE SUPPORT"} (+{formatCompact(clickPower * multiplier)})
                     </div>
                     {clicks.map((c) => (
                       <div
@@ -8106,7 +8135,7 @@
                         className="click-effect"
                         style={{ left: c.x - 20, top: c.y - 40 }}
                       >
-                        +{formatMoney(c.val)}
+                        +{formatCompact(c.val)}
                       </div>
                     ))}
                   </div>
@@ -8123,11 +8152,11 @@
                       <div className="text-left">
                         <div className="font-bold">{t.mousePower}</div>
                         <div className="text-xs text-gray-500">
-                          +{formatMoney(10 * multiplier)}/{t.click}
+                          +{formatCompact(10 * multiplier)}/{t.click}
                         </div>
                       </div>
                       <div className="font-black text-green-600">
-                        {formatMoney(clickUpgradeCost)}
+                        {formatCompact(clickUpgradeCost)}
                       </div>
                     </button>
 
@@ -8152,12 +8181,12 @@
                                 </span>
                               </div>
                               <div className="text-xs text-gray-500">
-                                +{formatMoney(p.baseIncome * multiplier)}/{t.sec}
+                                +{formatCompact(p.baseIncome * multiplier)}/{t.sec}
                               </div>
                             </div>
                           </div>
                           <div className="font-black text-emerald-600">
-                            {formatMoney(cost)}
+                            {formatCompact(cost)}
                           </div>
                         </button>
                       );
@@ -8238,7 +8267,7 @@
                         {ui.contractCapital}
                       </div>
                       <div className="text-lg font-black">
-                        {formatMoney(contractCapital)}
+                        {formatCompact(contractCapital)}
                       </div>
                     </div>
                     <div>
@@ -8246,7 +8275,7 @@
                         {ui.contractValue}
                       </div>
                       <div className="text-lg font-black">
-                        {formatMoney(totalPortfolioValue)}
+                        {formatCompact(totalPortfolioValue)}
                       </div>
                     </div>
                     <div>
@@ -8254,7 +8283,7 @@
                         {ui.totalCapital}
                       </div>
                       <div className="text-lg font-black">
-                        {formatMoney(totalNetWorth)}
+                        {formatCompact(totalNetWorth)}
                       </div>
                     </div>
                   </div>
@@ -8359,7 +8388,7 @@
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                           }`}
                       >
-                        {ui.boostCapital} {formatMoney(amount)}
+                        {ui.boostCapital} {formatCompact(amount)}
                       </button>
                     ))}
                   </div>
@@ -8453,11 +8482,13 @@
                         <div className="flex items-center justify-between mb-2">
                           <label className="text-[10px] font-black text-gray-700 uppercase">참전 지원 기금 설정</label>
                           <span className="text-[10px] font-bold text-gray-400">
-                            {ui.contractCapital}: <span className="font-black text-emerald-700">{formatMoney(contractCapital)}</span>
+                            {ui.contractCapital}: <span className="font-black text-emerald-700">{formatCompact(contractCapital)}</span>
                           </span>
                         </div>
                         <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-gray-400 font-black text-xs">₩</span>
+                          <span className="absolute left-3 top-2.5 text-gray-400 font-black text-xs">
+                            {language === "ko" ? "₩" : "$"}
+                          </span>
                           <input
                             type="number"
                             min="0"
@@ -8486,13 +8517,13 @@
                         <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-center">
                           <div className="text-[9px] font-black text-gray-400 uppercase mb-1">지원 기금액</div>
                           <div className="text-base font-black text-gray-800">
-                            {formatMoney(toFiniteNumber(gameState.investment.betSlip?.stake, 0))}
+                            {formatCompact(toFiniteNumber(gameState.investment.betSlip?.stake, 0))}
                           </div>
                         </div>
                         <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
                           <div className="text-[9px] font-black text-gray-400 uppercase mb-1">예상 획득 자금</div>
                           <div className="text-base font-black text-emerald-700">
-                            {formatMoney(betPreview.projectedWin)}
+                            {formatCompact(betPreview.projectedWin)}
                           </div>
                         </div>
                       </div>
@@ -8514,11 +8545,11 @@
                             </div>
                             <div className="bg-white border border-gray-100 rounded-lg p-2.5">
                               <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.projectedGain}</div>
-                              <div className="text-sm font-black text-emerald-700">+{formatMoney(simulatedOutcome.projectedGain)}</div>
+                              <div className="text-sm font-black text-emerald-700">+{formatCompact(simulatedOutcome.projectedGain)}</div>
                             </div>
                             <div className="bg-white border border-gray-100 rounded-lg p-2.5">
                               <div className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{ui.projectedLoss}</div>
-                              <div className="text-sm font-black text-red-500">-{formatMoney(simulatedOutcome.projectedLoss)}</div>
+                              <div className="text-sm font-black text-red-500">-{formatCompact(simulatedOutcome.projectedLoss)}</div>
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
@@ -8648,7 +8679,7 @@
                               <div className="flex items-center justify-between border-t border-gray-100 pt-1.5">
                                 <span className="text-gray-500">{ui.netPreview}</span>
                                 <span className={`font-black ${toFiniteNumber(dr.netPreview, 0) >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                                  {toFiniteNumber(dr.netPreview, 0) >= 0 ? "+" : ""}{formatMoney(toFiniteNumber(dr.netPreview, 0))}
+                                  {toFiniteNumber(dr.netPreview, 0) >= 0 ? "+" : ""}{formatCompact(toFiniteNumber(dr.netPreview, 0))}
                                 </span>
                               </div>
                               <div className="text-[10px] text-emerald-600 italic bg-emerald-50 p-2 rounded-lg text-center mt-2 border border-emerald-100 font-bold">
@@ -8708,7 +8739,7 @@
                                       <div className="min-w-0">
                                         <div className="text-[11px] font-black text-gray-800 truncate">{entry.contractName}</div>
                                         <div className="text-[9px] text-gray-400 mt-0.5 leading-relaxed">
-                                          참전 {formatMoney(toFiniteNumber(entry.stake, 0))} | {toFiniteNumber(entry.odds, 0)}% 확률 | x{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)} | {ts}
+                                          참전 {formatCompact(toFiniteNumber(entry.stake, 0))} | {toFiniteNumber(entry.odds, 0)}% 확률 | x{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)} | {ts}
                                         </div>
                                       </div>
                                       <div className="shrink-0 text-right">
@@ -8717,7 +8748,7 @@
                                           {isWon ? (language === "ko" ? "🛡️ 생존 성공" : "Won") : (language === "ko" ? "💀 영웅 사망" : "Lost")}
                                         </div>
                                         <div className={`text-[11px] font-black mt-1 ${net >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                                          {net >= 0 ? "+" : ""}{formatMoney(net)}
+                                          {net >= 0 ? "+" : ""}{formatCompact(net)}
                                         </div>
                                       </div>
                                     </div>
@@ -8756,7 +8787,7 @@
                                       <div className="min-w-0">
                                         <div className="text-[11px] font-black text-gray-800 truncate">{entry.contractName}</div>
                                         <div className="text-[9px] text-gray-400 mt-0.5 leading-relaxed">
-                                          모의 {formatMoney(toFiniteNumber(entry.stake, 0))} | {toFiniteNumber(entry.odds, 0)}% 확률 | x{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)}
+                                          모의 {formatCompact(toFiniteNumber(entry.stake, 0))} | {toFiniteNumber(entry.odds, 0)}% 확률 | x{toFiniteNumber(entry.projectedPayout, 1).toFixed(2)}
                                         </div>
                                       </div>
                                       <div className="shrink-0 text-right">
@@ -8810,7 +8841,7 @@
                       <div className="text-green-200 text-[9px] font-black uppercase">
                         {language === "ko" ? "💎 제련 파편" : "💎 Shards"}
                       </div>
-                      <div className="text-sm font-black">{toFiniteNumber(gameState.enhancement?.refinedShards, 0)}</div>
+                      <div className="text-sm font-black">{formatCompact(toFiniteNumber(gameState.enhancement?.refinedShards, 0), false)}</div>
                     </div>
                     <div className="bg-black/20 rounded-md p-2">
                       <div className="text-green-200 text-[9px] font-black uppercase">
@@ -9247,7 +9278,7 @@
                           <div className="flex justify-between items-center text-[10px] text-gray-500 border-t border-gray-900 pt-2 mt-2">
                             <span>{language === "ko" ? "매각 대금 (CASH)" : "Expected CASH Payout"}</span>
                             <span className="text-emerald-400 font-black text-xs">
-                              +{formatMoney(sandboxState.blackMarketVolume * 35000)}
+                              +{formatCompact(sandboxState.blackMarketVolume * 35000)}
                             </span>
                           </div>
                         </div>
@@ -9416,7 +9447,7 @@
                                     {language === "ko" ? "소모 비용" : "Cost Paid"}
                                   </span>
                                   <div className="mt-1 font-black text-sm text-slate-100">
-                                    {formatMoney(costVal)} Cash
+                                    {formatCompact(costVal)} Cash
                                   </div>
                                 </div>
 
@@ -9898,7 +9929,7 @@
                                     <div className="space-y-1.5">
                                       {/* Cost / Chance row */}
                                       <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 gap-2">
-                                        <span>{language === "ko" ? "비용" : "Cost"}: {formatMoney(getEnhanceCost(item.enhanceLevel))}</span>
+                                        <span>{language === "ko" ? "비용" : "Cost"}: {formatCompact(getEnhanceCost(item.enhanceLevel))}</span>
                                         <span>{language === "ko" ? "확률" : "Chance"}: {Math.round(getEnhanceChance(item.enhanceLevel) * 100)}%</span>
                                       </div>
                                       {/* Action buttons row */}
@@ -10172,9 +10203,9 @@
                                             <div className="pt-1.5 border-t border-zinc-800/50 space-y-1.5">
                                               {/* Balance readout */}
                                               <div className="text-[8px] font-bold text-zinc-500 leading-tight">
-                                                <span className="text-zinc-400">💎 {refinedShards}</span>
+                                                <span className="text-zinc-400">💎 {formatCompact(refinedShards, false)}</span>
                                                 <span className="text-zinc-700 mx-0.5">→</span>
-                                                <span className="text-amber-500/80">🪙 {bmt}</span>
+                                                <span className="text-amber-500/80">🪙 {formatCompact(bmt, false)}</span>
                                                 <span className="text-zinc-700 mx-0.5">·</span>
                                                 <span className="text-zinc-600">100:1</span>
                                               </div>
@@ -10192,7 +10223,7 @@
                                                       ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-600/50"
                                                       : "bg-zinc-900/40 text-zinc-600 cursor-not-allowed border border-zinc-800/30 opacity-40"
                                                   }`}
-                                                  title={language === "ko" ? `100 파편 → 1 토큰 (현재 ${refinedShards}개)` : `100 Shards → 1 Token (have ${refinedShards})`}
+                                                  title={language === "ko" ? `100 파편 → 1 토큰 (현재 ${formatCompact(refinedShards, false)}개)` : `100 Shards → 1 Token (have ${formatCompact(refinedShards, false)})`}
                                                 >
                                                   💎 100 → 🪙 1
                                                 </button>
@@ -10213,8 +10244,8 @@
                                                   <div>{language === "ko" ? "모든 파편 일괄 전환" : "Convert All Shards"}</div>
                                                   <div className={`text-[7px] font-bold mt-0.5 ${canConvert ? "text-zinc-400" : "text-zinc-700"}`}>
                                                     {language === "ko"
-                                                      ? `예상 토큰: ${Math.floor(refinedShards / SHARD_TO_TOKEN_RATE)}`
-                                                      : `Est. tokens: ${Math.floor(refinedShards / SHARD_TO_TOKEN_RATE)}`}
+                                                      ? `예상 토큰: ${formatCompact(Math.floor(refinedShards / SHARD_TO_TOKEN_RATE), false)}`
+                                                      : `Est. tokens: ${formatCompact(Math.floor(refinedShards / SHARD_TO_TOKEN_RATE), false)}`}
                                                   </div>
                                                 </button>
                                               </div>
@@ -10349,7 +10380,7 @@
                               {language === "ko" ? "💎 파편 회수 기록" : "💎 Salvage History"}
                             </h2>
                             <span className="text-[9px] font-black text-cyan-600">
-                              {language === "ko" ? "총 회수" : "Total"}: 💎{toFiniteNumber(gameState.enhancement?.forgeStats?.totalShardsEarned, 0)}
+                              {language === "ko" ? "총 회수" : "Total"}: 💎{formatCompact(toFiniteNumber(gameState.enhancement?.forgeStats?.totalShardsEarned, 0), false)}
                             </span>
                           </div>
                           <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
@@ -10361,7 +10392,7 @@
                                   </span>
                                   <span className="text-gray-600 truncate">{entry.weaponName} +{entry.weaponLevel}</span>
                                 </div>
-                                <span className="text-cyan-600 flex-shrink-0">💎 +{entry.refinedShardsAwarded}</span>
+                                <span className="text-cyan-600 flex-shrink-0">💎 +{formatCompact(toFiniteNumber(entry.refinedShardsAwarded, 0), false)}</span>
                               </div>
                             ))}
                           </div>
@@ -10631,16 +10662,27 @@
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 mt-3">
-                      <button
-                        onClick={startDefenseRun}
-                        disabled={runState.isActive === true || runTickets <= 0}
-                        className={`rounded-md py-2 text-[11px] font-black transition-colors ${runState.isActive === true || runTickets <= 0
-                          ? "bg-gray-700/40 text-gray-400 cursor-not-allowed"
-                          : "bg-emerald-600 text-white hover:bg-emerald-500"
-                          }`}
-                      >
-                        {ui.startDefenseRun}
-                      </button>
+                      {(() => {
+                        const isBankrupt = runTickets <= 0 && dividends < getRunTicketCost();
+                        const startBtnClass = `rounded-md py-2 text-[11px] font-black transition-colors ${
+                          runState.isActive === true
+                            ? "bg-gray-700/40 text-gray-400 cursor-not-allowed"
+                            : isBankrupt
+                              ? "bg-amber-600 text-white hover:bg-amber-500 animate-pulse border border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                              : "bg-emerald-600 text-white hover:bg-emerald-500"
+                        }`;
+                        return (
+                          <button
+                            onClick={startDefenseRun}
+                            disabled={runState.isActive === true || (runTickets <= 0 && dividends >= getRunTicketCost())}
+                            className={startBtnClass}
+                          >
+                            {runTickets <= 0 && dividends < getRunTicketCost()
+                              ? (language === "ko" ? "긴급 방어 지원 (무료)" : "Emergency Start (Free)")
+                              : ui.startDefenseRun}
+                          </button>
+                        );
+                      })()}
                       <button
                         onClick={buyRunTicket}
                         disabled={dividends < getRunTicketCost()}
@@ -10886,7 +10928,7 @@
                             </div>
                             <div>
                               <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "안정제 및 파편" : "Stab. / Shards"}</div>
-                              <div className={`text-[10px] font-black ${resourceColor}`}>📦 {stabilizers} <span className="text-[8px] font-bold text-gray-500">({refinedShards}S)</span></div>
+                              <div className={`text-[10px] font-black ${resourceColor}`}>📦 {stabilizers} <span className="text-[8px] font-bold text-gray-500">({formatCompact(refinedShards, false)}S)</span></div>
                             </div>
                             <div>
                               <div className="text-[8px] font-bold text-gray-500 uppercase">{language === "ko" ? "최고 기록" : "Highest Stage"}</div>
