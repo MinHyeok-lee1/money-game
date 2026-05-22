@@ -1,11 +1,15 @@
 // Service Worker for Money Game Universe
 // Every deployment that changes index.html must bump CACHE_NAME manually.
-const CACHE_NAME = "capital-front-v1.0.0";
+const CACHE_NAME = "capital-front-v1.0.1";
 const SHELL_URL = "./index.html";
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.add(SHELL_URL))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll([
+      SHELL_URL,
+      "favicon.svg",
+      "manifest.json"
+    ]))
   );
   // Activate the new SW immediately.
   self.skipWaiting();

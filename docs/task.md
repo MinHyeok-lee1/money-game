@@ -272,6 +272,10 @@
 - [x] Target 6: Exception override to keep text-area selectable inside import modal <!-- id: 205 -->
 - [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A -->
 - [x] Phase O-1A: PWA Lifecycle Hardening (static cache, safe-area CSS, silent SW registration) <!-- id: O1A -->
+- [x] Phase O-1C: Controlled Static Asset Caching <!-- id: O1C -->
 
 
 
+-   [ x ]   O - 1 B   P W A   U p d a t e   R e c o v e r y   &   C a c h e   R e g r e s s i o n   Q A  
+ -   [ x ]   O - 1 C   C o n t r o l l e d   S t a t i c   A s s e t   C a c h i n g  
+ 
