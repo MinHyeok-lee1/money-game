@@ -261,6 +261,11 @@
         scrollbar-width: thin;
       }
 
+
+      .guide-summary .guide-close-label { display: none; }
+      details[open] .guide-summary .guide-open-label { display: none; }
+      details[open] .guide-summary .guide-close-label { display: inline; }
+
       /* Safe area insets for standalone */
       #root,
       [data-app-root],
@@ -5931,7 +5936,7 @@
           lastEnhancement: "최근 모루 타격 결과",
           ownedCharacters: "보유 영웅",
           recentPulls: "최근 보급 내역",
-          inventory: "장비 보관고",
+          inventory: "무기 관리",
           weapon: "무기",
           none: "없음",
           equipFirst: "첫 무기 장착 (Deploy)",
@@ -5975,7 +5980,7 @@
           stakeWithinCapital: "투입 기금 <= 보유 자본",
           oddsValid: "전선 배당 배수 동기화 완료",
           payoutValid: "예상 정산 배수 정합성 확인",
-          runDryRun: "모의 작전 시뮬레이션 기동 (Dry Run)",
+          runDryRun: "모의 작전 시뮬레이션 기동",
           settleContract: "⚡ 전선 결과 정산",
           realSettlementLocked: "계약과 작전 자본을 먼저 설정하십시오",
           dryRunResult: "모의 작전 정산 결과",
@@ -6121,7 +6126,7 @@
           lastEnhancement: "Last Enhancement",
           ownedCharacters: "Owned Characters",
           recentPulls: "Recent Pulls",
-          inventory: "Inventory",
+          inventory: "Weapon Management",
           weapon: "Weapon",
           none: "None",
           equipFirst: "Equip First",
@@ -6165,7 +6170,7 @@
           stakeWithinCapital: "Stake <= Capital",
           oddsValid: "Odds Valid",
           payoutValid: "Payout Valid",
-          runDryRun: "Run Dry-Run Simulation",
+          runDryRun: "Run Simulation",
           settleContract: "Settle Contract",
           realSettlementLocked: "Select contract and stake first",
           dryRunResult: "Dry-Run Result",
@@ -6737,6 +6742,8 @@
         const [fusionQuantities, setFusionQuantities] = useState({ character: 1, weapon: 1 });
         const [gachaSummaryModal, setGachaSummaryModal] = useState(null);
         const [quartermasterHeroSort, setQuartermasterHeroSort] = useState("acquired");
+        const [quartermasterHeroFilter, setQuartermasterHeroFilter] = useState("all");
+        const [quartermasterWeaponFilter, setQuartermasterWeaponFilter] = useState("all");
         const [weaponEquipTargets, setWeaponEquipTargets] = useState({});
         const [badgeFlash, setBadgeFlash] = useState({}); // L-7: { [instanceId]: boolean } — local, not persisted
         const [offlineProgressData, setOfflineProgressData] = useState(null); // M-1: offline progress recap data
@@ -7344,12 +7351,31 @@
         const firstAvailableWeapon = weaponInventory.find(
           (weapon) => !isWeaponEquipped(weapon.instanceId, ownedCharacters),
         );
-        const inventoryByRarity = GACHA_RARITIES.reduce((counts, rarity) => {
-          counts[rarity.name] = enhancementInventory.filter(
-            (item) => item.rarity === rarity.name,
+        const normalizeRarityName = (rarity) => {
+          const key = String(rarity || "Normal").toLowerCase();
+          const map = { normal: "Normal", rare: "Rare", epic: "Epic", unique: "Unique", legendary: "Legendary", mythic: "Mythic" };
+          return map[key] || "Normal";
+        };
+        const getRarityRankValue = (rarity) => ({ Normal: 0, Rare: 1, Epic: 2, Unique: 3, Legendary: 4, Mythic: 5 }[normalizeRarityName(rarity)] ?? 0);
+        const RARITY_FILTERS = ["Normal", "Rare", "Epic", "Unique", "Legendary", "Mythic"];
+        const inventoryByRarity = RARITY_FILTERS.reduce((counts, rarity) => {
+          counts[rarity] = weaponInventory.filter(
+            (item) => normalizeRarityName(item.rarity) === rarity,
           ).length;
           return counts;
         }, {});
+        const heroByRarity = RARITY_FILTERS.reduce((counts, rarity) => {
+          counts[rarity] = ownedCharacterDetails.filter(
+            (character) => normalizeRarityName(character.rarityLabel || character.definition?.rarity) === rarity,
+          ).length;
+          return counts;
+        }, {});
+        const equippedWeaponCount = weaponInventory.filter((item) =>
+          isWeaponEquipped(item.instanceId, ownedCharacters),
+        ).length;
+        const deployedHeroCount = ownedCharacterDetails.filter((character) =>
+          (gameState.rpg?.run?.activeUnits || []).some((unit) => unit.instanceId === character.instanceId),
+        ).length;
         const rarityRank = GACHA_RARITIES.reduce((ranks, rarity, index) => {
           ranks[rarity.name] = index;
           return ranks;
@@ -7382,12 +7408,6 @@
         };
         const estimateHeroPowerReward = (stake, payout) =>
           Math.max(1, Math.floor(toFiniteNumber(stake, 0) * Math.max(1, toFiniteNumber(payout, 1)) / 1000000));
-        const normalizeRarityName = (rarity) => {
-          const key = String(rarity || "Normal").toLowerCase();
-          const map = { normal: "Normal", rare: "Rare", epic: "Epic", unique: "Unique", legendary: "Legendary", mythic: "Mythic" };
-          return map[key] || "Normal";
-        };
-        const getRarityRankValue = (rarity) => ({ Normal: 0, Rare: 1, Epic: 2, Unique: 3, Legendary: 4, Mythic: 5 }[normalizeRarityName(rarity)] ?? 0);
         const isPremiumRarity = (rarity) => getRarityRankValue(rarity) >= getRarityRankValue("Legendary");
         const getRecycleDividendValue = (rarity) => [100, 250, 800, 2000, 6000, 18000][getRarityRankValue(rarity)] || 100;
         const getRecycleShardValue = (rarity) => [3, 8, 20, 60, 180, 600][getRarityRankValue(rarity)] || 3;
@@ -7443,16 +7463,34 @@
               : activeTab === "investment"
                 ? `${gameState.rpg?.highestStage || 0}`
                 : `x${multiplier}`;
-        const sortedEnhancementInventory = [...enhancementInventory].sort(
+        const filteredEnhancementInventory = weaponInventory.filter((item) => {
+          if (quartermasterWeaponFilter === "equipped") {
+            return isWeaponEquipped(item.instanceId, ownedCharacters);
+          }
+          if (RARITY_FILTERS.includes(quartermasterWeaponFilter)) {
+            return normalizeRarityName(item.rarity) === quartermasterWeaponFilter;
+          }
+          return true;
+        });
+        const sortedEnhancementInventory = [...filteredEnhancementInventory].sort(
           (a, b) => {
             const rarityDelta =
-              (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0);
+              getRarityRankValue(b.rarity) - getRarityRankValue(a.rarity);
             if (rarityDelta !== 0) return rarityDelta;
-            return b.power - a.power;
+            return toFiniteNumber(b.enhanceLevel, 0) - toFiniteNumber(a.enhanceLevel, 0) || toFiniteNumber(b.power, 0) - toFiniteNumber(a.power, 0);
           },
         );
 
-        const sortedQuartermasterCharacters = [...ownedCharacterDetails].sort((a, b) => {
+        const filteredQuartermasterCharacters = ownedCharacterDetails.filter((character) => {
+          if (quartermasterHeroFilter === "deployed") {
+            return (gameState.rpg?.run?.activeUnits || []).some((unit) => unit.instanceId === character.instanceId);
+          }
+          if (RARITY_FILTERS.includes(quartermasterHeroFilter)) {
+            return normalizeRarityName(character.rarityLabel || character.definition?.rarity) === quartermasterHeroFilter;
+          }
+          return true;
+        });
+        const sortedQuartermasterCharacters = [...filteredQuartermasterCharacters].sort((a, b) => {
           const acquiredOrder = toFiniteNumber(a.acquisitionIndex, 0) - toFiniteNumber(b.acquisitionIndex, 0);
           if (quartermasterHeroSort === "level") {
             return toFiniteNumber(b.level, 0) - toFiniteNumber(a.level, 0) || acquiredOrder;
@@ -11012,7 +11050,7 @@
                   <div className="max-h-56 overflow-y-auto custom-scrollbar scroll-panel-soft space-y-1.5 pr-1">
                     {(gachaSummaryModal.topItems || []).map((item, index) => (
                       <div key={`summary-item-${item.instanceId || item.id}-${index}`} className="flex items-center justify-between bg-slate-900/80 border border-slate-800 rounded-md px-3 py-2">
-                        <div className="min-w-0">
+                        <div className="min-w-0 w-full">
                           <div className="text-xs font-black text-slate-100 truncate">{displayGachaItemName(item)}</div>
                           <div className={`text-[10px] font-black uppercase ${rarityTextClass(item.rarity)}`}>{item.rarity}</div>
                         </div>
@@ -12068,8 +12106,8 @@
                         </span>
                         <span className="text-slate-400">
                           {language === "ko"
-                            ? "참전 기금을 입력한 후, 모의 작전(Dry Run)으로 위험을 판단하고 정산을 결정하세요."
-                            : "Set your stake, run a simulation (Dry-Run) to check hazards, then decide to settle."}
+                            ? "참전 기금을 입력한 후, 모의 작전으로 위험을 판단하고 정산을 결정하세요."
+                            : "Set your stake, run a simulation to check hazards, then decide to settle."}
                         </span>
                       </div>
                     </div>
@@ -12186,7 +12224,7 @@
                       </div>
                       <div className="bg-gray-50 rounded-md p-2 border border-gray-100">
                         <div className="text-[9px] font-black text-gray-400 uppercase">
-                          Raid Confidence
+                          {language === "ko" ? "작전 신뢰도" : "Raid Confidence"}
                         </div>
                         <div
                           className={`text-sm font-black ${raidConfidence >= 50 ? "text-emerald-600" : "text-yellow-600"}`}
@@ -12199,7 +12237,7 @@
                       </div>
                       <div className="bg-gray-50 rounded-md p-2 border border-gray-100">
                         <div className="text-[9px] font-black text-gray-400 uppercase">
-                          Capital Pressure
+                          {language === "ko" ? "자본 압박" : "Capital Pressure"}
                         </div>
                         <div
                           className={`text-sm font-black ${capitalPressure >= 70 ? "text-yellow-600" : "text-emerald-600"}`}
@@ -12213,13 +12251,13 @@
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[9px] font-bold text-gray-400 uppercase">
                       <span>
-                        Top Faction:{" "}
+                        {language === "ko" ? "주요 진영:" : "Top Faction:"}{" "}
                         <span className="text-emerald-700 font-black">
                           {dominantFaction}
                         </span>
                       </span>
                       <span>
-                        Squad DPS:{" "}
+                        {language === "ko" ? "분대 전력:" : "Squad DPS:"}{" "}
                         <span className="text-emerald-700 font-black">
                           {formatDps({ log10: combatStats.totalDpsLog10 })}
                         </span>
@@ -12731,8 +12769,8 @@
                                       key={entry.id}
                                       className={`p-3 transition-colors ${isWon ? "bg-emerald-50 bg-opacity-20" : "bg-red-50 bg-opacity-10"}`}
                                     >
-                                      <div className="flex items-start justify-between gap-3">
-                                        <div className="min-w-0">
+                                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                        <div className="min-w-0 w-full">
                                           <div className="text-[11px] font-black text-gray-800 truncate">
                                             {displayContractFlavor(entry.contractId)?.displayName || entry.contractName}
                                           </div>
@@ -12817,7 +12855,7 @@
                                   return (
                                     <div key={entry.id} className="px-3 py-2">
                                       <div className="flex items-center justify-between gap-2">
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 w-full">
                                           <div className="text-[10px] font-black text-gray-700 truncate">
                                             {displayContractFlavor(entry.contractId)?.displayName || entry.contractName}
                                           </div>
@@ -12879,8 +12917,8 @@
                               : "bg-slate-900 border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900/80 shadow-black/30"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div className="min-w-0 w-full">
                               <div className="flex items-center gap-2">
                                 <h2 className="font-black text-slate-100 truncate">
                                   {displayContractFlavor(asset.id)
@@ -12905,10 +12943,10 @@
                             </div>
                             <div className="text-right shrink-0">
                               <div className="text-xs font-bold text-slate-500 uppercase">
-                                {ui.entryRate}
+                                {ui.riskTier}
                               </div>
-                              <div className="font-black text-emerald-300">
-                                {formatMoney(asset.price)}
+                              <div className={`font-black ${getDefenseContractRiskTier(asset).color}`}>
+                                {localizeRiskTierLabel(getDefenseContractRiskTier(asset).label)}
                               </div>
                             </div>
                           </div>
@@ -12916,18 +12954,18 @@
                           <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
                             <div className="bg-slate-950/70 rounded-md p-3 border border-slate-800">
                               <div className="text-xs font-bold text-slate-500 uppercase">
-                                {ui.positionsHeld}
+                                {ui.defenseOdds}
                               </div>
-                              <div className="font-black text-slate-100">
-                                {asset.owned}
+                              <div className="font-black text-emerald-300">
+                                {getDefenseContractOdds(asset, gameState.rpg?.highestStage || 0)}%
                               </div>
                             </div>
                             <div className="bg-slate-950/70 rounded-md p-3 border border-slate-800">
                               <div className="text-xs font-bold text-slate-500 uppercase">
-                                {ui.stakeValue}
+                                {ui.projectedPayout}
                               </div>
-                              <div className="font-black text-slate-100">
-                                {formatMoney(asset.value)}
+                              <div className="font-black text-emerald-300">
+                                x{getDefenseContractProjectedPayout(asset, gameState.rpg?.highestStage || 0, combatStats.totalDps).toFixed(2)}
                               </div>
                             </div>
                           </div>
@@ -13050,78 +13088,7 @@
                           );
                         })}
                       </div>
-                      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-3">
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          {language === "ko" ? "분해 / 합성 관리" : "Recycle / Fusion"}
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="bg-slate-950/70 border border-slate-800 rounded-lg p-2 space-y-2">
-                            <div className="text-[10px] font-black text-cyan-300 uppercase">
-                              {language === "ko" ? "무기 분해 / 합성" : "Weapon Recycle / Fusion"}
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <button type="button" onClick={salvageAllUnequippedWeapons} className="col-span-2 rounded-md py-2 text-[10px] font-black bg-red-800 text-white hover:bg-red-700 action-readable">
-                                {language === "ko" ? "장착 제외 무기 모두 분해" : "Recycle all unequipped weapons"}
-                              </button>
-                              {SALVAGE_RARITY_TIERS.map((rarity) => (
-                                <button key={`weapon-salvage-${rarity}`} type="button" onClick={() => salvageLowGradeWeaponsByRarity(rarity)} className="rounded-md py-2 text-[10px] font-black bg-slate-700 text-white hover:bg-slate-600 action-readable">
-                                  {language === "ko" ? `무기 ${rarity} 이하 분해` : `Weapons ≤ ${rarity}`}
-                                </button>
-                              ))}
-                              {(() => {
-                                const maxFuse = Math.floor(getReserveWeaponFusionCandidates(gameState).length / 5);
-                                const count = Math.max(1, Math.min(Math.max(1, maxFuse), Math.floor(toFiniteNumber(fusionQuantities.weapon, 1))));
-                                return (
-                                  <div className="col-span-2 bg-slate-950/60 border border-slate-800 rounded-md p-2 space-y-2">
-                                    <div className="flex items-center justify-between text-[10px] font-black text-cyan-300">
-                                      <span>{language === "ko" ? "무기 합성 횟수" : "Weapon fusion count"}</span>
-                                      <span>{count} / {maxFuse}</span>
-                                    </div>
-                                    <input type="range" min="1" max={Math.max(1, maxFuse)} step="1" value={count} disabled={maxFuse <= 0} onChange={(event) => setFusionQuantities((prev) => ({ ...prev, weapon: Math.floor(toFiniteNumber(event.target.value, 1)) }))} className="w-full accent-cyan-500" />
-                                    <button type="button" onClick={() => fuseLowGradeWeapons(count)} disabled={maxFuse <= 0} className={`w-full rounded-md py-2 text-[10px] font-black action-readable ${maxFuse > 0 ? "bg-cyan-700 text-white hover:bg-cyan-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                      {language === "ko" ? `예비 무기 ${count}회 합성 (${count * 5}개 소모)` : `Fuse weapons x${count}`}
-                                    </button>
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                          <div className="bg-slate-950/70 border border-slate-800 rounded-lg p-2 space-y-2">
-                            <div className="text-[10px] font-black text-violet-300 uppercase">
-                              {language === "ko" ? "영웅 분해 / 합성" : "Hero Recycle / Fusion"}
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <button type="button" onClick={salvageAllReserveHeroes} className="col-span-2 rounded-md py-2 text-[10px] font-black bg-red-800 text-white hover:bg-red-700 action-readable">
-                                {language === "ko" ? "분대 제외 영웅 모두 분해" : "Recycle all reserve heroes"}
-                              </button>
-                              {SALVAGE_RARITY_TIERS.map((rarity) => (
-                                <button key={`hero-salvage-${rarity}`} type="button" onClick={() => salvageLowGradeHeroesByRarity(rarity)} className="rounded-md py-2 text-[10px] font-black bg-slate-700 text-white hover:bg-slate-600 action-readable">
-                                  {language === "ko" ? `영웅 ${rarity} 이하 분해` : `Heroes ≤ ${rarity}`}
-                                </button>
-                              ))}
-                              <button type="button" onClick={salvageDuplicateReserveHeroes} className="col-span-2 rounded-md py-2 text-[10px] font-black bg-rose-900 text-white hover:bg-rose-800 action-readable">
-                                {language === "ko" ? "중복 예비 영웅 분해" : "Recycle duplicate reserve heroes"}
-                              </button>
-                              {(() => {
-                                const maxFuse = Math.floor(getReserveHeroFusionCandidates(gameState).length / 5);
-                                const count = Math.max(1, Math.min(Math.max(1, maxFuse), Math.floor(toFiniteNumber(fusionQuantities.character, 1))));
-                                return (
-                                  <div className="col-span-2 bg-slate-950/60 border border-slate-800 rounded-md p-2 space-y-2">
-                                    <div className="flex items-center justify-between text-[10px] font-black text-violet-300">
-                                      <span>{language === "ko" ? "영웅 합성 횟수" : "Hero fusion count"}</span>
-                                      <span>{count} / {maxFuse}</span>
-                                    </div>
-                                    <input type="range" min="1" max={Math.max(1, maxFuse)} step="1" value={count} disabled={maxFuse <= 0} onChange={(event) => setFusionQuantities((prev) => ({ ...prev, character: Math.floor(toFiniteNumber(event.target.value, 1)) }))} className="w-full accent-violet-500" />
-                                    <button type="button" onClick={() => fuseLowGradeCharacters(count)} disabled={maxFuse <= 0} className={`w-full rounded-md py-2 text-[10px] font-black action-readable ${maxFuse > 0 ? "bg-violet-700 text-white hover:bg-violet-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                      {language === "ko" ? `예비 영웅 ${count}회 합성 (${count * 5}명 소모)` : `Fuse heroes x${count}`}
-                                    </button>
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      
 
                       {dividends < GACHA_DRAW_COST && (
                         <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-center">
@@ -13442,28 +13409,49 @@
                         )}
                       </div>
 
-                      <div className="grid grid-cols-5 gap-2">
-                        {GACHA_RARITIES.map((rarity) => (
-                          <div
-                            key={rarity.name}
-                            className="bg-white border border-gray-200 rounded-md p-2 text-center"
-                          >
-                            <div
-                              className={`text-[10px] font-black uppercase ${rarityTextClass(rarity.name)}`}
-                            >
-                              {rarity.name}
+                      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <div className="text-[10px] font-black text-cyan-300 uppercase tracking-widest">
+                              {language === "ko" ? "무기 분해 / 합성" : "Weapon Recycle / Fusion"}
                             </div>
-                            <div className="font-black text-gray-800">
-                              {inventoryByRarity[rarity.name] || 0}
+                            <div className="text-[10px] font-bold text-slate-500 mt-0.5">
+                              {language === "ko" ? "장착 중인 무기는 보호되며, 예비 무기만 분해·합성됩니다." : "Equipped weapons are protected; only reserve weapons are recycled or fused."}
                             </div>
                           </div>
-                        ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button type="button" onClick={salvageAllUnequippedWeapons} className="col-span-2 rounded-md py-2 text-[10px] font-black bg-red-800 text-white hover:bg-red-700 action-readable">
+                            {language === "ko" ? "장착 제외 무기 모두 분해" : "Recycle all unequipped weapons"}
+                          </button>
+                          {SALVAGE_RARITY_TIERS.map((rarity) => (
+                            <button key={`weapon-salvage-${rarity}`} type="button" onClick={() => salvageLowGradeWeaponsByRarity(rarity)} className="rounded-md py-2 text-[10px] font-black bg-slate-700 text-white hover:bg-slate-600 action-readable">
+                              {language === "ko" ? `무기 ${rarity} 이하 분해` : `Weapons ≤ ${rarity}`}
+                            </button>
+                          ))}
+                          {(() => {
+                            const maxFuse = Math.floor(getReserveWeaponFusionCandidates(gameState).length / 5);
+                            const count = Math.max(1, Math.min(Math.max(1, maxFuse), Math.floor(toFiniteNumber(fusionQuantities.weapon, 1))));
+                            return (
+                              <div className="col-span-2 bg-slate-950/60 border border-slate-800 rounded-md p-2 space-y-2">
+                                <div className="flex items-center justify-between text-[10px] font-black text-cyan-300">
+                                  <span>{language === "ko" ? "무기 합성 횟수" : "Weapon fusion count"}</span>
+                                  <span>{count} / {maxFuse}</span>
+                                </div>
+                                <input type="range" min="1" max={Math.max(1, maxFuse)} step="1" value={count} disabled={maxFuse <= 0} onChange={(event) => setFusionQuantities((prev) => ({ ...prev, weapon: Math.floor(toFiniteNumber(event.target.value, 1)) }))} className="w-full accent-cyan-500" />
+                                <button type="button" onClick={() => fuseLowGradeWeapons(count)} disabled={maxFuse <= 0} className={`w-full rounded-md py-2 text-[10px] font-black action-readable ${maxFuse > 0 ? "bg-cyan-700 text-white hover:bg-cyan-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                  {language === "ko" ? `예비 무기 ${count}회 합성 (${count * 5}개 소모)` : `Fuse weapons x${count}`}
+                                </button>
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
 
                       <div className="bg-white border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
-                          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                            {ui.inventory} · {language === "ko" ? "다중 무기 관리" : "Multi-Weapon Management"}
+                          <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest">
+                            {language === "ko" ? "무기 관리" : "Weapon Management"}
                           </h2>
                           <div className="flex items-center gap-2">
                             {/* J-3I: Bulk salvage button for broken unlocked weapons */}
@@ -13487,6 +13475,37 @@
                             <div className="text-xs font-black text-gray-500">
                               {enhancementInventory.length}
                             </div>
+                          </div>
+                        </div>
+                        <div className="mb-3 space-y-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            {RARITY_FILTERS.map((rarity) => (
+                              <button
+                                key={`weapon-filter-${rarity}`}
+                                type="button"
+                                onClick={() => setQuartermasterWeaponFilter(quartermasterWeaponFilter === rarity ? "all" : rarity)}
+                                className={`rounded-lg border p-2 text-center transition-colors action-readable ${quartermasterWeaponFilter === rarity ? "bg-slate-900 border-emerald-400 text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"}`}
+                              >
+                                <div className={`text-[10px] font-black uppercase ${rarityTextClass(rarity)}`}>{rarity}</div>
+                                <div className="text-lg font-black leading-tight">{inventoryByRarity[rarity] || 0}</div>
+                              </button>
+                            ))}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setQuartermasterWeaponFilter("all")}
+                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterWeaponFilter === "all" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+                            >
+                              {language === "ko" ? "전체 보기" : "All"} · {weaponInventory.length}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuartermasterWeaponFilter("equipped")}
+                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterWeaponFilter === "equipped" ? "bg-cyan-700 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+                            >
+                              {language === "ko" ? "장착 중" : "Equipped"} · {equippedWeaponCount}
+                            </button>
                           </div>
                         </div>
                         <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2">
@@ -14499,33 +14518,116 @@
                       </div>
 
                       
-                      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3 gap-2">
+                      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
                           <div>
-                            <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                              {language === "ko" ? "쿼터마스터 영웅 관리" : "Quartermaster Hero Management"}
-                            </h2>
-                            <div className="text-[10px] font-bold text-slate-600 mt-0.5">
-                              {language === "ko" ? "기본은 획득순 고정입니다. 레벨/성급 강화 후 카드 위치가 튀지 않습니다." : "Default order is fixed by acquisition."}
+                            <div className="text-[10px] font-black text-violet-300 uppercase tracking-widest">
+                              {language === "ko" ? "영웅 분해 / 합성" : "Hero Recycle / Fusion"}
+                            </div>
+                            <div className="text-[10px] font-bold text-slate-500 mt-0.5">
+                              {language === "ko" ? "분대 편성 영웅은 보호되며, 예비 영웅만 분해·합성됩니다." : "Deployed heroes are protected; only reserve heroes are recycled or fused."}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <select
-                              value={quartermasterHeroSort}
-                              onChange={(event) => setQuartermasterHeroSort(event.target.value)}
-                              className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-[10px] font-black text-slate-200"
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button type="button" onClick={salvageAllReserveHeroes} className="col-span-2 rounded-md py-2 text-[10px] font-black bg-red-800 text-white hover:bg-red-700 action-readable">
+                            {language === "ko" ? "분대 제외 영웅 모두 분해" : "Recycle all reserve heroes"}
+                          </button>
+                          {SALVAGE_RARITY_TIERS.map((rarity) => (
+                            <button key={`hero-salvage-${rarity}`} type="button" onClick={() => salvageLowGradeHeroesByRarity(rarity)} className="rounded-md py-2 text-[10px] font-black bg-slate-700 text-white hover:bg-slate-600 action-readable">
+                              {language === "ko" ? `영웅 ${rarity} 이하 분해` : `Heroes ≤ ${rarity}`}
+                            </button>
+                          ))}
+                          <button type="button" onClick={salvageDuplicateReserveHeroes} className="col-span-2 rounded-md py-2 text-[10px] font-black bg-rose-900 text-white hover:bg-rose-800 action-readable">
+                            {language === "ko" ? "중복 예비 영웅 분해" : "Recycle duplicate reserve heroes"}
+                          </button>
+                          {(() => {
+                            const maxFuse = Math.floor(getReserveHeroFusionCandidates(gameState).length / 5);
+                            const count = Math.max(1, Math.min(Math.max(1, maxFuse), Math.floor(toFiniteNumber(fusionQuantities.character, 1))));
+                            return (
+                              <div className="col-span-2 bg-slate-950/60 border border-slate-800 rounded-md p-2 space-y-2">
+                                <div className="flex items-center justify-between text-[10px] font-black text-violet-300">
+                                  <span>{language === "ko" ? "영웅 합성 횟수" : "Hero fusion count"}</span>
+                                  <span>{count} / {maxFuse}</span>
+                                </div>
+                                <input type="range" min="1" max={Math.max(1, maxFuse)} step="1" value={count} disabled={maxFuse <= 0} onChange={(event) => setFusionQuantities((prev) => ({ ...prev, character: Math.floor(toFiniteNumber(event.target.value, 1)) }))} className="w-full accent-violet-500" />
+                                <button type="button" onClick={() => fuseLowGradeCharacters(count)} disabled={maxFuse <= 0} className={`w-full rounded-md py-2 text-[10px] font-black action-readable ${maxFuse > 0 ? "bg-violet-700 text-white hover:bg-violet-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                  {language === "ko" ? `예비 영웅 ${count}회 합성 (${count * 5}명 소모)` : `Fuse heroes x${count}`}
+                                </button>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                        <div className="mb-3 space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div>
+                              <h2 className="text-xs font-black text-slate-300 uppercase tracking-widest">
+                                {language === "ko" ? "영웅 관리" : "Hero Management"}
+                              </h2>
+                              <div className="text-[10px] font-bold text-slate-600 mt-0.5">
+                                {language === "ko" ? "등급 카드로 필터링하고, 성장 버튼과 분해 버튼을 분리해 오조작을 줄였습니다." : "Filter by rarity; growth and recycle actions are separated for safety."}
+                              </div>
+                            </div>
+                            <div className="text-xs font-black text-slate-500">{sortedQuartermasterCharacters.length}/{ownedCharacterDetails.length}</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {RARITY_FILTERS.map((rarity) => (
+                              <button
+                                key={`hero-filter-${rarity}`}
+                                type="button"
+                                onClick={() => setQuartermasterHeroFilter(quartermasterHeroFilter === rarity ? "all" : rarity)}
+                                className={`rounded-lg border p-2 text-center transition-colors action-readable ${quartermasterHeroFilter === rarity ? "bg-emerald-700 border-emerald-300 text-white" : "bg-slate-950/70 border-slate-700 text-slate-300 hover:bg-slate-800"}`}
+                              >
+                                <div className={`text-[10px] font-black uppercase ${rarityTextClass(rarity)}`}>{rarity}</div>
+                                <div className="text-lg font-black leading-tight">{heroByRarity[rarity] || 0}</div>
+                              </button>
+                            ))}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setQuartermasterHeroFilter("all")}
+                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterHeroFilter === "all" ? "bg-emerald-700 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
                             >
-                              <option value="acquired">{language === "ko" ? "획득순" : "Acquired"}</option>
-                              <option value="rarity">{language === "ko" ? "등급순" : "Rarity"}</option>
-                              <option value="level">{language === "ko" ? "레벨순" : "Level"}</option>
-                              <option value="power">{language === "ko" ? "전력순" : "Power"}</option>
-                              <option value="faction">{language === "ko" ? "진영순" : "Faction"}</option>
-                            </select>
-                            <div className="text-xs font-black text-slate-500">{ownedCharacterDetails.length}</div>
+                              {language === "ko" ? "전체 보기" : "All"} · {ownedCharacterDetails.length}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuartermasterHeroFilter("deployed")}
+                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterHeroFilter === "deployed" ? "bg-cyan-700 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
+                            >
+                              {language === "ko" ? "분대 편성" : "Deployed"} · {deployedHeroCount}
+                            </button>
+                          </div>
+                          <div className="rounded-lg bg-slate-950/70 border border-slate-800 p-2">
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                              {language === "ko" ? "정렬" : "Sort"}
+                            </div>
+                            <div className="grid grid-cols-5 gap-1.5">
+                              {[
+                                ["acquired", language === "ko" ? "획득" : "Acq"],
+                                ["rarity", language === "ko" ? "등급" : "Rarity"],
+                                ["level", language === "ko" ? "레벨" : "Level"],
+                                ["power", language === "ko" ? "전력" : "Power"],
+                                ["faction", language === "ko" ? "진영" : "Faction"],
+                              ].map(([value, label]) => (
+                                <button
+                                  key={`hero-sort-${value}`}
+                                  type="button"
+                                  onClick={() => setQuartermasterHeroSort(value)}
+                                  className={`rounded-md py-2 text-[10px] font-black transition-colors action-readable ${quartermasterHeroSort === value ? "bg-slate-200 text-slate-950" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         </div>
                         {ownedCharacterDetails.length > 0 ? (
-                          <div className="space-y-2 max-h-[34rem] overflow-y-auto custom-scrollbar scroll-panel-soft pr-1">
+                          <div className="space-y-3 max-h-[34rem] overflow-y-auto custom-scrollbar scroll-panel-soft pr-1">
                             {visibleQuartermasterCharacters.map((character) => {
                               const levelProfile = getCharacterLevelPowerProfile(character);
                               const weaponProfile = getWeaponPowerProfile(character.equippedWeapon);
@@ -14541,8 +14643,8 @@
                               const inSquad = (gameState.rpg?.run?.activeUnits || []).some((unit) => unit.instanceId === character.instanceId);
                               return (
                                 <div key={`qm-hero-${character.instanceId}`} className="bg-slate-950/70 rounded-md p-3 border border-slate-800">
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                    <div className="min-w-0 w-full">
                                       <div className="font-black text-slate-100 text-sm truncate">{character.name}</div>
                                       <div className={`text-[10px] font-bold uppercase ${rarityTextClass(character.rarityLabel)}`}>
                                         {character.rarityLabel} / {character.definition.faction} / Lv {character.level}/{getCharacterLevelCap(character)} / BT {Math.floor(toFiniteNumber(character.breakthroughTier, 0))}/10 / ★{character.stars}/30
@@ -14553,7 +14655,7 @@
                                           {getWeaponSynergyLabel(character, character.equippedWeapon, language)}
                                         </span>
                                       </div>
-                                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-bold text-slate-500">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-bold text-slate-500">
                                         <div>{language === "ko" ? "기본 전력" : "Base"}: <span className="text-slate-200">{formatDps(levelDps)}</span></div>
                                         <div>{language === "ko" ? "무기" : "Weapon"}: <span className="text-slate-200">{formatDps(weaponDps)}</span></div>
                                         <div>{language === "ko" ? "시너지" : "Synergy"}: <span className={character.synergyActive ? "text-emerald-400" : "text-slate-500"}>x{character.synergyMultiplier.toFixed(2)}</span></div>
@@ -14565,28 +14667,39 @@
                                         </div>
                                       )}
                                     </div>
-                                    <div className="flex flex-col gap-1 shrink-0">
-                                      <button type="button" onClick={() => inSquad ? undeployOwnedCharacterFromRun(character.instanceId) : deployOwnedCharacterToRun(character.instanceId)} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${inSquad ? "bg-red-700 text-white hover:bg-red-600" : "bg-emerald-700 text-white hover:bg-emerald-600"}`}>
-                                        {inSquad ? (language === "ko" ? "분대 해제" : "Undeploy") : (ui.deployToSquad || (language === "ko" ? "분대 배치" : "Deploy"))}
-                                      </button>
-                                      <button type="button" onClick={() => levelUpOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterLevelUpCost(character) || character.level >= getCharacterLevelCap(character)} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterLevelUpCost(character) && character.level < getCharacterLevelCap(character) ? "bg-blue-700 text-white hover:bg-blue-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                        {ui.levelUp || (language === "ko" ? "레벨 강화" : "Level Up")} {formatDps(getCharacterLevelUpCost(character))} DIV
-                                      </button>
-                                      <button type="button" onClick={() => autoLevelUpOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterLevelUpCost(character) || character.level >= getCharacterLevelCap(character)} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterLevelUpCost(character) && character.level < getCharacterLevelCap(character) ? "bg-sky-700 text-white hover:bg-sky-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                        {language === "ko" ? "자동 레벨" : "Auto Level"}
-                                      </button>
-                                      <button type="button" onClick={() => breakthroughOwnedCharacter(character.instanceId)} disabled={character.level < getCharacterLevelCap(character) || Math.floor(toFiniteNumber(character.breakthroughTier, 0)) >= MAX_CHARACTER_BREAKTHROUGH_TIER || Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)) < getCharacterBreakthroughCost(character)} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${character.level >= getCharacterLevelCap(character) && Math.floor(toFiniteNumber(character.breakthroughTier, 0)) < MAX_CHARACTER_BREAKTHROUGH_TIER && Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)) >= getCharacterBreakthroughCost(character) ? "bg-amber-700 text-white hover:bg-amber-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                        {ui.breakthrough || (language === "ko" ? "레벨 돌파" : "Breakthrough")} {getCharacterBreakthroughCost(character)} {ui.heroPower || (language === "ko" ? "영웅력" : "HP")}
-                                      </button>
-                                      <button type="button" onClick={() => promoteOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterStarUpCost(character) || character.stars >= MAX_CHARACTER_STARS} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterStarUpCost(character) && character.stars < MAX_CHARACTER_STARS ? "bg-violet-700 text-white hover:bg-violet-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                        {ui.starUp || (language === "ko" ? "성급 진급" : "Promote")} {formatDps(getCharacterStarUpCost(character))} DIV · {Math.round(getCharacterStarSuccessRate(character) * 100)}%
-                                      </button>
-                                      <button type="button" onClick={() => autoPromoteOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterStarUpCost(character) || character.stars >= MAX_CHARACTER_STARS} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterStarUpCost(character) && character.stars < MAX_CHARACTER_STARS ? "bg-fuchsia-700 text-white hover:bg-fuchsia-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                        {language === "ko" ? "자동 성급" : "Auto Star"}
-                                      </button>
-                                      <button type="button" onClick={() => salvageOwnedCharacter(character.instanceId)} disabled={inSquad} className={`rounded px-2 py-1 text-[10px] font-black transition-colors action-readable ${!inSquad ? "bg-red-800 text-white hover:bg-red-700" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
-                                        {language === "ko" ? "영웅 분해" : "Recycle Hero"}
-                                      </button>
+                                    <div className="shrink-0 w-full sm:w-48 space-y-2">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <button type="button" onClick={() => inSquad ? undeployOwnedCharacterFromRun(character.instanceId) : deployOwnedCharacterToRun(character.instanceId)} className={`rounded-lg px-3 py-2 text-[11px] font-black transition-colors action-readable ${inSquad ? "bg-red-700 text-white hover:bg-red-600" : "bg-emerald-700 text-white hover:bg-emerald-600"}`}>
+                                          {inSquad ? (language === "ko" ? "분대 해제" : "Undeploy") : (ui.deployToSquad || (language === "ko" ? "분대 배치" : "Deploy"))}
+                                        </button>
+                                        <button type="button" onClick={() => levelUpOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterLevelUpCost(character) || character.level >= getCharacterLevelCap(character)} className={`rounded-lg px-3 py-2 text-[11px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterLevelUpCost(character) && character.level < getCharacterLevelCap(character) ? "bg-blue-700 text-white hover:bg-blue-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                          {ui.levelUp || (language === "ko" ? "레벨 강화" : "Level")}
+                                        </button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <button type="button" onClick={() => autoLevelUpOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterLevelUpCost(character) || character.level >= getCharacterLevelCap(character)} className={`rounded-lg px-3 py-2 text-[11px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterLevelUpCost(character) && character.level < getCharacterLevelCap(character) ? "bg-sky-700 text-white hover:bg-sky-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                          {language === "ko" ? "자동 레벨" : "Auto Level"}
+                                        </button>
+                                        <button type="button" onClick={() => promoteOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterStarUpCost(character) || character.stars >= MAX_CHARACTER_STARS} className={`rounded-lg px-3 py-2 text-[11px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterStarUpCost(character) && character.stars < MAX_CHARACTER_STARS ? "bg-violet-700 text-white hover:bg-violet-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                          {ui.starUp || (language === "ko" ? "성급 진급" : "Promote")}
+                                        </button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <button type="button" onClick={() => autoPromoteOwnedCharacter(character.instanceId)} disabled={toFiniteNumber(gameState.rpg?.dividends, 0) < getCharacterStarUpCost(character) || character.stars >= MAX_CHARACTER_STARS} className={`rounded-lg px-3 py-2 text-[11px] font-black transition-colors action-readable ${toFiniteNumber(gameState.rpg?.dividends, 0) >= getCharacterStarUpCost(character) && character.stars < MAX_CHARACTER_STARS ? "bg-fuchsia-700 text-white hover:bg-fuchsia-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                          {language === "ko" ? "자동 성급" : "Auto Star"}
+                                        </button>
+                                        <button type="button" onClick={() => breakthroughOwnedCharacter(character.instanceId)} disabled={character.level < getCharacterLevelCap(character) || Math.floor(toFiniteNumber(character.breakthroughTier, 0)) >= MAX_CHARACTER_BREAKTHROUGH_TIER || Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)) < getCharacterBreakthroughCost(character)} className={`rounded-lg px-3 py-2 text-[11px] font-black transition-colors action-readable ${character.level >= getCharacterLevelCap(character) && Math.floor(toFiniteNumber(character.breakthroughTier, 0)) < MAX_CHARACTER_BREAKTHROUGH_TIER && Math.floor(toFiniteNumber(gameState.wallet?.blackMarketTokens, 0)) >= getCharacterBreakthroughCost(character) ? "bg-amber-700 text-white hover:bg-amber-600" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                          {ui.breakthrough || (language === "ko" ? "돌파" : "Break")}
+                                        </button>
+                                      </div>
+                                      <div className="rounded-lg border border-red-900/60 bg-red-950/20 p-2">
+                                        <div className="mb-1 text-[9px] font-black text-red-300 uppercase tracking-widest">
+                                          {language === "ko" ? "위험 작업" : "Danger"}
+                                        </div>
+                                        <button type="button" onClick={() => salvageOwnedCharacter(character.instanceId)} disabled={inSquad} className={`w-full rounded-lg px-3 py-2.5 text-[11px] font-black transition-colors action-readable ${!inSquad ? "bg-red-800 text-white hover:bg-red-700" : "bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+                                          {language === "ko" ? "영웅 분해" : "Recycle Hero"}
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -16090,8 +16203,8 @@
                             );
                             return (
                               <div key={`roster-${character.instanceId}`} className="bg-gray-50 rounded-md p-3 border border-gray-100">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                  <div className="min-w-0 w-full">
                                     <div className="font-black text-gray-800 text-sm truncate">
                                       {character.name}
                                     </div>
@@ -16187,8 +16300,9 @@
               if (!guideContent) return null;
               return (
                 <details className="w-full max-w-4xl mt-6 mb-20 bg-white border border-emerald-100 rounded-lg shadow-sm overflow-hidden">
-                  <summary className="cursor-pointer px-4 py-3 text-sm font-black text-emerald-800 bg-emerald-50 border-b border-emerald-100 select-none">
-                    {language === "ko" ? "공략집 열기" : "Open Strategy Guide"}
+                  <summary className="guide-summary cursor-pointer px-4 py-3 text-sm font-black text-emerald-800 bg-emerald-50 border-b border-emerald-100 select-none">
+                    <span className="guide-open-label">{language === "ko" ? "공략집 열기" : "Open Strategy Guide"}</span>
+                    <span className="guide-close-label">{language === "ko" ? "공략집 닫기" : "Close Strategy Guide"}</span>
                   </summary>
                   <div>{guideContent}</div>
                 </details>
