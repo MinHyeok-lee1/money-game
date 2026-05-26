@@ -278,6 +278,28 @@
         scrollbar-width: thin;
       }
 
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      button:focus-visible,
+      select:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      [role="button"]:focus-visible,
+      [role="tab"]:focus-visible {
+        outline: 2px solid #34d399;
+        outline-offset: 2px;
+      }
+
 
       .guide-summary .guide-close-label { display: none; }
       details[open] .guide-summary .guide-open-label { display: none; }
@@ -312,10 +334,11 @@
         </div>
       </div>
     </div>
+    <div id="app-a11y-status" class="sr-only" aria-live="polite">데이터 로딩 대기 중</div>
 
     <!-- React Logic -->
     <script type="text/babel">
-      const { useState, useEffect, useRef } = React;
+      const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
       class AppErrorBoundary extends React.Component {
         constructor(props) {
@@ -3385,6 +3408,17 @@
         return Number.isFinite(number) ? number : fallback;
       }
 
+      /**
+       * Safely formats a value with fixed decimal places.
+       * Prevents runtime crashes from undefined/null values reaching `.toFixed()`.
+       */
+      function formatFixed(value, digits = 0, fallback = "0") {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return fallback;
+        const precision = Math.max(0, Math.min(20, Math.trunc(Number(digits) || 0)));
+        return number.toFixed(precision);
+      }
+
       function formatCompactGlobal(
         val,
         isCurrency = true,
@@ -4625,8 +4659,8 @@
           shadowBonus,
           luxuryBonus,
           explanation: {
-            re: `ATK +${(reAtkBonus * 100).toFixed(0)}%, ACC +${(reAccBonus * 100).toFixed(0)}%, SPD +${(reSpdBonus * 100).toFixed(0)}%, PEN +${rePenBonus.toFixed(0)}, PB +${(rePressure * 100).toFixed(0)}%`,
-            inv: `RE +${(realtyBonus * 100).toFixed(0)}%, TK +${(tickerBonus * 100).toFixed(0)}%, SH +${(shadowBonus * 100).toFixed(0)}%, LX +${(luxuryBonus * 100).toFixed(0)}%`,
+            re: `ATK +${formatFixed(reAtkBonus * 100, 0)}%, ACC +${formatFixed(reAccBonus * 100, 0)}%, SPD +${formatFixed(reSpdBonus * 100, 0)}%, PEN +${formatFixed(rePenBonus, 0)}, PB +${formatFixed(rePressure * 100, 0)}%`,
+            inv: `RE +${formatFixed(realtyBonus * 100, 0)}%, TK +${formatFixed(tickerBonus * 100, 0)}%, SH +${formatFixed(shadowBonus * 100, 0)}%, LX +${formatFixed(luxuryBonus * 100, 0)}%`,
           },
         };
       }
@@ -4683,10 +4717,10 @@
           penBonus,
           crtBonus,
           explanation: {
-            atk: isUnlocked ? `+${(atkBonus * 100).toFixed(1)}%` : "Locked",
-            spd: isUnlocked ? `+${(spdBonus * 100).toFixed(1)}%` : "Locked",
-            pen: isUnlocked ? `+${penBonus.toFixed(0)}` : "Locked",
-            crt: isUnlocked ? `+${(crtBonus * 100).toFixed(1)}%` : "Locked",
+            atk: isUnlocked ? `+${formatFixed(atkBonus * 100, 1, "0.0")}%` : "Locked",
+            spd: isUnlocked ? `+${formatFixed(spdBonus * 100, 1, "0.0")}%` : "Locked",
+            pen: isUnlocked ? `+${formatFixed(penBonus, 0)}` : "Locked",
+            crt: isUnlocked ? `+${formatFixed(crtBonus * 100, 1, "0.0")}%` : "Locked",
           },
         };
       }
@@ -7564,68 +7598,114 @@
               : activeTab === "investment"
                 ? `${gameState.rpg?.highestStage || 0}`
                 : `x${multiplier}`;
-        const filteredEnhancementInventory = weaponInventory.filter((item) => {
-          if (quartermasterWeaponFilter === "equipped") {
-            return isWeaponEquipped(item.instanceId, ownedCharacters);
-          }
-          if (RARITY_FILTERS.includes(quartermasterWeaponFilter)) {
-            return normalizeRarityName(item.rarity) === quartermasterWeaponFilter;
-          }
-          return true;
-        });
-        const sortedEnhancementInventory = [...filteredEnhancementInventory].sort(
-          (a, b) => {
-            const rarityDelta =
-              getRarityRankValue(b.rarity) - getRarityRankValue(a.rarity);
-            if (rarityDelta !== 0) return rarityDelta;
-            return toFiniteNumber(b.enhanceLevel, 0) - toFiniteNumber(a.enhanceLevel, 0) || toFiniteNumber(b.power, 0) - toFiniteNumber(a.power, 0);
-          },
+        const filteredEnhancementInventory = useMemo(
+          () =>
+            weaponInventory.filter((item) => {
+              if (quartermasterWeaponFilter === "equipped") {
+                return isWeaponEquipped(item.instanceId, ownedCharacters);
+              }
+              if (RARITY_FILTERS.includes(quartermasterWeaponFilter)) {
+                return normalizeRarityName(item.rarity) === quartermasterWeaponFilter;
+              }
+              return true;
+            }),
+          [weaponInventory, quartermasterWeaponFilter, ownedCharacters],
+        );
+        const sortedEnhancementInventory = useMemo(
+          () =>
+            [...filteredEnhancementInventory].sort((a, b) => {
+              const rarityDelta =
+                getRarityRankValue(b.rarity) - getRarityRankValue(a.rarity);
+              if (rarityDelta !== 0) return rarityDelta;
+              return (
+                toFiniteNumber(b.enhanceLevel, 0) -
+                  toFiniteNumber(a.enhanceLevel, 0) ||
+                toFiniteNumber(b.power, 0) - toFiniteNumber(a.power, 0)
+              );
+            }),
+          [filteredEnhancementInventory],
         );
 
-        const filteredQuartermasterCharacters = ownedCharacterDetails.filter((character) => {
-          if (quartermasterHeroFilter === "deployed") {
-            return (gameState.rpg?.run?.activeUnits || []).some((unit) => unit.instanceId === character.instanceId);
-          }
-          if (RARITY_FILTERS.includes(quartermasterHeroFilter)) {
-            return normalizeRarityName(character.rarityLabel || character.definition?.rarity) === quartermasterHeroFilter;
-          }
-          return true;
-        });
-        const sortedQuartermasterCharacters = [...filteredQuartermasterCharacters].sort((a, b) => {
-          const acquiredOrder = toFiniteNumber(a.acquisitionIndex, 0) - toFiniteNumber(b.acquisitionIndex, 0);
-          if (quartermasterHeroSort === "level") {
-            return toFiniteNumber(b.level, 0) - toFiniteNumber(a.level, 0) || acquiredOrder;
-          }
-          if (quartermasterHeroSort === "power") {
-            const calcPowerLog = (character) =>
-              getProjectedCharacterPowerProfile(
-                character,
-                enhancementInventory,
-                gameState.enhancement,
-                ownedFactionCounts[character.definition.faction] || 0,
-              ).log10;
-            return calcPowerLog(b) - calcPowerLog(a) || acquiredOrder;
-          }
-          if (quartermasterHeroSort === "faction") {
-            return String(a.definition.faction).localeCompare(String(b.definition.faction)) || acquiredOrder;
-          }
-          if (quartermasterHeroSort === "rarity") {
-            return getRarityRankValue(b.rarityLabel) - getRarityRankValue(a.rarityLabel) || acquiredOrder;
-          }
-          return acquiredOrder;
-        });
+        const filteredQuartermasterCharacters = useMemo(
+          () =>
+            ownedCharacterDetails.filter((character) => {
+              if (quartermasterHeroFilter === "deployed") {
+                return (gameState.rpg?.run?.activeUnits || []).some(
+                  (unit) => unit.instanceId === character.instanceId,
+                );
+              }
+              if (RARITY_FILTERS.includes(quartermasterHeroFilter)) {
+                return (
+                  normalizeRarityName(
+                    character.rarityLabel || character.definition?.rarity,
+                  ) === quartermasterHeroFilter
+                );
+              }
+              return true;
+            }),
+          [ownedCharacterDetails, quartermasterHeroFilter, gameState.rpg?.run?.activeUnits],
+        );
+        const sortedQuartermasterCharacters = useMemo(
+          () =>
+            [...filteredQuartermasterCharacters].sort((a, b) => {
+              const acquiredOrder =
+                toFiniteNumber(a.acquisitionIndex, 0) -
+                toFiniteNumber(b.acquisitionIndex, 0);
+              if (quartermasterHeroSort === "level") {
+                return (
+                  toFiniteNumber(b.level, 0) - toFiniteNumber(a.level, 0) ||
+                  acquiredOrder
+                );
+              }
+              if (quartermasterHeroSort === "power") {
+                const calcPowerLog = (character) =>
+                  getProjectedCharacterPowerProfile(
+                    character,
+                    enhancementInventory,
+                    gameState.enhancement,
+                    ownedFactionCounts[character.definition.faction] || 0,
+                  ).log10;
+                return calcPowerLog(b) - calcPowerLog(a) || acquiredOrder;
+              }
+              if (quartermasterHeroSort === "faction") {
+                return (
+                  String(a.definition.faction).localeCompare(
+                    String(b.definition.faction),
+                  ) || acquiredOrder
+                );
+              }
+              if (quartermasterHeroSort === "rarity") {
+                return (
+                  getRarityRankValue(b.rarityLabel) -
+                    getRarityRankValue(a.rarityLabel) ||
+                  acquiredOrder
+                );
+              }
+              return acquiredOrder;
+            }),
+          [
+            filteredQuartermasterCharacters,
+            quartermasterHeroSort,
+            enhancementInventory,
+            gameState.enhancement,
+            ownedFactionCounts,
+          ],
+        );
         const LIST_RENDER_LIMIT = 120;
         const visibleEnhancementInventory = sortedEnhancementInventory.slice(0, LIST_RENDER_LIMIT);
         const visibleQuartermasterCharacters = sortedQuartermasterCharacters.slice(0, LIST_RENDER_LIMIT);
         const visibleCommandRosterCharacters = ownedCharacterDetails.slice(0, 80);
 
-        const updateGameState = (updater) => {
-          setGameState((prev) => {
-            const next =
-              typeof updater === "function" ? updater(prev) : updater;
-            return normalizeGameState(next, language);
-          });
-        };
+        const updateGameState = useCallback(
+          (updater) => {
+            setGameState((prev) => {
+              const next =
+                typeof updater === "function" ? updater(prev) : updater;
+              return normalizeGameState(next, language);
+            });
+          },
+          [language],
+        );
 
         useEffect(() => {
           let repeatTimer = null;
@@ -7695,24 +7775,42 @@
           }
         }, []);
 
-        const downloadTextFile = (filename, content, mimeType = "text/plain;charset=utf-8") => {
-          const blob = new Blob([content], { type: mimeType });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        };
+        const downloadTextFile = useCallback(
+          (filename, content, mimeType = "text/plain;charset=utf-8") => {
+            try {
+              const blob = new Blob([content], { type: mimeType });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = filename;
+              link.setAttribute("aria-hidden", "true");
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+              return true;
+            } catch (error) {
+              console.error("[EXPORT_ERROR]", error);
+              setSystemToast({
+                text:
+                  language === "ko"
+                    ? "데이터 내보내기에 실패했습니다. 저장 공간 또는 브라우저 권한을 확인하세요."
+                    : "Data export failed. Check browser storage or permissions.",
+                tone: "error",
+              });
+              setTimeout(() => setSystemToast(null), 3000);
+              return false;
+            }
+          },
+          [language],
+        );
 
-        const toCsvCell = (value) => {
+        const toCsvCell = useCallback((value) => {
           const text = String(value ?? "");
           return `"${text.replace(/"/g, '""')}"`;
-        };
+        }, []);
 
-        const exportHeroAnalyticsCsv = () => {
+        const exportHeroAnalyticsCsv = useCallback(() => {
           const rows = [[
             "name",
             "characterId",
@@ -7747,10 +7845,27 @@
             ]);
           });
           const csv = rows.map((row) => row.map(toCsvCell).join(",")).join("\n");
-          downloadTextFile(`capital-front-heroes-${Date.now()}.csv`, csv, "text/csv;charset=utf-8");
-        };
+          const filename = `capital-front-heroes-${Date.now()}.csv`;
+          if (downloadTextFile(filename, csv, "text/csv;charset=utf-8")) {
+            setSystemToast({
+              text:
+                language === "ko"
+                  ? `${filename} 다운로드를 시작했습니다.`
+                  : `${filename} download started.`,
+              tone: "success",
+            });
+            setTimeout(() => setSystemToast(null), 3000);
+          }
+        }, [
+          downloadTextFile,
+          gameState.enhancement,
+          language,
+          ownedCharacterDetails,
+          ownedFactionCounts,
+          toCsvCell,
+        ]);
 
-        const exportAnalyticsJson = () => {
+        const exportAnalyticsJson = useCallback(() => {
           const payload = {
             exportedAt: new Date().toISOString(),
             version: GAME_STATE_VERSION,
@@ -7778,12 +7893,36 @@
             contracts: gameState.investment?.contractSettlementHistory || [],
             forge: gameState.enhancement?.enhancementHistory || [],
           };
-          downloadTextFile(
-            `capital-front-analytics-${Date.now()}.json`,
-            JSON.stringify(payload, null, 2),
-            "application/json;charset=utf-8",
-          );
-        };
+          const filename = `capital-front-analytics-${Date.now()}.json`;
+          if (
+            downloadTextFile(
+              filename,
+              JSON.stringify(payload, null, 2),
+              "application/json;charset=utf-8",
+            )
+          ) {
+            setSystemToast({
+              text:
+                language === "ko"
+                  ? `${filename} 다운로드를 시작했습니다.`
+                  : `${filename} download started.`,
+              tone: "success",
+            });
+            setTimeout(() => setSystemToast(null), 3000);
+          }
+        }, [
+          cash,
+          combatStats,
+          contractCapital,
+          dividends,
+          downloadTextFile,
+          gameState.enhancement,
+          gameState.investment,
+          gameState.rpg,
+          language,
+          ownedCharacterDetails,
+          totalNetWorth,
+        ]);
 
         const handleManualSave = () => {
           saveGameState(gameState);
@@ -12571,7 +12710,7 @@
                               </span>
                               <div className="font-black text-emerald-300">
                                 {betPreview.odds}% / x
-                                {betPreview.payout.toFixed(2)}
+                                {formatFixed(betPreview?.payout, 2, "1.00")}
                               </div>
                             </div>
                           </div>
@@ -13209,7 +13348,7 @@
                                 {ui.projectedPayout}
                               </div>
                               <div className="font-black text-emerald-300">
-                                x{getDefenseContractProjectedPayout(asset, gameState.rpg?.highestStage || 0, combatStats.totalDps).toFixed(2)}
+                                x{formatFixed(getDefenseContractProjectedPayout(asset, gameState.rpg?.highestStage || 0, combatStats?.totalDps), 2, "1.00")}
                               </div>
                             </div>
                           </div>
@@ -13928,7 +14067,7 @@
                                               )[0]
                                             : null;
                                           const statDisplay = firstStat
-                                            ? `+${isFinite(firstStat[1]) ? (firstStat[1] * 100).toFixed(0) : "?"}%`
+                                            ? `+${isFinite(firstStat[1]) ? formatFixed(firstStat[1] * 100, 0) : "?"}%`
                                             : "";
                                           return (
                                             <div className="flex items-center gap-1 flex-wrap mt-0.5 min-w-0">
@@ -14253,7 +14392,7 @@
                                                 const statVal =
                                                   firstStatEntry &&
                                                   isFinite(firstStatEntry[1])
-                                                    ? `+${(firstStatEntry[1] * 100).toFixed(0)}%`
+                                                    ? `+${formatFixed(firstStatEntry[1] * 100, 0)}%`
                                                     : "";
                                                 return (
                                                   <div className="bg-amber-950/30 border border-amber-800/40 rounded p-1.5 space-y-0.5">
@@ -14637,7 +14776,7 @@
                                                         )[0]
                                                       : null;
                                                     const ceStatStr = ceStat
-                                                      ? `+${isFinite(ceStat[1]) ? (ceStat[1] * 100).toFixed(0) : "?"}% ${ceStat[0].toUpperCase()}`
+                                                      ? `+${isFinite(ceStat[1]) ? formatFixed(ceStat[1] * 100, 0) : "?"}% ${ceStat[0].toUpperCase()}`
                                                       : "";
                                                     return (
                                                       <div
@@ -16014,7 +16153,7 @@
                             {ui.combatFreq}
                           </div>
                           <div className="text-sm font-black text-emerald-600">
-                            x{combatStats.spd.toFixed(2)}
+                            x{formatFixed(combatStats?.spd, 2, "0.00")}
                           </div>
                           <div className="text-[8px] font-bold text-emerald-500 mt-0.5">
                             {(() => {
@@ -16033,7 +16172,7 @@
                             {ui.penetration}
                           </div>
                           <div className="text-sm font-black text-emerald-600">
-                            {(combatStats.pen * 100).toFixed(1)}%
+                            {formatFixed(toFiniteNumber(combatStats?.pen, 0) * 100, 1, "0.0")}%
                           </div>
                           <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">
                             {ui.preview}
@@ -16044,7 +16183,7 @@
                             {ui.accuracy}
                           </div>
                           <div className="text-sm font-black text-emerald-600">
-                            {(combatStats.acc * 100).toFixed(0)}%
+                            {formatFixed(toFiniteNumber(combatStats?.acc, 0) * 100, 0)}%
                           </div>
                           <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">
                             {ui.preview}
@@ -16055,7 +16194,7 @@
                             {ui.criticalChance}
                           </div>
                           <div className="text-sm font-black text-emerald-700">
-                            {(combatStats.crt * 100).toFixed(1)}%
+                            {formatFixed(toFiniteNumber(combatStats?.crt, 0) * 100, 1, "0.0")}%
                           </div>
                           <div className="text-[8px] font-bold text-gray-400 uppercase mt-0.5">
                             {ui.includesRarityBonus}
@@ -16091,23 +16230,23 @@
                           const parts = [];
                           if (isFinite(aggBonus.pen) && aggBonus.pen > 0)
                             parts.push(
-                              `PEN +${((aggBonus.pen / squadSz) * 100).toFixed(0)}%`,
+                              `PEN +${formatFixed((aggBonus.pen / squadSz) * 100, 0)}%`,
                             );
                           if (isFinite(aggBonus.crt) && aggBonus.crt > 0)
                             parts.push(
-                              `CRT +${((aggBonus.crt / squadSz) * 100).toFixed(0)}%`,
+                              `CRT +${formatFixed((aggBonus.crt / squadSz) * 100, 0)}%`,
                             );
                           if (isFinite(aggBonus.spd) && aggBonus.spd > 0)
                             parts.push(
-                              `SPD +${((aggBonus.spd / squadSz) * 100).toFixed(0)}%`,
+                              `SPD +${formatFixed((aggBonus.spd / squadSz) * 100, 0)}%`,
                             );
                           if (isFinite(aggBonus.acc) && aggBonus.acc > 0)
                             parts.push(
-                              `ACC +${((aggBonus.acc / squadSz) * 100).toFixed(0)}%`,
+                              `ACC +${formatFixed((aggBonus.acc / squadSz) * 100, 0)}%`,
                             );
                           if (isFinite(aggBonus.atk) && aggBonus.atk > 0)
                             parts.push(
-                              `ATK +${((aggBonus.atk / squadSz) * 100).toFixed(0)}%`,
+                              `ATK +${formatFixed((aggBonus.atk / squadSz) * 100, 0)}%`,
                             );
                           if (parts.length === 0) return null;
                           return (
