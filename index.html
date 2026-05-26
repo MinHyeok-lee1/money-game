@@ -4795,14 +4795,15 @@
       function getCombatTempoProfile(spdMultiplier) {
         const spd = Math.max(1, toFiniteNumber(spdMultiplier, 1));
         const logSpd = Math.max(0, Math.log2(spd));
-        // QC23: visible action tempo. A high SPD value should make the kill
-        // counter advance like 0/5 -> 1/5 -> 2/5 -> ... instead of resolving
-        // all five kills inside one React render and showing only 0/5 again.
-        const tickMs = Math.max(220, Math.min(1000, Math.round(1000 / (1 + logSpd * 0.58))));
+        // QC24: keep the satisfying visible flow (0/5 -> 1/5 -> ... -> +1 stage),
+        // but make high SPD feel snappier without reverting to multi-stage skips.
+        // SPD affects action cadence first; reward sync is handled on stage clear.
+        const tickMs = Math.max(180, Math.min(850, Math.round(850 / (1 + logSpd * 0.68))));
         return {
           tickMs,
-          damageTempo: Math.min(1.08, 1 + logSpd * 0.015),
-          rewardTempo: Math.min(1.25, 1 + logSpd * 0.04),
+          damageTempo: 1,
+          rewardTempo: Math.min(1.12, 1 + logSpd * 0.025),
+          stageClearRewardTempo: Math.min(1.35, 1 + logSpd * 0.055),
           killCap: 1,
           stageAdvanceCap: 1,
         };
@@ -4878,7 +4879,7 @@
           stageKills += 1;
           const reward = Math.max(1, Math.floor(getMonsterDefeatReward(currentStage) * tempoProfile.rewardTempo));
           dividendsGained += reward;
-          lastReward = reward;
+          lastReward += reward;
 
           if (currentStage >= 101) {
             const baseShardsAwarded = 2;
@@ -4889,6 +4890,17 @@
 
           const killsRequired = getKillsRequiredForStage(currentStage);
           if (stageKills >= killsRequired) {
+            const stageClearBonus = Math.max(
+              1,
+              Math.floor(
+                getMonsterDefeatReward(currentStage) *
+                  Math.max(1, killsRequired) *
+                  0.8 *
+                  toFiniteNumber(tempoProfile.stageClearRewardTempo, 1),
+              ),
+            );
+            dividendsGained += stageClearBonus;
+            lastReward += stageClearBonus;
             currentStage += 1;
             stageKills = 0;
             highestStage = Math.max(highestStage, currentStage);
@@ -15107,92 +15119,8 @@
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 bg-black/40 rounded-lg p-3 border border-emerald-500/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
-                          {t.externalCapitalLeverage}
-                        </div>
-                        {!gameState.rpg?.normalEndingSeen && (
-                          <div className="text-[9px] font-bold text-red-400/80 uppercase animate-pulse">
-                            {language === "ko" ? "잠김" : "Locked"}
-                          </div>
-                        )}
-                      </div>
-
-                      {(() => {
-                        const leverage =
-                          getExternalCapitalLeverageStats(gameState);
-                        const specialization =
-                          getExternalCapitalSpecializationStats(gameState);
-                        if (!leverage.unlocked) {
-                          return (
-                            <div className="text-[10px] text-gray-500 font-bold italic py-1">
-                              {t.leverageLocked}
-                            </div>
-                          );
-                        }
-                        return (
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] text-emerald-100/60 uppercase">
-                                {t.leverageAtk}
-                              </span>
-                              <span className="text-[10px] font-black text-emerald-400">
-                                {leverage.explanation.atk}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] text-emerald-100/60 uppercase">
-                                {t.leverageSpd}
-                              </span>
-                              <span className="text-[10px] font-black text-emerald-400">
-                                {leverage.explanation.spd}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] text-emerald-100/60 uppercase">
-                                {t.leveragePen}
-                              </span>
-                              <span className="text-[10px] font-black text-emerald-400">
-                                {leverage.explanation.pen}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] text-emerald-100/60 uppercase">
-                                {t.leverageCrt}
-                              </span>
-                              <span className="text-[10px] font-black text-emerald-400">
-                                {leverage.explanation.crt}
-                              </span>
-                            </div>
-
-                            <div className="col-span-2 mt-2 pt-2 border-t border-emerald-500/10">
-                              <div className="text-[8px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1">
-                                {t.buildSpecialization}
-                              </div>
-                              <div className="space-y-1">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-[8px] text-emerald-100/40 uppercase">
-                                    {t.specializationRE}
-                                  </span>
-                                  <span className="text-[9px] font-bold text-emerald-200/80">
-                                    {specialization.explanation.re}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-[8px] text-emerald-100/40 uppercase">
-                                    {t.specializationInv}
-                                  </span>
-                                  <span className="text-[9px] font-bold text-emerald-200/80">
-                                    {specialization.explanation.inv}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
+                    {/* QC24: Removed rear capital leverage / specialization detail panels from the Frontline Command view.
+                    The underlying bonuses remain in combat math, but the panels were low-value UI noise. */}
                     <div className="mt-3 bg-black/30 rounded-lg p-3 border border-emerald-900/20">
                       <div className="flex items-center justify-between gap-3">
                         <div>
@@ -15911,7 +15839,7 @@
                             x{combatStats.spd.toFixed(2)}
                           </div>
                           <div className="text-[8px] font-bold text-emerald-500 mt-0.5">
-                            {language === "ko" ? `실전 틱 ${getCombatTempoProfile(combatStats.spd).tickMs}ms · 스테이지 +1 템포 · 수급 x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}` : `Tick ${getCombatTempoProfile(combatStats.spd).tickMs}ms · +1 stage tempo · income x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}`}
+                            {language === "ko" ? `실전 틱 ${getCombatTempoProfile(combatStats.spd).tickMs}ms · 1마리씩 빠른 처치 · 클리어 보너스 x${getCombatTempoProfile(combatStats.spd).stageClearRewardTempo.toFixed(2)}` : `Tick ${getCombatTempoProfile(combatStats.spd).tickMs}ms · visible 1-kill cadence · clear bonus x${getCombatTempoProfile(combatStats.spd).stageClearRewardTempo.toFixed(2)}`}
                           </div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
