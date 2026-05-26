@@ -4090,9 +4090,21 @@
 
       function getRpgUpgradeEffect(key, level) {
         const l = Math.max(0, Math.floor(toFiniteNumber(level, 0)));
-        if (key === "atkLevel") return 1 + l * 0.02;
-        if (key === "spdLevel") return 1 + l * 0.01;
-        if (key === "penLevel") return Math.min(0.8, l * 0.005);
+
+        // QC11 Balance Pass:
+        // Previous linear scaling made late training feel unrewarding
+        // (e.g. SPD Lv.194 cost was already huge while the multiplier was still under x3).
+        // Use a bounded quadratic curve so late-stage DIV investment gives visible power.
+        if (key === "atkLevel") {
+          return Math.min(2500, 1 + l * 0.045 + l * l * 0.00018);
+        }
+        if (key === "spdLevel") {
+          return Math.min(1200, 1 + l * 0.035 + l * l * 0.00012);
+        }
+        if (key === "penLevel") {
+          // Penetration is percent-style, so use a soft cap instead of weak linear growth.
+          return Math.min(0.95, 1 - Math.pow(0.985, l));
+        }
         return 0;
       }
 
@@ -15775,6 +15787,9 @@
                         </div>
                       </div>
                       <div className="p-3 space-y-3">
+                        <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-[10px] font-bold text-emerald-800 leading-relaxed">
+                          후반 전투 특성 훈련은 비용 증가에 맞춰 효과가 가속됩니다. ATK/SPD는 고레벨에서 배율이 더 크게 오르고, PEN은 무한 모드 방어 장벽을 뚫기 위한 소프트캡 방식으로 성장합니다.
+                        </div>
                         {/* ATK Upgrade */}
                         <div className="flex items-center justify-between gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
                           <div>
