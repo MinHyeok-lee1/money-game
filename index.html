@@ -18,8 +18,25 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta
       name="description"
-      content="Capital Front: Deadline - Command war capital, forge weapons, and defend frontline waves in an apocalyptic defense game. 자본전선: 데드라인 - 전선 사수 방어전!"
+      content="Capital Front: Deadline is a defense and hero-growth data dashboard game. Track frontline stages, hero DPS, forge results, battle rewards, and export local analytics data."
     />
+    <meta property="og:title" content="자본전선: 데드라인 | Capital Front: Deadline" />
+    <meta
+      property="og:description"
+      content="Defense game and local data analytics dashboard for stage progress, hero DPS, battle rewards, and forge results."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Capital Front: Deadline",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web",
+        "description": "A defense game with local hero, forge, battle, and economy analytics export tools."
+      }
+    </script>
     <title>자본전선: 데드라인 | Capital Front: Deadline</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -283,7 +300,18 @@
     <div
       id="root"
       class="w-full max-w-md w-full my-4 flex flex-col items-center"
-    ></div>
+    >
+      <div class="w-full max-w-md p-4 text-slate-100">
+        <div class="rounded-2xl border border-emerald-900/40 bg-slate-950 p-5 shadow-2xl">
+          <div class="h-3 w-32 rounded bg-slate-800 animate-pulse mb-4"></div>
+          <div class="h-8 w-64 rounded bg-slate-800 animate-pulse mb-3"></div>
+          <div class="h-3 w-full rounded bg-slate-800 animate-pulse mb-2"></div>
+          <div class="h-3 w-5/6 rounded bg-slate-800 animate-pulse mb-5"></div>
+          <div class="h-10 w-full rounded-xl bg-emerald-900/40 animate-pulse"></div>
+          <div class="mt-4 text-xs font-bold text-slate-500">데이터를 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
 
     <!-- React Logic -->
     <script type="text/babel">
@@ -4163,14 +4191,22 @@
 
       function getMonsterDefeatReward(stage) {
         const s = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
-        // Reward now follows a controlled curve too, so training/hero growth remains
-        // affordable without requiring e-number inflation.
-        const normalReward = 25 * Math.pow(s, 1.18);
+        // QC25 economy rebalance:
+        // Cash/DIV now comes from each monster defeat, not from stage-clear bursts.
+        // The curve intentionally catches up with late upgrade costs such as SPD Lv.194
+        // while keeping early stages readable and non-explosive.
+        const normalReward = 28 * Math.pow(s, 1.16);
         if (s <= NORMAL_ENDING_STAGE) {
           return Math.max(1, Math.floor(normalReward));
         }
+
         const infiniteStage = s - NORMAL_ENDING_STAGE;
-        const infiniteReward = normalReward * Math.pow(1 + infiniteStage / 45, 1.35);
+        const stage100Reward = 28 * Math.pow(NORMAL_ENDING_STAGE, 1.16);
+        const infiniteReward =
+          stage100Reward *
+          Math.pow(1 + infiniteStage / 35, 3.35) *
+          (INFINITE_BOSS_STAGES.includes(s) ? 1.35 : 1);
+
         return Math.max(1, Math.floor(infiniteReward));
       }
 
@@ -4795,16 +4831,14 @@
       function getCombatTempoProfile(spdMultiplier) {
         const spd = Math.max(1, toFiniteNumber(spdMultiplier, 1));
         const logSpd = Math.max(0, Math.log2(spd));
-        // QC24: keep the satisfying visible flow (0/5 -> 1/5 -> ... -> +1 stage),
-        // but make high SPD feel snappier without reverting to multi-stage skips.
-        // SPD affects action cadence first; reward sync is handled on stage clear.
-        const tickMs = Math.max(180, Math.min(850, Math.round(850 / (1 + logSpd * 0.68))));
+        // QC25: faster defense rhythm. Keep visible stage-by-stage progression,
+        // but allow high-SPD builds to process up to two monster defeats per tick.
+        const tickMs = Math.max(120, Math.min(720, Math.round(720 / (1 + logSpd * 0.85))));
         return {
           tickMs,
           damageTempo: 1,
-          rewardTempo: Math.min(1.12, 1 + logSpd * 0.025),
-          stageClearRewardTempo: Math.min(1.35, 1 + logSpd * 0.055),
-          killCap: 1,
+          rewardTempo: Math.min(1.22, 1 + logSpd * 0.035),
+          killCap: spd >= 8 ? 2 : 1,
           stageAdvanceCap: 1,
         };
       }
@@ -4853,6 +4887,7 @@
         let defeated = Math.max(0, toFiniteNumber(state.rpg.defeatedMonsters, 0));
         let highestStage = Math.max(0, toFiniteNumber(state.rpg.highestStage, 0));
         let dividendsGained = 0;
+        let cashGained = 0;
         let shardsGained = 0;
         let killsThisTick = 0;
         let lastReward = 0;
@@ -4879,6 +4914,7 @@
           stageKills += 1;
           const reward = Math.max(1, Math.floor(getMonsterDefeatReward(currentStage) * tempoProfile.rewardTempo));
           dividendsGained += reward;
+          cashGained += reward;
           lastReward += reward;
 
           if (currentStage >= 101) {
@@ -4890,17 +4926,8 @@
 
           const killsRequired = getKillsRequiredForStage(currentStage);
           if (stageKills >= killsRequired) {
-            const stageClearBonus = Math.max(
-              1,
-              Math.floor(
-                getMonsterDefeatReward(currentStage) *
-                  Math.max(1, killsRequired) *
-                  0.8 *
-                  toFiniteNumber(tempoProfile.stageClearRewardTempo, 1),
-              ),
-            );
-            dividendsGained += stageClearBonus;
-            lastReward += stageClearBonus;
+            // QC25: no stage-clear lump sum. The economy now pays only on monster defeat
+            // so income feels continuous and synchronized with defense action.
             currentStage += 1;
             stageKills = 0;
             highestStage = Math.max(highestStage, currentStage);
@@ -4933,6 +4960,15 @@
 
         return {
           ...state,
+          wallet: {
+            ...state.wallet,
+            cash: Math.max(0, toFiniteNumber(state.wallet?.cash, 0) + cashGained),
+          },
+          landlord: {
+            ...state.landlord,
+            totalEarned:
+              toFiniteNumber(state.landlord?.totalEarned, 0) + cashGained,
+          },
           enhancement:
             shardsGained > 0
               ? {
@@ -7655,6 +7691,96 @@
             });
           }
         }, []);
+
+        const downloadTextFile = (filename, content, mimeType = "text/plain;charset=utf-8") => {
+          const blob = new Blob([content], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        };
+
+        const toCsvCell = (value) => {
+          const text = String(value ?? "");
+          return `"${text.replace(/"/g, '""')}"`;
+        };
+
+        const exportHeroAnalyticsCsv = () => {
+          const rows = [[
+            "name",
+            "characterId",
+            "rarity",
+            "faction",
+            "level",
+            "stars",
+            "power",
+            "equippedWeapon",
+          ]];
+          (ownedCharacterDetails || []).forEach((entry) => {
+            const character = entry.character || {};
+            const def = entry.definition || {};
+            const weapon = getEquippedWeaponForCharacter(
+              character,
+              gameState.enhancement?.inventory || [],
+            );
+            rows.push([
+              getCharacterDisplayName(character),
+              character.characterId,
+              def.rarity,
+              def.faction,
+              character.level,
+              character.stars,
+              getProjectedCharacterPowerProfile(
+                character,
+                gameState.enhancement?.inventory || [],
+                gameState.enhancement,
+                ownedFactionCounts?.[def.faction] || 0,
+              ).value,
+              weapon ? displayGachaItemName(weapon) : "",
+            ]);
+          });
+          const csv = rows.map((row) => row.map(toCsvCell).join(",")).join("\n");
+          downloadTextFile(`capital-front-heroes-${Date.now()}.csv`, csv, "text/csv;charset=utf-8");
+        };
+
+        const exportAnalyticsJson = () => {
+          const payload = {
+            exportedAt: new Date().toISOString(),
+            version: GAME_STATE_VERSION,
+            economy: {
+              cash,
+              contractCapital,
+              dividends,
+              totalNetWorth,
+            },
+            rpg: {
+              currentStage: gameState.rpg?.currentStage,
+              highestStage: gameState.rpg?.highestStage,
+              defeatedMonsters: gameState.rpg?.defeatedMonsters,
+              lastRpgReward: gameState.rpg?.lastRpgReward,
+              combatStats,
+            },
+            heroes: (ownedCharacterDetails || []).map((entry) => ({
+              name: getCharacterDisplayName(entry.character),
+              characterId: entry.character?.characterId,
+              rarity: entry.definition?.rarity,
+              faction: entry.definition?.faction,
+              level: entry.character?.level,
+              stars: entry.character?.stars,
+            })),
+            contracts: gameState.investment?.contractSettlementHistory || [],
+            forge: gameState.enhancement?.enhancementHistory || [],
+          };
+          downloadTextFile(
+            `capital-front-analytics-${Date.now()}.json`,
+            JSON.stringify(payload, null, 2),
+            "application/json;charset=utf-8",
+          );
+        };
 
         const handleManualSave = () => {
           saveGameState(gameState);
@@ -12070,6 +12196,55 @@
                             ? "데이터 복구 (저장 코드 붙여넣기)"
                             : "Import (Paste Save Code)"}
                         </button>
+                      </div>
+                      <div className="mt-3 rounded-xl border border-emerald-900/40 bg-slate-950/70 p-3">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                              {language === "ko" ? "데이터 분석" : "Data Analytics"}
+                            </div>
+                            <div className="text-[10px] font-bold text-slate-500 mt-0.5">
+                              {language === "ko"
+                                ? "영웅, 전투, 강화 기록을 로컬 파일로 내보냅니다."
+                                : "Export hero, battle, and forge records as local files."}
+                            </div>
+                          </div>
+                          <div className="text-right text-[9px] font-black text-slate-400">
+                            Stage {gameState.rpg?.currentStage || 1}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="rounded-lg bg-slate-900 border border-slate-800 p-2">
+                            <div className="text-[9px] font-black text-slate-500 uppercase">Win/Run</div>
+                            <div className="text-sm font-black text-slate-100">
+                              {formatCompact(gameState.rpg?.defeatedMonsters || 0)} Kills
+                            </div>
+                          </div>
+                          <div className="rounded-lg bg-slate-900 border border-slate-800 p-2">
+                            <div className="text-[9px] font-black text-slate-500 uppercase">Avg DPS</div>
+                            <div className="text-sm font-black text-slate-100">
+                              {formatDps(combatStats?.totalDps || 0)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={exportHeroAnalyticsCsv}
+                            aria-label="Export hero analytics CSV"
+                            className="bg-emerald-900/60 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/40 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
+                          >
+                            CSV 영웅 데이터 다운로드
+                          </button>
+                          <button
+                            type="button"
+                            onClick={exportAnalyticsJson}
+                            aria-label="Export battle analytics JSON"
+                            className="bg-sky-900/60 hover:bg-sky-800 text-sky-100 border border-sky-700/40 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
+                          >
+                            JSON 전투 기록 다운로드
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <p className="text-[10px] text-zinc-500 font-medium mt-2.5 text-center leading-normal">
