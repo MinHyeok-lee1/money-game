@@ -4794,12 +4794,16 @@
 
       function getCombatTempoProfile(spdMultiplier) {
         const spd = Math.max(1, toFiniteNumber(spdMultiplier, 1));
-        const logSpd = Math.log2(spd);
+        const logSpd = Math.max(0, Math.log2(spd));
+        // QC21: moderate speed feel. SPD is already included in total DPS, so this
+        // profile must not multiply damage again aggressively. It only controls
+        // visual cadence, small reward feel, and the per-tick multi-kill safety cap.
+        const tickMs = Math.max(450, Math.min(1000, Math.round(1000 / (1 + logSpd * 0.18))));
         return {
-          tickMs: Math.max(120, Math.min(1000, Math.round(1000 / Math.sqrt(spd)))),
-          damageTempo: Math.min(4, 1 + logSpd * 0.25),
-          rewardTempo: Math.min(5, 1 + logSpd * 0.4),
-          killCap: Math.max(250, Math.floor(180 * Math.sqrt(spd))),
+          tickMs,
+          damageTempo: Math.min(1.25, 1 + logSpd * 0.035),
+          rewardTempo: Math.min(1.6, 1 + logSpd * 0.09),
+          killCap: Math.max(25, Math.min(120, Math.floor(18 + logSpd * 16))),
         };
       }
 
