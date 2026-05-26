@@ -4788,10 +4788,14 @@
         if (damage <= 0) return state;
 
         const currentHp = toFiniteNumber(state.rpg.monsterHp, 0);
-        const currentMaxHp = Math.max(
+        // Use stage-derived max HP as the source of truth. This prevents old
+        // pre-rebalance saves from preserving e-number monster HP after a patch.
+        const expectedMaxHp = getMonsterMaxHp(currentStage);
+        const savedMaxHp = Math.max(
           1,
-          toFiniteNumber(state.rpg.monsterMaxHp, getMonsterMaxHp(currentStage)),
+          toFiniteNumber(state.rpg.monsterMaxHp, expectedMaxHp),
         );
+        const currentMaxHp = Math.min(savedMaxHp, expectedMaxHp);
         const damagedHp = Math.max(0, currentHp - damage);
         const regen =
           damagedHp > 0
@@ -5310,12 +5314,16 @@
               1,
               Math.floor(toFiniteNumber(rpg.currentStage, 1)),
             ),
-            monsterMaxHp: Math.max(1, toFiniteNumber(rpg.monsterMaxHp, 100)),
+            // QC15 stale-save migration: previous exponential HP saves can contain
+            // monsterMaxHp values like 1e132. After the controlled combat/HP rebalance,
+            // always derive the active monster HP cap from the current stage so old
+            // localStorage data cannot keep an impossible pre-rebalance monster alive.
+            monsterMaxHp: getMonsterMaxHp(Math.max(1, Math.floor(toFiniteNumber(rpg.currentStage, 1)))),
             monsterHp: clampNumber(
               rpg.monsterHp,
               0,
-              Math.max(1, toFiniteNumber(rpg.monsterMaxHp, 100)),
-              100,
+              getMonsterMaxHp(Math.max(1, Math.floor(toFiniteNumber(rpg.currentStage, 1)))),
+              getMonsterMaxHp(Math.max(1, Math.floor(toFiniteNumber(rpg.currentStage, 1)))),
             ),
             defeatedMonsters: Math.max(
               0,
