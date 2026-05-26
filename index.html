@@ -1010,6 +1010,27 @@
           price: 50,
           volatility: 0.12,
         },
+        {
+          id: "secure-frontline-bond",
+          name: "Secure Frontline Bond",
+          type: "Defense Bond",
+          price: 300,
+          volatility: 0.005,
+        },
+        {
+          id: "reaper-derivative",
+          name: "Reaper Derivative",
+          type: "Derivative",
+          price: 2500,
+          volatility: 0.22,
+        },
+        {
+          id: "abyss-option",
+          name: "Abyss Option",
+          type: "Option",
+          price: 10000,
+          volatility: 0.35,
+        },
       ];
 
       const DEFENSE_CONTRACT_FLAVOR = {
@@ -1028,12 +1049,30 @@
           contractType: "Raid Contract",
           lore: "Unrated, volatile contracts on fringe squads. Max risk, max return.",
         },
+        "secure-frontline-bond": {
+          displayName: "철벽 보급 채권",
+          contractType: "저위험 방어 계약",
+          lore: "성공률은 높지만 보상은 낮은 안정형 작전입니다.",
+        },
+        "reaper-derivative": {
+          displayName: "사신 파생 계약",
+          contractType: "고위험 돌파 계약",
+          lore: "성공률은 낮지만 성공 시 영웅력을 크게 획득합니다.",
+        },
+        "abyss-option": {
+          displayName: "심연 옵션 작전",
+          contractType: "초고위험 역전 계약",
+          lore: "한 자리수 성공률을 감수하고 극단적인 리턴을 노리는 계약입니다.",
+        },
       };
 
       const DEFENSE_CONTRACT_FACTION_MAPPING = {
         "blue-chip-stock": "realty",
         "growth-stock": "ticker",
         "meme-coin": "shadow",
+        "secure-frontline-bond": "realty",
+        "reaper-derivative": "shadow",
+        "abyss-option": "luxury",
       };
 
       // Defense Contract preview helpers ??derived-only, no state mutation
@@ -1045,12 +1084,18 @@
       }
 
       function getDefenseContractOdds(asset, highestStage) {
-        const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Power-curve scaling: vol^0.6 penalizes mid-range volatility harder than linear,
-        // producing distinct tiers (Stable ~79%, Volatile ~62%, High Risk ~32%).
-        return Math.round(
-          Math.max(30, Math.min(80, (1 - Math.pow(vol, 0.6) * 3.5) * 100)),
-        );
+        const id = asset?.id;
+        const contractBaseOdds = {
+          "secure-frontline-bond": 92,
+          "blue-chip-stock": 80,
+          "growth-stock": 55,
+          "meme-coin": 28,
+          "reaper-derivative": 9,
+          "abyss-option": 3,
+        };
+        if (contractBaseOdds[id] != null) return contractBaseOdds[id];
+        const vol = toFiniteNumber(asset?.volatility, 0.05);
+        return Math.round(Math.max(5, Math.min(92, 92 - Math.pow(vol, 0.55) * 220)));
       }
 
       function getDefenseContractProjectedPayout(
@@ -1058,17 +1103,20 @@
         highestStage,
         squadDps,
       ) {
-        const vol = toFiniteNumber(asset.volatility, 0.05);
-        // Higher risk -> higher projected multiplier (base range ~1.20 - 2.20)
-        // Intent: Reward users for picking volatile contracts that rely on tactical signals.
-        const baseMultiplier = 1 + vol * 10;
-        // Squad DPS adds a small log-scaled bonus (capped at +0.20)
-        // Intent: Diminishing returns on DPS ensure contracts remain risky regardless of power level.
+        const id = asset?.id;
+        const contractPayouts = {
+          "secure-frontline-bond": 1.06,
+          "blue-chip-stock": 1.24,
+          "growth-stock": 1.95,
+          "meme-coin": 4.2,
+          "reaper-derivative": 14,
+          "abyss-option": 55,
+        };
+        const baseMultiplier = contractPayouts[id] ?? Math.max(1.05, 1 + toFiniteNumber(asset?.volatility, 0.05) * 12);
         const dps = toFiniteNumber(squadDps, 0);
-        const dpsBonus =
-          dps > 0 ? Math.min(0.2, Math.log10(dps + 1) * 0.02) : 0;
-        const raw = toFiniteNumber(baseMultiplier + dpsBonus, 1.2);
-        return Math.max(1.05, Math.min(2.5, raw));
+        const dpsBonus = dps > 0 ? Math.min(0.35, Math.log10(dps + 1) * 0.015) : 0;
+        const raw = toFiniteNumber(baseMultiplier + dpsBonus, baseMultiplier);
+        return Math.max(1.02, Math.min(99, raw));
       }
 
       // Derived-only bet slip preview ??no state mutation, no settlement
@@ -1191,14 +1239,25 @@
           asset,
         );
 
-        // Success Formula: Base + Stage(15) + DPS(5) + PEN(15) + Tactical(12) = Max +47% Bonus
+        // Success Formula. Risk bands intentionally remain distinct:
+        // safe contracts can sit near 90%, while abyss contracts can remain single-digit
+        // unless the squad provides strong tactical signals.
+        const highRiskIds = ["meme-coin", "reaper-derivative", "abyss-option"];
+        const isExtremeRisk = highRiskIds.includes(asset?.id);
+        const supportScale = asset?.id === "abyss-option" ? 0.18 : asset?.id === "reaper-derivative" ? 0.28 : asset?.id === "meme-coin" ? 0.55 : 1;
         const rawChance =
           odds +
-          stageSignal +
-          dpsSignal +
-          penSignal +
-          tacticalCandidate.tacticalSignal;
-        const boundedChance = Math.max(5, Math.min(95, rawChance));
+          (stageSignal + dpsSignal + penSignal + tacticalCandidate.tacticalSignal) * supportScale;
+        const maxChanceByContract = {
+          "secure-frontline-bond": 96,
+          "blue-chip-stock": 94,
+          "growth-stock": 88,
+          "meme-coin": 58,
+          "reaper-derivative": 22,
+          "abyss-option": 9,
+        };
+        const maxChance = maxChanceByContract[asset?.id] ?? 95;
+        const boundedChance = Math.max(3, Math.min(maxChance, Math.round(rawChance)));
 
         return {
           successChance: boundedChance,
@@ -1206,7 +1265,7 @@
           rawChance,
           boundedChance,
           minChance: 5,
-          maxChance: 95,
+          maxChance,
           squadSignal: dpsSignal + penSignal,
           contractSignal: odds,
           stageSignal,
@@ -4733,175 +4792,142 @@
         return getRpgCombatStats(state).totalDps;
       }
 
+      function getCombatTempoProfile(spdMultiplier) {
+        const spd = Math.max(1, toFiniteNumber(spdMultiplier, 1));
+        const logSpd = Math.log2(spd);
+        return {
+          tickMs: Math.max(120, Math.min(1000, Math.round(1000 / Math.sqrt(spd)))),
+          damageTempo: Math.min(4, 1 + logSpd * 0.25),
+          rewardTempo: Math.min(5, 1 + logSpd * 0.4),
+          killCap: Math.max(250, Math.floor(180 * Math.sqrt(spd))),
+        };
+      }
+
       function applyCombatTick(state, deltaSeconds) {
         if (state.rpg?.run?.isActive !== true) return state;
         const combatStats = getRpgCombatStats(state);
         const dps = combatStats.totalDps;
-        const currentStage = Math.max(
-          1,
-          toFiniteNumber(state.rpg.currentStage, 1),
-        );
-        const archetype = getInfiniteMonsterArchetype(currentStage);
-        const bossMilestone = getInfiniteBossMilestone(currentStage);
-        const reaperProfile = getInfiniteReaperProfile(currentStage);
-        const modifier = getInfiniteArchetypeCombatModifier(
-          archetype,
-          combatStats,
-          currentStage,
-        );
-        const bossModifier = getInfiniteBossCombatModifier(
-          bossMilestone,
-          combatStats,
-          currentStage,
-        );
-        const reaperModifier = getInfiniteReaperCombatModifier(
-          reaperProfile,
-          combatStats,
-          currentStage,
-        );
-        const archetypeMultiplier = toFiniteNumber(
-          modifier.damageMultiplier,
-          1,
-        );
-        const bossDamageMultiplier = toFiniteNumber(
-          bossModifier.damageMultiplier,
-          1,
-        );
-        const reaperDamageMultiplier = toFiniteNumber(
-          reaperModifier.damageMultiplier,
-          1,
-        );
+        let currentStage = Math.max(1, toFiniteNumber(state.rpg.currentStage, 1));
+        let currentHp = toFiniteNumber(state.rpg.monsterHp, getMonsterMaxHp(currentStage));
 
-        let baseDamageMultiplier =
-          archetypeMultiplier * bossDamageMultiplier * reaperDamageMultiplier;
-        if (currentStage >= 101) {
-          const intensityTier = Math.floor((currentStage - 100) / 10) + 1;
-          const damageCompressionModifier = Math.max(
-            0.45,
-            1 - intensityTier * 0.025,
-          );
-          baseDamageMultiplier *= damageCompressionModifier;
-        }
-        const damageMultiplier = Math.max(
-          0.45,
-          Math.min(1, baseDamageMultiplier),
-        );
-        const damage = Math.max(
+        const getStageDamageProfile = (stage) => {
+          const archetype = getInfiniteMonsterArchetype(stage);
+          const bossMilestone = getInfiniteBossMilestone(stage);
+          const reaperProfile = getInfiniteReaperProfile(stage);
+          const modifier = getInfiniteArchetypeCombatModifier(archetype, combatStats, stage);
+          const bossModifier = getInfiniteBossCombatModifier(bossMilestone, combatStats, stage);
+          const reaperModifier = getInfiniteReaperCombatModifier(reaperProfile, combatStats, stage);
+          let mult =
+            toFiniteNumber(modifier.damageMultiplier, 1) *
+            toFiniteNumber(bossModifier.damageMultiplier, 1) *
+            toFiniteNumber(reaperModifier.damageMultiplier, 1);
+          if (stage >= 101) {
+            const intensityTier = Math.floor((stage - 100) / 10) + 1;
+            mult *= Math.max(0.45, 1 - intensityTier * 0.025);
+          }
+          return {
+            multiplier: Math.max(0.45, Math.min(1, mult)),
+            regenRate: toFiniteNumber(modifier.regenRate, 0),
+          };
+        };
+
+        const initialProfile = getStageDamageProfile(currentStage);
+        const tempoProfile = getCombatTempoProfile(combatStats.spd);
+        const damageBudget = Math.max(
           0,
-          toFiniteNumber(dps * deltaSeconds * damageMultiplier, 0),
+          toFiniteNumber(
+            dps * Math.max(0, toFiniteNumber(deltaSeconds, 0)) * initialProfile.multiplier * tempoProfile.damageTempo,
+            0,
+          ),
         );
-        if (damage <= 0) return state;
+        if (damageBudget <= 0) return state;
 
-        const currentHp = toFiniteNumber(state.rpg.monsterHp, 0);
-        // Use stage-derived max HP as the source of truth. This prevents old
-        // pre-rebalance saves from preserving e-number monster HP after a patch.
-        const expectedMaxHp = getMonsterMaxHp(currentStage);
-        const savedMaxHp = Math.max(
-          1,
-          toFiniteNumber(state.rpg.monsterMaxHp, expectedMaxHp),
-        );
-        const currentMaxHp = Math.min(savedMaxHp, expectedMaxHp);
-        const damagedHp = Math.max(0, currentHp - damage);
-        const regen =
-          damagedHp > 0
-            ? currentMaxHp *
-              modifier.regenRate *
-              Math.max(0, toFiniteNumber(deltaSeconds, 0))
-            : 0;
-        const nextHp = Math.min(currentMaxHp, damagedHp + regen);
+        let remainingDamage = damageBudget;
+        let stageKills = Math.max(0, toFiniteNumber(state.rpg.stageKills, 0));
+        let defeated = Math.max(0, toFiniteNumber(state.rpg.defeatedMonsters, 0));
+        let highestStage = Math.max(0, toFiniteNumber(state.rpg.highestStage, 0));
+        let dividendsGained = 0;
+        let shardsGained = 0;
+        let killsThisTick = 0;
+        let lastReward = 0;
+        const maxKillsPerTick = tempoProfile.killCap;
 
-        if (nextHp <= 0) {
-          const nextDefeated =
-            toFiniteNumber(state.rpg.defeatedMonsters, 0) + 1;
-          const currentStageKills = toFiniteNumber(state.rpg.stageKills, 0);
-          const killsRequired = getKillsRequiredForStage(currentStage);
-
-          let nextStage = currentStage;
-          let nextStageKills = currentStageKills + 1;
-          let nextHighestStage = toFiniteNumber(state.rpg.highestStage, 0);
-
-          if (nextStageKills >= killsRequired) {
-            nextStage = currentStage + 1;
-            nextStageKills = 0;
-            nextHighestStage = Math.max(nextHighestStage, nextStage);
+        while (remainingDamage > 0 && killsThisTick < maxKillsPerTick) {
+          const stageMaxHp = getMonsterMaxHp(currentStage);
+          currentHp = Math.min(Math.max(0, currentHp), stageMaxHp);
+          if (remainingDamage < currentHp) {
+            currentHp -= remainingDamage;
+            remainingDamage = 0;
+            break;
           }
 
-          const maxHp = getMonsterMaxHp(nextStage);
-          const reward = getMonsterDefeatReward(currentStage);
-          const reachedNormalEnding =
-            state.rpg.normalEndingReached === true ||
-            nextHighestStage >= NORMAL_ENDING_STAGE;
+          remainingDamage -= currentHp;
+          defeated += 1;
+          killsThisTick += 1;
+          stageKills += 1;
+          const reward = Math.max(1, Math.floor(getMonsterDefeatReward(currentStage) * tempoProfile.rewardTempo));
+          dividendsGained += reward;
+          lastReward = reward;
 
-          // L-5B: Infinite Mode shard payout scaling — only stage >= 101, stage 1-100 path untouched
-          let shardsToAward = 0;
           if (currentStage >= 101) {
             const baseShardsAwarded = 2;
             const intensityTier = Math.floor((currentStage - 100) / 10) + 1;
-            if (isFinite(intensityTier)) {
-              const shardBonus = baseShardsAwarded * intensityTier * 0.1;
-              if (isFinite(shardBonus)) {
-                const totalShardsRaw = baseShardsAwarded + shardBonus;
-                const totalShardsFloored = Math.floor(totalShardsRaw);
-                if (isFinite(totalShardsFloored) && totalShardsFloored > 0) {
-                  shardsToAward = totalShardsFloored;
-                }
-              }
-            }
+            const shardBonus = baseShardsAwarded * Math.max(1, intensityTier) * 0.1;
+            shardsGained += Math.max(1, Math.floor(baseShardsAwarded + shardBonus));
           }
 
-          const prevRefinedShards = toFiniteNumber(
-            state.enhancement?.refinedShards,
-            0,
-          );
-          const nextRefinedShards =
-            shardsToAward > 0
-              ? Math.max(0, prevRefinedShards + shardsToAward)
-              : prevRefinedShards;
-
-          return {
-            ...state,
-            enhancement:
-              shardsToAward > 0
-                ? {
-                    ...state.enhancement,
-                    refinedShards: nextRefinedShards,
-                  }
-                : state.enhancement,
-            rpg: {
-              ...state.rpg,
-              currentStage: nextStage,
-              highestStage: nextHighestStage,
-              stageKills: nextStageKills,
-              monsterHp: maxHp,
-              monsterMaxHp: maxHp,
-              defeatedMonsters: nextDefeated,
-              dividends: toFiniteNumber(state.rpg.dividends, 0) + reward,
-              lastRpgReward: reward,
-              normalEndingReached: reachedNormalEnding,
-              run: {
-                ...state.rpg.run,
-                stage: nextStage,
-                wave: nextDefeated,
-              },
-            },
-          };
+          const killsRequired = getKillsRequiredForStage(currentStage);
+          if (stageKills >= killsRequired) {
+            currentStage += 1;
+            stageKills = 0;
+            highestStage = Math.max(highestStage, currentStage);
+          }
+          currentHp = getMonsterMaxHp(currentStage);
         }
+
+        const currentMaxHp = getMonsterMaxHp(currentStage);
+        if (killsThisTick === 0 && currentHp > 0) {
+          const endProfile = getStageDamageProfile(currentStage);
+          const regen =
+            currentMaxHp *
+            endProfile.regenRate *
+            Math.max(0, toFiniteNumber(deltaSeconds, 0));
+          currentHp = Math.min(currentMaxHp, currentHp + regen);
+        }
+
+        const reachedNormalEnding =
+          state.rpg.normalEndingReached === true || highestStage >= NORMAL_ENDING_STAGE;
+        const nextRefinedShards =
+          shardsGained > 0
+            ? Math.max(0, toFiniteNumber(state.enhancement?.refinedShards, 0) + shardsGained)
+            : toFiniteNumber(state.enhancement?.refinedShards, 0);
 
         return {
           ...state,
+          enhancement:
+            shardsGained > 0
+              ? {
+                  ...state.enhancement,
+                  refinedShards: nextRefinedShards,
+                }
+              : state.enhancement,
           rpg: {
             ...state.rpg,
-            monsterHp: nextHp,
+            currentStage,
+            highestStage,
+            stageKills,
+            monsterHp: Math.min(currentHp, currentMaxHp),
+            monsterMaxHp: currentMaxHp,
+            defeatedMonsters: defeated,
+            dividends: toFiniteNumber(state.rpg.dividends, 0) + dividendsGained,
+            lastRpgReward: lastReward,
+            lastCombatTickKills: killsThisTick,
+            lastCombatTickReward: dividendsGained,
+            normalEndingReached: reachedNormalEnding,
             run: {
               ...state.rpg.run,
-              stage: Math.max(
-                1,
-                toFiniteNumber(state.rpg.run?.stage, state.rpg.currentStage),
-              ),
-              wave: Math.max(
-                0,
-                toFiniteNumber(state.rpg.run?.wave, state.rpg.defeatedMonsters),
-              ),
+              stage: currentStage,
+              wave: defeated,
             },
           },
         };
@@ -5340,6 +5366,8 @@
             ),
             dividends: Math.max(0, toFiniteNumber(rpg.dividends, 0)),
             lastRpgReward: Math.max(0, toFiniteNumber(rpg.lastRpgReward, 0)),
+            lastCombatTickKills: Math.max(0, Math.floor(toFiniteNumber(rpg.lastCombatTickKills, 0))),
+            lastCombatTickReward: Math.max(0, toFiniteNumber(rpg.lastCombatTickReward, 0)),
             normalEndingReached: rpg.normalEndingReached === true,
             normalEndingSeen: rpg.normalEndingSeen === true,
             upgrades: {
@@ -7084,6 +7112,11 @@
             gainLoss,
             gainLossPercent,
           };
+        }).sort((a, b) => {
+          const stage = gameState.rpg?.highestStage || 0;
+          const oddsDelta = getDefenseContractOdds(b, stage) - getDefenseContractOdds(a, stage);
+          if (oddsDelta !== 0) return oddsDelta;
+          return getDefenseContractProjectedPayout(a, stage, combatStats.totalDps) - getDefenseContractProjectedPayout(b, stage, combatStats.totalDps);
         });
         const totalPortfolioValue = investmentAssets.reduce(
           (total, asset) => total + toFiniteNumber(asset.value, 0),
@@ -7856,9 +7889,13 @@
         useEffect(() => {
           if (activeTab !== "rpg" || runState.isActive !== true) return;
 
+          const tempoProfile = getCombatTempoProfile(combatStats?.spd || 1);
+          const tickMs = tempoProfile.tickMs;
+          const tickDeltaSeconds = tickMs / 1000;
+
           const timer = setInterval(() => {
             updateGameState((prev) => {
-              const nextState = applyCombatTick(prev, 1);
+              const nextState = applyCombatTick(prev, tickDeltaSeconds);
 
               // Trigger heavy radar flash and write tactical terminal messages
               setWaveAlert(true);
@@ -7876,9 +7913,9 @@
 
               return nextState;
             });
-          }, 1000);
+          }, tickMs);
           return () => clearInterval(timer);
-        }, [activeTab, runState.isActive]);
+        }, [activeTab, runState.isActive, combatStats.spd]);
 
         useEffect(() => {
           const stage =
@@ -15855,6 +15892,9 @@
                           </div>
                           <div className="text-sm font-black text-emerald-600">
                             x{combatStats.spd.toFixed(2)}
+                          </div>
+                          <div className="text-[8px] font-bold text-emerald-500 mt-0.5">
+                            {language === "ko" ? `실전 틱 ${getCombatTempoProfile(combatStats.spd).tickMs}ms · 수급 x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}` : `Tick ${getCombatTempoProfile(combatStats.spd).tickMs}ms · income x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}`}
                           </div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
