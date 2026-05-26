@@ -4079,20 +4079,21 @@
 
       function getMonsterMaxHp(stage) {
         const s = Math.max(1, Math.floor(toFiniteNumber(stage, 1)));
-        // QC13 Balance: match the controlled hero power curve.
-        // Old 1.3^stage (+ extra 1.1^infiniteStage) caused runaway HP after the
-        // combat formula was changed away from exponential growth. This curve keeps
-        // Stage 1-100 readable and makes Infinite Mode a polynomial pressure climb.
+        // QC14 Rebalance: after QC12 lowered hero/combat power from runaway
+        // exponential growth to a controlled curve, QC13 HP was still too high
+        // in actual play. The target here is time-to-kill continuity: stages that
+        // were already farmable before the combat-scale change should remain
+        // farmable instead of turning into walls.
         const normalProgress = Math.max(0, s - 1);
-        const normalHp = 100 * Math.pow(1 + normalProgress / 4, 4);
+        const normalHp = 100 * Math.pow(1 + normalProgress / 12, 3);
         if (s <= NORMAL_ENDING_STAGE) {
           return Math.max(100, Math.floor(normalHp));
         }
 
-        const stage100Hp = 100 * Math.pow(1 + (NORMAL_ENDING_STAGE - 1) / 4, 4);
+        const stage100Hp = 100 * Math.pow(1 + (NORMAL_ENDING_STAGE - 1) / 12, 3);
         const infiniteStage = s - NORMAL_ENDING_STAGE;
-        const infinitePressure = Math.pow(1 + infiniteStage / 35, 2.4);
-        const milestonePressure = INFINITE_BOSS_STAGES.includes(s) ? 2.5 : 1;
+        const infinitePressure = Math.pow(1 + infiniteStage / 80, 2.0);
+        const milestonePressure = INFINITE_BOSS_STAGES.includes(s) ? 1.75 : 1;
         return Math.max(100, Math.floor(stage100Hp * infinitePressure * milestonePressure));
       }
 
