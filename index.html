@@ -4795,15 +4795,16 @@
       function getCombatTempoProfile(spdMultiplier) {
         const spd = Math.max(1, toFiniteNumber(spdMultiplier, 1));
         const logSpd = Math.max(0, Math.log2(spd));
-        // QC21: moderate speed feel. SPD is already included in total DPS, so this
-        // profile must not multiply damage again aggressively. It only controls
-        // visual cadence, small reward feel, and the per-tick multi-kill safety cap.
-        const tickMs = Math.max(450, Math.min(1000, Math.round(1000 / (1 + logSpd * 0.18))));
+        // QC22: action-feel tempo. SPD should make the battle pulse faster, but
+        // stage progression must remain visually readable as +1, +1, +1 rather
+        // than jumping by dozens of stages in a single render tick.
+        const tickMs = Math.max(280, Math.min(1000, Math.round(1000 / (1 + logSpd * 0.42))));
         return {
           tickMs,
-          damageTempo: Math.min(1.25, 1 + logSpd * 0.035),
-          rewardTempo: Math.min(1.6, 1 + logSpd * 0.09),
-          killCap: Math.max(25, Math.min(120, Math.floor(18 + logSpd * 16))),
+          damageTempo: Math.min(1.12, 1 + logSpd * 0.02),
+          rewardTempo: Math.min(1.35, 1 + logSpd * 0.055),
+          killCap: Math.max(5, Math.min(40, Math.floor(5 + logSpd * 6))),
+          stageAdvanceCap: 1,
         };
       }
 
@@ -4854,9 +4855,15 @@
         let shardsGained = 0;
         let killsThisTick = 0;
         let lastReward = 0;
+        let stagesAdvancedThisTick = 0;
         const maxKillsPerTick = tempoProfile.killCap;
+        const maxStagesPerTick = Math.max(1, Math.floor(toFiniteNumber(tempoProfile.stageAdvanceCap, 1)));
 
-        while (remainingDamage > 0 && killsThisTick < maxKillsPerTick) {
+        while (
+          remainingDamage > 0 &&
+          killsThisTick < maxKillsPerTick &&
+          stagesAdvancedThisTick < maxStagesPerTick
+        ) {
           const stageMaxHp = getMonsterMaxHp(currentStage);
           currentHp = Math.min(Math.max(0, currentHp), stageMaxHp);
           if (remainingDamage < currentHp) {
@@ -4885,6 +4892,12 @@
             currentStage += 1;
             stageKills = 0;
             highestStage = Math.max(highestStage, currentStage);
+            stagesAdvancedThisTick += 1;
+            // QC22: stop after a single visible stage advance. Extra damage is
+            // intentionally discarded so the player sees rapid +1 progression
+            // instead of 10+ or 100+ stage jumps in one frame.
+            currentHp = getMonsterMaxHp(currentStage);
+            break;
           }
           currentHp = getMonsterMaxHp(currentStage);
         }
@@ -15898,7 +15911,7 @@
                             x{combatStats.spd.toFixed(2)}
                           </div>
                           <div className="text-[8px] font-bold text-emerald-500 mt-0.5">
-                            {language === "ko" ? `실전 틱 ${getCombatTempoProfile(combatStats.spd).tickMs}ms · 수급 x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}` : `Tick ${getCombatTempoProfile(combatStats.spd).tickMs}ms · income x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}`}
+                            {language === "ko" ? `실전 틱 ${getCombatTempoProfile(combatStats.spd).tickMs}ms · 스테이지 +1 템포 · 수급 x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}` : `Tick ${getCombatTempoProfile(combatStats.spd).tickMs}ms · +1 stage tempo · income x${getCombatTempoProfile(combatStats.spd).rewardTempo.toFixed(2)}`}
                           </div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
