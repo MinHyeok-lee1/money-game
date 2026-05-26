@@ -3790,17 +3790,18 @@
       function getCharacterLevelPowerProfile(characterInstance) {
         const baseDps = getCharacterBaseDps(characterInstance);
         const definition = getCharacterDefinition(characterInstance?.characterId);
+        const safeBase = Math.max(1, toFiniteNumber(baseDps, 1));
         if (!definition) {
-          const safeBase = Math.max(1, toFiniteNumber(baseDps, 1));
           return { value: safeBase, log10: Math.log10(safeBase) };
         }
 
         const rarityKey = String(definition.rarity || "normal").toLowerCase();
-        const rarityBalance = CHARACTER_RARITY_BALANCE[rarityKey] || {
-          growthRateRange: [1.05, 1.05],
-        };
-        const growthRate = Math.max(1.001, toFiniteNumber(rarityBalance.growthRateRange[0], 1.05));
-        const level = Math.max(1, toFiniteNumber(characterInstance.level, 1));
+        const level = clampNumber(
+          Math.floor(toFiniteNumber(characterInstance.level, 1)),
+          1,
+          MAX_CHARACTER_LEVEL,
+          1,
+        );
         const stars = clampNumber(
           Math.floor(toFiniteNumber(characterInstance.stars, 0)),
           0,
@@ -3815,12 +3816,34 @@
         );
         const rarityRank = getRarityRankValueGlobal(rarityKey);
         const rarityMultiplier = getRarityPowerMultiplier(rarityKey);
-        const starMultiplier = 1 + stars * (0.08 + rarityRank * 0.025);
-        const breakthroughMultiplier = 1 + breakthroughTier * (0.15 + rarityRank * 0.04);
-        const safeBase = Math.max(1, toFiniteNumber(baseDps, 1));
+
+        // QC12 Combat Scale Pass:
+        // The old exponential `growthRate^level` model eventually overflowed and then
+        // fell back to the base value (e.g. 1.00e300 -> 1.44K). It also made long-term
+        // growth mathematically absurd. Use a controlled power curve instead:
+        // level still matters heavily, but late-game growth stays readable and tunable.
+        const levelExponentByRarity = {
+          normal: 1.15,
+          rare: 1.45,
+          epic: 1.9,
+          unique: 2.35,
+          legendary: 2.85,
+          mythic: 3.4,
+        };
+        const levelExponent = levelExponentByRarity[rarityKey] || 1.15;
+        const levelMultiplier = Math.pow(1 + (level - 1) / 100, levelExponent);
+        const starMultiplier =
+          1 +
+          stars * (0.06 + rarityRank * 0.018) +
+          stars * stars * (0.002 + rarityRank * 0.0007);
+        const breakthroughMultiplier =
+          1 +
+          breakthroughTier * (0.18 + rarityRank * 0.035) +
+          breakthroughTier * breakthroughTier * (0.015 + rarityRank * 0.003);
+
         const log10Power =
           Math.log10(safeBase) +
-          (level - 1) * Math.log10(growthRate) +
+          Math.log10(Math.max(1, levelMultiplier)) +
           Math.log10(Math.max(1, rarityMultiplier)) +
           Math.log10(Math.max(1, starMultiplier)) +
           Math.log10(Math.max(1, breakthroughMultiplier));
@@ -3829,12 +3852,13 @@
           value: toPowerNumberFromLog10(log10Power, safeBase),
           log10: log10Power,
           rarityMultiplier,
+          levelMultiplier,
           starMultiplier,
           breakthroughMultiplier,
         };
       }
 
-      function getCharacterLevelDps(characterInstance) {
+            function getCharacterLevelDps(characterInstance) {
         return getCharacterLevelPowerProfile(characterInstance).value;
       }
 
@@ -4344,8 +4368,8 @@
           : "Your current squad is viable for 101+. Entry is recommended.";
       }
 
-      function getTeamBaseAtk(state) {
-        if (!state || !state.rpg) return 0;
+      function getTeamBasePowerProfile(state) {
+        if (!state || !state.rpg) return { value: 0, log10: Number.NEGATIVE_INFINITY };
         const characters = Array.isArray(state.rpg.run?.activeUnits)
           ? state.rpg.run.activeUnits
           : [];
@@ -4385,18 +4409,27 @@
           return acc;
         }, {});
 
-        return ownedCharacterDetails.reduce((sum, char) => {
+        const totalLog = ownedCharacterDetails.reduce((sumLog, char) => {
           const profile = getProjectedCharacterPowerProfile(
             char,
             inventory,
             state.enhancement,
             ownedFactionCounts[char.definition.faction] || 0,
           );
-          return Math.min(POWER_NUMBER_CAP, sum + profile.value);
-        }, 0);
+          return addPowerLogs(sumLog, profile.log10);
+        }, Number.NEGATIVE_INFINITY);
+
+        return {
+          value: toPowerNumberFromLog10(totalLog, 0),
+          log10: totalLog,
+        };
       }
 
-      function getExternalCapitalSpecializationStats(state) {
+      function getTeamBaseAtk(state) {
+        return getTeamBasePowerProfile(state).value;
+      }
+
+            function getExternalCapitalSpecializationStats(state) {
         const isUnlocked = state.rpg?.normalEndingSeen === true;
         if (!isUnlocked) {
           return {
@@ -4565,7 +4598,8 @@
       }
 
       function getRpgCombatStats(state) {
-        const baseAtk = getTeamBaseAtk(state);
+        const basePowerProfile = getTeamBasePowerProfile(state);
+        const baseAtk = basePowerProfile.value;
         const atkLevel = getRpgUpgradeLevel(state, "atkLevel");
         const spdLevel = getRpgUpgradeLevel(state, "spdLevel");
         const penLevel = getRpgUpgradeLevel(state, "penLevel");
@@ -4646,26 +4680,36 @@
         const pressureMult =
           currentStage > 100 ? 1 + specialization.pressureBreaker : 1;
 
-        // L-4: atk mod is a fractional multiplier bonus added to totalAtkMult
+        // L-4: atk mod is a fractional multiplier bonus added to totalAtkMult.
+        // QC12: keep a log10 profile beside the capped JS number so displays and sorting
+        // do not collapse at 1e300. Actual combat still uses the capped numeric value,
+        // but the new controlled growth curve keeps normal gameplay well below that cap.
         const modAtkMult = isFinite(modAtk) ? modAtk : 0;
-        const safeAtk = clampFinitePower(
-          baseAtk * (totalAtkMult + modAtkMult) * pressureMult,
-          POWER_NUMBER_CAP,
+        const finalAtkMultiplier = Math.max(
+          0,
+          (totalAtkMult + modAtkMult) * pressureMult,
         );
-        const safeTotalDps = clampFinitePower(
-          baseAtk *
-            (totalAtkMult + modAtkMult) *
-            (totalSpdMult + (isFinite(modSpd) ? modSpd : 0)) *
-            pressureMult,
-          POWER_NUMBER_CAP,
+        const finalSpdMultiplier = Math.max(
+          0,
+          totalSpdMult + (isFinite(modSpd) ? modSpd : 0),
         );
+        const atkLog10 = Number.isFinite(basePowerProfile.log10) && finalAtkMultiplier > 0
+          ? basePowerProfile.log10 + Math.log10(finalAtkMultiplier)
+          : Number.NEGATIVE_INFINITY;
+        const totalDpsLog10 = Number.isFinite(atkLog10) && finalSpdMultiplier > 0
+          ? atkLog10 + Math.log10(finalSpdMultiplier)
+          : Number.NEGATIVE_INFINITY;
+        const safeAtk = toPowerNumberFromLog10(atkLog10, 0);
+        const safeTotalDps = toPowerNumberFromLog10(totalDpsLog10, 0);
         return {
           atk: safeAtk,
-          spd: totalSpdMult + (isFinite(modSpd) ? modSpd : 0),
+          atkLog10,
+          spd: finalSpdMultiplier,
           pen: totalPen + (isFinite(modPen) ? modPen : 0),
           acc: totalAcc + (isFinite(modAcc) ? modAcc : 0),
           crt: totalCrt + (isFinite(modCrt) ? modCrt : 0),
           totalDps: safeTotalDps,
+          totalDpsLog10,
         };
       }
 
@@ -7233,10 +7277,11 @@
               acquisitionIndex: index,
               equippedWeapon,
               totalDps,
+              totalDpsLog10: totalPowerProfile.log10,
             };
           })
           .filter(Boolean)
-          .sort((a, b) => b.totalDps - a.totalDps);
+          .sort((a, b) => toFiniteNumber(b.totalDpsLog10, -9999) - toFiniteNumber(a.totalDpsLog10, -9999));
 
         const combatStats = getRpgCombatStats(gameState);
         const totalTeamDps = combatStats.totalDps;
@@ -12157,7 +12202,7 @@
                       <span>
                         Squad DPS:{" "}
                         <span className="text-emerald-700 font-black">
-                          {formatDps(totalTeamDps)}
+                          {formatDps({ log10: combatStats.totalDpsLog10 })}
                         </span>
                       </span>
                     </div>
@@ -14681,7 +14726,7 @@
                           {language === "ko" ? "총 팀 DPS" : "Total Team DPS"}
                         </div>
                         <div className="text-lg font-black leading-tight">
-                          {formatDps(totalTeamDps)}
+                          {formatDps({ log10: combatStats.totalDpsLog10 })}
                         </div>
                       </div>
                       {(() => {
@@ -15669,7 +15714,7 @@
                             {ui.teamAtk}
                           </div>
                           <div className="text-sm font-black text-gray-800">
-                            {formatDps(combatStats.atk)}
+                            {formatDps({ log10: combatStats.atkLog10 })}
                           </div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
@@ -15788,7 +15833,7 @@
                       </div>
                       <div className="p-3 space-y-3">
                         <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-[10px] font-bold text-emerald-800 leading-relaxed">
-                          후반 전투 특성 훈련은 비용 증가에 맞춰 효과가 가속됩니다. ATK/SPD는 고레벨에서 배율이 더 크게 오르고, PEN은 무한 모드 방어 장벽을 뚫기 위한 소프트캡 방식으로 성장합니다.
+                          전투 특성 훈련은 실제 전투에 직접 반영됩니다. ATK는 실제 피해량을 올리고, SPD는 초당 타격량을 올려 적 처치와 배당금 획득 속도를 높입니다. 단, 전투력은 오버플로우 방지를 위해 로그 기반/제어 성장식으로 계산됩니다.
                         </div>
                         {/* ATK Upgrade */}
                         <div className="flex items-center justify-between gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -15985,7 +16030,7 @@
                                   DPS
                                 </div>
                                 <div className="font-black text-emerald-600">
-                                  {formatDps(char.totalDps)}
+                                  {formatDps({ log10: char.totalDpsLog10 })}
                                 </div>
                               </div>
                             </div>
