@@ -4838,6 +4838,9 @@
           tickMs,
           damageTempo: 1,
           rewardTempo: Math.min(1.22, 1 + logSpd * 0.035),
+          // Compatibility field: existing UI still reads this value for display.
+          // It intentionally mirrors rewardTempo because stage-clear rewards were removed.
+          stageClearRewardTempo: Math.min(1.22, 1 + logSpd * 0.035),
           killCap: spd >= 8 ? 2 : 1,
           stageAdvanceCap: 1,
         };
@@ -14899,7 +14902,7 @@
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-bold text-slate-500">
                                         <div>{language === "ko" ? "기본 전력" : "Base"}: <span className="text-slate-200">{formatDps(levelDps)}</span></div>
                                         <div>{language === "ko" ? "무기" : "Weapon"}: <span className="text-slate-200">{formatDps(weaponDps)}</span></div>
-                                        <div>{language === "ko" ? "시너지" : "Synergy"}: <span className={character.synergyActive ? "text-emerald-400" : "text-slate-500"}>x{character.synergyMultiplier.toFixed(2)}</span></div>
+                                        <div>{language === "ko" ? "시너지" : "Synergy"}: <span className={character.synergyActive ? "text-emerald-400" : "text-slate-500"}>x{toFiniteNumber(character.synergyMultiplier, 1).toFixed(2)}</span></div>
                                         <div>{language === "ko" ? "총 전력" : "Total"}: <span className="text-emerald-300">{formatDps(projectedDps)}</span></div>
                                       </div>
                                       {character.equippedWeapon && (
@@ -16014,7 +16017,15 @@
                             x{combatStats.spd.toFixed(2)}
                           </div>
                           <div className="text-[8px] font-bold text-emerald-500 mt-0.5">
-                            {language === "ko" ? `실전 틱 ${getCombatTempoProfile(combatStats.spd).tickMs}ms · 1마리씩 빠른 처치 · 클리어 보너스 x${getCombatTempoProfile(combatStats.spd).stageClearRewardTempo.toFixed(2)}` : `Tick ${getCombatTempoProfile(combatStats.spd).tickMs}ms · visible 1-kill cadence · clear bonus x${getCombatTempoProfile(combatStats.spd).stageClearRewardTempo.toFixed(2)}`}
+                            {(() => {
+                              const tempo = getCombatTempoProfile(combatStats.spd);
+                              const killText = tempo.killCap > 1
+                                ? (language === "ko" ? `최대 ${tempo.killCap}마리 처치` : `up to ${tempo.killCap} kills`)
+                                : (language === "ko" ? "1마리 처치" : "1-kill cadence");
+                              return language === "ko"
+                                ? `실전 틱 ${tempo.tickMs}ms · ${killText} · 처치 보상 x${toFiniteNumber(tempo.rewardTempo, 1).toFixed(2)}`
+                                : `Tick ${tempo.tickMs}ms · ${killText} · kill reward x${toFiniteNumber(tempo.rewardTempo, 1).toFixed(2)}`;
+                            })()}
                           </div>
                         </div>
                         <div className="bg-gray-50 p-2 rounded border border-gray-100">
@@ -16374,7 +16385,7 @@
                                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-bold text-gray-500">
                                       <div>{language === "ko" ? "기본 전력" : "Base"}: <span className="text-gray-800">{formatDps(levelDps)}</span></div>
                                       <div>{language === "ko" ? "무기" : "Weapon"}: <span className="text-gray-800">{formatDps(weaponDps)}</span></div>
-                                      <div>{language === "ko" ? "시너지" : "Synergy"}: <span className={character.synergyActive ? "text-emerald-600" : "text-gray-400"}>x{character.synergyMultiplier.toFixed(2)}</span></div>
+                                      <div>{language === "ko" ? "시너지" : "Synergy"}: <span className={character.synergyActive ? "text-emerald-600" : "text-gray-400"}>x{toFiniteNumber(character.synergyMultiplier, 1).toFixed(2)}</span></div>
                                       <div>{language === "ko" ? "총 전력" : "Total"}: <span className="text-emerald-700">{formatDps(projectedDps)}</span></div>
                                     </div>
                                   </div>
