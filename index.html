@@ -4795,15 +4795,15 @@
       function getCombatTempoProfile(spdMultiplier) {
         const spd = Math.max(1, toFiniteNumber(spdMultiplier, 1));
         const logSpd = Math.max(0, Math.log2(spd));
-        // QC22: action-feel tempo. SPD should make the battle pulse faster, but
-        // stage progression must remain visually readable as +1, +1, +1 rather
-        // than jumping by dozens of stages in a single render tick.
-        const tickMs = Math.max(280, Math.min(1000, Math.round(1000 / (1 + logSpd * 0.42))));
+        // QC23: visible action tempo. A high SPD value should make the kill
+        // counter advance like 0/5 -> 1/5 -> 2/5 -> ... instead of resolving
+        // all five kills inside one React render and showing only 0/5 again.
+        const tickMs = Math.max(220, Math.min(1000, Math.round(1000 / (1 + logSpd * 0.58))));
         return {
           tickMs,
-          damageTempo: Math.min(1.12, 1 + logSpd * 0.02),
-          rewardTempo: Math.min(1.35, 1 + logSpd * 0.055),
-          killCap: Math.max(5, Math.min(40, Math.floor(5 + logSpd * 6))),
+          damageTempo: Math.min(1.08, 1 + logSpd * 0.015),
+          rewardTempo: Math.min(1.25, 1 + logSpd * 0.04),
+          killCap: 1,
           stageAdvanceCap: 1,
         };
       }
