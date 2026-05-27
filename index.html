@@ -16,28 +16,71 @@
     />
     <meta name="apple-mobile-web-app-title" content="자본전선" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://money-game-zeta.vercel.app/" />
     <meta
       name="description"
-      content="Capital Front: Deadline is a defense and hero-growth data dashboard game. Track frontline stages, hero DPS, forge results, battle rewards, and export local analytics data."
+      content="자본전선 - 5가지 게임 모드 통합 방어전 시뮬레이터. 부동산 투자부터 영웅 육성까지, 게임 공략, 초보자 팁, FAQ와 데이터 분석을 제공합니다."
     />
-    <meta property="og:title" content="자본전선: 데드라인 | Capital Front: Deadline" />
+    <meta property="og:title" content="자본전선 - 무한 방어전 전략 게임 및 데이터 분석 도구" />
     <meta
       property="og:description"
-      content="Defense game and local data analytics dashboard for stage progress, hero DPS, battle rewards, and forge results."
+      content="5가지 게임 모드: 부동산 투자, 계약 관리, RPG 방어전, 무기 강화, 소환 시스템. 게임 가이드, 전략 팁, 통계 분석 제공!"
     />
+    <!-- TODO: Ensure /og-image.png exists at deployment. Recommended size: 1200x630. -->
+    <meta property="og:image" content="https://money-game-zeta.vercel.app/og-image.png" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://money-game-zeta.vercel.app/" />
     <meta property="og:locale" content="ko_KR" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
+        "@type": "WebApplication",
         "name": "Capital Front: Deadline",
+        "url": "https://money-game-zeta.vercel.app/",
         "applicationCategory": "GameApplication",
         "operatingSystem": "Web",
-        "description": "A defense game with local hero, forge, battle, and economy analytics export tools."
+        "description": "A defense game with local hero, forge, battle, and economy analytics export tools.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KRW"
+        }
       }
     </script>
-    <title>자본전선: 데드라인 | Capital Front: Deadline</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "자본전선이란 무엇인가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "자본전선은 부동산 투자, 계약 관리, RPG 방어전, 무기 강화, 소환 시스템을 한 페이지에서 제공하는 무료 웹 전략 시뮬레이션 게임입니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "게임 데이터는 어디에 저장되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "게임 데이터는 브라우저 localStorage에 저장되며, 사용자는 JSON 백업과 CSV 분석 파일로 데이터를 직접 내보낼 수 있습니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "자본전선은 무료인가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "네. 자본전선은 브라우저에서 무료로 플레이할 수 있는 웹 게임입니다."
+            }
+          }
+        ]
+      }
+    </script>
+    <meta name="keywords" content="방어게임, 시뮬레이션게임, 전략게임, 무료게임, 데이터분석, 방치형게임" />
+    <title>자본전선 - 무한 방어전 전략 게임 | 완벽 공략집 포함</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -321,7 +364,7 @@
     <!-- React App Root -->
     <div
       id="root"
-      class="w-full max-w-md w-full my-4 flex flex-col items-center"
+      class="w-full max-w-none w-full my-0 flex flex-col items-center"
     >
       <div class="w-full max-w-md p-4 text-slate-100">
         <div class="rounded-2xl border border-emerald-900/40 bg-slate-950 p-5 shadow-2xl">
@@ -1025,6 +1068,12 @@
       const GAME_STATE_VERSION = 1;
       const GAME_STATE_STORAGE_KEY = "moneyGameUniverseStateV1";
       const LEGACY_LANDLORD_STORAGE_KEY = "idleLandlordSaveV4";
+      const QUARTERMASTER_FILTER_STORAGE_KEY = "moneyGameQuartermasterFilterPrefsV1";
+      const PRODUCTION_SITE_URL = "https://money-game-zeta.vercel.app/";
+      // Replace these two values with the numeric data-ad-slot IDs from Google AdSense before production review.
+      // Keep them empty or as placeholders until real slot IDs are issued; placeholder values do not render live ad markup.
+      const ADSENSE_TOP_SLOT_ID = "";
+      const ADSENSE_BOTTOM_SLOT_ID = "";
       const MAX_OFFLINE_SECONDS = 43200; // 12 hours (43200 seconds) cap on offline progress
       const INVESTMENT_HISTORY_LIMIT = 30;
       const GACHA_DRAW_COST = 1000;
@@ -5770,11 +5819,13 @@
 
           const saveString = encoded + "." + checksum.toString(16);
           localStorage.setItem(GAME_STATE_STORAGE_KEY, saveString);
+          return true;
         } catch (error) {
           console.error(
             "Unable to save Game State in encrypted format:",
             error,
           );
+          return false;
         }
       }
 
@@ -6838,6 +6889,249 @@
         };
       };
 
+
+      function AdSenseSection({ language, slot = "" }) {
+        const slotValue = String(slot || "").trim();
+        const isPlaceholderSlot =
+          !slotValue ||
+          !/^\d{6,}$/.test(slotValue) ||
+          /^INSERT_|^YOUR_/.test(slotValue) ||
+          slotValue.includes("HERE");
+        return (
+          <section
+            className="w-full py-8 px-4 bg-slate-100 text-slate-700"
+            aria-label={language === "ko" ? "광고 영역" : "Advertisement section"}
+          >
+            <div className="max-w-4xl mx-auto">
+              <div className="border-t border-b border-slate-300 py-4">
+                <p className="text-xs text-slate-500 mb-3 font-black uppercase tracking-widest">
+                  {language === "ko" ? "광고" : "Advertisement"}
+                </p>
+                <div className="w-full min-h-[250px] bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden">
+                  {isPlaceholderSlot ? (
+                    <div className="px-4 text-center">
+                      <div className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 mb-2">
+                        {language === "ko" ? "AdSense 슬롯 ID 대기 중" : "AdSense slot pending"}
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        {language === "ko"
+                          ? "실제 광고 단위의 data-ad-slot 값을 ADSENSE_TOP_SLOT_ID / ADSENSE_BOTTOM_SLOT_ID에 입력하면 이 영역이 실제 광고 코드로 전환됩니다."
+                          : "Enter real data-ad-slot values in ADSENSE_TOP_SLOT_ID / ADSENSE_BOTTOM_SLOT_ID to render live ad markup here."}
+                      </p>
+                    </div>
+                  ) : (
+                    <ins
+                      className="adsbygoogle"
+                      style={{ display: "block", textAlign: "center", width: "100%", minHeight: "250px" }}
+                      data-ad-layout="in-article"
+                      data-ad-format="fluid"
+                      data-ad-client="ca-pub-6423816528159440"
+                      data-ad-slot={slotValue}
+                    />
+                  )}
+                </div>
+                <p className="mt-2 text-[10px] text-slate-400 font-bold">
+                  {language === "ko"
+                    ? "광고 영역은 게임 조작 UI와 분리되어 표시됩니다."
+                    : "Ad placement is separated from the game controls."}
+                </p>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      function CapitalFrontLandingContent({ language }) {
+        const isKo = language === "ko";
+        const modes = [
+          {
+            icon: "📊",
+            titleKo: "Landlord: 부동산 투자",
+            titleEn: "Landlord: Real Estate Investment",
+            textKo: "클릭으로 전쟁 자금을 확보하고 수복 구역에 투자하는 기본 경제 모드입니다. 초반에는 클릭 강화와 저비용 자산 확보가 중요하며, 이후에는 비용 증가율과 초당 수익을 비교해 가장 효율적인 투자 순서를 찾는 것이 핵심입니다.",
+            textEn: "The core economy mode where you secure war funds and invest in reclaimed districts. Early play focuses on click upgrades and low-cost assets, then shifts toward comparing cost growth against passive income."
+          },
+          {
+            icon: "💼",
+            titleKo: "Investment: 계약 관리",
+            titleEn: "Investment: Contract Management",
+            textKo: "계약별 위험도, 예상 수익, 성공 확률을 비교하는 분석형 모드입니다. 단순히 배율이 높은 계약만 고르는 것이 아니라 현재 자본 규모와 실패 리스크를 함께 고려해야 안정적인 성장을 만들 수 있습니다.",
+            textEn: "An analytics-focused mode for comparing contract risk, projected payout, and success probability. Sustainable growth comes from balancing high payout opportunities with current capital and downside risk."
+          },
+          {
+            icon: "⚔️",
+            titleKo: "RPG: 영웅 방어전",
+            titleEn: "RPG: Hero Defense",
+            textKo: "영웅을 배치해 전선을 방어하고 스테이지를 돌파하는 전투 모드입니다. 영웅의 레벨, 별, 장착 무기, 진영 시너지를 함께 고려해야 하며, 고스테이지에서는 단일 전력보다 조합 안정성이 더 중요합니다.",
+            textEn: "A defense mode where deployed heroes hold the frontline and push stages. Level, stars, equipped weapons, and faction synergy matter together, especially when high-stage stability becomes more important than raw power."
+          },
+          {
+            icon: "🔨",
+            titleKo: "Enhancement: 무기 강화",
+            titleEn: "Enhancement: Weapon Upgrade",
+            textKo: "무기를 강화해 영웅 전력을 끌어올리는 성장 모드입니다. 강화 단계가 높아질수록 리스크가 커지므로, 주요 영웅의 장비를 우선 강화하고 백업 데이터를 남긴 뒤 중요한 시도를 진행하는 것이 좋습니다.",
+            textEn: "A progression mode for improving weapons and hero power. Risk rises with upgrade level, so prioritizing core hero equipment and keeping backups before major attempts is recommended."
+          },
+          {
+            icon: "✨",
+            titleKo: "Gacha: 소환 시스템",
+            titleEn: "Gacha: Summon System",
+            textKo: "영웅과 무기를 확보하는 수집 모드입니다. 희귀도별 확률과 중복 자원 활용을 이해하면 무작위 결과도 장기 성장 자산으로 전환할 수 있습니다. 획득 데이터는 분석 패널에서 CSV로 내보낼 수 있습니다.",
+            textEn: "A collection mode for obtaining heroes and weapons. Understanding rarity odds and duplicate conversion turns random outcomes into long-term progress, with exportable analytics data available in the dashboard."
+          },
+        ];
+        const faqs = [
+          [isKo ? "게임은 어떻게 시작하나요?" : "How do I start?", isKo ? "아래의 게임 시작하기 버튼을 누르면 실제 게임 UI 위치로 이동합니다. 처음에는 Landlord 모드에서 자금을 확보하는 것을 권장합니다." : "Use the Start Game button to jump to the game UI. Starting with Landlord mode is recommended."],
+          [isKo ? "데이터는 자동 저장되나요?" : "Is progress saved automatically?", isKo ? "네. 진행 상황은 브라우저 localStorage에 저장됩니다. 별도 백업 다운로드를 함께 사용하면 더 안전합니다." : "Yes. Progress is saved in browser localStorage. Backup downloads are recommended for safety."],
+          [isKo ? "다른 기기로 옮길 수 있나요?" : "Can I move data to another device?", isKo ? "JSON 백업 파일을 다운로드한 뒤 다른 브라우저에서 복원하면 됩니다." : "Download a JSON backup and restore it in another browser."],
+          [isKo ? "광고가 게임을 방해하나요?" : "Do ads interrupt gameplay?", isKo ? "광고는 게임 조작 영역과 분리된 정보 섹션 사이에 배치됩니다." : "Ads are separated from interactive game controls."],
+          [isKo ? "데이터 분석은 무엇을 제공하나요?" : "What does analytics provide?", isKo ? "영웅, 무기, 강화 기록, 전투 상태를 CSV 또는 JSON으로 내보내고 분포를 확인할 수 있습니다." : "You can export heroes, weapons, forge history, and battle state as CSV or JSON."],
+        ];
+        return (
+          <section className="w-full bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 py-12 px-4 text-slate-100">
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-8 text-center">
+                <div className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-3">
+                  Capital Front Strategy Guide
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
+                  {isKo ? "자본전선: 무한 방어전" : "Capital Front: Infinite Defense"}
+                </h1>
+                <p className="text-lg md:text-xl text-slate-300 leading-relaxed">
+                  {isKo
+                    ? "5가지 게임 모드, 실시간 데이터 분석, 백업/복원 기능을 갖춘 브라우저 기반 전략 시뮬레이션입니다."
+                    : "A browser-based strategy simulation with five game modes, real-time analytics, and backup/restore support."}
+                </p>
+              </div>
+
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6 mb-6 shadow-xl">
+                <h2 className="text-2xl font-black text-emerald-300 mb-4">
+                  {isKo ? "게임 소개" : "About the Game"}
+                </h2>
+                <p className="text-slate-300 leading-relaxed mb-4">
+                  {isKo
+                    ? "자본전선은 단순한 클릭 게임이 아니라 경제 성장, 계약 리스크, 영웅 전투, 장비 강화, 소환 확률을 한 화면에서 다루는 복합 전략 게임입니다. 플레이어는 전쟁 자금을 모으고, 수복 구역을 확장하며, 영웅과 무기를 육성해 더 높은 스테이지를 목표로 합니다. 모든 주요 데이터는 로컬에 저장되며, CSV와 JSON으로 내보내 분석할 수 있습니다."
+                    : "Capital Front is not just a clicker. It combines economic growth, contract risk, hero combat, weapon upgrades, and summon probability into a single strategy experience. Players gather war funds, expand reclaimed sectors, build heroes and weapons, and push toward higher stages. Key data is stored locally and can be exported for analysis."}
+                </p>
+                <p className="text-slate-400 leading-relaxed">
+                  {isKo
+                    ? "초보자는 부동산 투자와 클릭 강화를 통해 기본 수익 구조를 익히고, 중반부터는 영웅 조합과 무기 강화를 통해 전투력을 올리는 방식으로 접근하면 좋습니다. 고급 사용자는 데이터 분석 패널에서 영웅 분포, 무기 현황, 강화 기록을 확인하며 성장 효율을 비교할 수 있습니다."
+                    : "Beginners can learn the income loop through real estate and click upgrades, then move into hero composition and weapon enhancement. Advanced players can use the analytics panel to compare hero distribution, weapon status, and upgrade history."}
+                </p>
+              </article>
+
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6 mb-6 shadow-xl">
+                <h2 className="text-2xl font-black text-emerald-300 mb-5">
+                  {isKo ? "5가지 게임 모드" : "Five Game Modes"}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {modes.map((mode) => (
+                    <div key={mode.titleEn} className="bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+                      <h3 className="font-black text-slate-100 mb-2">
+                        <span className="mr-2">{mode.icon}</span>
+                        {isKo ? mode.titleKo : mode.titleEn}
+                      </h3>
+                      <p className="text-sm text-slate-400 leading-relaxed">
+                        {isKo ? mode.textKo : mode.textEn}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6 mb-6 shadow-xl">
+                <h2 className="text-2xl font-black text-emerald-300 mb-4">
+                  {isKo ? "초보자 팁 TOP 5" : "Top 5 Beginner Tips"}
+                </h2>
+                <ol className="list-decimal list-inside space-y-3 text-slate-300 leading-relaxed">
+                  <li>{isKo ? "초반 5분은 클릭 강화와 저비용 수복 구역 확보에 집중하세요." : "Spend the first five minutes on click upgrades and low-cost sectors."}</li>
+                  <li>{isKo ? "수익 배율보다 실제 구매 가능 비용과 회수 시간을 함께 보세요." : "Compare actual cost and payback time, not just income multiplier."}</li>
+                  <li>{isKo ? "계약은 성공 확률과 손실 가능성을 함께 확인한 뒤 선택하세요." : "Choose contracts by checking both success chance and possible loss."}</li>
+                  <li>{isKo ? "주력 영웅에게 먼저 무기를 장착하고 강화하세요." : "Equip and upgrade weapons on core heroes first."}</li>
+                  <li>{isKo ? "중요한 강화나 복원 전에는 JSON 백업을 다운로드하세요." : "Download a JSON backup before major upgrades or restores."}</li>
+                </ol>
+              </article>
+
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6 mb-8 shadow-xl">
+                <h2 className="text-2xl font-black text-emerald-300 mb-4">
+                  {isKo ? "자주 묻는 질문" : "FAQ"}
+                </h2>
+                <div className="space-y-4">
+                  {faqs.map(([q, a]) => (
+                    <div key={q} className="border-l-4 border-emerald-500 pl-4">
+                      <h3 className="text-sm font-black text-emerald-200">Q. {q}</h3>
+                      <p className="text-sm text-slate-400 mt-1 leading-relaxed">A. {a}</p>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("game-section")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  className="action-readable bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black py-4 px-10 rounded-2xl text-lg shadow-xl border border-emerald-300/30"
+                  aria-label={isKo ? "게임 시작하기" : "Start game"}
+                >
+                  {isKo ? "게임 시작하기" : "Start Game"}
+                </button>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      function CapitalFrontInfoContent({ language }) {
+        const isKo = language === "ko";
+        return (
+          <section className="w-full bg-gradient-to-b from-slate-950 to-slate-900 py-12 px-4 text-slate-100">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6">
+                <h2 className="text-2xl font-black text-emerald-300 mb-4">
+                  {isKo ? "게임 메커니즘 상세 설명" : "Game Mechanics"}
+                </h2>
+                <p className="text-slate-300 leading-relaxed">
+                  {isKo
+                    ? "자본전선의 성장은 여러 시스템이 서로 맞물리며 진행됩니다. Landlord 모드의 구매 비용은 단계적으로 증가하므로, 동일 자산을 반복 구매하기보다 수익 대비 비용을 비교하는 것이 중요합니다. RPG 전투에서는 영웅 전력, 장착 무기, 진영 시너지, 강화 상태가 함께 작동합니다. Enhancement 모드는 확률 기반 시스템이므로 무작위 결과가 존재하지만, 장기적으로는 강화를 어디에 집중하는지가 성장 효율을 좌우합니다."
+                    : "Capital Front progression is driven by interconnected systems. Landlord purchases become more expensive over time, so comparing cost against income is important. RPG combat combines hero power, equipped weapons, faction synergy, and upgrade status. Enhancement is probability-based, but long-term efficiency depends on where upgrades are focused."}
+                </p>
+              </article>
+
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6">
+                <h2 className="text-2xl font-black text-emerald-300 mb-4">
+                  {isKo ? "효율적인 자원 운영" : "Resource Strategy"}
+                </h2>
+                <p className="text-slate-300 leading-relaxed">
+                  {isKo
+                    ? "초반에는 현금 흐름을 만드는 것이 가장 중요합니다. 중반에는 계약 자본, 배당금, 영웅 성장 자원을 분리해 관리해야 하며, 후반에는 강화 비용과 스테이지 보상 사이의 균형을 확인해야 합니다. 데이터 분석 패널의 CSV 내보내기를 사용하면 보유 영웅과 무기의 상태를 표 형태로 검토할 수 있어, 어떤 영웅을 먼저 성장시킬지 판단하기 쉽습니다."
+                    : "Early play should prioritize cash flow. Mid-game strategy separates contract capital, dividends, and hero-growth resources. Late-game optimization means checking the balance between upgrade costs and stage rewards. CSV exports help review hero and weapon status in spreadsheet form."}
+                </p>
+              </article>
+
+              <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-6">
+                <h2 className="text-2xl font-black text-emerald-300 mb-4">
+                  {isKo ? "업데이트 히스토리" : "Update History"}
+                </h2>
+                <div className="space-y-3">
+                  <div className="border-l-4 border-emerald-500 pl-4">
+                    <p className="font-black text-emerald-200">v5</p>
+                    <p className="text-sm text-slate-400">{isKo ? "필터 UI, 결과 수 표시, 데이터 분석 내보내기 개선" : "Filter UI, result counts, and analytics export improvements."}</p>
+                  </div>
+                  <div className="border-l-4 border-sky-500 pl-4">
+                    <p className="font-black text-sky-200">v4</p>
+                    <p className="text-sm text-slate-400">{isKo ? "통계 요약 카드와 CSS 기반 분포 차트 추가" : "Added summary cards and CSS-based distribution charts."}</p>
+                  </div>
+                  <div className="border-l-4 border-amber-500 pl-4">
+                    <p className="font-black text-amber-200">v3</p>
+                    <p className="text-sm text-slate-400">{isKo ? "toFixed 안정화와 기본 내보내기 기능 보강" : "Hardened toFixed usage and baseline export tooling."}</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+        );
+      }
+
       function GameApp() {
         // Language detection and initial state setup
         const userLang = detectPreferredLanguage();
@@ -6871,9 +7165,34 @@
         const [gachaQuantities, setGachaQuantities] = useState({ character: 1, weapon: 1 });
         const [fusionQuantities, setFusionQuantities] = useState({ character: 1, weapon: 1 });
         const [gachaSummaryModal, setGachaSummaryModal] = useState(null);
-        const [quartermasterHeroSort, setQuartermasterHeroSort] = useState("acquired");
-        const [quartermasterHeroFilter, setQuartermasterHeroFilter] = useState("all");
-        const [quartermasterWeaponFilter, setQuartermasterWeaponFilter] = useState("all");
+        const loadQuartermasterFilterPref = (key, fallback, allowedValues) => {
+          try {
+            const raw = localStorage.getItem(QUARTERMASTER_FILTER_STORAGE_KEY);
+            if (!raw) return fallback;
+            const parsed = JSON.parse(raw);
+            const candidate = parsed?.[key];
+            return allowedValues.includes(candidate) ? candidate : fallback;
+          } catch (error) {
+            console.warn("[QUARTERMASTER_FILTER_PREF_LOAD_FAILED]", error);
+            return fallback;
+          }
+        };
+        const heroFilterOptions = ["all", "deployed", "Normal", "Rare", "Epic", "Unique", "Legendary", "Mythic"];
+        const heroSortOptions = ["acquired", "rarity", "level", "power", "faction"];
+        const weaponFilterOptions = ["all", "equipped", "Normal", "Rare", "Epic", "Unique", "Legendary", "Mythic"];
+        const weaponSortOptions = ["rarity", "enhance", "power"];
+        const [quartermasterHeroSort, setQuartermasterHeroSort] = useState(() =>
+          loadQuartermasterFilterPref("heroSort", "acquired", heroSortOptions),
+        );
+        const [quartermasterHeroFilter, setQuartermasterHeroFilter] = useState(() =>
+          loadQuartermasterFilterPref("heroFilter", "all", heroFilterOptions),
+        );
+        const [quartermasterWeaponFilter, setQuartermasterWeaponFilter] = useState(() =>
+          loadQuartermasterFilterPref("weaponFilter", "all", weaponFilterOptions),
+        );
+        const [quartermasterWeaponSort, setQuartermasterWeaponSort] = useState(() =>
+          loadQuartermasterFilterPref("weaponSort", "rarity", weaponSortOptions),
+        );
         const [weaponEquipTargets, setWeaponEquipTargets] = useState({});
         const [badgeFlash, setBadgeFlash] = useState({}); // L-7: { [instanceId]: boolean } — local, not persisted
         const [offlineProgressData, setOfflineProgressData] = useState(null); // M-1: offline progress recap data
@@ -6885,6 +7204,7 @@
         const [showImportModal, setShowImportModal] = useState(false);
         const [importText, setImportText] = useState("");
         const [importError, setImportError] = useState(null);
+        const backupFileInputRef = useRef(null);
         const [systemToast, setSystemToast] = useState(null);
         const [exportFallbackString, setExportFallbackString] = useState("");
         const [tacticalLogFeed, setTacticalLogFeed] = useState([
@@ -7614,6 +7934,22 @@
         const sortedEnhancementInventory = useMemo(
           () =>
             [...filteredEnhancementInventory].sort((a, b) => {
+              if (quartermasterWeaponSort === "enhance") {
+                return (
+                  toFiniteNumber(b.enhanceLevel, 0) -
+                    toFiniteNumber(a.enhanceLevel, 0) ||
+                  getRarityRankValue(b.rarity) - getRarityRankValue(a.rarity) ||
+                  toFiniteNumber(b.power, 0) - toFiniteNumber(a.power, 0)
+                );
+              }
+              if (quartermasterWeaponSort === "power") {
+                return (
+                  toFiniteNumber(b.power, 0) - toFiniteNumber(a.power, 0) ||
+                  getRarityRankValue(b.rarity) - getRarityRankValue(a.rarity) ||
+                  toFiniteNumber(b.enhanceLevel, 0) -
+                    toFiniteNumber(a.enhanceLevel, 0)
+                );
+              }
               const rarityDelta =
                 getRarityRankValue(b.rarity) - getRarityRankValue(a.rarity);
               if (rarityDelta !== 0) return rarityDelta;
@@ -7623,7 +7959,7 @@
                 toFiniteNumber(b.power, 0) - toFiniteNumber(a.power, 0)
               );
             }),
-          [filteredEnhancementInventory],
+          [filteredEnhancementInventory, quartermasterWeaponSort],
         );
 
         const filteredQuartermasterCharacters = useMemo(
@@ -7695,6 +8031,64 @@
         const visibleEnhancementInventory = sortedEnhancementInventory.slice(0, LIST_RENDER_LIMIT);
         const visibleQuartermasterCharacters = sortedQuartermasterCharacters.slice(0, LIST_RENDER_LIMIT);
         const visibleCommandRosterCharacters = ownedCharacterDetails.slice(0, 80);
+
+        const heroFilterLabelMap = {
+          all: language === "ko" ? "전체" : "All",
+          deployed: language === "ko" ? "분대 편성" : "Deployed",
+          Normal: "Normal",
+          Rare: "Rare",
+          Epic: "Epic",
+          Unique: "Unique",
+          Legendary: "Legendary",
+          Mythic: "Mythic",
+        };
+        const heroSortLabelMap = {
+          acquired: language === "ko" ? "획득순" : "Acquired",
+          rarity: language === "ko" ? "등급순" : "Rarity",
+          level: language === "ko" ? "레벨순" : "Level",
+          power: language === "ko" ? "전력순" : "Power",
+          faction: language === "ko" ? "진영순" : "Faction",
+        };
+        const weaponFilterLabelMap = {
+          all: language === "ko" ? "전체" : "All",
+          equipped: language === "ko" ? "장착 중" : "Equipped",
+          Normal: "Normal",
+          Rare: "Rare",
+          Epic: "Epic",
+          Unique: "Unique",
+          Legendary: "Legendary",
+          Mythic: "Mythic",
+        };
+        const weaponSortLabelMap = {
+          rarity: language === "ko" ? "등급순" : "Rarity",
+          enhance: language === "ko" ? "강화순" : "Enhance",
+          power: language === "ko" ? "전력순" : "Power",
+        };
+        const heroActiveFilterBadges = [
+          quartermasterHeroFilter !== "all"
+            ? `${language === "ko" ? "영웅 필터" : "Hero Filter"}: ${heroFilterLabelMap[quartermasterHeroFilter] || quartermasterHeroFilter}`
+            : null,
+          quartermasterHeroSort !== "acquired"
+            ? `${language === "ko" ? "영웅 정렬" : "Hero Sort"}: ${heroSortLabelMap[quartermasterHeroSort] || quartermasterHeroSort}`
+            : null,
+        ].filter(Boolean);
+        const weaponActiveFilterBadges = [
+          quartermasterWeaponFilter !== "all"
+            ? `${language === "ko" ? "무기 필터" : "Weapon Filter"}: ${weaponFilterLabelMap[quartermasterWeaponFilter] || quartermasterWeaponFilter}`
+            : null,
+          quartermasterWeaponSort !== "rarity"
+            ? `${language === "ko" ? "무기 정렬" : "Weapon Sort"}: ${weaponSortLabelMap[quartermasterWeaponSort] || quartermasterWeaponSort}`
+            : null,
+        ].filter(Boolean);
+        const resetHeroQuartermasterFilters = useCallback(() => {
+          setQuartermasterHeroFilter("all");
+          setQuartermasterHeroSort("acquired");
+        }, []);
+        const resetWeaponQuartermasterFilters = useCallback(() => {
+          setQuartermasterWeaponFilter("all");
+          setQuartermasterWeaponSort("rarity");
+        }, []);
+
         const analyticsDashboard = useMemo(() => {
           const heroCount = ownedCharacterDetails.length;
           const weaponCount = weaponInventory.length;
@@ -7903,6 +8297,27 @@
         }, [gameState]);
 
         useEffect(() => {
+          try {
+            localStorage.setItem(
+              QUARTERMASTER_FILTER_STORAGE_KEY,
+              JSON.stringify({
+                heroFilter: quartermasterHeroFilter,
+                heroSort: quartermasterHeroSort,
+                weaponFilter: quartermasterWeaponFilter,
+                weaponSort: quartermasterWeaponSort,
+              }),
+            );
+          } catch (error) {
+            console.warn("[QUARTERMASTER_FILTER_PREF_SAVE_FAILED]", error);
+          }
+        }, [
+          quartermasterHeroFilter,
+          quartermasterHeroSort,
+          quartermasterWeaponFilter,
+          quartermasterWeaponSort,
+        ]);
+
+        useEffect(() => {
           if (gameState.tempOfflineProgress) {
             setOfflineProgressData(gameState.tempOfflineProgress);
             updateGameState((prev) => {
@@ -8062,6 +8477,158 @@
           totalNetWorth,
         ]);
 
+
+        const exportBackupJson = useCallback(() => {
+          const fileDate = new Date().toISOString().slice(0, 10);
+          const payload = {
+            exportedAt: new Date().toISOString(),
+            version: GAME_STATE_VERSION,
+            storageKey: GAME_STATE_STORAGE_KEY,
+            gameState,
+          };
+          const filename = `capital-front-backup-${fileDate}.json`;
+          if (
+            downloadTextFile(
+              filename,
+              JSON.stringify(payload, null, 2),
+              "application/json;charset=utf-8",
+            )
+          ) {
+            setSystemToast({
+              text:
+                language === "ko"
+                  ? `${filename} 백업 다운로드를 시작했습니다.`
+                  : `${filename} backup download started.`,
+              tone: "success",
+            });
+            setTimeout(() => setSystemToast(null), 3000);
+          }
+        }, [downloadTextFile, gameState, language]);
+
+        const exportWeaponAnalyticsCsv = useCallback(() => {
+          const rows = [[
+            "name",
+            "instanceId",
+            "itemId",
+            "rarity",
+            "weaponType",
+            "power",
+            "enhanceLevel",
+            "equippedTo",
+            "locked",
+            "modCount",
+          ]];
+          (gameState.enhancement?.inventory || []).forEach((weapon) => {
+            rows.push([
+              displayGachaItemName(weapon),
+              weapon.instanceId,
+              weapon.id || weapon.itemId,
+              weapon.rarity,
+              weapon.weaponType,
+              toFiniteNumber(weapon.power, 0),
+              toFiniteNumber(weapon.enhanceLevel, 0),
+              weapon.equippedTo || weapon.equippedCharacterId || "",
+              weapon.locked ? "true" : "false",
+              (weapon.mods || []).length,
+            ]);
+          });
+          const csv = rows.map((row) => row.map(toCsvCell).join(",")).join("\n");
+          const filename = `capital-front-weapons-${Date.now()}.csv`;
+          if (downloadTextFile(filename, csv, "text/csv;charset=utf-8")) {
+            setSystemToast({
+              text:
+                language === "ko"
+                  ? `${filename} 다운로드를 시작했습니다.`
+                  : `${filename} download started.`,
+              tone: "success",
+            });
+            setTimeout(() => setSystemToast(null), 3000);
+          }
+        }, [downloadTextFile, gameState.enhancement, language, toCsvCell]);
+
+        const exportEnhancementHistoryCsv = useCallback(() => {
+          const rows = [[
+            "createdAt",
+            "itemName",
+            "instanceId",
+            "fromLevel",
+            "toLevel",
+            "success",
+            "destroyed",
+            "usedStabilizer",
+            "cost",
+          ]];
+          (gameState.enhancement?.enhancementHistory || []).forEach((entry) => {
+            rows.push([
+              entry.createdAt || entry.timestamp || "",
+              entry.itemName || entry.weaponName || entry.name || "",
+              entry.instanceId || entry.weaponInstanceId || "",
+              toFiniteNumber(entry.fromLevel ?? entry.previousLevel, 0),
+              toFiniteNumber(entry.toLevel ?? entry.nextLevel ?? entry.level, 0),
+              entry.success ? "true" : "false",
+              entry.destroyed || entry.broken ? "true" : "false",
+              entry.usedStabilizer ? "true" : "false",
+              toFiniteNumber(entry.cost, 0),
+            ]);
+          });
+          const csv = rows.map((row) => row.map(toCsvCell).join(",")).join("\n");
+          const filename = `capital-front-enhancement-history-${Date.now()}.csv`;
+          if (downloadTextFile(filename, csv, "text/csv;charset=utf-8")) {
+            setSystemToast({
+              text:
+                language === "ko"
+                  ? `${filename} 다운로드를 시작했습니다.`
+                  : `${filename} download started.`,
+              tone: "success",
+            });
+            setTimeout(() => setSystemToast(null), 3000);
+          }
+        }, [downloadTextFile, gameState.enhancement, language, toCsvCell]);
+
+        const handleBackupFileSelected = useCallback((event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const text = String(reader.result || "");
+              const parsed = JSON.parse(text);
+              const candidate = parsed?.gameState || parsed;
+              if (!candidate || typeof candidate !== "object") {
+                throw new Error("Invalid backup payload");
+              }
+              setImportText(JSON.stringify(candidate, null, 2));
+              setImportError(null);
+              setSystemToast({
+                text:
+                  language === "ko"
+                    ? "백업 파일을 읽었습니다. 내용을 확인한 뒤 복구 확인을 누르십시오."
+                    : "Backup file loaded. Review it, then confirm import.",
+                tone: "success",
+              });
+              setTimeout(() => setSystemToast(null), 3000);
+            } catch (error) {
+              console.warn("[BACKUP_FILE_READ_FAILED]", error);
+              setImportError(
+                language === "ko"
+                  ? "백업 JSON 파일을 읽을 수 없습니다. 파일이 손상되었거나 형식이 맞지 않습니다."
+                  : "Unable to read backup JSON. The file may be corrupted or invalid.",
+              );
+            } finally {
+              event.target.value = "";
+            }
+          };
+          reader.onerror = () => {
+            setImportError(
+              language === "ko"
+                ? "백업 파일을 읽는 중 오류가 발생했습니다."
+                : "An error occurred while reading the backup file.",
+            );
+            event.target.value = "";
+          };
+          reader.readAsText(file);
+        }, [language]);
+
         const handleManualSave = () => {
           saveGameState(gameState);
           setSystemToast({
@@ -8218,8 +8785,23 @@
               return;
             }
 
+            const confirmed = window.confirm(
+              language === "ko"
+                ? "현재 진행 데이터를 백업 데이터로 덮어씁니다. 계속 복구하시겠습니까?"
+                : "This will overwrite current progress with the backup data. Continue?",
+            );
+            if (!confirmed) return;
+
             setGameState(normalizedState);
-            saveGameState(normalizedState);
+            const saveOk = saveGameState(normalizedState);
+            if (!saveOk) {
+              setImportError(
+                language === "ko"
+                  ? "복구 데이터는 유효하지만 브라우저 저장소에 기록하지 못했습니다. localStorage 용량 또는 브라우저 권한을 확인하십시오."
+                  : "The backup is valid, but saving to browser storage failed. Check localStorage quota or browser permissions.",
+              );
+              return;
+            }
 
             setSystemToast({
               text:
@@ -11631,6 +12213,25 @@
                         : "Paste your exported backup string below. This will overwrite your current progress."}
                     </p>
 
+                    <div className="mb-4 rounded-xl border border-amber-900/40 bg-zinc-900/60 p-3">
+                      <div className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">
+                        {language === "ko" ? "JSON 백업 파일 복원" : "Restore JSON Backup File"}
+                      </div>
+                      <p className="text-[10px] font-bold text-zinc-500 leading-relaxed mb-2">
+                        {language === "ko"
+                          ? "백업 파일을 선택하면 아래 입력창에 자동으로 채워집니다. 복구 전 반드시 현재 데이터가 덮어써지는 것을 확인하십시오."
+                          : "Selecting a backup file fills the textarea below. Confirm that current data will be overwritten before restoring."}
+                      </p>
+                      <input
+                        ref={backupFileInputRef}
+                        type="file"
+                        accept="application/json,.json"
+                        onChange={handleBackupFileSelected}
+                        className="w-full text-[10px] text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-950/50 file:px-3 file:py-2 file:text-[10px] file:font-black file:text-amber-300 hover:file:bg-amber-900/50"
+                        aria-label={language === "ko" ? "백업 JSON 파일 선택" : "Select backup JSON file"}
+                      />
+                    </div>
+
                     <textarea
                       value={importText}
                       onChange={(e) => {
@@ -11656,6 +12257,8 @@
 
                     <div className="flex flex-col sm:flex-row gap-2.5 mt-5">
                       <button
+                        type="button"
+                        aria-label={language === "ko" ? "복구 취소" : "Cancel import"}
                         onClick={() => {
                           setShowImportModal(false);
                           setImportText("");
@@ -11666,6 +12269,8 @@
                         {language === "ko" ? "취소" : "Cancel"}
                       </button>
                       <button
+                        type="button"
+                        aria-label={language === "ko" ? "백업 데이터 복구 확인" : "Confirm backup import"}
                         onClick={handleConfirmImport}
                         className="w-full sm:flex-1 py-2.5 bg-amber-950/40 hover:bg-amber-900/40 text-amber-500 font-black text-xs uppercase tracking-wider rounded-xl border border-amber-800/60 shadow-[0_0_15px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all cursor-pointer"
                       >
@@ -12150,8 +12755,14 @@
               </div>
             )}
 
+            <CapitalFrontLandingContent language={language} />
+            <div className="w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent" aria-hidden="true"></div>
+            <AdSenseSection language={language} slot={ADSENSE_TOP_SLOT_ID} />
+            <div className="w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent" aria-hidden="true"></div>
+
             {/* Game tab navigation */}
-            <div className="w-full max-w-md">
+            <section id="game-section" className="w-full py-8 px-4 flex justify-center" aria-label={language === "ko" ? "게임 조작 영역" : "Game interaction area"}>
+              <div className="w-full max-w-md">
               <section className="w-full bg-slate-900 shadow-2xl rounded-xl mb-4 border border-slate-800 overflow-hidden sticky top-2 z-20 shadow-black/50">
                 <div className="bg-gradient-to-r from-slate-950 to-slate-900 text-slate-100 px-4 py-3 flex items-center justify-between border-b border-slate-800">
                   <h2 className="text-xs font-black uppercase tracking-widest">
@@ -12614,18 +13225,42 @@
                           <button
                             type="button"
                             onClick={exportHeroAnalyticsCsv}
-                            aria-label="Export hero analytics CSV"
+                            aria-label={language === "ko" ? "영웅 분석 CSV 다운로드" : "Export hero analytics CSV"}
                             className="bg-emerald-900/60 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/40 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
                           >
-                            CSV 영웅 데이터 다운로드
+                            {language === "ko" ? "CSV 영웅 데이터" : "Hero CSV"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={exportWeaponAnalyticsCsv}
+                            aria-label={language === "ko" ? "무기 분석 CSV 다운로드" : "Export weapon analytics CSV"}
+                            className="bg-violet-900/60 hover:bg-violet-800 text-violet-100 border border-violet-700/40 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
+                          >
+                            {language === "ko" ? "CSV 무기 데이터" : "Weapon CSV"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={exportEnhancementHistoryCsv}
+                            aria-label={language === "ko" ? "강화 기록 CSV 다운로드" : "Export enhancement history CSV"}
+                            className="bg-amber-900/60 hover:bg-amber-800 text-amber-100 border border-amber-700/40 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
+                          >
+                            {language === "ko" ? "CSV 강화 기록" : "Forge CSV"}
                           </button>
                           <button
                             type="button"
                             onClick={exportAnalyticsJson}
-                            aria-label="Export battle analytics JSON"
+                            aria-label={language === "ko" ? "전투 분석 JSON 다운로드" : "Export battle analytics JSON"}
                             className="bg-sky-900/60 hover:bg-sky-800 text-sky-100 border border-sky-700/40 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
                           >
-                            JSON 전투 기록 다운로드
+                            {language === "ko" ? "JSON 분석 데이터" : "Analytics JSON"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={exportBackupJson}
+                            aria-label={language === "ko" ? "전체 게임 백업 JSON 다운로드" : "Download full game backup JSON"}
+                            className="sm:col-span-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-600/60 rounded-lg py-2 text-[11px] font-black transition-all action-readable"
+                          >
+                            {language === "ko" ? "전체 백업 JSON 다운로드" : "Download Full Backup JSON"}
                           </button>
                         </div>
                       </div>
@@ -14101,35 +14736,83 @@
                             </div>
                           </div>
                         </div>
-                        <div className="mb-3 space-y-2">
-                          <div className="grid grid-cols-3 gap-2">
-                            {RARITY_FILTERS.map((rarity) => (
-                              <button
-                                key={`weapon-filter-${rarity}`}
-                                type="button"
-                                onClick={() => setQuartermasterWeaponFilter(quartermasterWeaponFilter === rarity ? "all" : rarity)}
-                                className={`rounded-lg border p-2 text-center transition-colors action-readable ${quartermasterWeaponFilter === rarity ? "bg-slate-900 border-emerald-400 text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"}`}
-                              >
-                                <div className={`text-[10px] font-black uppercase ${rarityTextClass(rarity)}`}>{rarity}</div>
-                                <div className="text-lg font-black leading-tight">{inventoryByRarity[rarity] || 0}</div>
-                              </button>
-                            ))}
+                        <div className="mb-3 space-y-3" aria-label={language === "ko" ? "무기 필터 및 정렬" : "Weapon filters and sorting"}>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="text-[11px] font-black text-slate-600">
+                              {language === "ko"
+                                ? `총 ${formatCompact(weaponInventory.length, false)}개 중 ${formatCompact(sortedEnhancementInventory.length, false)}개 표시`
+                                : `${formatCompact(sortedEnhancementInventory.length, false)} of ${formatCompact(weaponInventory.length, false)} shown`}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={resetWeaponQuartermasterFilters}
+                              aria-label={language === "ko" ? "무기 필터 초기화" : "Reset weapon filters"}
+                              className="rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-1.5 text-[10px] font-black transition-colors action-readable"
+                            >
+                              {language === "ko" ? "초기화" : "Reset"}
+                            </button>
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setQuartermasterWeaponFilter("all")}
-                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterWeaponFilter === "all" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
-                            >
-                              {language === "ko" ? "전체 보기" : "All"} · {weaponInventory.length}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setQuartermasterWeaponFilter("equipped")}
-                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterWeaponFilter === "equipped" ? "bg-cyan-700 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
-                            >
-                              {language === "ko" ? "장착 중" : "Equipped"} · {equippedWeaponCount}
-                            </button>
+                          <div className="flex flex-wrap gap-1.5" aria-label={language === "ko" ? "적용 중인 무기 필터" : "Active weapon filters"}>
+                            {weaponActiveFilterBadges.length > 0 ? (
+                              weaponActiveFilterBadges.map((badge) => (
+                                <span
+                                  key={`weapon-badge-${badge}`}
+                                  className="rounded-full border border-cyan-300/50 bg-cyan-50 px-2 py-1 text-[10px] font-black text-cyan-800"
+                                >
+                                  {badge}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-500">
+                                {language === "ko" ? "기본 필터" : "Default filters"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="rounded-lg bg-slate-50 border border-slate-200 p-2">
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                              {language === "ko" ? "필터" : "Filter"}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5" role="group" aria-label={language === "ko" ? "무기 필터 선택" : "Select weapon filter"}>
+                              {[
+                                ["all", `${language === "ko" ? "전체" : "All"} · ${formatCompact(weaponInventory.length, false)}`],
+                                ["equipped", `${language === "ko" ? "장착 중" : "Equipped"} · ${formatCompact(equippedWeaponCount, false)}`],
+                                ...RARITY_FILTERS.map((rarity) => [rarity, `${rarity} · ${formatCompact(inventoryByRarity[rarity] || 0, false)}`]),
+                              ].map(([value, label]) => (
+                                <button
+                                  key={`weapon-filter-${value}`}
+                                  type="button"
+                                  onClick={() => setQuartermasterWeaponFilter(value)}
+                                  aria-pressed={quartermasterWeaponFilter === value}
+                                  aria-label={language === "ko" ? `무기 필터 ${label}` : `Weapon filter ${label}`}
+                                  className={`rounded-full border px-2.5 py-1.5 text-[10px] font-black transition-colors action-readable ${quartermasterWeaponFilter === value ? "bg-slate-900 border-emerald-400 text-white" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"}`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="rounded-lg bg-slate-50 border border-slate-200 p-2">
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                              {language === "ko" ? "정렬" : "Sort"}
+                            </div>
+                            <div className="grid grid-cols-3 gap-1.5" role="group" aria-label={language === "ko" ? "무기 정렬 선택" : "Select weapon sort"}>
+                              {[
+                                ["rarity", language === "ko" ? "등급" : "Rarity"],
+                                ["enhance", language === "ko" ? "강화" : "Enhance"],
+                                ["power", language === "ko" ? "전력" : "Power"],
+                              ].map(([value, label]) => (
+                                <button
+                                  key={`weapon-sort-${value}`}
+                                  type="button"
+                                  onClick={() => setQuartermasterWeaponSort(value)}
+                                  aria-pressed={quartermasterWeaponSort === value}
+                                  aria-label={language === "ko" ? `무기 정렬 ${label}` : `Weapon sort ${label}`}
+                                  className={`rounded-md py-2 text-[10px] font-black transition-colors action-readable ${quartermasterWeaponSort === value ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"}`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         </div>
                         <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2">
@@ -15197,56 +15880,85 @@
                             </div>
                             <div className="text-xs font-black text-slate-500">{sortedQuartermasterCharacters.length}/{ownedCharacterDetails.length}</div>
                           </div>
-                          <div className="grid grid-cols-3 gap-2">
-                            {RARITY_FILTERS.map((rarity) => (
+                          <div className="space-y-3" aria-label={language === "ko" ? "영웅 필터 및 정렬" : "Hero filters and sorting"}>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="text-[11px] font-black text-slate-500">
+                                {language === "ko"
+                                  ? `총 ${formatCompact(ownedCharacterDetails.length, false)}명 중 ${formatCompact(sortedQuartermasterCharacters.length, false)}명 표시`
+                                  : `${formatCompact(sortedQuartermasterCharacters.length, false)} of ${formatCompact(ownedCharacterDetails.length, false)} shown`}
+                              </div>
                               <button
-                                key={`hero-filter-${rarity}`}
                                 type="button"
-                                onClick={() => setQuartermasterHeroFilter(quartermasterHeroFilter === rarity ? "all" : rarity)}
-                                className={`rounded-lg border p-2 text-center transition-colors action-readable ${quartermasterHeroFilter === rarity ? "bg-emerald-700 border-emerald-300 text-white" : "bg-slate-950/70 border-slate-700 text-slate-300 hover:bg-slate-800"}`}
+                                onClick={resetHeroQuartermasterFilters}
+                                aria-label={language === "ko" ? "영웅 필터 초기화" : "Reset hero filters"}
+                                className="rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 text-[10px] font-black transition-colors action-readable"
                               >
-                                <div className={`text-[10px] font-black uppercase ${rarityTextClass(rarity)}`}>{rarity}</div>
-                                <div className="text-lg font-black leading-tight">{heroByRarity[rarity] || 0}</div>
+                                {language === "ko" ? "초기화" : "Reset"}
                               </button>
-                            ))}
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setQuartermasterHeroFilter("all")}
-                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterHeroFilter === "all" ? "bg-emerald-700 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
-                            >
-                              {language === "ko" ? "전체 보기" : "All"} · {ownedCharacterDetails.length}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setQuartermasterHeroFilter("deployed")}
-                              className={`rounded-lg px-3 py-2 text-xs font-black transition-colors action-readable ${quartermasterHeroFilter === "deployed" ? "bg-cyan-700 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
-                            >
-                              {language === "ko" ? "분대 편성" : "Deployed"} · {deployedHeroCount}
-                            </button>
-                          </div>
-                          <div className="rounded-lg bg-slate-950/70 border border-slate-800 p-2">
-                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
-                              {language === "ko" ? "정렬" : "Sort"}
                             </div>
-                            <div className="grid grid-cols-5 gap-1.5">
-                              {[
-                                ["acquired", language === "ko" ? "획득" : "Acq"],
-                                ["rarity", language === "ko" ? "등급" : "Rarity"],
-                                ["level", language === "ko" ? "레벨" : "Level"],
-                                ["power", language === "ko" ? "전력" : "Power"],
-                                ["faction", language === "ko" ? "진영" : "Faction"],
-                              ].map(([value, label]) => (
-                                <button
-                                  key={`hero-sort-${value}`}
-                                  type="button"
-                                  onClick={() => setQuartermasterHeroSort(value)}
-                                  className={`rounded-md py-2 text-[10px] font-black transition-colors action-readable ${quartermasterHeroSort === value ? "bg-slate-200 text-slate-950" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
-                                >
-                                  {label}
-                                </button>
-                              ))}
+                            <div className="flex flex-wrap gap-1.5" aria-label={language === "ko" ? "적용 중인 영웅 필터" : "Active hero filters"}>
+                              {heroActiveFilterBadges.length > 0 ? (
+                                heroActiveFilterBadges.map((badge) => (
+                                  <span
+                                    key={`hero-badge-${badge}`}
+                                    className="rounded-full border border-emerald-400/40 bg-emerald-950/70 px-2 py-1 text-[10px] font-black text-emerald-200"
+                                  >
+                                    {badge}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="rounded-full border border-slate-700 bg-slate-950/70 px-2 py-1 text-[10px] font-bold text-slate-500">
+                                  {language === "ko" ? "기본 필터" : "Default filters"}
+                                </span>
+                              )}
+                            </div>
+                            <div className="rounded-lg bg-slate-950/70 border border-slate-800 p-2">
+                              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                                {language === "ko" ? "필터" : "Filter"}
+                              </div>
+                              <div className="flex flex-wrap gap-1.5" role="group" aria-label={language === "ko" ? "영웅 필터 선택" : "Select hero filter"}>
+                                {[
+                                  ["all", `${language === "ko" ? "전체" : "All"} · ${formatCompact(ownedCharacterDetails.length, false)}`],
+                                  ["deployed", `${language === "ko" ? "분대 편성" : "Deployed"} · ${formatCompact(deployedHeroCount, false)}`],
+                                  ...RARITY_FILTERS.map((rarity) => [rarity, `${rarity} · ${formatCompact(heroByRarity[rarity] || 0, false)}`]),
+                                ].map(([value, label]) => (
+                                  <button
+                                    key={`hero-filter-${value}`}
+                                    type="button"
+                                    onClick={() => setQuartermasterHeroFilter(value)}
+                                    aria-pressed={quartermasterHeroFilter === value}
+                                    aria-label={language === "ko" ? `영웅 필터 ${label}` : `Hero filter ${label}`}
+                                    className={`rounded-full border px-2.5 py-1.5 text-[10px] font-black transition-colors action-readable ${quartermasterHeroFilter === value ? "bg-emerald-700 border-emerald-300 text-white" : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"}`}
+                                  >
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="rounded-lg bg-slate-950/70 border border-slate-800 p-2">
+                              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                                {language === "ko" ? "정렬" : "Sort"}
+                              </div>
+                              <div className="grid grid-cols-5 gap-1.5" role="group" aria-label={language === "ko" ? "영웅 정렬 선택" : "Select hero sort"}>
+                                {[
+                                  ["acquired", language === "ko" ? "획득" : "Acq"],
+                                  ["rarity", language === "ko" ? "등급" : "Rarity"],
+                                  ["level", language === "ko" ? "레벨" : "Level"],
+                                  ["power", language === "ko" ? "전력" : "Power"],
+                                  ["faction", language === "ko" ? "진영" : "Faction"],
+                                ].map(([value, label]) => (
+                                  <button
+                                    key={`hero-sort-${value}`}
+                                    type="button"
+                                    onClick={() => setQuartermasterHeroSort(value)}
+                                    aria-pressed={quartermasterHeroSort === value}
+                                    aria-label={language === "ko" ? `영웅 정렬 ${label}` : `Hero sort ${label}`}
+                                    className={`rounded-md py-2 text-[10px] font-black transition-colors action-readable ${quartermasterHeroSort === value ? "bg-slate-200 text-slate-950" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}
+                                  >
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -16843,7 +17555,11 @@
                   </div>
                 </section>
               )}
-            </div>
+              </div>
+            </section>
+
+            <AdSenseSection language={language} slot={ADSENSE_BOTTOM_SLOT_ID} />
+            <CapitalFrontInfoContent language={language} />
 
             {/* Tab-specific SEO content for search engines */}
             {(() => {
