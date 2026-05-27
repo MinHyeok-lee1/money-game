@@ -7206,6 +7206,11 @@
         const [importError, setImportError] = useState(null);
         const backupFileInputRef = useRef(null);
         const [systemToast, setSystemToast] = useState(null);
+        const [saveStatus, setSaveStatus] = useState("idle");
+        const [lastSavedAt, setLastSavedAt] = useState(
+          gameState.settings?.lastSavedAt || null,
+        );
+        const saveStatusResetRef = useRef(null);
         const [exportFallbackString, setExportFallbackString] = useState("");
         const [tacticalLogFeed, setTacticalLogFeed] = useState([
           "📡 후방 사령부 통신 온라인.",
@@ -7443,6 +7448,31 @@
         );
         const t = TRANSLATIONS[language] || TRANSLATIONS.en;
         const ui = UI_TEXT[language] || UI_TEXT.en;
+        const saveStatusLabel = useMemo(() => {
+          const isKo = language === "ko";
+          if (saveStatus === "saving") return isKo ? "저장 중..." : "Saving...";
+          if (saveStatus === "error") {
+            return isKo ? "저장 실패 · 백업 권장" : "Save failed · backup recommended";
+          }
+          if (lastSavedAt) {
+            try {
+              const savedTime = new Date(lastSavedAt).toLocaleTimeString(
+                isKo ? "ko-KR" : "en-US",
+                { hour: "2-digit", minute: "2-digit" },
+              );
+              return isKo ? `자동 저장 ${savedTime}` : `Saved ${savedTime}`;
+            } catch (error) {
+              return isKo ? "자동 저장 완료" : "Auto-saved";
+            }
+          }
+          return isKo ? "자동 저장 대기" : "Auto-save ready";
+        }, [language, lastSavedAt, saveStatus]);
+        const saveStatusClass =
+          saveStatus === "error"
+            ? "text-red-300"
+            : saveStatus === "saving"
+              ? "text-amber-300"
+              : "text-emerald-300";
 
         useEffect(() => {
           document.documentElement.lang = language;
@@ -8293,8 +8323,31 @@
         }, [gameState.settings?.language, userLang]);
 
         useEffect(() => {
-          saveGameState(gameState);
+          setSaveStatus("saving");
+          const saved = saveGameState(gameState);
+          const savedAt = new Date().toISOString();
+          if (saved) {
+            setLastSavedAt(savedAt);
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus("error");
+          }
+          if (saveStatusResetRef.current) {
+            clearTimeout(saveStatusResetRef.current);
+          }
+          saveStatusResetRef.current = setTimeout(() => {
+            setSaveStatus((current) => (current === "error" ? "error" : "idle"));
+          }, 1800);
         }, [gameState]);
+
+        useEffect(
+          () => () => {
+            if (saveStatusResetRef.current) {
+              clearTimeout(saveStatusResetRef.current);
+            }
+          },
+          [],
+        );
 
         useEffect(() => {
           try {
@@ -12762,20 +12815,29 @@
 
             {/* Game tab navigation */}
             <section id="game-section" className="w-full py-8 px-4 flex justify-center" aria-label={language === "ko" ? "게임 조작 영역" : "Game interaction area"}>
-              <div className="w-full max-w-md">
+              <div className="w-full max-w-sm md:max-w-md lg:max-w-xl">
               <section className="w-full bg-slate-900 shadow-2xl rounded-xl mb-4 border border-slate-800 overflow-hidden sticky top-2 z-20 shadow-black/50">
                 <div className="bg-gradient-to-r from-slate-950 to-slate-900 text-slate-100 px-4 py-3 flex items-center justify-between border-b border-slate-800">
                   <h2 className="text-xs font-black uppercase tracking-widest">
                     {ui.walletHeader}
                   </h2>
-                  <div className="text-[10px] font-bold text-green-100">
-                    {tabs.find((tab) => tab.id === activeTab)?.label}
+                  <div className="flex flex-col items-end gap-0.5 min-w-0">
+                    <div className="text-[10px] font-bold text-green-100 truncate">
+                      {tabs.find((tab) => tab.id === activeTab)?.label}
+                    </div>
+                    <div
+                      className={`text-[10px] font-black ${saveStatusClass} truncate`}
+                      aria-live="polite"
+                      aria-label={saveStatusLabel}
+                    >
+                      {saveStatus === "saving" ? "⏳" : saveStatus === "error" ? "⚠" : "✓"} {saveStatusLabel}
+                    </div>
                   </div>
                 </div>
                 {/* L-4: 5-column wallet HUD — Cash / Diamonds / Dividends / Secondary / Hero Power */}
                 <div className="grid grid-cols-5 divide-x divide-slate-800">
                   <div className="px-3 py-3 bg-slate-900/70 min-w-0">
-                    <div className="text-[9px] font-black uppercase text-slate-500 truncate">
+                    <div className="text-[10px] sm:text-[9px] font-black uppercase text-slate-400 truncate">
                       {ui.walletCash}
                     </div>
                     <div className="text-base font-black text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.3)] leading-tight truncate">
@@ -12783,7 +12845,7 @@
                     </div>
                   </div>
                   <div className="px-3 py-3 bg-slate-900/60 min-w-0">
-                    <div className="text-[9px] font-black uppercase text-slate-500 truncate">
+                    <div className="text-[10px] sm:text-[9px] font-black uppercase text-slate-400 truncate">
                       {ui.walletDiamond}
                     </div>
                     <div className="text-base font-black text-cyan-300 drop-shadow-[0_0_6px_rgba(103,232,249,0.25)] leading-tight truncate">
@@ -12791,7 +12853,7 @@
                     </div>
                   </div>
                   <div className="px-3 py-3 bg-slate-900/60 min-w-0">
-                    <div className="text-[9px] font-black uppercase text-slate-500 truncate">
+                    <div className="text-[10px] sm:text-[9px] font-black uppercase text-slate-400 truncate">
                       {headerPrimaryLabel}
                     </div>
                     <div className="text-base font-black text-amber-300 drop-shadow-[0_0_6px_rgba(252,211,77,0.22)] leading-tight truncate">
@@ -12799,7 +12861,7 @@
                     </div>
                   </div>
                   <div className="px-3 py-3 bg-slate-900/60 min-w-0">
-                    <div className="text-[9px] font-black uppercase text-slate-500 truncate">
+                    <div className="text-[10px] sm:text-[9px] font-black uppercase text-slate-400 truncate">
                       {headerSecondaryLabel}
                     </div>
                     <div className="text-base font-black text-violet-300 drop-shadow-[0_0_6px_rgba(196,181,253,0.22)] leading-tight truncate">
@@ -12808,7 +12870,7 @@
                   </div>
                   {/* L-4: Black Market Hero Power widget */}
                   <div className="px-2 py-3 bg-zinc-950 min-w-0">
-                    <div className="text-[8px] font-black uppercase text-amber-700/70 truncate">
+                    <div className="text-[10px] sm:text-[8px] font-black uppercase text-amber-400/90 truncate">
                       {ui.heroPower || (language === "ko" ? "영웅력" : "Hero Power")}
                     </div>
                     <div className="flex items-center gap-1 text-base font-black text-amber-400 drop-shadow-[0_0_4px_rgba(245,158,11,0.3)] leading-tight min-w-0">
@@ -12836,35 +12898,35 @@
                 {/* Phase J-4E: Global War Status Strip (Telemetry HUD) */}
                 <div className="bg-slate-950 border-t border-slate-900 px-3 py-2 text-[9px] font-mono grid grid-cols-4 gap-1.5 text-center text-slate-300">
                   <div className="flex flex-col">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">
+                    <span className="text-slate-400 uppercase tracking-tighter text-[8px] sm:text-[7px] truncate">
                       {language === "ko" ? "전선 안정도" : "FRONT STABILITY"}
                     </span>
-                    <span className={`${warStatus.stabilityColor} truncate`}>
-                      {warStatus.stability}
+                    <span className={`${warStatus.stabilityColor} truncate`} aria-label={`${language === "ko" ? "전선 안정도" : "Front stability"}: ${warStatus.stability}`}>
+                      ✓ {warStatus.stability}
                     </span>
                   </div>
                   <div className="flex flex-col border-l border-slate-900 pl-1.5">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">
+                    <span className="text-slate-400 uppercase tracking-tighter text-[8px] sm:text-[7px] truncate">
                       {language === "ko" ? "병참 상태" : "LOGISTICS STATUS"}
                     </span>
-                    <span className={`${warStatus.logisticsColor} truncate`}>
-                      {warStatus.logistics}
+                    <span className={`${warStatus.logisticsColor} truncate`} aria-label={`${language === "ko" ? "병참 상태" : "Logistics status"}: ${warStatus.logistics}`}>
+                      ◆ {warStatus.logistics}
                     </span>
                   </div>
                   <div className="flex flex-col border-l border-slate-900 pl-1.5">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">
+                    <span className="text-slate-400 uppercase tracking-tighter text-[8px] sm:text-[7px] truncate">
                       {language === "ko" ? "사령부 위신" : "HQ PRESTIGE"}
                     </span>
-                    <span className="text-amber-400 font-bold tracking-tighter truncate">
-                      {warStatus.prestigeLabel} (LV.{warStatus.prestigeLevel})
+                    <span className="text-amber-400 font-bold tracking-tighter truncate" aria-label={`${language === "ko" ? "사령부 위신" : "HQ prestige"}: ${warStatus.prestigeLabel} level ${warStatus.prestigeLevel}`}>
+                      ★ {warStatus.prestigeLabel} (LV.{warStatus.prestigeLevel})
                     </span>
                   </div>
                   <div className="flex flex-col border-l border-slate-900 pl-1.5">
-                    <span className="text-slate-500 uppercase tracking-tighter text-[7px] truncate">
+                    <span className="text-slate-400 uppercase tracking-tighter text-[8px] sm:text-[7px] truncate">
                       {language === "ko" ? "위협 등급" : "THREAT LEVEL"}
                     </span>
-                    <span className={`${warStatus.threatColor} truncate`}>
-                      {warStatus.threat}
+                    <span className={`${warStatus.threatColor} truncate`} aria-label={`${language === "ko" ? "위협 등급" : "Threat level"}: ${warStatus.threat}`}>
+                      ⚠ {warStatus.threat}
                     </span>
                   </div>
                 </div>
@@ -12874,8 +12936,11 @@
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
+                    type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-2 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id ? "bg-slate-950 text-emerald-400 border border-slate-800 font-black shadow-inner" : "text-slate-500 hover:bg-slate-800/50 hover:text-slate-300"}`}
+                    aria-pressed={activeTab === tab.id}
+                    aria-label={`${language === "ko" ? "탭 이동" : "Switch tab"}: ${tab.label}`}
+                    className={`px-2 py-2 rounded-lg text-xs font-bold transition-colors duration-150 ${activeTab === tab.id ? "bg-slate-950 text-emerald-400 border border-slate-800 font-black shadow-inner" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"}`}
                   >
                     {tab.label}
                   </button>
