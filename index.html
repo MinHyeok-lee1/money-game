@@ -7695,6 +7695,144 @@
         const visibleEnhancementInventory = sortedEnhancementInventory.slice(0, LIST_RENDER_LIMIT);
         const visibleQuartermasterCharacters = sortedQuartermasterCharacters.slice(0, LIST_RENDER_LIMIT);
         const visibleCommandRosterCharacters = ownedCharacterDetails.slice(0, 80);
+        const analyticsDashboard = useMemo(() => {
+          const heroCount = ownedCharacterDetails.length;
+          const weaponCount = weaponInventory.length;
+          const activeUnitIds = new Set(
+            (gameState.rpg?.run?.activeUnits || [])
+              .map((unit) => unit.instanceId)
+              .filter(Boolean),
+          );
+          const deployedCount = ownedCharacterDetails.filter((character) =>
+            activeUnitIds.has(character.instanceId),
+          ).length;
+          const averageHeroLevel = heroCount > 0
+            ? ownedCharacterDetails.reduce(
+                (sum, character) => sum + toFiniteNumber(character.level, 1),
+                0,
+              ) / heroCount
+            : 0;
+          const heroesWithPower = ownedCharacterDetails.map((character) => {
+            const profile = getProjectedCharacterPowerProfile(
+              character,
+              enhancementInventory,
+              gameState.enhancement,
+              ownedFactionCounts[character.definition?.faction] || 0,
+            );
+            return {
+              ...character,
+              analyticsPower: toFiniteNumber(profile.value, 0),
+              analyticsPowerLog10: toFiniteNumber(profile.log10, Number.NEGATIVE_INFINITY),
+            };
+          });
+          const topHero = heroesWithPower.reduce((best, character) => {
+            if (!best) return character;
+            return character.analyticsPowerLog10 > best.analyticsPowerLog10
+              ? character
+              : best;
+          }, null);
+          const enhancedWeaponCount = weaponInventory.filter(
+            (weapon) => toFiniteNumber(weapon.enhanceLevel, 0) > 0,
+          ).length;
+          const rarityRows = RARITY_FILTERS.map((rarity) => ({
+            key: rarity,
+            label: rarity,
+            count: toFiniteNumber(heroByRarity[rarity], 0),
+          })).filter((row) => row.count > 0);
+          const factionRows = Object.entries(ownedFactionCounts)
+            .map(([faction, count]) => ({
+              key: faction,
+              label: String(faction || "Unknown"),
+              count: toFiniteNumber(count, 0),
+            }))
+            .filter((row) => row.count > 0)
+            .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+          const maxRarityCount = Math.max(1, ...rarityRows.map((row) => row.count));
+          const maxFactionCount = Math.max(1, ...factionRows.map((row) => row.count));
+          return {
+            heroCount,
+            weaponCount,
+            deployedCount,
+            averageHeroLevel,
+            topHero,
+            enhancedWeaponCount,
+            rarityRows: rarityRows.map((row) => ({
+              ...row,
+              percent: (row.count / maxRarityCount) * 100,
+            })),
+            factionRows: factionRows.map((row) => ({
+              ...row,
+              percent: (row.count / maxFactionCount) * 100,
+            })),
+            hasHeroData: heroCount > 0,
+            hasWeaponData: weaponCount > 0,
+          };
+        }, [
+          ownedCharacterDetails,
+          weaponInventory,
+          gameState.rpg?.run?.activeUnits,
+          gameState.enhancement,
+          ownedFactionCounts,
+          heroByRarity,
+        ]);
+
+        const analyticsStatCards = [
+          {
+            key: "heroes",
+            labelKo: "총 영웅 수",
+            labelEn: "Total Heroes",
+            value: formatCompact(analyticsDashboard.heroCount, false),
+            ariaKo: `총 영웅 수 ${formatCompact(analyticsDashboard.heroCount, false)}명`,
+            ariaEn: `Total heroes ${formatCompact(analyticsDashboard.heroCount, false)}`,
+          },
+          {
+            key: "deployed",
+            labelKo: "배치 중 영웅",
+            labelEn: "Deployed Heroes",
+            value: formatCompact(analyticsDashboard.deployedCount, false),
+            ariaKo: `배치 중인 영웅 ${formatCompact(analyticsDashboard.deployedCount, false)}명`,
+            ariaEn: `Deployed heroes ${formatCompact(analyticsDashboard.deployedCount, false)}`,
+          },
+          {
+            key: "avg-level",
+            labelKo: "평균 영웅 레벨",
+            labelEn: "Avg Hero Level",
+            value: formatFixed(analyticsDashboard.averageHeroLevel, 1, "0.0"),
+            ariaKo: `평균 영웅 레벨 ${formatFixed(analyticsDashboard.averageHeroLevel, 1, "0.0")}`,
+            ariaEn: `Average hero level ${formatFixed(analyticsDashboard.averageHeroLevel, 1, "0.0")}`,
+          },
+          {
+            key: "top-power",
+            labelKo: "최고 전력 영웅",
+            labelEn: "Top Power Hero",
+            value: analyticsDashboard.topHero
+              ? formatDps(analyticsDashboard.topHero.analyticsPower)
+              : "-",
+            caption: analyticsDashboard.topHero?.name || (language === "ko" ? "영웅 없음" : "No hero"),
+            ariaKo: analyticsDashboard.topHero
+              ? `최고 전력 영웅 ${analyticsDashboard.topHero.name}, 전력 ${formatDps(analyticsDashboard.topHero.analyticsPower)}`
+              : "최고 전력 영웅 데이터 없음",
+            ariaEn: analyticsDashboard.topHero
+              ? `Top power hero ${analyticsDashboard.topHero.name}, power ${formatDps(analyticsDashboard.topHero.analyticsPower)}`
+              : "No top power hero data",
+          },
+          {
+            key: "weapons",
+            labelKo: "총 무기 수",
+            labelEn: "Total Weapons",
+            value: formatCompact(analyticsDashboard.weaponCount, false),
+            ariaKo: `총 무기 수 ${formatCompact(analyticsDashboard.weaponCount, false)}개`,
+            ariaEn: `Total weapons ${formatCompact(analyticsDashboard.weaponCount, false)}`,
+          },
+          {
+            key: "enhanced-weapons",
+            labelKo: "강화된 무기",
+            labelEn: "Enhanced Weapons",
+            value: formatCompact(analyticsDashboard.enhancedWeaponCount, false),
+            ariaKo: `강화된 무기 ${formatCompact(analyticsDashboard.enhancedWeaponCount, false)}개`,
+            ariaEn: `Enhanced weapons ${formatCompact(analyticsDashboard.enhancedWeaponCount, false)}`,
+          },
+        ];
 
         const updateGameState = useCallback(
           (updater) => {
@@ -12369,6 +12507,109 @@
                             </div>
                           </div>
                         </div>
+                        <div className="mb-3 rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div>
+                              <div className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                                {language === "ko" ? "통계 요약" : "Summary Metrics"}
+                              </div>
+                              <div className="text-[9px] font-bold text-slate-500 mt-0.5">
+                                {language === "ko"
+                                  ? "현재 저장 데이터를 기준으로 계산된 읽기 전용 분석입니다."
+                                  : "Read-only analytics derived from the current local save."}
+                              </div>
+                            </div>
+                            <div className="text-[9px] font-black text-emerald-300">
+                              {language === "ko" ? "LOCAL" : "LOCAL"}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {analyticsStatCards.map((card) => (
+                              <div
+                                key={card.key}
+                                aria-label={language === "ko" ? card.ariaKo : card.ariaEn}
+                                className="rounded-lg bg-slate-950/80 border border-slate-800 p-2"
+                              >
+                                <div className="text-[9px] font-black text-slate-500 uppercase">
+                                  {language === "ko" ? card.labelKo : card.labelEn}
+                                </div>
+                                <div className="text-sm font-black text-slate-100 truncate">
+                                  {card.value}
+                                </div>
+                                {card.caption && (
+                                  <div className="text-[9px] font-bold text-slate-500 truncate mt-0.5">
+                                    {card.caption}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                          <div
+                            className="rounded-xl border border-slate-800 bg-slate-900/70 p-3"
+                            aria-label={language === "ko" ? "영웅 희귀도 분포 막대 차트" : "Hero rarity distribution bar chart"}
+                          >
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-300 mb-2">
+                              {language === "ko" ? "영웅 희귀도 분포" : "Hero Rarity Mix"}
+                            </div>
+                            {analyticsDashboard.rarityRows.length > 0 ? (
+                              <div className="space-y-2">
+                                {analyticsDashboard.rarityRows.map((row) => (
+                                  <div key={row.key}>
+                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 mb-1">
+                                      <span>{row.label}</span>
+                                      <span>{formatCompact(row.count, false)}</span>
+                                    </div>
+                                    <div className="h-2 rounded-full bg-slate-800 overflow-hidden" aria-hidden="true">
+                                      <div
+                                        className="h-full rounded-full bg-emerald-500/80"
+                                        style={{ width: `${formatFixed(row.percent, 2, "0")}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="rounded-lg border border-dashed border-slate-700 p-3 text-[10px] font-bold text-slate-500 text-center">
+                                {language === "ko" ? "아직 보유 영웅 데이터가 없습니다." : "No hero data yet."}
+                              </div>
+                            )}
+                          </div>
+
+                          <div
+                            className="rounded-xl border border-slate-800 bg-slate-900/70 p-3"
+                            aria-label={language === "ko" ? "진영별 영웅 수 분포 막대 차트" : "Hero faction distribution bar chart"}
+                          >
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-300 mb-2">
+                              {language === "ko" ? "진영별 영웅 수" : "Faction Distribution"}
+                            </div>
+                            {analyticsDashboard.factionRows.length > 0 ? (
+                              <div className="space-y-2">
+                                {analyticsDashboard.factionRows.map((row) => (
+                                  <div key={row.key}>
+                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 mb-1">
+                                      <span className="capitalize">{row.label}</span>
+                                      <span>{formatCompact(row.count, false)}</span>
+                                    </div>
+                                    <div className="h-2 rounded-full bg-slate-800 overflow-hidden" aria-hidden="true">
+                                      <div
+                                        className="h-full rounded-full bg-sky-500/80"
+                                        style={{ width: `${formatFixed(row.percent, 2, "0")}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="rounded-lg border border-dashed border-slate-700 p-3 text-[10px] font-bold text-slate-500 text-center">
+                                {language === "ko" ? "아직 진영 분석 데이터가 없습니다." : "No faction data yet."}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <button
                             type="button"
